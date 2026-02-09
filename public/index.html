@@ -8,6 +8,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <meta name="description" content="NewsAtlas: Real-time Global Intelligence Terminal featuring 3D geospatial visualization, live financial telemetry, and AI-driven situation reports.">
+    <meta property="og:title" content="NewsAtlas | Global Intelligence Terminal">
+    <meta property="og:description" content="Access real-time global news, market data, and AI intelligence via a secure orbital interface.">
+    <meta property="og:image" content="https://news-atlas-live.vercel.app/screenshot.png"> 
+    <meta name="theme-color" content="#020617">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2072/2072130.png" type="image/x-icon">
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -224,6 +230,9 @@
                 </button>
                 <button onclick="toggleSearch()" class="text-slate-500 hover:text-blue-400 transition-all tactical-btn" title="Search">
                     <i class="fas fa-search text-2xl"></i>
+                </button>
+                <button onclick="activateVoice()" class="text-slate-500 hover:text-red-500 transition-all tactical-btn" title="Voice Command">
+                    <i class="fas fa-microphone text-2xl"></i>
                 </button>
                 <button onclick="toggleAbout(true)" class="text-slate-500 hover:text-emerald-400 transition-all tactical-btn" title="Command Info">
                     <i class="fas fa-info-circle text-2xl"></i>
@@ -1206,6 +1215,41 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 document.body.classList.toggle('night-mode', isNight);
                 document.body.classList.toggle('day-mode', !isNight);
             }
+        }
+
+        function activateVoice() {
+            playTacticalSound('click');
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) { alert("Voice module offline (Browser not supported)"); return; }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.start();
+
+            const btn = document.querySelector('.fa-microphone');
+            btn.classList.add('text-red-500', 'animate-pulse');
+
+            recognition.onresult = (event) => {
+                const command = event.results[0][0].transcript.toLowerCase().replace('.', '');
+                console.log("Voice Command:", command);
+                
+                btn.classList.remove('text-red-500', 'animate-pulse');
+                
+                if (command.includes("go to")) {
+                    const country = command.replace("go to ", "").trim();
+                    window.selectFromSearch(country);
+                    appendLog(`> VOICE COMMAND: VECTORING TO [${country.toUpperCase()}]`, 'text-red-400');
+                } else if (command.includes("analyze")) {
+                    switchTab('intel');
+                    appendLog(`> VOICE COMMAND: INITIATING ANALYSIS`, 'text-red-400');
+                } else if (command.includes("news")) {
+                    switchTab('news');
+                }
+            };
+
+            recognition.onerror = () => {
+                btn.classList.remove('text-red-500', 'animate-pulse');
+            };
         }
 
         initTerminal();

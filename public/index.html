@@ -18,7 +18,6 @@
     </script>
 
     <style>
-        /* (Styles remain unchanged - same as provided) */
         :root { --glass-bg: rgba(15, 23, 42, 0.96); --glass-border: rgba(255, 255, 255, 0.08); --accent-blue: #3b82f6; --accent-emerald: #10b981; --accent-red: #ef4444; --solar-glow: rgba(59, 130, 246, 0.12); }
         body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: #020617; background-image: radial-gradient(at 0% 0%, var(--solar-glow) 0, transparent 50%), radial-gradient(at 100% 100%, rgba(30, 41, 59, 0.2) 0, transparent 50%); color: #f8fafc; overflow: hidden; height: 100vh; transition: background-image 1.2s ease-in-out; }
         .glass-panel { background: var(--glass-bg); backdrop-filter: blur(40px); border: 1px solid var(--glass-border); border-radius: 1.5rem; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7); }
@@ -463,7 +462,6 @@
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
          
-        // NOTE: Keys are removed for security (Client-side connects to backend now)
         const apiKey = ""; 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'news-atlas-v7';
 
@@ -474,7 +472,6 @@
         let globalSearchData = [];
         let aboutStatsInterval;
         
-        // --- AUDIO ENGINE ---
         let audioCtx;
         let ambienceOscillators = [];
         let ambienceGain = null;
@@ -488,19 +485,17 @@
         window.toggleAmbience = () => {
             initAudio();
             if (isAmbiencePlaying) {
-                // Stop
                 ambienceOscillators.forEach(osc => osc.stop());
                 ambienceOscillators = [];
                 isAmbiencePlaying = false;
                 document.getElementById('ambience-text').innerText = "OFF";
                 document.getElementById('ambience-text').classList.remove('text-blue-400');
             } else {
-                // Start Drone
                 ambienceGain = audioCtx.createGain();
-                ambienceGain.gain.value = 0.05; // Very quiet
+                ambienceGain.gain.value = 0.05; 
                 ambienceGain.connect(audioCtx.destination);
 
-                const freqs = [55, 110, 112, 54]; // Low drone frequencies
+                const freqs = [55, 110, 112, 54]; 
                 freqs.forEach(f => {
                     const osc = audioCtx.createOscillator();
                     osc.type = 'sine';
@@ -549,7 +544,6 @@
         }
         window.playTacticalSound = playTacticalSound;
 
-        // --- EXPORT DOSSIER LOGIC ---
         window.downloadDossier = () => {
             playTacticalSound('success');
             const cName = selectedCountry ? selectedCountry.properties.name : "GLOBAL_CONTEXT";
@@ -634,7 +628,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                     appendLog(`> Processing query for sector: [${countryName.toUpperCase()}]...`, 'text-blue-400 animate-pulse');
 
                     try {
-                        // SERVER-SIDE CALL
                         const res = await fetch('/api/ai', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -703,32 +696,46 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
         }
 
         async function initTerminal() {
-            try {
-                const res = await fetch('https://restcountries.com/v3.1/all?fields=name,flags,cca2,latlng,currencies,population,capital');
-                globalSearchData = await res.json();
-                console.log("Global search data loaded:", globalSearchData.length, "entries");
-            } catch(e) { console.error("Search index fail", e); }
+            const config = {
+                apiKey: "AIzaSyBXg1tCOjaLp3mYWzLcS1BBny2LrcWlluE",
+                authDomain: "news-atlas-live.firebaseapp.com",
+                projectId: "news-atlas-live",
+                storageBucket: "news-atlas-live.firebasestorage.app",
+                messagingSenderId: "177473843770",
+                appId: "1:177473843770:web:f9abb15747f79f28a9bb03"
+            };
 
             try {
-                const config = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "none", projectId: "news-atlas-demo" };
-                const firebaseApp = initializeApp(config);
-                auth = getAuth(firebaseApp);
-                db = getFirestore(firebaseApp);
+                const firebaseApp = window.firebaseCore.initializeApp(config);
+                auth = window.firebaseCore.getAuth(firebaseApp);
+                db = window.firebaseCore.getFirestore(firebaseApp);
 
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token).catch(() => signInAnonymously(auth));
-                } else { await signInAnonymously(auth); }
+                await window.firebaseCore.signInAnonymously(auth);
 
-                onAuthStateChanged(auth, (u) => {
+                window.firebaseCore.onAuthStateChanged(auth, (u) => {
                     user = u;
                     if (u) {
-                        document.getElementById('neural-id').innerText = `VAULT LINK: ${u.uid.substring(0, 14)}...`;
+                        document.getElementById('neural-id').innerText = `ID: ${u.uid.substring(0, 8).toUpperCase()}`;
+                        document.getElementById('neural-id').classList.add('text-emerald-500');
+                        
+                        try {
+                            const userRef = window.firebaseCore.doc(db, "visitors", u.uid);
+                            window.firebaseCore.setDoc(userRef, {
+                                last_login: window.firebaseCore.serverTimestamp(),
+                                device: navigator.userAgent
+                            }, { merge: true });
+                        } catch(e) { console.log("DB Write failed (Test Mode rules might be off)"); }
                     }
                 });
             } catch (e) {
-                console.warn("Firebase handshake failed (Running in autonomous mode):", e);
-                document.getElementById('neural-id').innerText = "LOCAL MODE";
+                console.warn("Firebase Auth failed:", e);
+                document.getElementById('neural-id').innerText = "LOCAL MODE (OFFLINE)";
             }
+            
+            try {
+                const res = await fetch('https://restcountries.com/v3.1/all?fields=name,flags,cca2,latlng,currencies,population,capital');
+                globalSearchData = await res.json();
+            } catch(e) {}
             
             fetchNews();
         }
@@ -796,7 +803,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             if (box) box.classList.remove('hidden'); 
             if (text) text.innerText = "Synchronizing neural cores...";
             try {
-                // SERVER-SIDE CALL
                 const res = await fetch('/api/ai', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -834,7 +840,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 [BRIEF]
                 1 sentence market outlook.`;
 
-                // SERVER-SIDE CALL
                 const res = await fetch('/api/ai', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -859,7 +864,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             }
         }
 
-        // --- MAP CORE (RESTORED TO STABLE) ---
         function initMap(type) {
             projectionType = type;
             const container = document.getElementById('map-container');
@@ -980,7 +984,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             if (loading) loading.classList.remove('hidden'); 
             if (container) container.innerHTML = '';
             try {
-                // SERVER-SIDE CALL
                 let url = `/api/news?category=${currentCategory}&country=${iso2Code || ''}&q=${selectedCountry ? encodeURIComponent(selectedCountry.properties.name) : ''}`;
                 
                 const res = await fetch(url); const data = await res.json();
@@ -1054,7 +1057,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
 
         async function fetchWeather(lat, lon) {
             try {
-                // SERVER-SIDE CALL
                 const wRes = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
                 const wData = await wRes.json();
                 
@@ -1206,7 +1208,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             }
         }
 
-        // EXECUTION START
         initTerminal();
         initMap('2d');
         setupEventListeners();

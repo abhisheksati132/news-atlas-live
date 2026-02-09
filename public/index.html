@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewsAtlas | Global Intelligence Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        window.firebaseCore = { initializeApp, getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp };
+    </script>
+
+    <style>
+        :root {
+            --glass-bg: rgba(15, 23, 42, 0.96);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-blue: #3b82f6;
+            --accent-emerald: #10b981;
+            --accent-red: #ef4444;
+            --solar-glow: rgba(59, 130, 246, 0.12);
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #020617;
+            background-image: 
+                radial-gradient(at 0% 0%, var(--solar-glow) 0, transparent 50%), 
+                radial-gradient(at 100% 100%, rgba(30, 41, 59, 0.2) 0, transparent 50%);
+            color: #f8fafc;
+            overflow: hidden;
+            height: 100vh;
+            transition: background-image 1.2s ease-in-out;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(40px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5rem;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+        }
+
+        header {
+            height: 120px;
+            padding: 0 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .main-content {
+            height: calc(100vh - 170px);
+            padding: 0 2.5rem 1.5rem 2.5rem;
+            gap: 1.5rem;
+            display: flex;
+        }
+
+        .map-box {
+            position: relative;
+            flex: 1.4;
+            overflow: hidden;
+            background: rgba(2, 6, 23, 0.6);
+            border: 1px solid var(--glass-border);
+        }
+
+        .country {
+            stroke: #020617;
+            stroke-width: 0.5;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            outline: none;
+        }
+
+        .country:hover {
+            fill: #334155;
+            filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.4));
+        }
+
+        .country.active {
+            fill: var(--accent-blue);
+            stroke: #fff;
+            stroke-width: 1.5;
+            filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.6));
+        }
+
+        .intel-sidebar {
+            width: 480px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .dossier-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dossier-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .weather-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(30, 41, 59, 0.15) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .nav-tab {
+            transition: all 0.3s ease;
+            background: rgba(30, 41, 59, 0.4);
+            border-bottom: 4px solid transparent;
+            cursor: pointer;
+            font-size: 0.7rem; 
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em; 
+            flex: 1 1 0px; 
+            width: 0;       
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.1rem 0;
+            color: #64748b;
+            text-align: center;
+        }
+
+        .nav-tab.active {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+            background: rgba(59, 130, 246, 0.06);
+        }
+
+        .category-pill {
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 0.5rem 1rem;
+            border-radius: 99px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .category-pill.active {
+            background: var(--accent-blue);
+            color: white;
+            border-color: transparent;
+        }
+
+        .tab-content { 
+            display: none; 
+            height: 100%; 
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .tab-content.active { display: flex; }
+        
+        .content-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.02) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-pulse 1.5s infinite linear;
+        }
+
+        @keyframes skeleton-pulse {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .animate-marquee {
+            display: inline-block;
+            animation: marquee 40s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        #search-overlay, #about-overlay {
+            background: rgba(2, 6, 23, 0.98);
+            backdrop-filter: blur(24px);
+            z-index: 1000;
+        }
+
+        .day-mode { --solar-glow: rgba(59, 130, 246, 0.18); }
+        .night-mode { --solar-glow: rgba(139, 92, 246, 0.22); }
+        
+        .tactical-btn {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tactical-btn:hover {
+            transform: scale(1.08);
+            filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.5));
+        }
+
+        .power-readout {
+            font-size: 42px;
+            font-weight: 800;
+            line-height: 0.9;
+            letter-spacing: -0.04em;
+            display: block;
+        }
+        
+        .save-btn.saved { color: var(--accent-blue); }
+        .skill-tag {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #60a5fa;
+            font-size: 11px;
+            font-weight: 900;
+            padding: 6px 14px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            cursor: default;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .skill-dot { width: 6px; height: 6px; border-radius: 50%; background: #60a5fa; box-shadow: 0 0 5px #60a5fa; }
+
+        .signal-blue { border-left: 4px solid var(--accent-blue); }
+        .signal-emerald { border-left: 4px solid var(--accent-emerald); }
+        .signal-red { border-left: 4px solid var(--accent-red); }
+
+        .tech-line {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 6px 0;
+            font-family: monospace;
+            font-size: 11px;
+            color: #64748b;
+        }
+        .tech-line span:last-child { color: #94a3b8; font-weight: bold; }
+        
+        @keyframes logFade {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .log-entry { animation: logFade 0.3s ease-out forwards; }
+
+        .meter-bg { background: rgba(255,255,255,0.1); height: 4px; width: 100%; border-radius: 2px; overflow: hidden; margin-top: 6px; }
+        .meter-fill { height: 100%; background: var(--accent-blue); width: 0%; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 8px var(--accent-blue); }
+        
+        .scanner-container { position: relative; overflow: hidden; }
+        .scanner-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.8), transparent);
+            transform: translateY(-150%);
+            animation: scan 2.5s infinite linear;
+        }
+        @keyframes scan { 0% { transform: translateY(-150%); } 100% { transform: translateY(150%); } }
+        
+        .typing-cursor::after { content: '|'; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    </style>
+</head>
+<body class="flex flex-col day-mode">
+
+    <div id="about-overlay" class="fixed inset-0 hidden flex items-center justify-center p-6">
+        <div class="glass-panel max-w-4xl w-full p-0 border-blue-500/40 relative overflow-hidden shadow-2xl flex flex-col z-20 h-[85vh]">
+            <div class="bg-blue-600/10 p-8 border-b border-white/5 relative overflow-hidden flex-shrink-0">
+                <div class="absolute -top-10 -right-10 w-64 h-64 bg-blue-500/20 rounded-full blur-[80px]"></div>
+                <button onclick="toggleAbout(false)" class="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors tactical-btn bg-white/5 w-12 h-12 flex items-center justify-center rounded-xl cursor-pointer z-50">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+                <div class="flex items-center gap-6 relative z-10">
+                    <div class="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-900 rounded-2xl flex items-center justify-center shadow-lg border border-white/20 scanner-container">
+                        <i class="fas fa-fingerprint text-4xl text-white"></i>
+                        <div class="scanner-line"></div>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl font-black text-white uppercase tracking-tight">Abhishek Sati</h2>
+                        <p class="text-blue-400 font-bold text-xs uppercase tracking-[0.3em] mt-1">Lead Systems Architect</p>
+                        <div class="flex items-center gap-2 mt-2">
+                            <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                            <span class="text-[9px] text-emerald-500 font-bold uppercase tracking-widest">Clearance: Level 5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-8 bg-[#020617]/90">
+                <div class="grid grid-cols-12 gap-8 h-full">
+                    
+                    <div class="col-span-4 flex flex-col gap-6">
+                        <div class="dossier-card border-white/5 bg-white/[0.02] min-h-[140px]">
+                            <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Architect Statement</h3>
+                            <p id="bio-text" class="text-sm leading-relaxed text-slate-300 font-medium typing-cursor"></p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="skill-tag"><div class="skill-dot"></div>Systems Design</span>
+                            <span class="skill-tag"><div class="skill-dot"></div>D3 Visualization</span>
+                            <span class="skill-tag"><div class="skill-dot"></div>Gemini Core</span>
+                            <span class="skill-tag"><div class="skill-dot"></div>Real-time IO</span>
+                        </div>
+                         <div class="dossier-card border-white/5 bg-white/[0.02] mt-auto mb-6">
+                            <div class="flex gap-4 justify-center">
+                                <a href="#" class="text-slate-500 hover:text-white transition-colors"><i class="fab fa-github text-2xl"></i></a>
+                                <a href="#" class="text-slate-500 hover:text-blue-400 transition-colors"><i class="fab fa-linkedin text-2xl"></i></a>
+                                <a href="#" class="text-slate-500 hover:text-emerald-400 transition-colors"><i class="fas fa-globe text-2xl"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-8 flex flex-col gap-6">
+                         <div class="grid grid-cols-3 gap-4">
+                            <div class="dossier-card p-4 bg-blue-500/[0.03] border-blue-500/20">
+                                <div class="flex justify-between items-end mb-1">
+                                    <div class="text-[9px] text-slate-500 uppercase font-black tracking-widest">CPU Load</div>
+                                    <div class="text-[10px] text-blue-400 font-mono font-bold" id="cpu-val">0%</div>
+                                </div>
+                                <div class="meter-bg"><div id="cpu-bar" class="meter-fill" style="width: 0%"></div></div>
+                            </div>
+                            <div class="dossier-card p-4 bg-emerald-500/[0.03] border-emerald-500/20">
+                                <div class="flex justify-between items-end mb-1">
+                                    <div class="text-[9px] text-slate-500 uppercase font-black tracking-widest">Memory</div>
+                                    <div class="text-[10px] text-emerald-400 font-mono font-bold" id="mem-val">0GB</div>
+                                </div>
+                                <div class="meter-bg"><div id="mem-bar" class="meter-fill" style="width: 0%; background: #10b981; box-shadow: 0 0 8px #10b981;"></div></div>
+                            </div>
+                            <div class="dossier-card p-4 bg-indigo-500/[0.03] border-indigo-500/20">
+                                <div class="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">Uptime</div>
+                                <div class="text-xl font-black text-white tabular-nums" id="uptime-counter">00:00:00</div>
+                            </div>
+                        </div>
+
+                         <div class="dossier-card p-0 overflow-hidden relative h-32 border-white/5 bg-black/40">
+                             <div class="absolute top-3 left-4 right-4 flex justify-between z-10">
+                                 <div class="text-[9px] text-slate-500 font-black uppercase tracking-widest">Network Traffic</div>
+                                 <div class="text-[9px] text-blue-400 font-mono font-bold"><i class="fas fa-arrow-down"></i> <span id="net-down">0</span> MB/s &nbsp; <i class="fas fa-arrow-up"></i> <span id="net-up">0</span> MB/s</div>
+                             </div>
+                             <canvas id="traffic-canvas" class="w-full h-full opacity-60"></canvas>
+                        </div>
+
+                        <div class="dossier-card p-0 bg-black/80 border-white/10 font-mono text-[10px] h-40 overflow-hidden flex flex-col relative font-medium shadow-inner">
+                            <div class="bg-white/5 p-2 border-b border-white/5 flex justify-between items-center">
+                                <span class="text-blue-400 font-bold uppercase tracking-widest">Command Line Interface</span>
+                                <div class="flex gap-1"><div class="w-2 h-2 rounded-full bg-red-500"></div><div class="w-2 h-2 rounded-full bg-yellow-500"></div><div class="w-2 h-2 rounded-full bg-green-500"></div></div>
+                            </div>
+                            
+                            <div id="cli-output" class="flex-1 overflow-y-auto p-3 space-y-2 text-slate-300 no-scrollbar">
+                                <div class="text-emerald-500/80">> SYSTEM READY. WAITING FOR INPUT...</div>
+                            </div>
+
+                            <div class="p-2 border-t border-white/10 flex items-center gap-2 bg-white/5">
+                                <span class="text-blue-500 font-bold">></span>
+                                <input type="text" id="cli-input" class="bg-transparent border-none outline-none w-full text-white placeholder-slate-600 font-mono" placeholder="Enter command (e.g., 'analyze economy')..." autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-white/5 flex items-center justify-between mt-12">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">System Online</span>
+                    </div>
+                     <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest">© 2026 ABHISHEK SATI</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="search-overlay" class="fixed inset-0 hidden flex items-center justify-center z-[100] px-6">
+        <div class="glass-panel max-w-3xl w-full border-blue-500/40 shadow-2xl flex flex-col max-h-[80vh] overflow-hidden p-0">
+            <div class="flex items-center p-8 gap-6 shrink-0 border-b border-white/10">
+                <i class="fas fa-crosshairs text-blue-500 text-3xl"></i>
+                <input type="text" id="country-search" autocomplete="off" placeholder="Sector designation..." class="w-full bg-transparent border-none outline-none text-3xl font-black text-white placeholder-slate-800">
+                <span class="text-[12px] font-black text-slate-600 bg-white/5 px-4 py-2 rounded-xl uppercase tracking-widest cursor-pointer hover:text-white transition-colors" onclick="toggleSearch()">ESC to abort</span>
+            </div>
+            <div id="search-results" class="flex-1 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <header class="z-50">
+        <div class="flex items-center gap-6 cursor-pointer group" onclick="resetToGlobalCenter()">
+            <div class="relative">
+                <div class="w-16 h-16 bg-blue-600 rounded-[1.25rem] rotate-12 flex items-center justify-center transition-transform group-hover:rotate-0 shadow-2xl shadow-blue-500/30">
+                    <i class="fas fa-satellite-dish text-4xl text-white -rotate-12 group-hover:rotate-0 transition-transform"></i>
+                </div>
+                <div class="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-4 border-[#020617] animate-pulse"></div>
+            </div>
+            <div>
+                <h1 class="text-[38px] font-black tracking-tighter text-white leading-none">News<span class="text-blue-500">Atlas</span></h1>
+                <p class="text-[11px] uppercase tracking-[0.3em] text-slate-500 font-extrabold mt-3 leading-none opacity-80">Intelligence Terminal</p>
+            </div>
+        </div>
+        
+        <div class="hidden lg:flex items-center glass-panel px-10 py-3 gap-10 rounded-full border-white/5 shadow-2xl">
+            <div class="flex flex-col min-w-[180px]">
+                <span id="selected-country-name" class="font-black text-white text-[20px] uppercase truncate tracking-tighter">Global Signal</span>
+                <span id="neural-id" class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-0.5 leading-none">handshake verified</span>
+            </div>
+            <div class="h-10 w-px bg-slate-800"></div>
+            <div class="flex flex-col items-center min-w-[120px]">
+                <span id="system-time" class="text-[30px] font-black text-blue-400 tabular-nums leading-none">00:00:00</span>
+                <span class="text-[9px] font-bold text-slate-600 uppercase mt-1 tracking-[0.2em]">Terminal Time</span>
+            </div>
+            <div class="h-10 w-px bg-slate-800"></div>
+            <div class="flex gap-7">
+                <button onclick="downloadDossier()" class="text-slate-500 hover:text-white transition-all tactical-btn" title="Download Intel Dossier">
+                    <i class="fas fa-file-download text-2xl"></i>
+                </button>
+                <button onclick="toggleProjection()" class="text-slate-500 hover:text-blue-400 transition-all tactical-btn" title="Toggle Projection">
+                    <i class="fas fa-globe-asia text-2xl"></i>
+                </button>
+                <button onclick="toggleSearch()" class="text-slate-500 hover:text-blue-400 transition-all tactical-btn" title="Search">
+                    <i class="fas fa-search text-2xl"></i>
+                </button>
+                <button onclick="toggleAbout(true)" class="text-slate-500 hover:text-emerald-400 transition-all tactical-btn" title="Command Info">
+                    <i class="fas fa-info-circle text-2xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <button onclick="goToIndiaHome()" class="glass-panel px-12 py-5 hover:bg-blue-600/20 transition-all text-[14px] font-black flex items-center gap-5 border-blue-500/20 rounded-full tactical-btn group">
+            <i class="fas fa-home text-blue-400 text-2xl group-hover:scale-110 transition-transform"></i>
+            <span class="tracking-[0.15em] uppercase">India Base</span>
+        </button>
+    </header>
+
+    <main class="flex-1 main-content">
+        <div class="map-box glass-panel flex flex-col overflow-hidden">
+            <div class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5">
+                <div class="flex items-center gap-4">
+                    <span id="projection-label" class="text-[14px] font-black text-slate-200 uppercase tracking-widest">Orbital Interface: 2D Active</span>
+                    <div id="active-sector-display" class="hidden flex items-center gap-4 bg-blue-500/10 border border-blue-500/20 px-4 py-1.5 rounded-lg animate-in fade-in zoom-in duration-300">
+                        <img id="sector-flag" src="" alt="Flag" class="w-8 h-5 object-cover rounded shadow-sm opacity-90">
+                        <span id="sector-name" class="text-[12px] font-black text-blue-100 uppercase tracking-widest">--</span>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="zoomMap(1.6)" class="w-10 h-10 hover:bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 transition-colors tactical-btn shadow-xl"><i class="fas fa-plus text-slate-400"></i></button>
+                    <button onclick="zoomMap(0.6)" class="w-10 h-10 hover:bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 transition-colors tactical-btn shadow-xl"><i class="fas fa-minus text-slate-400"></i></button>
+                    <button onclick="resetToGlobalCenter()" class="w-10 h-10 hover:bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 text-blue-400 tactical-btn shadow-xl"><i class="fas fa-expand text-sm"></i></button>
+                </div>
+            </div>
+            <div id="map-container" class="flex-1 relative w-full h-full">
+                <svg id="world-map" class="w-full h-full"></svg>
+            </div>
+        </div>
+
+        <div id="sidebar" class="intel-sidebar glass-panel">
+            <nav class="flex border-b border-white/10 bg-white/5 w-full">
+                <div class="nav-tab active" onmouseenter="playTacticalSound('hover')" onclick="switchTab('intel')">Intel</div>
+                <div class="nav-tab" onmouseenter="playTacticalSound('hover')" onclick="switchTab('news')">News</div>
+                <div class="nav-tab" onmouseenter="playTacticalSound('hover')" onclick="switchTab('markets')">Markets</div>
+                <div class="nav-tab" onmouseenter="playTacticalSound('hover')" onclick="switchTab('atmosphere')">Atmosphere</div>
+                <div class="nav-tab" onmouseenter="playTacticalSound('hover')" onclick="switchTab('economic')">Economic</div>
+            </nav>
+
+            <div id="sidebar-content" class="flex-1 overflow-hidden relative">
+                
+                <div id="tab-intel" class="tab-content active">
+                    <div class="content-scroll-area">
+                        <h2 class="text-[12px] font-black text-white uppercase tracking-[0.3em] mb-4">Tactical Briefing</h2>
+                        
+                        <div id="ai-briefing-box" class="dossier-card bg-blue-500/[0.08] border-blue-500/30 mb-4">
+                            <div class="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
+                                <span class="text-[10px] text-blue-400 uppercase font-black tracking-widest flex items-center gap-3"><i class="fas fa-brain text-lg"></i> Neural Synthesis</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                                    <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Live Link</span>
+                                </div>
+                            </div>
+                            <p id="ai-briefing-text" class="text-[16px] text-slate-200 leading-loose font-medium tracking-wide">
+                                <span class="animate-pulse text-slate-500">Awaiting target selection...</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-markets" class="tab-content">
+                    <div class="content-scroll-area">
+                        <h2 class="text-[12px] font-black text-white uppercase tracking-[0.3em] mb-2">Financial Assets</h2>
+
+                        <div class="dossier-card bg-indigo-500/[0.05] border-indigo-500/20 mb-4">
+                            <div class="flex justify-between items-center mb-4 border-b border-white/5 pb-2">
+                                <span class="text-[10px] text-indigo-400 uppercase font-black tracking-widest"><i class="fas fa-chart-line mr-2"></i> Market Intel</span>
+                                <span class="text-[9px] text-slate-500 font-bold uppercase">Real-Time Search</span>
+                            </div>
+                            <div id="market-brief-text" class="text-[14px] text-slate-300 leading-relaxed font-mono whitespace-pre-line">
+                                <span class="animate-pulse text-slate-500">Initializing financial uplink...</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="dossier-card p-4 border-white/10 bg-white/[0.02]">
+                                <span class="text-[9px] text-yellow-500 uppercase font-black tracking-widest block mb-2">Gold (Au)</span>
+                                <div class="text-2xl font-black text-white" id="price-gold">--</div>
+                            </div>
+                            <div class="dossier-card p-4 border-white/10 bg-white/[0.02]">
+                                <span class="text-[9px] text-slate-400 uppercase font-black tracking-widest block mb-2">Silver (Ag)</span>
+                                <div class="text-2xl font-black text-white" id="price-silver">--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-news" class="tab-content">
+                    <div class="px-8 py-5 flex flex-col gap-4 border-b border-white/5 bg-white/5">
+                        <h2 class="text-[12px] font-black text-white uppercase tracking-[0.3em]">Signal Intelligence</h2>
+                        <div class="flex gap-2.5 overflow-x-auto no-scrollbar p-2 w-full">
+                            <div class="category-pill active" onclick="playTacticalSound('click')" data-cat="top">Trending</div>
+                            <div class="category-pill" onclick="playTacticalSound('click')" data-cat="politics">Political</div>
+                            <div class="category-pill" onclick="playTacticalSound('click')" data-cat="technology">Tech</div>
+                            <div class="category-pill" onclick="playTacticalSound('click')" data-cat="sports">Sports</div>
+                            <div class="w-12 shrink-0"></div>
+                        </div>
+                    </div>
+                    <div class="content-scroll-area">
+                        <div id="news-loading" class="hidden"><div class="dossier-card h-40 skeleton mb-4"></div><div class="dossier-card h-40 skeleton"></div></div>
+                        <div id="articles-container" class="space-y-6"></div>
+                    </div>
+                </div>
+
+                <div id="tab-atmosphere" class="tab-content">
+                    <div class="content-scroll-area">
+                        <h2 class="text-[12px] font-black text-white uppercase tracking-[0.3em] mb-2">Climatic Payload</h2>
+                        
+                        <div class="weather-card rounded-2xl p-8 shadow-2xl bg-gradient-to-br from-blue-600/10 to-transparent border border-white/10 dossier-card mb-4">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <div id="weather-temp" class="text-[72px] font-black text-white tabular-nums tracking-tighter leading-none power-readout">--°C</div>
+                                    <div id="weather-desc" class="text-[16px] font-bold text-blue-400 uppercase tracking-[0.2em] mt-3 leading-none">Link Active</div>
+                                </div>
+                                <div id="weather-icon" class="text-7xl text-slate-500 opacity-60"><i class="fas fa-cloud-sun"></i></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-6 mt-10 pt-8 border-t border-white/10">
+                                <div class="flex flex-col"><span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-2 leading-none">Wind Velocity</span><span class="text-3xl font-black text-white leading-none"><span id="weather-wind">--</span> <small class="text-[12px] text-slate-500 uppercase">KM/H</small></span></div>
+                                <div class="flex flex-col"><span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-2 leading-none">Humidity</span><span class="text-3xl font-black text-white leading-none"><span id="weather-hum">--</span> <small class="text-[12px] text-slate-500 uppercase">%</small></span></div>
+                            </div>
+                        </div>
+
+                        <div class="dossier-card border-white/10 bg-white/[0.01] grid grid-cols-2 gap-x-4 gap-y-4 py-6 px-7 mb-4">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 block leading-none">UV Index</span>
+                                <div id="weather-uv" class="text-[28px] font-black text-white tabular-nums leading-none power-readout">--</div>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 block leading-none">Cloud Cover</span>
+                                <div id="weather-cloud" class="text-[28px] font-black text-white tabular-nums leading-none power-readout">-- <small class="text-[12px] text-slate-600">%</small></div>
+                            </div>
+                             <div class="col-span-2 pt-3 border-t border-white/5 flex justify-between items-center">
+                                <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest leading-none">Surface Pressure</span>
+                                <div id="weather-press" class="text-[28px] font-black text-white tabular-nums leading-none power-readout">-- <small class="text-[12px] text-slate-600">HPA</small></div>
+                            </div>
+                             <div class="col-span-2 pt-3 border-t border-white/5 flex justify-between items-center">
+                                <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest leading-none">Visibility</span>
+                                <div id="weather-vis" class="text-[28px] font-black text-white tabular-nums leading-none power-readout">-- <small class="text-[12px] text-slate-600">KM</small></div>
+                            </div>
+                             <div class="col-span-2 pt-3 border-t border-white/5 flex justify-between items-center">
+                                <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest leading-none">Dew Point</span>
+                                <div id="weather-dew" class="text-[28px] font-black text-white tabular-nums leading-none power-readout">--°</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-economic" class="tab-content">
+                    <div class="content-scroll-area">
+                        <h2 class="text-[12px] font-black text-white uppercase tracking-[0.3em] mb-2">Market Telemetry</h2>
+                        
+                        <div class="dossier-card bg-emerald-500/[0.05] border-emerald-500/20 py-7 px-8 mb-4">
+                            <span class="text-[10px] text-emerald-500 uppercase font-black tracking-widest block mb-2 leading-none">Exchange (1.00 USD)</span>
+                            <div id="fact-currency" class="power-readout text-white tabular-nums tracking-tight">--</div>
+                        </div>
+                        
+                        <div class="dossier-card py-5 px-7 space-y-4 mb-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 block leading-none">Sovereign Region</span>
+                                    <div id="fact-region" class="text-[24px] font-black text-white leading-none power-readout">--</div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 block leading-none">Dial Code</span>
+                                    <div id="fact-code" class="text-[24px] font-black text-blue-400 leading-none power-readout">--</div>
+                                </div>
+                            </div>
+                            <div class="pt-4 border-t border-white/5 flex justify-between">
+                                 <div>
+                                    <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-2 block leading-none">Land Area</span>
+                                    <div id="fact-area" class="text-[22px] font-black text-white leading-none tracking-tight power-readout">-- <small class="text-[10px] text-slate-600 font-bold uppercase">KM²</small></div>
+                                </div>
+                                 <div class="text-right">
+                                    <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 block leading-none">Gini</span>
+                                    <div id="fact-gini" class="text-[22px] font-black text-white leading-none tracking-tight power-readout">--</div>
+                                </div>
+                            </div>
+                            <div class="pt-4 border-t border-white/5 flex justify-between">
+                                 <div>
+                                    <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-2 block leading-none">Demonym</span>
+                                    <div id="fact-demonym" class="text-[18px] font-black text-white leading-none tracking-tight power-readout">--</div>
+                                </div>
+                                 <div class="text-right">
+                                    <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 block leading-none">Driving Side</span>
+                                    <div id="fact-drive" class="text-[18px] font-black text-white leading-none tracking-tight power-readout">--</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dossier-card py-6 px-7 mb-4">
+                            <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest block mb-2 leading-none">Total Population</span>
+                            <div id="fact-pop" class="power-readout text-white tabular-nums tracking-tight">--</div>
+                        </div>
+
+                        <div class="dossier-card flex justify-between items-center py-6 px-8 border-blue-500/10">
+                            <div class="flex items-center gap-4">
+                                <span class="text-[11px] text-slate-500 uppercase font-black tracking-widest leading-none">Regional Capital</span>
+                                <div id="fact-cap" class="text-[24px] font-black text-white leading-none tracking-tight">--</div>
+                            </div>
+                        </div>
+
+                        <div class="dossier-card border-blue-500/10 bg-white/[0.01] flex justify-between items-center py-6 px-7 mt-auto">
+                            <div class="flex items-center gap-4">
+                                <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest leading-none">Terminal Sync</span>
+                                <div id="local-time" class="text-[24px] font-black text-blue-400 tabular-nums leading-none power-readout">00:00:00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="h-14 bg-black/80 border-t border-white/10 flex items-center overflow-hidden shadow-[0_-10px_40px_rgba(0,0,0,0.5)] justify-between px-6">
+        <div class="flex items-center gap-4">
+             <button onclick="toggleAmbience()" class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] hover:text-white transition-colors flex items-center gap-2">
+                <i class="fas fa-volume-up" id="ambience-icon"></i> Audio: <span id="ambience-text">OFF</span>
+             </button>
+        </div>
+        <div class="animate-marquee whitespace-nowrap flex-1 text-center">
+            <span class="text-[12px] font-black text-blue-400 uppercase tracking-[0.3em] mx-24">SYSTEM: MAP ENGINE CALIBRATED v9.7</span>
+            <span class="text-[12px] font-black text-slate-500 uppercase tracking-[0.3em] mx-24">LATENCY: 4MS | PACKET INTEGRITY: 100% | UPLINK: VERIFIED</span>
+            <span class="text-[12px] font-black text-blue-400 uppercase tracking-[0.3em] mx-24">ENCRYPTION: AES-512 | SAT-LINK: ARTEMIS-X ACTIVE | NEURAL ID: GRANTED</span>
+            <span class="text-[12px] font-black text-slate-500 uppercase tracking-[0.3em] mx-24">CORE THERMALS: 28.1°C | NEURAL SYNAPSE LOAD: 3.2% | QUANTUM ENTROPY: NOMINAL</span>
+            <span class="text-[12px] font-black text-blue-400 uppercase tracking-[0.3em] mx-24">DATA HANDSHAKE: VERIFIED | GLOBAL FEED: ONLINE | ARCHITECT: ABHISHEK SATI</span>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+         
+        const apiKey = "AIzaSyAhOk5ttee1EGgsGdqLS5cBYSOK3ykxqhQ"; 
+        const model = "gemini-2.5-flash-preview-09-2025";
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'news-atlas-v7';
+
+        let auth, db, user, selectedCountry;
+        let currentCategory = 'top';
+        let worldFeatures = [];
+        let countryUTCOffset, iso2Code, currencyCode, projectionType = '2d', currentProjection, svg, g, zoom;
+        let globalSearchData = [];
+        let aboutStatsInterval;
+        
+        // --- AUDIO ENGINE ---
+        let audioCtx;
+        let ambienceOscillators = [];
+        let ambienceGain = null;
+        let isAmbiencePlaying = false;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        window.toggleAmbience = () => {
+            initAudio();
+            if (isAmbiencePlaying) {
+                // Stop
+                ambienceOscillators.forEach(osc => osc.stop());
+                ambienceOscillators = [];
+                isAmbiencePlaying = false;
+                document.getElementById('ambience-text').innerText = "OFF";
+                document.getElementById('ambience-text').classList.remove('text-blue-400');
+            } else {
+                // Start Drone
+                ambienceGain = audioCtx.createGain();
+                ambienceGain.gain.value = 0.05; // Very quiet
+                ambienceGain.connect(audioCtx.destination);
+
+                const freqs = [55, 110, 112, 54]; // Low drone frequencies
+                freqs.forEach(f => {
+                    const osc = audioCtx.createOscillator();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(f, audioCtx.currentTime);
+                    osc.connect(ambienceGain);
+                    osc.start();
+                    ambienceOscillators.push(osc);
+                });
+                
+                isAmbiencePlaying = true;
+                document.getElementById('ambience-text').innerText = "ON";
+                document.getElementById('ambience-text').classList.add('text-blue-400');
+            }
+        };
+
+        function playTacticalSound(type) {
+            initAudio();
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                
+                if (type === 'tab') {
+                    osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+                } else if (type === 'click') {
+                    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+                } else if (type === 'hover') {
+                    osc.frequency.setValueAtTime(1400, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.006, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.02);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.02);
+                } else if (type === 'success') {
+                    osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(1100, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch(e) {}
+        }
+        window.playTacticalSound = playTacticalSound;
+
+        // --- EXPORT DOSSIER LOGIC ---
+        window.downloadDossier = () => {
+            playTacticalSound('success');
+            const cName = selectedCountry ? selectedCountry.properties.name : "GLOBAL_CONTEXT";
+            const date = new Date().toISOString().split('T')[0];
+            const intelText = document.getElementById('ai-briefing-text') ? document.getElementById('ai-briefing-text').innerText : "No Intel Loaded";
+            
+            const content = `
+████████████████████████████████████████████████████████████
+CLASSIFIED INTELLIGENCE DOSSIER
+SECTOR: ${cName.toUpperCase()}
+DATE: ${date}
+GENERATED BY: NEWSATLAS TERMINAL v9.7
+████████████████████████████████████████████████████████████
+
+[TACTICAL BRIEFING]
+${intelText}
+
+[ECONOMIC TELEMETRY]
+Population: ${document.getElementById('fact-pop').innerText}
+Currency: ${document.getElementById('fact-currency').innerText}
+Capital: ${document.getElementById('fact-cap').innerText}
+
+[MARKET DATA]
+Gold: ${document.getElementById('price-gold').innerText}
+Silver: ${document.getElementById('price-silver').innerText}
+
+[ATMOSPHERIC CONDITIONS]
+Temp: ${document.getElementById('weather-temp').innerText}
+Wind: ${document.getElementById('weather-wind').innerText} KM/H
+
+-- END OF TRANSMISSION --
+            `;
+
+            const blob = new Blob([content], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `INTEL_${cName.toUpperCase()}_${date}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        };
+
+        function initTrafficCanvas() {
+            const canvas = document.getElementById('traffic-canvas');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width = canvas.offsetWidth;
+            const h = canvas.height = canvas.offsetHeight;
+            let offset = 0;
+
+            function draw() {
+                ctx.clearRect(0, 0, w, h);
+                ctx.beginPath();
+                ctx.strokeStyle = '#3b82f6';
+                ctx.lineWidth = 2;
+                for (let x = 0; x < w; x++) {
+                    const y = h/2 + Math.sin((x + offset) * 0.05) * 20 * Math.sin(x * 0.01);
+                    ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+                offset += 2;
+                requestAnimationFrame(draw);
+            }
+            draw();
+        }
+
+        const cliInput = document.getElementById('cli-input');
+        const cliOutput = document.getElementById('cli-output');
+
+        if (cliInput) {
+            cliInput.addEventListener('keypress', async (e) => {
+                if (e.key === 'Enter') {
+                    const query = cliInput.value.trim();
+                    if (!query) return;
+
+                    playTacticalSound('click');
+                    appendLog(`> ${query}`, 'text-white');
+                    cliInput.value = '';
+
+                    const countryName = selectedCountry ? selectedCountry.properties.name : "Global Context";
+                    appendLog(`> Processing query for sector: [${countryName.toUpperCase()}]...`, 'text-blue-400 animate-pulse');
+
+                    try {
+                        const prompt = `Context: The user is looking at a dashboard for ${countryName}. 
+                        User Query: "${query}". 
+                        Task: Answer as a tactical AI computer (concise, data-driven, no fluff). 
+                        Limit response to 2 sentences.`;
+
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                        });
+
+                        const data = await res.json();
+                        const answer = data.candidates?.[0]?.content?.parts?.[0]?.text || "DATA CORRUPTION. RETRY.";
+                        
+                        appendLog(`> ${answer}`, 'text-emerald-400');
+                        playTacticalSound('success');
+
+                    } catch (err) {
+                        appendLog(`> ERROR: UPLINK FAILED.`, 'text-red-500');
+                    }
+                }
+            });
+        }
+
+        function appendLog(text, colorClass) {
+            const div = document.createElement('div');
+            div.className = `log-entry ${colorClass} leading-relaxed`;
+            div.innerText = text;
+            cliOutput.appendChild(div);
+            cliOutput.scrollTop = cliOutput.scrollHeight;
+        }
+
+        function startAboutStats() {
+            const bioText = "Engineering high-fidelity command terminals that synchronize high-frequency global data with real-time geospatial telemetry.";
+            const bioEl = document.getElementById('bio-text');
+            bioEl.innerText = "";
+            let i = 0;
+            const type = setInterval(() => {
+                if(i < bioText.length) { bioEl.innerText += bioText.charAt(i); i++; } 
+                else clearInterval(type);
+            }, 30);
+
+            if(aboutStatsInterval) clearInterval(aboutStatsInterval);
+            
+            let sec = 0;
+            const uptimeEl = document.getElementById('uptime-counter');
+            
+            aboutStatsInterval = setInterval(() => {
+                const cpu = Math.floor(Math.random() * 40) + 10;
+                const mem = (Math.random() * 4 + 4).toFixed(1);
+                document.getElementById('cpu-bar').style.width = cpu + '%';
+                document.getElementById('cpu-val').innerText = cpu + '%';
+                document.getElementById('mem-bar').style.width = (mem/16*100) + '%';
+                document.getElementById('mem-val').innerText = mem + 'GB';
+
+                document.getElementById('net-down').innerText = (Math.random() * 50 + 10).toFixed(1);
+                document.getElementById('net-up').innerText = (Math.random() * 20 + 2).toFixed(1);
+
+                sec++;
+                const h = Math.floor(sec / 3600).toString().padStart(2, '0');
+                const m = Math.floor((sec % 3600) / 60).toString().padStart(2, '0');
+                const s = (sec % 60).toString().padStart(2, '0');
+                if(uptimeEl) uptimeEl.innerText = `${h}:${m}:${s}`;
+
+            }, 1000);
+        }
+
+        async function initTerminal() {
+            try {
+                const res = await fetch('https://restcountries.com/v3.1/all?fields=name,flags,cca2,latlng,currencies,population,capital');
+                globalSearchData = await res.json();
+                console.log("Global search data loaded:", globalSearchData.length, "entries");
+            } catch(e) { console.error("Search index fail", e); }
+
+            try {
+                const config = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "none", projectId: "news-atlas-demo" };
+                const firebaseApp = initializeApp(config);
+                auth = getAuth(firebaseApp);
+                db = getFirestore(firebaseApp);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token).catch(() => signInAnonymously(auth));
+                } else { await signInAnonymously(auth); }
+
+                onAuthStateChanged(auth, (u) => {
+                    user = u;
+                    if (u) {
+                        document.getElementById('neural-id').innerText = `VAULT LINK: ${u.uid.substring(0, 14)}...`;
+                    }
+                });
+            } catch (e) {
+                console.warn("Firebase handshake failed (Running in autonomous mode):", e);
+                document.getElementById('neural-id').innerText = "LOCAL MODE";
+            }
+            
+            fetchNews();
+        }
+
+        window.toggleAbout = (show) => {
+            playTacticalSound(show ? 'success' : 'click');
+            const overlay = document.getElementById('about-overlay');
+            overlay.classList.toggle('hidden', !show);
+            if(show) {
+                initTrafficCanvas();
+                startAboutStats();
+            } else {
+                if(aboutStatsInterval) clearInterval(aboutStatsInterval);
+            }
+        };
+
+        window.toggleSearch = () => {
+            playTacticalSound('click');
+            const overlay = document.getElementById('search-overlay');
+            overlay.classList.toggle('hidden');
+            if (!overlay.classList.contains('hidden')) {
+                document.getElementById('country-search').focus();
+                renderTrending(); 
+            }
+        };
+
+        function renderTrending() {
+            const resContainer = document.getElementById('search-results');
+            
+            if (!globalSearchData || globalSearchData.length === 0) {
+                 resContainer.innerHTML = `
+                    <div class="p-8 text-center flex flex-col items-center gap-3 animate-pulse">
+                        <i class="fas fa-satellite-dish text-blue-500 text-xl"></i>
+                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Downloading Global Index...</span>
+                    </div>`;
+                 return;
+            }
+
+            const trending = ["India", "United States", "United Kingdom", "Japan", "Germany", "France", "Russia", "China"];
+            
+            resContainer.innerHTML = '<div class="p-4 text-[10px] font-black text-slate-600 uppercase tracking-widest sticky top-0 bg-[#020617]/95 backdrop-blur z-10 border-b border-white/5">High Traffic Sectors</div>' + 
+                trending.map(name => {
+                    const c = globalSearchData.find(curr => 
+                        curr.name.common === name || 
+                        (name === "United States" && curr.name.common === "United States of America") ||
+                        (name === "Russia" && curr.name.common.includes("Russian"))
+                    );
+                    
+                    if (!c) return ''; 
+
+                    return `
+                    <div class="p-4 hover:bg-blue-600/10 cursor-pointer flex items-center gap-4 border-b border-white/5 transition-all group" onclick="window.selectFromSearch('${name}')">
+                        <div class="w-8 h-5 rounded shadow-sm overflow-hidden relative border border-white/10 group-hover:border-blue-400/50">
+                            <img src="${c.flags.svg}" class="w-full h-full object-cover">
+                        </div>
+                        <span class="font-bold text-white text-sm tracking-tight group-hover:text-blue-300 transition-colors">${name}</span>
+                        <i class="fas fa-chevron-right ml-auto text-[10px] text-slate-600 group-hover:text-blue-400"></i>
+                    </div>`;
+                }).join('');
+        }
+
+        async function generateAIBriefing(loc) {
+            const box = document.getElementById('ai-briefing-box');
+            const text = document.getElementById('ai-briefing-text');
+            if (box) box.classList.remove('hidden'); 
+            if (text) text.innerText = "Synchronizing neural cores...";
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: `Location: ${loc}. Provide tactical 3-sentence intel briefing. Tone: High-level tactical.` }] }],
+                        tools: [{ "google_search": {} }]
+                    })
+                });
+                const result = await res.json();
+                if (text) text.innerText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Link stable. No intel found.";
+                playTacticalSound('success');
+            } catch (e) { if (text) text.innerText = "Briefing handshake failed."; }
+        }
+
+        async function fetchMarketIntel(country, currency) {
+            const textEl = document.getElementById('market-brief-text');
+            const goldEl = document.getElementById('price-gold');
+            const silverEl = document.getElementById('price-silver');
+            
+            if(textEl) textEl.innerHTML = '<span class="animate-pulse text-slate-500">Scanning global exchanges...</span>';
+            if(goldEl) goldEl.innerText = "--";
+            if(silverEl) silverEl.innerText = "--";
+
+            try {
+                const prompt = `Search for current stock market indices for ${country} and current Gold (10g) and Silver (1kg) prices in ${currency || 'USD'}. 
+                Return a strict summary in this format:
+                
+                [INDICES]
+                • Index Name: Value (Change%)
+                • Index Name: Value (Change%)
+                
+                [METALS]
+                • Gold (10g): Price
+                • Silver (1kg): Price
+                
+                [BRIEF]
+                1 sentence market outlook.`;
+
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        tools: [{ "google_search": {} }]
+                    })
+                });
+                
+                const result = await res.json();
+                const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Market data unavailable.";
+                
+                if(textEl) textEl.innerText = responseText;
+
+                const goldMatch = responseText.match(/Gold.*?([\d,.]+)/);
+                const silverMatch = responseText.match(/Silver.*?([\d,.]+)/);
+                
+                if(goldEl && goldMatch) goldEl.innerText = goldMatch[1];
+                if(silverEl && silverMatch) silverEl.innerText = silverMatch[1];
+
+                playTacticalSound('success');
+
+            } catch (e) {
+                if(textEl) textEl.innerText = "Financial uplink failed.";
+            }
+        }
+
+        // --- MAP CORE (RESTORED TO STABLE) ---
+        function initMap(type) {
+            projectionType = type;
+            const container = document.getElementById('map-container');
+            const width = container.clientWidth || 800;
+            const height = container.clientHeight || 500;
+
+            // 1. CLEANUP: Wipe container to clear listeners
+            const mapContainer = d3.select("#map-container");
+            mapContainer.html(""); 
+
+            svg = mapContainer.append("svg")
+                .attr("id", "world-map")
+                .attr("viewBox", `0 0 ${width} ${height}`)
+                .attr("class", "w-full h-full");
+            
+            g = svg.append("g");
+
+            if (type === '2d') {
+                currentProjection = d3.geoNaturalEarth1().scale(width / 6.6).translate([width / 2, height / 1.95]);
+                document.getElementById('projection-label').innerText = "Orbital Interface: 2D Active";
+            } else {
+                currentProjection = d3.geoOrthographic().scale(height / 2.3).translate([width / 2, height / 2]).clipAngle(90);
+                document.getElementById('projection-label').innerText = "Orbital Interface: 3D Globe";
+            }
+
+            const path = d3.geoPath().projection(currentProjection);
+
+            // 2. BEHAVIOR
+            if (type === '2d') {
+                zoom = d3.zoom().scaleExtent([1, 15]).on("zoom", (e) => g.attr("transform", e.transform));
+                svg.call(zoom);
+            } else {
+                // 3D Drag (Standard)
+                const drag = d3.drag()
+                    .on("drag", (event) => {
+                        const rotate = currentProjection.rotate();
+                        const k = 75 / currentProjection.scale();
+                        currentProjection.rotate([
+                            rotate[0] + event.dx * k,
+                            rotate[1] - event.dy * k
+                        ]);
+                        g.selectAll("path").attr("d", path);
+                    });
+                svg.call(drag);
+            }
+
+            // 3. LOAD DATA
+            d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(data => {
+                worldFeatures = topojson.feature(data, data.objects.countries).features;
+                
+                const palette = [
+                    "#1d4ed8", "#2563eb", "#3b82f6", 
+                    "#4f46e5", "#6366f1", "#0ea5e9", 
+                    "#334155", "#475569", "#0f766e"  
+                ];
+
+                g.selectAll("path").data(worldFeatures).enter().append("path")
+                    .attr("class", "country")
+                    .attr("d", path)
+                    .attr("fill", (d, i) => palette[i % palette.length]) 
+                    .on("mouseenter", () => playTacticalSound('hover'))
+                    .on("click", function(event, d) {
+                        // 4. CLICK FIX: Always allow click unless strictly dragging
+                        handleCountryClick(event, d);
+                    });
+            });
+        }
+
+        async function handleCountryClick(event, d) {
+            playTacticalSound('click');
+            d3.selectAll(".country").classed("active", false);
+            
+            if (d && g) {
+                g.selectAll("path").filter(p => p.properties.name === d.properties.name).classed("active", true);
+            }
+            
+            selectedCountry = d;
+            switchTab('intel'); 
+            
+            if (d && d.properties) {
+                document.getElementById('selected-country-name').innerText = d.properties.name;
+                iso2Code = null; 
+                fetchAllData(d.properties.name);
+                
+                if (projectionType === '2d') {
+                    zoomToCountry(d); 
+                } else {
+                    rotateToCountry(d);
+                }
+                
+                generateAIBriefing(d.properties.name);
+                fetchMarketIntel(d.properties.name, currencyCode);
+            }
+        }
+
+        // --- 3D ROTATION (RESTORED) ---
+        function rotateToCountry(d) {
+            const centroid = d3.geoCentroid(d);
+            
+            d3.transition()
+                .duration(1200)
+                .tween("rotate", () => {
+                    const r = d3.interpolate(currentProjection.rotate(), [-centroid[0], -centroid[1]]);
+                    return (t) => { 
+                        currentProjection.rotate(r(t)); 
+                        g.selectAll("path").attr("d", d3.geoPath().projection(currentProjection)); 
+                    };
+                });
+        }
+
+        function zoomToCountry(d) {
+            const container = document.getElementById('map-container');
+            const width = container.clientWidth, height = container.clientHeight;
+            const projection = d3.geoNaturalEarth1().scale(width / 6.6).translate([width / 2, height / 1.95]);
+            const bounds = d3.geoPath().projection(projection).bounds(d);
+            const dx = bounds[1][0] - bounds[0][0], dy = bounds[1][1] - bounds[0][1];
+            const x = (bounds[0][0] + bounds[1][0]) / 2, y = (bounds[0][1] + bounds[1][1]) / 2;
+            const scale = Math.max(1, Math.min(8, 0.8 / Math.max(dx / width, dy / height)));
+            svg.transition().duration(1000).call(zoom.transform, d3.zoomIdentity.translate(width / 2 - scale * x, height / 2 - scale * y).scale(scale));
+        }
+
+        async function fetchNews() {
+            const container = document.getElementById('articles-container');
+            const loading = document.getElementById('news-loading');
+            if (loading) loading.classList.remove('hidden'); 
+            if (container) container.innerHTML = '';
+            try {
+                let url = `/api/news?category=${currentCategory}&country=${iso2Code || ''}&q=${selectedCountry ? encodeURIComponent(selectedCountry.properties.name) : ''}`;
+                
+                const res = await fetch(url); const data = await res.json();
+                if (data.results && data.results.length > 0) {
+                    data.results.forEach((art, i) => {
+                        const card = document.createElement('div');
+                        const sents = ['signal-blue', 'signal-emerald', 'signal-red'];
+                        const sent = sents[i % 3];
+                        
+                        card.className = `dossier-card shadow-md mb-4 ${sent}`;
+                        card.onmouseenter = () => playTacticalSound('hover');
+                        card.innerHTML = `
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="text-[10px] font-black text-white/70 uppercase tracking-widest bg-white/5 px-2.5 py-0.5 rounded-lg">${art.source_id || 'UPLINK'}</div>
+                                <button class="text-slate-400 hover:text-white transition-all tactical-btn"><i class="fas fa-link text-[13px]"></i></button>
+                            </div>
+                            <h3 class="font-bold text-[19px] text-white leading-tight mb-3 cursor-pointer hover:text-blue-300 transition-colors pr-4" onclick="window.open('${art.link}', '_blank')">${art.title}</h3>
+                        `;
+                        container.appendChild(card);
+                    });
+                } else { if (container) container.innerHTML = `<div class="p-10 text-center text-[12px] text-slate-500 font-black italic uppercase tracking-widest">Zero news fragments in sector.</div>`; }
+            } catch (e) {} finally { if (loading) loading.classList.add('hidden'); }
+        }
+
+        async function fetchAllData(name) {
+            try {
+                const res = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fullText=true`);
+                const data = await res.json();
+                if (data && data[0]) {
+                    const c = data[0];
+                    iso2Code = c.cca2.toLowerCase(); currencyCode = c.currencies ? Object.keys(c.currencies)[0] : null;
+                    document.getElementById('fact-pop').innerText = (c.population / 1000000).toFixed(1) + 'M';
+                    document.getElementById('fact-cap').innerText = c.capital ? c.capital[0] : 'N/A';
+                    document.getElementById('fact-region').innerText = c.region || '--';
+                    document.getElementById('fact-area').innerText = c.area.toLocaleString();
+                    document.getElementById('fact-code').innerText = c.idd.root + (c.idd.suffixes ? c.idd.suffixes[0] : '');
+                    
+                    document.getElementById('fact-demonym').innerText = c.demonyms?.eng?.m || '--';
+                    document.getElementById('fact-gini').innerText = c.gini ? Object.values(c.gini)[0] : 'N/A';
+                    document.getElementById('fact-drive').innerText = c.car ? c.car.side.toUpperCase() : '--';
+
+                    const flagEl = document.getElementById('sector-flag');
+                    const nameEl = document.getElementById('sector-name');
+                    const box = document.getElementById('active-sector-display');
+                    
+                    if(flagEl && nameEl && box){
+                         flagEl.src = c.flags.svg;
+                         nameEl.innerText = c.name.common;
+                         box.classList.remove('hidden');
+                    }
+
+                    countryUTCOffset = c.timezones ? c.timezones[0] : "UTC+00:00";
+                    
+                    if(c.latlng) {
+                        fetchWeather(c.latlng[0], c.latlng[1]);
+                    }
+                    fetchCurrency(); 
+                    fetchNews();
+                }
+            } catch (e) { console.error("Data Fetch Error", e); }
+        }
+
+        async function fetchCurrency() {
+            const el = document.getElementById('fact-currency');
+            if (!currencyCode || currencyCode === 'USD') { if (el) el.innerText = "USD Base"; return; }
+            try {
+                const res = await fetch(`https://api.frankfurter.app/latest?from=USD&to=${currencyCode}`);
+                const data = await res.json(); if (el) el.innerText = `${data.rates[currencyCode].toFixed(2)} ${currencyCode}`;
+            } catch (e) { if (el) el.innerText = "Offline"; }
+        }
+
+        async function fetchWeather(lat, lon) {
+            try {
+                const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m,visibility,surface_pressure,uv_index,cloudcover&timezone=auto`);
+                const wData = await wRes.json();
+                
+                const cw = wData.current_weather;
+                const hourly = wData.hourly;
+                const nowIndex = new Date().getHours(); 
+
+                document.getElementById('weather-temp').innerText = `${Math.round(cw.temperature)}°C`;
+                document.getElementById('weather-wind').innerText = Math.round(cw.windspeed);
+                document.getElementById('weather-desc').innerText = cw.weathercode <= 3 ? "Clear Skies" : "Cloud Layer Active";
+                
+                const currentHumidity = hourly.relativehumidity_2m ? hourly.relativehumidity_2m[nowIndex] : 50;
+                document.getElementById('weather-hum').innerText = currentHumidity;
+
+                document.getElementById('weather-uv').innerText = hourly.uv_index ? (hourly.uv_index[nowIndex] || '1.1') : '--';
+                document.getElementById('weather-vis').innerText = hourly.visibility ? ((hourly.visibility[nowIndex] / 1000).toFixed(1) || '10.0') : '--';
+                document.getElementById('weather-press').innerText = hourly.surface_pressure ? (Math.round(hourly.surface_pressure[nowIndex]) || '--') : '--';
+                document.getElementById('weather-cloud').innerText = hourly.cloudcover ? (hourly.cloudcover[nowIndex] || '12') : '--';
+                
+                const dew = cw.temperature - ((100 - currentHumidity)/5); 
+                document.getElementById('weather-dew').innerText = `${Math.round(dew)}°`;
+                
+                playTacticalSound('success');
+            } catch (e) { console.error("Weather Error", e); }
+        }
+
+        window.switchTab = (id) => {
+            playTacticalSound('tab');
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            const tabBtn = Array.from(document.querySelectorAll('.nav-tab')).find(btn => btn.innerText.toLowerCase().includes(id.toLowerCase()));
+            if (tabBtn) tabBtn.classList.add('active');
+            const targetContent = document.getElementById(`tab-${id}`);
+            if (targetContent) targetContent.classList.add('active');
+        };
+
+        window.toggleProjection = () => { playTacticalSound('tab'); initMap(projectionType === '2d' ? '3d' : '2d'); };
+
+        window.selectFromSearch = (name) => {
+            const country = worldFeatures.find(f => {
+                const featName = f.properties.name.toLowerCase();
+                const searchName = name.toLowerCase();
+                return featName === searchName || 
+                       (featName === "united states of america" && searchName === "united states") ||
+                       (featName.includes("russia") && searchName.includes("russian"));
+            });
+
+            if (country) {
+                handleCountryClick(null, country);
+            } else {
+                fetchAllData(name);
+                document.getElementById('selected-country-name').innerText = name;
+                selectedCountry = { properties: { name: name } }; 
+                generateAIBriefing(name);
+            }
+            
+            document.getElementById('search-overlay').classList.add('hidden');
+            document.getElementById('country-search').value = '';
+        };
+
+        window.zoomMap = (f) => {
+            playTacticalSound('click');
+            if (projectionType === '2d') svg.transition().duration(400).call(zoom.scaleBy, f);
+            else { currentProjection.scale(currentProjection.scale() * f); g.selectAll("path").attr("d", d3.geoPath().projection(currentProjection)); }
+        };
+
+        window.resetToGlobalCenter = () => {
+            selectedCountry = null; countryUTCOffset = null;
+            d3.selectAll(".country").classed("active", false);
+            document.getElementById('selected-country-name').innerText = "Global Surveillance";
+            document.getElementById('ai-briefing-box').classList.add('hidden');
+            const flagBox = document.getElementById('active-sector-display');
+            if(flagBox) flagBox.classList.add('hidden');
+            if (projectionType === '2d') svg.transition().duration(1200).call(zoom.transform, d3.zoomIdentity);
+            fetchNews();
+        };
+
+        window.goToIndiaHome = () => { 
+            const india = worldFeatures.find(f => f.properties.name === "India"); 
+            if (india) handleCountryClick(null, india); 
+        };
+
+        function setupEventListeners() {
+            document.querySelectorAll('.category-pill').forEach(pill => {
+                pill.onmouseenter = () => playTacticalSound('hover');
+                pill.onclick = () => {
+                    playTacticalSound('click');
+                    document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    currentCategory = pill.dataset.cat;
+                    fetchNews();
+                };
+            });
+            const input = document.getElementById('country-search');
+            input.oninput = (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                const resContainer = document.getElementById('search-results');
+                
+                if (!query) { 
+                    renderTrending(); 
+                    return; 
+                }
+                
+                if (!globalSearchData || globalSearchData.length === 0) {
+                      resContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 font-bold uppercase tracking-widest animate-pulse">Initializing Search Index...</div>`;
+                      return;
+                }
+                
+                const matched = globalSearchData.filter(c => c.name.common.toLowerCase().includes(query)).slice(0, 8);
+                
+                if (matched.length === 0) {
+                    resContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 font-bold uppercase tracking-widest">Sector Not Found</div>`;
+                    return;
+                }
+
+                resContainer.innerHTML = matched.map(c => `
+                    <div class="p-4 hover:bg-blue-600/10 cursor-pointer flex items-center gap-4 border-b border-white/5 transition-all group" onclick="window.selectFromSearch('${c.name.common.replace(/'/g, "\\'")}')">
+                        <div class="w-8 h-5 rounded shadow-sm overflow-hidden relative border border-white/10 group-hover:border-blue-400/50">
+                            <img src="${c.flags.svg}" class="w-full h-full object-cover">
+                        </div>
+                        <span class="font-bold text-white text-sm tracking-tight group-hover:text-blue-300 transition-colors">${c.name.common}</span>
+                        <i class="fas fa-chevron-right ml-auto text-[10px] text-slate-600 group-hover:text-blue-400"></i>
+                    </div>
+                `).join('');
+            };
+            window.onkeydown = (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); toggleSearch(); }
+                if (e.key === 'Escape') {
+                    document.getElementById('search-overlay').classList.add('hidden');
+                    document.getElementById('about-overlay').classList.add('hidden');
+                }
+            };
+        }
+
+        function updateSystemTime() {
+            const now = new Date();
+            document.getElementById('system-time').innerText = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            if (countryUTCOffset) {
+                const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                let off = 0; const match = countryUTCOffset.match(/UTC([+-]\d+):?(\d+)?/);
+                if (match) off = (parseInt(match[1]) * 60) + (match[2] ? parseInt(match[2]) : 0);
+                const localDate = new Date(utc + (60000 * off));
+                const localEl = document.getElementById('local-time');
+                if (localEl) localEl.innerText = localDate.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const hr = localDate.getHours();
+                const isNight = hr < 6 || hr > 18;
+                document.body.classList.toggle('night-mode', isNight);
+                document.body.classList.toggle('day-mode', !isNight);
+            }
+        }
+
+        // EXECUTION START
+        initTerminal();
+        initMap('2d');
+        setupEventListeners();
+        setInterval(updateSystemTime, 1000);
+    </script>
+</body>
+</html>

@@ -14,26 +14,24 @@
     <meta property="og:image" content="https://news-atlas-live.vercel.app/screenshot.png"> 
     <meta name="theme-color" content="#020617">
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2072/2072130.png" type="image/x-icon">
-    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
         window.firebaseCore = { initializeApp, getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp };
     </script>
-
     <style>
+        *, *::before, *::after { box-sizing: border-box; }
         :root { --glass-bg: rgba(15, 23, 42, 0.96); --glass-border: rgba(255, 255, 255, 0.08); --accent-blue: #3b82f6; --accent-emerald: #10b981; --accent-red: #ef4444; --solar-glow: rgba(59, 130, 246, 0.12); }
-        body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: #020617; background-image: radial-gradient(at 0% 0%, var(--solar-glow) 0, transparent 50%), radial-gradient(at 100% 100%, rgba(30, 41, 59, 0.2) 0, transparent 50%); color: #f8fafc; overflow: hidden; height: 100vh; transition: background-image 1.2s ease-in-out; }
+        body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: #020617; background-image: radial-gradient(at 0% 0%, var(--solar-glow) 0, transparent 50%), radial-gradient(at 100% 100%, rgba(30, 41, 59, 0.2) 0, transparent 50%); color: #f8fafc; overflow: hidden; height: 100vh; width: 100vw; transition: background-image 1.2s ease-in-out; }
         .glass-panel { background: var(--glass-bg); backdrop-filter: blur(40px); border: 1px solid var(--glass-border); border-radius: 1.5rem; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7); }
-        header { height: 120px; padding: 0 2.5rem; display: flex; align-items: center; justify-content: space-between; }
-        .main-content { height: calc(100vh - 170px); padding: 0 2.5rem 1.5rem 2.5rem; gap: 1.5rem; display: flex; }
-        .map-box { position: relative; flex: 1.4; overflow: hidden; background: rgba(2, 6, 23, 0.6); border: 1px solid var(--glass-border); }
+        header { height: 120px; padding: 0 2.5rem; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+        .main-content { height: calc(100vh - 170px); padding: 0 2.5rem 1.5rem 2.5rem; gap: 1.5rem; display: flex; width: 100%; }
+        .map-box { position: relative; flex: 1.4; min-width: 0; overflow: hidden; background: rgba(2, 6, 23, 0.6); border: 1px solid var(--glass-border); }
+        .intel-sidebar { width: 480px; display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0; }
         .country { stroke: #020617; stroke-width: 0.5; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; outline: none; }
         .country:hover { fill: #334155; filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.4)); }
         .country.active { fill: var(--accent-blue); stroke: #fff; stroke-width: 1.5; filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.6)); }
-        .intel-sidebar { width: 480px; display: flex; flex-direction: column; overflow: hidden; }
         .dossier-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1rem; padding: 1.5rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; display: flex; flex-direction: column; }
         .dossier-card:hover { background: rgba(255, 255, 255, 0.04); border-color: rgba(59, 130, 246, 0.4); transform: translateY(-2px); }
         .weather-card { background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(30, 41, 59, 0.15) 100%); border: 1px solid rgba(59, 130, 246, 0.2); }
@@ -76,14 +74,11 @@
         @keyframes scan { 0% { transform: translateY(-150%); } 100% { transform: translateY(150%); } }
         .typing-cursor::after { content: '|'; animation: blink 1s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
-        /* --- ADDED STYLES FOR NEW FEATURES --- */
         #boot-screen { transition: opacity 0.8s ease-out; }
         #map-tooltip { pointer-events: none; z-index: 100; transition: all 0.1s ease-out; backdrop-filter: blur(8px); }
     </style>
 </head>
 <body class="flex flex-col day-mode">
-
     <div id="boot-screen" class="fixed inset-0 bg-[#020617] z-[9999] flex flex-col items-center justify-center font-mono text-emerald-500 text-xs p-10">
         <div class="w-full max-w-md space-y-2">
             <div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
@@ -92,11 +87,9 @@
             <div id="boot-log" class="h-32 overflow-hidden flex flex-col justify-end text-slate-400 font-bold uppercase tracking-widest"></div>
         </div>
     </div>
-
     <div id="map-tooltip" class="fixed hidden bg-slate-900/90 border border-blue-500/30 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest shadow-xl border-l-4 border-l-blue-500">
         <span id="tooltip-text"></span>
     </div>
-
     <div id="about-overlay" class="fixed inset-0 hidden flex items-center justify-center p-6">
         <div class="glass-panel max-w-4xl w-full p-0 border-blue-500/40 relative overflow-hidden shadow-2xl flex flex-col z-20 h-[85vh]">
             <div class="bg-blue-600/10 p-8 border-b border-white/5 relative overflow-hidden flex-shrink-0">
@@ -119,10 +112,8 @@
                     </div>
                 </div>
             </div>
-
             <div class="flex-1 overflow-y-auto p-8 bg-[#020617]/90">
                 <div class="grid grid-cols-12 gap-8 h-full">
-                    
                     <div class="col-span-4 flex flex-col gap-6">
                         <div class="dossier-card border-white/5 bg-white/[0.02] min-h-[140px]">
                             <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Architect Statement</h3>
@@ -136,13 +127,12 @@
                         </div>
                          <div class="dossier-card border-white/5 bg-white/[0.02] mt-auto mb-6">
                             <div class="flex gap-4 justify-center">
-                                <a href="#" class="text-slate-500 hover:text-white transition-colors"><i class="fab fa-github text-2xl"></i></a>
-                                <a href="#" class="text-slate-500 hover:text-blue-400 transition-colors"><i class="fab fa-linkedin text-2xl"></i></a>
-                                <a href="#" class="text-slate-500 hover:text-emerald-400 transition-colors"><i class="fas fa-globe text-2xl"></i></a>
+                                <a href="https://github.com/abhisheksati132" target="_blank" class="text-slate-500 hover:text-white transition-colors"><i class="fab fa-github text-2xl"></i></a>
+                                <a href="https://www.linkedin.com/in/abhisheksati132" target="_blank" class="text-slate-500 hover:text-blue-400 transition-colors"><i class="fab fa-linkedin text-2xl"></i></a>
+                                <a href="https://www.instagram.com/satiabhishek/" target="_blank" class="text-slate-500 hover:text-pink-500 transition-colors"><i class="fab fa-instagram text-2xl"></i></a>
                             </div>
                         </div>
                     </div>
-
                     <div class="col-span-8 flex flex-col gap-6">
                          <div class="grid grid-cols-3 gap-4">
                             <div class="dossier-card p-4 bg-blue-500/[0.03] border-blue-500/20">
@@ -164,7 +154,6 @@
                                 <div class="text-xl font-black text-white tabular-nums" id="uptime-counter">00:00:00</div>
                             </div>
                         </div>
-
                          <div class="dossier-card p-0 overflow-hidden relative h-32 border-white/5 bg-black/40">
                              <div class="absolute top-3 left-4 right-4 flex justify-between z-10">
                                  <div class="text-[9px] text-slate-500 font-black uppercase tracking-widest">Network Traffic</div>
@@ -172,17 +161,14 @@
                              </div>
                              <canvas id="traffic-canvas" class="w-full h-full opacity-60"></canvas>
                         </div>
-
                         <div class="dossier-card p-0 bg-black/80 border-white/10 font-mono text-[10px] h-40 overflow-hidden flex flex-col relative font-medium shadow-inner">
                             <div class="bg-white/5 p-2 border-b border-white/5 flex justify-between items-center">
                                 <span class="text-blue-400 font-bold uppercase tracking-widest">Command Line Interface</span>
                                 <div class="flex gap-1"><div class="w-2 h-2 rounded-full bg-red-500"></div><div class="w-2 h-2 rounded-full bg-yellow-500"></div><div class="w-2 h-2 rounded-full bg-green-500"></div></div>
                             </div>
-                            
                             <div id="cli-output" class="flex-1 overflow-y-auto p-3 space-y-2 text-slate-300 no-scrollbar">
                                 <div class="text-emerald-500/80">> SYSTEM READY. WAITING FOR INPUT...</div>
                             </div>
-
                             <div class="p-2 border-t border-white/10 flex items-center gap-2 bg-white/5">
                                 <span class="text-blue-500 font-bold">></span>
                                 <input type="text" id="cli-input" class="bg-transparent border-none outline-none w-full text-white placeholder-slate-600 font-mono" placeholder="Enter command (e.g., 'analyze economy')..." autocomplete="off">
@@ -190,7 +176,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="pt-6 border-t border-white/5 flex items-center justify-between mt-12">
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
@@ -201,7 +186,6 @@
             </div>
         </div>
     </div>
-
     <div id="search-overlay" class="fixed inset-0 hidden flex items-center justify-center z-[100] px-6">
         <div class="glass-panel max-w-3xl w-full border-blue-500/40 shadow-2xl flex flex-col max-h-[80vh] overflow-hidden p-0">
             <div class="flex items-center p-8 gap-6 shrink-0 border-b border-white/10">
@@ -212,7 +196,6 @@
             <div id="search-results" class="flex-1 overflow-y-auto"></div>
         </div>
     </div>
-
     <header class="z-50">
         <div class="flex items-center gap-6 cursor-pointer group" onclick="resetToGlobalCenter()">
             <div class="relative">
@@ -226,7 +209,6 @@
                 <p class="text-[11px] uppercase tracking-[0.3em] text-slate-500 font-extrabold mt-3 leading-none opacity-80">Intelligence Terminal</p>
             </div>
         </div>
-        
         <div class="hidden lg:flex items-center glass-panel px-10 py-3 gap-10 rounded-full border-white/5 shadow-2xl">
             <div class="flex flex-col min-w-[180px]">
                 <span id="selected-country-name" class="font-black text-white text-[20px] uppercase truncate tracking-tighter">Global Signal</span>
@@ -256,13 +238,11 @@
                 </button>
             </div>
         </div>
-
         <button onclick="goToIndiaHome()" class="glass-panel px-12 py-5 hover:bg-blue-600/20 transition-all text-[14px] font-black flex items-center gap-5 border-blue-500/20 rounded-full tactical-btn group">
             <i class="fas fa-home text-blue-400 text-2xl group-hover:scale-110 transition-transform"></i>
             <span class="tracking-[0.15em] uppercase">India Base</span>
         </button>
     </header>
-
     <main class="flex-1 main-content">
         <div class="map-box glass-panel flex flex-col overflow-hidden">
             <div class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5">
@@ -283,7 +263,6 @@
                 <svg id="world-map" class="w-full h-full"></svg>
             </div>
         </div>
-
         <div id="sidebar" class="intel-sidebar glass-panel">
             <nav class="flex border-b border-white/10 bg-white/5 w-full">
                 <div class="nav-tab active" onmouseenter="playTacticalSound('hover')" onclick="switchTab('intel')">Intel</div>
@@ -292,13 +271,10 @@
                 <div class="nav-tab" onmouseenter="playTacticalSound('hover')" onclick="switchTab('atmosphere')">Atmosphere</div>
                 <div class="nav-tab" onmouseenter="playTacticalSound('hover')" onclick="switchTab('economic')">Economic</div>
             </nav>
-
             <div id="sidebar-content" class="flex-1 overflow-hidden relative">
-                
                 <div id="tab-intel" class="tab-content active">
                     <div class="content-scroll-area">
                         <h2 class="text-[12px] font-black text-white uppercase tracking-[0.3em] mb-4">Tactical Briefing</h2>
-                        
                         <div id="ai-briefing-box" class="dossier-card bg-blue-500/[0.08] border-blue-500/30 mb-4">
                             <div class="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
                                 <span class="text-[10px] text-blue-400 uppercase font-black tracking-widest flex items-center gap-3"><i class="fas fa-brain text-lg"></i> Neural Synthesis</span>
@@ -313,11 +289,9 @@
                         </div>
                     </div>
                 </div>
-
                 <div id="tab-markets" class="tab-content">
                     <div class="content-scroll-area">
                         <h2 class="text-[12px] font-black text-white uppercase tracking-[0.3em] mb-2">Financial Assets</h2>
-
                         <div class="dossier-card bg-indigo-500/[0.05] border-indigo-500/20 mb-4">
                             <div class="flex justify-between items-center mb-4 border-b border-white/5 pb-2">
                                 <span class="text-[10px] text-indigo-400 uppercase font-black tracking-widest"><i class="fas fa-chart-line mr-2"></i> Market Intel</span>
@@ -327,7 +301,6 @@
                                 <span class="animate-pulse text-slate-500">Initializing financial uplink...</span>
                             </div>
                         </div>
-
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div class="dossier-card p-4 border-white/10 bg-white/[0.02]">
                                 <span class="text-[9px] text-yellow-500 uppercase font-black tracking-widest block mb-2">Gold (Au)</span>
@@ -340,7 +313,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div id="tab-news" class="tab-content">
                     <div class="px-8 py-5 flex flex-col gap-4 border-b border-white/5 bg-white/5">
                         <h2 class="text-[12px] font-black text-white uppercase tracking-[0.3em]">Signal Intelligence</h2>
@@ -357,11 +329,9 @@
                         <div id="articles-container" class="space-y-6"></div>
                     </div>
                 </div>
-
                 <div id="tab-atmosphere" class="tab-content">
                     <div class="content-scroll-area">
                         <h2 class="text-[12px] font-black text-white uppercase tracking-[0.3em] mb-2">Climatic Payload</h2>
-                        
                         <div class="weather-card rounded-2xl p-8 shadow-2xl bg-gradient-to-br from-blue-600/10 to-transparent border border-white/10 dossier-card mb-4">
                             <div class="flex justify-between items-start">
                                 <div class="flex-1">
@@ -375,7 +345,6 @@
                                 <div class="flex flex-col"><span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-2 leading-none">Humidity</span><span class="text-3xl font-black text-white leading-none"><span id="weather-hum">--</span> <small class="text-[12px] text-slate-500 uppercase">%</small></span></div>
                             </div>
                         </div>
-
                         <div class="dossier-card border-white/10 bg-white/[0.01] grid grid-cols-2 gap-x-4 gap-y-4 py-6 px-7 mb-4">
                             <div class="flex flex-col">
                                 <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 block leading-none">UV Index</span>
@@ -400,16 +369,13 @@
                         </div>
                     </div>
                 </div>
-
                 <div id="tab-economic" class="tab-content">
                     <div class="content-scroll-area">
                         <h2 class="text-[12px] font-black text-white uppercase tracking-[0.3em] mb-2">Market Telemetry</h2>
-                        
                         <div class="dossier-card bg-emerald-500/[0.05] border-emerald-500/20 py-7 px-8 mb-4">
                             <span class="text-[10px] text-emerald-500 uppercase font-black tracking-widest block mb-2 leading-none">Exchange (1.00 USD)</span>
                             <div id="fact-currency" class="power-readout text-white tabular-nums tracking-tight">--</div>
                         </div>
-                        
                         <div class="dossier-card py-5 px-7 space-y-4 mb-4">
                             <div class="flex justify-between items-start">
                                 <div>
@@ -442,19 +408,16 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="dossier-card py-6 px-7 mb-4">
                             <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest block mb-2 leading-none">Total Population</span>
                             <div id="fact-pop" class="power-readout text-white tabular-nums tracking-tight">--</div>
                         </div>
-
                         <div class="dossier-card flex justify-between items-center py-6 px-8 border-blue-500/10">
                             <div class="flex items-center gap-4">
                                 <span class="text-[11px] text-slate-500 uppercase font-black tracking-widest leading-none">Regional Capital</span>
                                 <div id="fact-cap" class="text-[24px] font-black text-white leading-none tracking-tight">--</div>
                             </div>
                         </div>
-
                         <div class="dossier-card border-blue-500/10 bg-white/[0.01] flex justify-between items-center py-6 px-7 mt-auto">
                             <div class="flex items-center gap-4">
                                 <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest leading-none">Terminal Sync</span>
@@ -463,11 +426,9 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </main>
-
     <footer class="h-14 bg-black/80 border-t border-white/10 flex items-center overflow-hidden shadow-[0_-10px_40px_rgba(0,0,0,0.5)] justify-between px-6">
         <div class="flex items-center gap-4">
              <button onclick="toggleAmbience()" class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] hover:text-white transition-colors flex items-center gap-2">
@@ -482,34 +443,27 @@
             <span class="text-[12px] font-black text-blue-400 uppercase tracking-[0.3em] mx-24">DATA HANDSHAKE: VERIFIED | GLOBAL FEED: ONLINE | ARCHITECT: ABHISHEK SATI</span>
         </div>
     </footer>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-         
         const apiKey = ""; 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'news-atlas-v7';
-
         window.firebaseCore = { initializeApp, getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp };
-
         let auth, db, user, selectedCountry;
         let currentCategory = 'top';
         let worldFeatures = [];
         let countryUTCOffset, iso2Code, currencyCode, projectionType = '2d', currentProjection, svg, g, zoom;
         let globalSearchData = [];
         let aboutStatsInterval;
-        
         let audioCtx;
         let ambienceOscillators = [];
         let ambienceGain = null;
         let isAmbiencePlaying = false;
-
         function initAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
         }
-
         window.toggleAmbience = () => {
             initAudio();
             if (isAmbiencePlaying) {
@@ -522,7 +476,6 @@
                 ambienceGain = audioCtx.createGain();
                 ambienceGain.gain.value = 0.05; 
                 ambienceGain.connect(audioCtx.destination);
-
                 const freqs = [55, 110, 112, 54]; 
                 freqs.forEach(f => {
                     const osc = audioCtx.createOscillator();
@@ -532,20 +485,17 @@
                     osc.start();
                     ambienceOscillators.push(osc);
                 });
-                
                 isAmbiencePlaying = true;
                 document.getElementById('ambience-text').innerText = "ON";
                 document.getElementById('ambience-text').classList.add('text-blue-400');
             }
         };
-
         window.playTacticalSound = (type) => {
             initAudio();
             try {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.connect(gain); gain.connect(audioCtx.destination);
-                
                 if (type === 'tab') {
                     osc.frequency.setValueAtTime(440, audioCtx.currentTime);
                     gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
@@ -570,13 +520,11 @@
                 }
             } catch(e) {}
         }
-
         window.downloadDossier = () => {
             window.playTacticalSound('success');
             const cName = selectedCountry ? selectedCountry.properties.name : "GLOBAL_CONTEXT";
             const date = new Date().toISOString().split('T')[0];
             const intelText = document.getElementById('ai-briefing-text') ? document.getElementById('ai-briefing-text').innerText : "No Intel Loaded";
-            
             const content = `
 ████████████████████████████████████████████████████████████
 CLASSIFIED INTELLIGENCE DOSSIER
@@ -603,7 +551,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
 
 -- END OF TRANSMISSION --
             `;
-
             const blob = new Blob([content], { type: "text/plain" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
@@ -613,7 +560,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             a.click();
             document.body.removeChild(a);
         };
-
         function initTrafficCanvas() {
             const canvas = document.getElementById('traffic-canvas');
             if(!canvas) return;
@@ -621,7 +567,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             const w = canvas.width = canvas.offsetWidth;
             const h = canvas.height = canvas.offsetHeight;
             let offset = 0;
-
             function draw() {
                 ctx.clearRect(0, 0, w, h);
                 ctx.beginPath();
@@ -637,23 +582,18 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             }
             draw();
         }
-
         const cliInput = document.getElementById('cli-input');
         const cliOutput = document.getElementById('cli-output');
-
         if (cliInput) {
             cliInput.addEventListener('keypress', async (e) => {
                 if (e.key === 'Enter') {
                     const query = cliInput.value.trim();
                     if (!query) return;
-
                     window.playTacticalSound('click');
                     appendLog(`> ${query}`, 'text-white');
                     cliInput.value = '';
-
                     const countryName = selectedCountry ? selectedCountry.properties.name : "Global Context";
                     appendLog(`> Processing query for sector: [${countryName.toUpperCase()}]...`, 'text-blue-400 animate-pulse');
-
                     try {
                         const res = await fetch('/api/ai', {
                             method: 'POST',
@@ -665,20 +605,16 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                                 Limit response to 2 sentences.` 
                             })
                         });
-
                         const data = await res.json();
                         const answer = data.candidates?.[0]?.content?.parts?.[0]?.text || "DATA CORRUPTION. RETRY.";
-                        
                         appendLog(`> ${answer}`, 'text-emerald-400');
                         window.playTacticalSound('success');
-
                     } catch (err) {
                         appendLog(`> ERROR: UPLINK FAILED.`, 'text-red-500');
                     }
                 }
             });
         }
-
         function appendLog(text, colorClass) {
             const div = document.createElement('div');
             div.className = `log-entry ${colorClass} leading-relaxed`;
@@ -686,7 +622,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             cliOutput.appendChild(div);
             cliOutput.scrollTop = cliOutput.scrollHeight;
         }
-
         function startAboutStats() {
             const bioText = "Engineering high-fidelity command terminals that synchronize high-frequency global data with real-time geospatial telemetry.";
             const bioEl = document.getElementById('bio-text');
@@ -696,12 +631,9 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 if(i < bioText.length) { bioEl.innerText += bioText.charAt(i); i++; } 
                 else clearInterval(type);
             }, 30);
-
             if(aboutStatsInterval) clearInterval(aboutStatsInterval);
-            
             let sec = 0;
             const uptimeEl = document.getElementById('uptime-counter');
-            
             aboutStatsInterval = setInterval(() => {
                 const cpu = Math.floor(Math.random() * 40) + 10;
                 const mem = (Math.random() * 4 + 4).toFixed(1);
@@ -709,25 +641,19 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 document.getElementById('cpu-val').innerText = cpu + '%';
                 document.getElementById('mem-bar').style.width = (mem/16*100) + '%';
                 document.getElementById('mem-val').innerText = mem + 'GB';
-
                 document.getElementById('net-down').innerText = (Math.random() * 50 + 10).toFixed(1);
                 document.getElementById('net-up').innerText = (Math.random() * 20 + 2).toFixed(1);
-
                 sec++;
                 const h = Math.floor(sec / 3600).toString().padStart(2, '0');
                 const m = Math.floor((sec % 3600) / 60).toString().padStart(2, '0');
                 const s = (sec % 60).toString().padStart(2, '0');
                 if(uptimeEl) uptimeEl.innerText = `${h}:${m}:${s}`;
-
             }, 1000);
         }
-
-        // --- NEW: Boot Sequence Function ---
         async function runBootSequence() {
             const logs = ["SYSTEM_INIT...", "CONNECTING_SAT_UPLINK...", "DECRYPTING_GLOBAL_FEED...", "HANDSHAKE_VERIFIED", "ACCESS_GRANTED"];
             const logEl = document.getElementById('boot-log');
             const bar = document.getElementById('boot-bar');
-            
             for(let i=0; i<logs.length; i++) {
                 await new Promise(r => setTimeout(r, 400));
                 const d = document.createElement('div');
@@ -739,11 +665,8 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             document.getElementById('boot-screen').style.opacity = '0';
             setTimeout(() => document.getElementById('boot-screen').remove(), 800);
         }
-
         async function initTerminal() {
-            // --- NEW: Run Boot Sequence ---
             runBootSequence();
-
             const config = {
                 apiKey: "AIzaSyBXg1tCOjaLp3mYWzLcS1BBny2LrcWlluE",
                 authDomain: "news-atlas-live.firebaseapp.com",
@@ -752,20 +675,16 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 messagingSenderId: "177473843770",
                 appId: "1:177473843770:web:f9abb15747f79f28a9bb03"
             };
-
             try {
                 const firebaseApp = window.firebaseCore.initializeApp(config);
                 auth = window.firebaseCore.getAuth(firebaseApp);
                 db = window.firebaseCore.getFirestore(firebaseApp);
-
                 await window.firebaseCore.signInAnonymously(auth);
-
                 window.firebaseCore.onAuthStateChanged(auth, (u) => {
                     user = u;
                     if (u) {
                         document.getElementById('neural-id').innerText = `ID: ${u.uid.substring(0, 8).toUpperCase()}`;
                         document.getElementById('neural-id').classList.add('text-emerald-500');
-                        
                         try {
                             const userRef = window.firebaseCore.doc(db, "visitors", u.uid);
                             window.firebaseCore.setDoc(userRef, {
@@ -779,15 +698,12 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 console.warn("Firebase Auth failed:", e);
                 document.getElementById('neural-id').innerText = "LOCAL MODE (OFFLINE)";
             }
-            
             try {
                 const res = await fetch('https://restcountries.com/v3.1/all?fields=name,flags,cca2,latlng,currencies,population,capital');
                 globalSearchData = await res.json();
             } catch(e) {}
-            
             fetchNews();
         }
-
         window.toggleAbout = (show) => {
             window.playTacticalSound(show ? 'success' : 'click');
             const overlay = document.getElementById('about-overlay');
@@ -799,7 +715,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 if(aboutStatsInterval) clearInterval(aboutStatsInterval);
             }
         };
-
         window.toggleSearch = () => {
             window.playTacticalSound('click');
             const overlay = document.getElementById('search-overlay');
@@ -809,10 +724,8 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 renderTrending(); 
             }
         };
-
         function renderTrending() {
             const resContainer = document.getElementById('search-results');
-            
             if (!globalSearchData || globalSearchData.length === 0) {
                  resContainer.innerHTML = `
                     <div class="p-8 text-center flex flex-col items-center gap-3 animate-pulse">
@@ -821,9 +734,7 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                     </div>`;
                  return;
             }
-
             const trending = ["India", "United States", "United Kingdom", "Japan", "Germany", "France", "Russia", "China"];
-            
             resContainer.innerHTML = '<div class="p-4 text-[10px] font-black text-slate-600 uppercase tracking-widest sticky top-0 bg-[#020617]/95 backdrop-blur z-10 border-b border-white/5">High Traffic Sectors</div>' + 
                 trending.map(name => {
                     const c = globalSearchData.find(curr => 
@@ -831,9 +742,7 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                         (name === "United States" && curr.name.common === "United States of America") ||
                         (name === "Russia" && curr.name.common.includes("Russian"))
                     );
-                    
                     if (!c) return ''; 
-
                     return `
                     <div class="p-4 hover:bg-blue-600/10 cursor-pointer flex items-center gap-4 border-b border-white/5 transition-all group" onclick="window.selectFromSearch('${name}')">
                         <div class="w-8 h-5 rounded shadow-sm overflow-hidden relative border border-white/10 group-hover:border-blue-400/50">
@@ -844,7 +753,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                     </div>`;
                 }).join('');
         }
-
         async function generateAIBriefing(loc) {
             const box = document.getElementById('ai-briefing-box');
             const text = document.getElementById('ai-briefing-text');
@@ -863,71 +771,53 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 window.playTacticalSound('success');
             } catch (e) { if (text) text.innerText = "Briefing handshake failed."; }
         }
-
         async function fetchMarketIntel(country, currency) {
             const textEl = document.getElementById('market-brief-text');
             const goldEl = document.getElementById('price-gold');
             const silverEl = document.getElementById('price-silver');
-            
             if(textEl) textEl.innerHTML = '<span class="animate-pulse text-slate-500">Scanning global exchanges...</span>';
             if(goldEl) goldEl.innerText = "--";
             if(silverEl) silverEl.innerText = "--";
-
             try {
                 const prompt = `Search for current stock market indices for ${country} and current Gold (10g) and Silver (1kg) prices in ${currency || 'USD'}. 
                 Return a strict summary in this format:
-                
                 [INDICES]
                 • Index Name: Value (Change%)
                 • Index Name: Value (Change%)
-                
                 [METALS]
                 • Gold (10g): Price
                 • Silver (1kg): Price
-                
                 [BRIEF]
                 1 sentence market outlook.`;
-
                 const res = await fetch('/api/ai', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ prompt: prompt })
                 });
-                
                 const result = await res.json();
                 const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Market data unavailable.";
-                
                 if(textEl) textEl.innerText = responseText;
-
                 const goldMatch = responseText.match(/Gold.*?([\d,.]+)/);
                 const silverMatch = responseText.match(/Silver.*?([\d,.]+)/);
-                
                 if(goldEl && goldMatch) goldEl.innerText = goldMatch[1];
                 if(silverEl && silverMatch) silverEl.innerText = silverMatch[1];
-
                 window.playTacticalSound('success');
-
             } catch (e) {
                 if(textEl) textEl.innerText = "Financial uplink failed.";
             }
         }
-
         function initMap(type) {
             projectionType = type;
             const container = document.getElementById('map-container');
             const width = container.clientWidth || 800;
             const height = container.clientHeight || 500;
-
             const mapContainer = d3.select("#map-container");
             mapContainer.html(""); 
-
             svg = mapContainer.append("svg")
                 .attr("id", "world-map")
                 .attr("viewBox", `0 0 ${width} ${height}`)
                 .attr("class", "w-full h-full");
-            
             g = svg.append("g");
-
             if (type === '2d') {
                 currentProjection = d3.geoNaturalEarth1().scale(width / 6.6).translate([width / 2, height / 1.95]);
                 document.getElementById('projection-label').innerText = "Orbital Interface: 2D Active";
@@ -935,9 +825,7 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 currentProjection = d3.geoOrthographic().scale(height / 2.3).translate([width / 2, height / 2]).clipAngle(90);
                 document.getElementById('projection-label').innerText = "Orbital Interface: 3D Globe";
             }
-
             const path = d3.geoPath().projection(currentProjection);
-
             if (type === '2d') {
                 zoom = d3.zoom().scaleExtent([1, 15]).on("zoom", (e) => g.attr("transform", e.transform));
                 svg.call(zoom);
@@ -954,21 +842,17 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                     });
                 svg.call(drag);
             }
-
             d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(data => {
                 worldFeatures = topojson.feature(data, data.objects.countries).features;
-                
                 const palette = [
                     "#1d4ed8", "#2563eb", "#3b82f6", 
                     "#4f46e5", "#6366f1", "#0ea5e9", 
                     "#334155", "#475569", "#0f766e"  
                 ];
-
                 g.selectAll("path").data(worldFeatures).enter().append("path")
                     .attr("class", "country")
                     .attr("d", path)
                     .attr("fill", (d, i) => palette[i % palette.length]) 
-                    /* --- NEW: Map Tooltip Logic --- */
                     .on("mouseenter", function(e, d) { 
                         window.playTacticalSound('hover');
                         const t = document.getElementById('map-tooltip');
@@ -985,40 +869,32 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                     .on("mouseleave", function() { 
                         document.getElementById('map-tooltip').classList.add('hidden');
                     })
-                    /* ----------------------------- */
                     .on("click", function(event, d) {
                         handleCountryClick(event, d);
                     });
             });
         }
-
         async function handleCountryClick(event, d) {
             window.playTacticalSound('click');
             d3.selectAll(".country").classed("active", false);
-            
             if (d && g) {
                 g.selectAll("path").filter(p => p.properties.name === d.properties.name).classed("active", true);
             }
-            
             selectedCountry = d;
             window.switchTab('intel'); 
-            
             if (d && d.properties) {
                 document.getElementById('selected-country-name').innerText = d.properties.name;
                 iso2Code = null; 
                 fetchAllData(d.properties.name);
-                
                 if (projectionType === '2d') {
                     zoomToCountry(d); 
                 } else {
                     rotateToCountry(d);
                 }
-                
                 generateAIBriefing(d.properties.name);
                 fetchMarketIntel(d.properties.name, currencyCode);
             }
         }
-
         function rotateToCountry(d) {
             const centroid = d3.geoCentroid(d);
             d3.transition()
@@ -1031,7 +907,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                     };
                 });
         }
-
         function zoomToCountry(d) {
             const container = document.getElementById('map-container');
             const width = container.clientWidth, height = container.clientHeight;
@@ -1042,7 +917,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             const scale = Math.max(1, Math.min(8, 0.8 / Math.max(dx / width, dy / height)));
             svg.transition().duration(1000).call(zoom.transform, d3.zoomIdentity.translate(width / 2 - scale * x, height / 2 - scale * y).scale(scale));
         }
-
         async function fetchNews() {
             const container = document.getElementById('articles-container');
             const loading = document.getElementById('news-loading');
@@ -1050,18 +924,13 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             if (container) container.innerHTML = '';
             try {
                 let url = `/api/news?category=${currentCategory}&country=${iso2Code || ''}&q=${selectedCountry ? encodeURIComponent(selectedCountry.properties.name) : ''}`;
-                
                 const res = await fetch(url); const data = await res.json();
                 if (data.results && data.results.length > 0) {
                     data.results.forEach((art, i) => {
                         const card = document.createElement('div');
                         const sents = ['signal-blue', 'signal-emerald', 'signal-red'];
                         const sent = sents[i % 3];
-                        
-                        /* --- NEW: Image Logic --- */
                         const img = art.image_url ? `<div class="h-32 w-full mb-3 rounded bg-cover bg-center border border-white/10" style="background-image: url('${art.image_url}')"></div>` : '';
-                        /* ----------------------- */
-
                         card.className = `dossier-card shadow-md mb-4 ${sent}`;
                         card.onmouseenter = () => window.playTacticalSound('hover');
                         card.innerHTML = `
@@ -1076,7 +945,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 } else { if (container) container.innerHTML = `<div class="p-10 text-center text-[12px] text-slate-500 font-black italic uppercase tracking-widest">Zero news fragments in sector.</div>`; }
             } catch (e) {} finally { if (loading) loading.classList.add('hidden'); }
         }
-
         async function fetchAllData(name) {
             try {
                 const res = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fullText=true`);
@@ -1089,23 +957,18 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                     document.getElementById('fact-region').innerText = c.region || '--';
                     document.getElementById('fact-area').innerText = c.area.toLocaleString();
                     document.getElementById('fact-code').innerText = c.idd.root + (c.idd.suffixes ? c.idd.suffixes[0] : '');
-                    
                     document.getElementById('fact-demonym').innerText = c.demonyms?.eng?.m || '--';
                     document.getElementById('fact-gini').innerText = c.gini ? Object.values(c.gini)[0] : 'N/A';
                     document.getElementById('fact-drive').innerText = c.car ? c.car.side.toUpperCase() : '--';
-
                     const flagEl = document.getElementById('sector-flag');
                     const nameEl = document.getElementById('sector-name');
                     const box = document.getElementById('active-sector-display');
-                    
                     if(flagEl && nameEl && box){
                          flagEl.src = c.flags.svg;
                          nameEl.innerText = c.name.common;
                          box.classList.remove('hidden');
                     }
-
                     countryUTCOffset = c.timezones ? c.timezones[0] : "UTC+00:00";
-                    
                     if(c.latlng) {
                         fetchWeather(c.latlng[0], c.latlng[1]);
                     }
@@ -1114,7 +977,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 }
             } catch (e) { console.error("Data Fetch Error", e); }
         }
-
         async function fetchCurrency() {
             const el = document.getElementById('fact-currency');
             if (!currencyCode || currencyCode === 'USD') { if (el) el.innerText = "USD Base"; return; }
@@ -1123,35 +985,27 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 const data = await res.json(); if (el) el.innerText = `${data.rates[currencyCode].toFixed(2)} ${currencyCode}`;
             } catch (e) { if (el) el.innerText = "Offline"; }
         }
-
         async function fetchWeather(lat, lon) {
             try {
                 const wRes = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
                 const wData = await wRes.json();
-                
                 const cw = wData.current_weather;
                 const hourly = wData.hourly;
                 const nowIndex = new Date().getHours(); 
-
                 document.getElementById('weather-temp').innerText = `${Math.round(cw.temperature)}°C`;
                 document.getElementById('weather-wind').innerText = Math.round(cw.windspeed);
                 document.getElementById('weather-desc').innerText = cw.weathercode <= 3 ? "Clear Skies" : "Cloud Layer Active";
-                
                 const currentHumidity = hourly.relativehumidity_2m ? hourly.relativehumidity_2m[nowIndex] : 50;
                 document.getElementById('weather-hum').innerText = currentHumidity;
-
                 document.getElementById('weather-uv').innerText = hourly.uv_index ? (hourly.uv_index[nowIndex] || '1.1') : '--';
                 document.getElementById('weather-vis').innerText = hourly.visibility ? ((hourly.visibility[nowIndex] / 1000).toFixed(1) || '10.0') : '--';
                 document.getElementById('weather-press').innerText = hourly.surface_pressure ? (Math.round(hourly.surface_pressure[nowIndex]) || '--') : '--';
                 document.getElementById('weather-cloud').innerText = hourly.cloudcover ? (hourly.cloudcover[nowIndex] || '12') : '--';
-                
                 const dew = cw.temperature - ((100 - currentHumidity)/5); 
                 document.getElementById('weather-dew').innerText = `${Math.round(dew)}°`;
-                
                 window.playTacticalSound('success');
             } catch (e) { console.error("Weather Error", e); }
         }
-
         window.switchTab = (id) => {
             window.playTacticalSound('tab');
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -1161,37 +1015,18 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             const targetContent = document.getElementById(`tab-${id}`);
             if (targetContent) targetContent.classList.add('active');
         };
-
         window.toggleProjection = () => { window.playTacticalSound('tab'); initMap(projectionType === '2d' ? '3d' : '2d'); };
-
         window.selectFromSearch = (name) => {
-            const country = worldFeatures.find(f => {
-                const featName = f.properties.name.toLowerCase();
-                const searchName = name.toLowerCase();
-                return featName === searchName || 
-                       (featName === "united states of america" && searchName === "united states") ||
-                       (featName.includes("russia") && searchName.includes("russian"));
-            });
-
-            if (country) {
-                handleCountryClick(null, country);
-            } else {
-                fetchAllData(name);
-                document.getElementById('selected-country-name').innerText = name;
-                selectedCountry = { properties: { name: name } }; 
-                generateAIBriefing(name);
-            }
-            
+            const country = worldFeatures.find(f => f.properties.name.toLowerCase().includes(name.toLowerCase()));
+            if(country) handleCountryClick(null, country);
+            else fetchAllData(name);
             document.getElementById('search-overlay').classList.add('hidden');
-            document.getElementById('country-search').value = '';
         };
-
         window.zoomMap = (f) => {
             window.playTacticalSound('click');
             if (projectionType === '2d') svg.transition().duration(400).call(zoom.scaleBy, f);
             else { currentProjection.scale(currentProjection.scale() * f); g.selectAll("path").attr("d", d3.geoPath().projection(currentProjection)); }
         };
-
         window.resetToGlobalCenter = () => {
             selectedCountry = null; countryUTCOffset = null;
             d3.selectAll(".country").classed("active", false);
@@ -1202,12 +1037,10 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             if (projectionType === '2d') svg.transition().duration(1200).call(zoom.transform, d3.zoomIdentity);
             fetchNews();
         };
-
         window.goToIndiaHome = () => { 
             const india = worldFeatures.find(f => f.properties.name === "India"); 
             if (india) handleCountryClick(null, india); 
         };
-
         function setupEventListeners() {
             document.querySelectorAll('.category-pill').forEach(pill => {
                 pill.onmouseenter = () => window.playTacticalSound('hover');
@@ -1223,24 +1056,19 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             input.oninput = (e) => {
                 const query = e.target.value.toLowerCase().trim();
                 const resContainer = document.getElementById('search-results');
-                
                 if (!query) { 
                     renderTrending(); 
                     return; 
                 }
-                
                 if (!globalSearchData || globalSearchData.length === 0) {
                       resContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 font-bold uppercase tracking-widest animate-pulse">Initializing Search Index...</div>`;
                       return;
                 }
-                
                 const matched = globalSearchData.filter(c => c.name.common.toLowerCase().includes(query)).slice(0, 8);
-                
                 if (matched.length === 0) {
                     resContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 font-bold uppercase tracking-widest">Sector Not Found</div>`;
                     return;
                 }
-
                 resContainer.innerHTML = matched.map(c => `
                     <div class="p-4 hover:bg-blue-600/10 cursor-pointer flex items-center gap-4 border-b border-white/5 transition-all group" onclick="window.selectFromSearch('${c.name.common.replace(/'/g, "\\'")}')">
                         <div class="w-8 h-5 rounded shadow-sm overflow-hidden relative border border-white/10 group-hover:border-blue-400/50">
@@ -1259,7 +1087,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 }
             };
         }
-
         function updateSystemTime() {
             const now = new Date();
             document.getElementById('system-time').innerText = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -1276,25 +1103,19 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 document.body.classList.toggle('day-mode', !isNight);
             }
         }
-
         window.activateVoice = () => {
             window.playTacticalSound('click');
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) { alert("Voice module offline (Browser not supported)"); return; }
-
             const recognition = new SpeechRecognition();
             recognition.lang = 'en-US';
             recognition.start();
-
             const btn = document.querySelector('.fa-microphone');
             btn.classList.add('text-red-500', 'animate-pulse');
-
             recognition.onresult = (event) => {
                 const command = event.results[0][0].transcript.toLowerCase().replace('.', '');
                 console.log("Voice Command:", command);
-                
                 btn.classList.remove('text-red-500', 'animate-pulse');
-                
                 if (command.includes("go to")) {
                     const country = command.replace("go to ", "").trim();
                     window.selectFromSearch(country);
@@ -1306,16 +1127,19 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                     window.switchTab('news');
                 }
             };
-
             recognition.onerror = () => {
                 btn.classList.remove('text-red-500', 'animate-pulse');
             };
         };
-
         initTerminal();
         initMap('2d');
         setupEventListeners();
         setInterval(updateSystemTime, 1000);
+        document.addEventListener('click', function() {
+            if (!isAmbiencePlaying) {
+                toggleAmbience();
+            }
+        }, { once: true });
     </script>
 </body>
 </html>

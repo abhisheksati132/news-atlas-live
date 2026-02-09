@@ -18,272 +18,57 @@
     </script>
 
     <style>
-        :root {
-            --glass-bg: rgba(15, 23, 42, 0.96);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --accent-blue: #3b82f6;
-            --accent-emerald: #10b981;
-            --accent-red: #ef4444;
-            --solar-glow: rgba(59, 130, 246, 0.12);
-        }
-
-        body {
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #020617;
-            background-image: 
-                radial-gradient(at 0% 0%, var(--solar-glow) 0, transparent 50%), 
-                radial-gradient(at 100% 100%, rgba(30, 41, 59, 0.2) 0, transparent 50%);
-            color: #f8fafc;
-            overflow: hidden;
-            height: 100vh;
-            transition: background-image 1.2s ease-in-out;
-        }
-
-        .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(40px);
-            border: 1px solid var(--glass-border);
-            border-radius: 1.5rem;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
-        }
-
-        header {
-            height: 120px;
-            padding: 0 2.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .main-content {
-            height: calc(100vh - 170px);
-            padding: 0 2.5rem 1.5rem 2.5rem;
-            gap: 1.5rem;
-            display: flex;
-        }
-
-        .map-box {
-            position: relative;
-            flex: 1.4;
-            overflow: hidden;
-            background: rgba(2, 6, 23, 0.6);
-            border: 1px solid var(--glass-border);
-        }
-
-        .country {
-            stroke: #020617;
-            stroke-width: 0.5;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            outline: none;
-        }
-
-        .country:hover {
-            fill: #334155;
-            filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.4));
-        }
-
-        .country.active {
-            fill: var(--accent-blue);
-            stroke: #fff;
-            stroke-width: 1.5;
-            filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.6));
-        }
-
-        .intel-sidebar {
-            width: 480px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .dossier-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .dossier-card:hover {
-            background: rgba(255, 255, 255, 0.04);
-            border-color: rgba(59, 130, 246, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .weather-card {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(30, 41, 59, 0.15) 100%);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-        }
-
-        .nav-tab {
-            transition: all 0.3s ease;
-            background: rgba(30, 41, 59, 0.4);
-            border-bottom: 4px solid transparent;
-            cursor: pointer;
-            font-size: 0.7rem; 
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em; 
-            flex: 1 1 0px; 
-            width: 0;       
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1.1rem 0;
-            color: #64748b;
-            text-align: center;
-        }
-
-        .nav-tab.active {
-            color: var(--accent-blue);
-            border-bottom-color: var(--accent-blue);
-            background: rgba(59, 130, 246, 0.06);
-        }
-
-        .category-pill {
-            transition: all 0.2s ease;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            cursor: pointer;
-            font-size: 0.75rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            padding: 0.5rem 1rem;
-            border-radius: 99px;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .category-pill.active {
-            background: var(--accent-blue);
-            color: white;
-            border-color: transparent;
-        }
-
-        .tab-content { 
-            display: none; 
-            height: 100%; 
-            flex-direction: column;
-            overflow: hidden;
-        }
+        /* (Styles remain unchanged - same as provided) */
+        :root { --glass-bg: rgba(15, 23, 42, 0.96); --glass-border: rgba(255, 255, 255, 0.08); --accent-blue: #3b82f6; --accent-emerald: #10b981; --accent-red: #ef4444; --solar-glow: rgba(59, 130, 246, 0.12); }
+        body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: #020617; background-image: radial-gradient(at 0% 0%, var(--solar-glow) 0, transparent 50%), radial-gradient(at 100% 100%, rgba(30, 41, 59, 0.2) 0, transparent 50%); color: #f8fafc; overflow: hidden; height: 100vh; transition: background-image 1.2s ease-in-out; }
+        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(40px); border: 1px solid var(--glass-border); border-radius: 1.5rem; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7); }
+        header { height: 120px; padding: 0 2.5rem; display: flex; align-items: center; justify-content: space-between; }
+        .main-content { height: calc(100vh - 170px); padding: 0 2.5rem 1.5rem 2.5rem; gap: 1.5rem; display: flex; }
+        .map-box { position: relative; flex: 1.4; overflow: hidden; background: rgba(2, 6, 23, 0.6); border: 1px solid var(--glass-border); }
+        .country { stroke: #020617; stroke-width: 0.5; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; outline: none; }
+        .country:hover { fill: #334155; filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.4)); }
+        .country.active { fill: var(--accent-blue); stroke: #fff; stroke-width: 1.5; filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.6)); }
+        .intel-sidebar { width: 480px; display: flex; flex-direction: column; overflow: hidden; }
+        .dossier-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1rem; padding: 1.5rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; display: flex; flex-direction: column; }
+        .dossier-card:hover { background: rgba(255, 255, 255, 0.04); border-color: rgba(59, 130, 246, 0.4); transform: translateY(-2px); }
+        .weather-card { background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(30, 41, 59, 0.15) 100%); border: 1px solid rgba(59, 130, 246, 0.2); }
+        .nav-tab { transition: all 0.3s ease; background: rgba(30, 41, 59, 0.4); border-bottom: 4px solid transparent; cursor: pointer; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; flex: 1 1 0px; width: 0; display: flex; align-items: center; justify-content: center; padding: 1.1rem 0; color: #64748b; text-align: center; }
+        .nav-tab.active { color: var(--accent-blue); border-bottom-color: var(--accent-blue); background: rgba(59, 130, 246, 0.06); }
+        .category-pill { transition: all 0.2s ease; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); cursor: pointer; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; padding: 0.5rem 1rem; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
+        .category-pill.active { background: var(--accent-blue); color: white; border-color: transparent; }
+        .tab-content { display: none; height: 100%; flex-direction: column; overflow: hidden; }
         .tab-content.active { display: flex; }
-        
-        .content-scroll-area {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
-
-        .skeleton {
-            background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.02) 75%);
-            background-size: 200% 100%;
-            animation: skeleton-pulse 1.5s infinite linear;
-        }
-
-        @keyframes skeleton-pulse {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        .animate-marquee {
-            display: inline-block;
-            animation: marquee 40s linear infinite;
-        }
-
-        @keyframes marquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-
+        .content-scroll-area { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+        .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.02) 75%); background-size: 200% 100%; animation: skeleton-pulse 1.5s infinite linear; }
+        @keyframes skeleton-pulse { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .animate-marquee { display: inline-block; animation: marquee 40s linear infinite; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
         ::-webkit-scrollbar-track { background: transparent; }
-
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        #search-overlay, #about-overlay {
-            background: rgba(2, 6, 23, 0.98);
-            backdrop-filter: blur(24px);
-            z-index: 1000;
-        }
-
+        #search-overlay, #about-overlay { background: rgba(2, 6, 23, 0.98); backdrop-filter: blur(24px); z-index: 1000; }
         .day-mode { --solar-glow: rgba(59, 130, 246, 0.18); }
         .night-mode { --solar-glow: rgba(139, 92, 246, 0.22); }
-        
-        .tactical-btn {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .tactical-btn:hover {
-            transform: scale(1.08);
-            filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.5));
-        }
-
-        .power-readout {
-            font-size: 42px;
-            font-weight: 800;
-            line-height: 0.9;
-            letter-spacing: -0.04em;
-            display: block;
-        }
-        
+        .tactical-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .tactical-btn:hover { transform: scale(1.08); filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.5)); }
+        .power-readout { font-size: 42px; font-weight: 800; line-height: 0.9; letter-spacing: -0.04em; display: block; }
         .save-btn.saved { color: var(--accent-blue); }
-        .skill-tag {
-            background: rgba(59, 130, 246, 0.15);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            color: #60a5fa;
-            font-size: 11px;
-            font-weight: 900;
-            padding: 6px 14px;
-            border-radius: 8px;
-            text-transform: uppercase;
-            cursor: default;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+        .skill-tag { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; font-size: 11px; font-weight: 900; padding: 6px 14px; border-radius: 8px; text-transform: uppercase; cursor: default; display: flex; align-items: center; gap: 6px; }
         .skill-dot { width: 6px; height: 6px; border-radius: 50%; background: #60a5fa; box-shadow: 0 0 5px #60a5fa; }
-
         .signal-blue { border-left: 4px solid var(--accent-blue); }
         .signal-emerald { border-left: 4px solid var(--accent-emerald); }
         .signal-red { border-left: 4px solid var(--accent-red); }
-
-        .tech-line {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding: 6px 0;
-            font-family: monospace;
-            font-size: 11px;
-            color: #64748b;
-        }
+        .tech-line { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 6px 0; font-family: monospace; font-size: 11px; color: #64748b; }
         .tech-line span:last-child { color: #94a3b8; font-weight: bold; }
-        
-        @keyframes logFade {
-            0% { opacity: 0; transform: translateY(10px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes logFade { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
         .log-entry { animation: logFade 0.3s ease-out forwards; }
-
         .meter-bg { background: rgba(255,255,255,0.1); height: 4px; width: 100%; border-radius: 2px; overflow: hidden; margin-top: 6px; }
         .meter-fill { height: 100%; background: var(--accent-blue); width: 0%; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 8px var(--accent-blue); }
-        
         .scanner-container { position: relative; overflow: hidden; }
-        .scanner-line {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.8), transparent);
-            transform: translateY(-150%);
-            animation: scan 2.5s infinite linear;
-        }
+        .scanner-line { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.8), transparent); transform: translateY(-150%); animation: scan 2.5s infinite linear; }
         @keyframes scan { 0% { transform: translateY(-150%); } 100% { transform: translateY(150%); } }
-        
         .typing-cursor::after { content: '|'; animation: blink 1s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     </style>
@@ -678,8 +463,8 @@
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
          
-        const apiKey = "AIzaSyAhOk5ttee1EGgsGdqLS5cBYSOK3ykxqhQ"; 
-        const model = "gemini-2.5-flash-preview-09-2025";
+        // NOTE: Keys are removed for security (Client-side connects to backend now)
+        const apiKey = ""; 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'news-atlas-v7';
 
         let auth, db, user, selectedCountry;
@@ -849,15 +634,16 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                     appendLog(`> Processing query for sector: [${countryName.toUpperCase()}]...`, 'text-blue-400 animate-pulse');
 
                     try {
-                        const prompt = `Context: The user is looking at a dashboard for ${countryName}. 
-                        User Query: "${query}". 
-                        Task: Answer as a tactical AI computer (concise, data-driven, no fluff). 
-                        Limit response to 2 sentences.`;
-
-                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                        // SERVER-SIDE CALL
+                        const res = await fetch('/api/ai', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                            body: JSON.stringify({ 
+                                prompt: `Context: The user is looking at a dashboard for ${countryName}. 
+                                User Query: "${query}". 
+                                Task: Answer as a tactical AI computer (concise, data-driven, no fluff). 
+                                Limit response to 2 sentences.` 
+                            })
                         });
 
                         const data = await res.json();
@@ -1010,12 +796,12 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             if (box) box.classList.remove('hidden'); 
             if (text) text.innerText = "Synchronizing neural cores...";
             try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                // SERVER-SIDE CALL
+                const res = await fetch('/api/ai', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `Location: ${loc}. Provide tactical 3-sentence intel briefing. Tone: High-level tactical.` }] }],
-                        tools: [{ "google_search": {} }]
+                    body: JSON.stringify({ 
+                        prompt: `Location: ${loc}. Provide tactical 3-sentence intel briefing. Tone: High-level tactical.` 
                     })
                 });
                 const result = await res.json();
@@ -1048,13 +834,11 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 [BRIEF]
                 1 sentence market outlook.`;
 
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                // SERVER-SIDE CALL
+                const res = await fetch('/api/ai', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }],
-                        tools: [{ "google_search": {} }]
-                    })
+                    body: JSON.stringify({ prompt: prompt })
                 });
                 
                 const result = await res.json();
@@ -1082,7 +866,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             const width = container.clientWidth || 800;
             const height = container.clientHeight || 500;
 
-            // 1. CLEANUP: Wipe container to clear listeners
             const mapContainer = d3.select("#map-container");
             mapContainer.html(""); 
 
@@ -1103,12 +886,10 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
 
             const path = d3.geoPath().projection(currentProjection);
 
-            // 2. BEHAVIOR
             if (type === '2d') {
                 zoom = d3.zoom().scaleExtent([1, 15]).on("zoom", (e) => g.attr("transform", e.transform));
                 svg.call(zoom);
             } else {
-                // 3D Drag (Standard)
                 const drag = d3.drag()
                     .on("drag", (event) => {
                         const rotate = currentProjection.rotate();
@@ -1122,7 +903,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 svg.call(drag);
             }
 
-            // 3. LOAD DATA
             d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(data => {
                 worldFeatures = topojson.feature(data, data.objects.countries).features;
                 
@@ -1138,7 +918,6 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                     .attr("fill", (d, i) => palette[i % palette.length]) 
                     .on("mouseenter", () => playTacticalSound('hover'))
                     .on("click", function(event, d) {
-                        // 4. CLICK FIX: Always allow click unless strictly dragging
                         handleCountryClick(event, d);
                     });
             });
@@ -1171,10 +950,8 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             }
         }
 
-        // --- 3D ROTATION (RESTORED) ---
         function rotateToCountry(d) {
             const centroid = d3.geoCentroid(d);
-            
             d3.transition()
                 .duration(1200)
                 .tween("rotate", () => {
@@ -1203,6 +980,7 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             if (loading) loading.classList.remove('hidden'); 
             if (container) container.innerHTML = '';
             try {
+                // SERVER-SIDE CALL
                 let url = `/api/news?category=${currentCategory}&country=${iso2Code || ''}&q=${selectedCountry ? encodeURIComponent(selectedCountry.properties.name) : ''}`;
                 
                 const res = await fetch(url); const data = await res.json();
@@ -1276,7 +1054,8 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
 
         async function fetchWeather(lat, lon) {
             try {
-                const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m,visibility,surface_pressure,uv_index,cloudcover&timezone=auto`);
+                // SERVER-SIDE CALL
+                const wRes = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
                 const wData = await wRes.json();
                 
                 const cw = wData.current_weather;

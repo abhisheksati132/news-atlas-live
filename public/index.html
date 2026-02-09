@@ -474,6 +474,8 @@
         const apiKey = ""; 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'news-atlas-v7';
 
+        window.firebaseCore = { initializeApp, getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp };
+
         let auth, db, user, selectedCountry;
         let currentCategory = 'top';
         let worldFeatures = [];
@@ -520,7 +522,7 @@
             }
         };
 
-        function playTacticalSound(type) {
+        window.playTacticalSound = (type) => {
             initAudio();
             try {
                 const osc = audioCtx.createOscillator();
@@ -551,10 +553,9 @@
                 }
             } catch(e) {}
         }
-        window.playTacticalSound = playTacticalSound;
 
         window.downloadDossier = () => {
-            playTacticalSound('success');
+            window.playTacticalSound('success');
             const cName = selectedCountry ? selectedCountry.properties.name : "GLOBAL_CONTEXT";
             const date = new Date().toISOString().split('T')[0];
             const intelText = document.getElementById('ai-briefing-text') ? document.getElementById('ai-briefing-text').innerText : "No Intel Loaded";
@@ -629,7 +630,7 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                     const query = cliInput.value.trim();
                     if (!query) return;
 
-                    playTacticalSound('click');
+                    window.playTacticalSound('click');
                     appendLog(`> ${query}`, 'text-white');
                     cliInput.value = '';
 
@@ -652,7 +653,7 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                         const answer = data.candidates?.[0]?.content?.parts?.[0]?.text || "DATA CORRUPTION. RETRY.";
                         
                         appendLog(`> ${answer}`, 'text-emerald-400');
-                        playTacticalSound('success');
+                        window.playTacticalSound('success');
 
                     } catch (err) {
                         appendLog(`> ERROR: UPLINK FAILED.`, 'text-red-500');
@@ -750,7 +751,7 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
         }
 
         window.toggleAbout = (show) => {
-            playTacticalSound(show ? 'success' : 'click');
+            window.playTacticalSound(show ? 'success' : 'click');
             const overlay = document.getElementById('about-overlay');
             overlay.classList.toggle('hidden', !show);
             if(show) {
@@ -762,7 +763,7 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
         };
 
         window.toggleSearch = () => {
-            playTacticalSound('click');
+            window.playTacticalSound('click');
             const overlay = document.getElementById('search-overlay');
             overlay.classList.toggle('hidden');
             if (!overlay.classList.contains('hidden')) {
@@ -821,7 +822,7 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 });
                 const result = await res.json();
                 if (text) text.innerText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Link stable. No intel found.";
-                playTacticalSound('success');
+                window.playTacticalSound('success');
             } catch (e) { if (text) text.innerText = "Briefing handshake failed."; }
         }
 
@@ -866,7 +867,7 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 if(goldEl && goldMatch) goldEl.innerText = goldMatch[1];
                 if(silverEl && silverMatch) silverEl.innerText = silverMatch[1];
 
-                playTacticalSound('success');
+                window.playTacticalSound('success');
 
             } catch (e) {
                 if(textEl) textEl.innerText = "Financial uplink failed.";
@@ -929,7 +930,7 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                     .attr("class", "country")
                     .attr("d", path)
                     .attr("fill", (d, i) => palette[i % palette.length]) 
-                    .on("mouseenter", () => playTacticalSound('hover'))
+                    .on("mouseenter", () => window.playTacticalSound('hover'))
                     .on("click", function(event, d) {
                         handleCountryClick(event, d);
                     });
@@ -937,7 +938,7 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
         }
 
         async function handleCountryClick(event, d) {
-            playTacticalSound('click');
+            window.playTacticalSound('click');
             d3.selectAll(".country").classed("active", false);
             
             if (d && g) {
@@ -945,7 +946,7 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             }
             
             selectedCountry = d;
-            switchTab('intel'); 
+            window.switchTab('intel'); 
             
             if (d && d.properties) {
                 document.getElementById('selected-country-name').innerText = d.properties.name;
@@ -1003,7 +1004,7 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                         const sent = sents[i % 3];
                         
                         card.className = `dossier-card shadow-md mb-4 ${sent}`;
-                        card.onmouseenter = () => playTacticalSound('hover');
+                        card.onmouseenter = () => window.playTacticalSound('hover');
                         card.innerHTML = `
                             <div class="flex justify-between items-center mb-4">
                                 <div class="text-[10px] font-black text-white/70 uppercase tracking-widest bg-white/5 px-2.5 py-0.5 rounded-lg">${art.source_id || 'UPLINK'}</div>
@@ -1088,12 +1089,12 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 const dew = cw.temperature - ((100 - currentHumidity)/5); 
                 document.getElementById('weather-dew').innerText = `${Math.round(dew)}°`;
                 
-                playTacticalSound('success');
+                window.playTacticalSound('success');
             } catch (e) { console.error("Weather Error", e); }
         }
 
         window.switchTab = (id) => {
-            playTacticalSound('tab');
+            window.playTacticalSound('tab');
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             const tabBtn = Array.from(document.querySelectorAll('.nav-tab')).find(btn => btn.innerText.toLowerCase().includes(id.toLowerCase()));
@@ -1102,7 +1103,7 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             if (targetContent) targetContent.classList.add('active');
         };
 
-        window.toggleProjection = () => { playTacticalSound('tab'); initMap(projectionType === '2d' ? '3d' : '2d'); };
+        window.toggleProjection = () => { window.playTacticalSound('tab'); initMap(projectionType === '2d' ? '3d' : '2d'); };
 
         window.selectFromSearch = (name) => {
             const country = worldFeatures.find(f => {
@@ -1127,7 +1128,7 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
         };
 
         window.zoomMap = (f) => {
-            playTacticalSound('click');
+            window.playTacticalSound('click');
             if (projectionType === '2d') svg.transition().duration(400).call(zoom.scaleBy, f);
             else { currentProjection.scale(currentProjection.scale() * f); g.selectAll("path").attr("d", d3.geoPath().projection(currentProjection)); }
         };
@@ -1150,9 +1151,9 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
 
         function setupEventListeners() {
             document.querySelectorAll('.category-pill').forEach(pill => {
-                pill.onmouseenter = () => playTacticalSound('hover');
+                pill.onmouseenter = () => window.playTacticalSound('hover');
                 pill.onclick = () => {
-                    playTacticalSound('click');
+                    window.playTacticalSound('click');
                     document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
                     pill.classList.add('active');
                     currentCategory = pill.dataset.cat;
@@ -1217,8 +1218,8 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             }
         }
 
-        function activateVoice() {
-            playTacticalSound('click');
+        window.activateVoice = () => {
+            window.playTacticalSound('click');
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) { alert("Voice module offline (Browser not supported)"); return; }
 
@@ -1240,17 +1241,17 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                     window.selectFromSearch(country);
                     appendLog(`> VOICE COMMAND: VECTORING TO [${country.toUpperCase()}]`, 'text-red-400');
                 } else if (command.includes("analyze")) {
-                    switchTab('intel');
+                    window.switchTab('intel');
                     appendLog(`> VOICE COMMAND: INITIATING ANALYSIS`, 'text-red-400');
                 } else if (command.includes("news")) {
-                    switchTab('news');
+                    window.switchTab('news');
                 }
             };
 
             recognition.onerror = () => {
                 btn.classList.remove('text-red-500', 'animate-pulse');
             };
-        }
+        };
 
         initTerminal();
         initMap('2d');

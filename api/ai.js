@@ -7,10 +7,27 @@ export default async function handler(req, res) {
     if (req.method === "OPTIONS") return res.status(200).end();
 
     const apiKey = process.env.GEMINI_API_KEY;
-    const { prompt } = req.body || {};
+    if (!apiKey) {
+        console.error("CRITICAL: API Key missing in Vercel Env Variables");
+        return res.status(500).json({ error: "Server Configuration Error: Missing API Key" });
+    }
 
-    if (!apiKey) return res.status(500).json({ error: "Server Error: Missing API Key" });
-    if (!prompt) return res.status(400).json({ error: "Client Error: No prompt provided" });
+    let body = req.body;
+
+    if (typeof body === 'string') {
+        try {
+            body = JSON.parse(body);
+        } catch (e) {
+            console.error("JSON Parse Error:", e);
+            return res.status(400).json({ error: "Invalid JSON format" });
+        }
+    }
+
+    const prompt = body?.prompt;
+
+    if (!prompt) {
+        return res.status(400).json({ error: "Client Error: No prompt provided in body" });
+    }
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 

@@ -974,11 +974,23 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
         }
         async function fetchCurrency() {
             const el = document.getElementById('fact-currency');
-            if (!currencyCode || currencyCode === 'USD') { if (el) el.innerText = "USD Base"; return; }
+            if (!currencyCode || currencyCode === 'USD') { 
+                if (el) el.innerText = "1.00 USD"; 
+                return; 
+            }
             try {
-                const res = await fetch(`https://api.frankfurter.app/latest?from=USD&to=${currencyCode}`);
-                const data = await res.json(); if (el) el.innerText = `${data.rates[currencyCode].toFixed(2)} ${currencyCode}`;
-            } catch (e) { if (el) el.innerText = "Offline"; }
+                const res = await fetch(`https://open.er-api.com/v6/latest/USD`);
+                const data = await res.json();
+                if (data && data.rates && data.rates[currencyCode]) {
+                    const rate = data.rates[currencyCode];
+                    if (el) el.innerText = `${rate.toFixed(2)} ${currencyCode}`;
+                } else {
+                    if (el) el.innerText = "Data Unavailable";
+                }
+            } catch (e) { 
+                console.error("Currency Error:", e);
+                if (el) el.innerText = "Offline"; 
+            }
         }
         async function fetchWeather(lat, lon) {
             try {

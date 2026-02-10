@@ -3,5 +3,9 @@
   "version": "1.0.0",
   "engines": {
     "node": "20.x"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "node-fetch": "^3.3.2"
   }
 }

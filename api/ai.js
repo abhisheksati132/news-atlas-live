@@ -1,5 +1,16 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
 export default async function handler(req, res) {
-    const apiKey = process.env.GEMINI_API_KEY; 
+    res.setHeader("Access-Control-Allow-Credentials", true);
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS,PATCH,DELETE,POST,PUT");
+    res.setHeader("Access-Control-Allow-Headers", "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version");
+
+    if (req.method === "OPTIONS") {
+        return res.status(200).end();
+    }
 
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
@@ -7,33 +18,26 @@ export default async function handler(req, res) {
 
     const { prompt } = req.body;
 
-    if (!apiKey) {
-        console.error("API Key missing in Vercel Environment");
+    if (!process.env.GEMINI_API_KEY) {
         return res.status(500).json({ error: "Server missing API Key" });
     }
 
     try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
         
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
-            })
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+
+        res.status(200).json({
+            candidates: [{
+                content: {
+                    parts: [{ text: text }]
+                }
+            }]
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error("Google API Error:", JSON.stringify(errorData));
-            return res.status(response.status).json({ error: "Google API Error", details: errorData });
-        }
-
-        const data = await response.json();
-        res.status(200).json(data);
-
     } catch (error) {
-        console.error("Server processing error:", error);
-        res.status(500).json({ error: "AI Processing Failed" });
+        res.status(500).json({ error: "AI Processing Failed", details: error.message });
     }
 }

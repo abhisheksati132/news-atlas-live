@@ -107,7 +107,9 @@
             gap: 1.5rem; 
         }
         @media(min-width: 768px) { #articles-container { grid-template-columns: repeat(2, 1fr); } }
-        @media(min-width: 1200px) { #articles-container { grid-template-columns: repeat(3, 1fr); } }
+        @media(min-width: 1024px) { #articles-container { grid-template-columns: repeat(3, 1fr); } }
+        @media(min-width: 1600px) { #articles-container { grid-template-columns: repeat(4, 1fr); } }
+        @media(min-width: 2000px) { #articles-container { grid-template-columns: repeat(5, 1fr); } }
 
         .country { stroke: #020617; stroke-width: 0.5; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; outline: none; }
         .country:hover { fill: #334155; filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.4)); }
@@ -115,10 +117,58 @@
         .dossier-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1rem; padding: 1.5rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; display: flex; flex-direction: column; }
         .dossier-card:hover { background: rgba(255, 255, 255, 0.04); border-color: rgba(59, 130, 246, 0.4); transform: translateY(-2px); }
         .weather-card { background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(30, 41, 59, 0.15) 100%); border: 1px solid rgba(59, 130, 246, 0.2); }
-        .nav-tab { transition: all 0.3s ease; background: rgba(30, 41, 59, 0.4); border-bottom: 4px solid transparent; cursor: pointer; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; flex: 1 1 0px; width: 0; display: flex; align-items: center; justify-content: center; padding: 1.5rem 0; color: #64748b; text-align: center; } 
-        .nav-tab.active { color: var(--accent-blue); border-bottom-color: var(--accent-blue); background: rgba(59, 130, 246, 0.06); }
-        .category-pill { transition: all 0.2s ease; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); cursor: pointer; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; padding: 0.5rem 1rem; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
-        .category-pill.active { background: var(--accent-blue); color: white; border-color: transparent; }
+        
+        /* --- UPGRADED NAV TABS --- */
+        .nav-tab { 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            background: rgba(30, 41, 59, 0.4); 
+            border-bottom: 4px solid transparent; 
+            cursor: pointer; 
+            font-size: 14px; /* Increased Size */
+            font-weight: 900; /* Extra Bold */
+            text-transform: uppercase; 
+            letter-spacing: 0.15em; /* Wider Spacing */
+            flex: 1 1 0px; 
+            width: 0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 1.8rem 0; 
+            color: #64748b; 
+            text-align: center; 
+        } 
+        
+        .nav-tab:hover {
+            color: #f8fafc;
+            background: rgba(59, 130, 246, 0.1);
+            text-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+        }
+
+        .nav-tab.active { 
+            color: var(--accent-blue); 
+            border-bottom-color: var(--accent-blue); 
+            background: rgba(59, 130, 246, 0.06); 
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        /* --- PLAIN TEXT CATEGORY TABS --- */
+        .intel-tab {
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #64748b;
+            padding: 0.75rem 0;
+            margin-right: 2rem;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            position: relative;
+        }
+        .intel-tab:hover { color: #e2e8f0; text-shadow: 0 0 12px rgba(255,255,255,0.4); }
+        .intel-tab.active { color: #3b82f6; text-shadow: 0 0 15px rgba(59, 130, 246, 0.6); }
+        .intel-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: #3b82f6; box-shadow: 0 0 10px #3b82f6; }
+
         .tab-content { display: none; height: 100%; flex-direction: column; overflow: visible; }
         .tab-content.active { display: flex; }
         .content-scroll-area { flex: 1; overflow-y: visible; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
@@ -398,116 +448,306 @@
                         </div>
                     </div>
                 </div>
+                
                 <div id="tab-news" class="tab-content">
                     <div class="px-8 py-5 flex flex-col gap-4 border-b border-white/5 bg-white/5">
-                        <h2 class="text-[12px] font-black text-white uppercase tracking-[0.3em]">Signal Intelligence</h2>
-                        <div class="flex gap-2.5 overflow-x-auto no-scrollbar p-2 w-full">
-                            <div class="category-pill active" onclick="playTacticalSound('click')" data-cat="top">Trending</div>
-                            <div class="category-pill" onclick="playTacticalSound('click')" data-cat="politics">Political</div>
-                            <div class="category-pill" onclick="playTacticalSound('click')" data-cat="technology">Tech</div>
-                            <div class="category-pill" onclick="playTacticalSound('click')" data-cat="sports">Sports</div>
+                        <div class="flex justify-between items-end">
+                            <h2 class="text-[12px] font-black text-white uppercase tracking-[0.3em]">Signal Intelligence</h2>
+                            <span class="text-[9px] text-slate-500 uppercase font-bold tracking-widest"><span id="news-count">0</span> FRAGMENTS INTERCEPTED</span>
+                        </div>
+                        <div class="flex gap-2 overflow-x-auto no-scrollbar w-full items-center">
+                            <div class="intel-tab active" onclick="window.setCategory(this, 'top')">Headlines</div>
+                            <div class="intel-tab" onclick="window.setCategory(this, 'politics')">Politics</div>
+                            <div class="intel-tab" onclick="window.setCategory(this, 'business')">Business</div>
+                            <div class="intel-tab" onclick="window.setCategory(this, 'technology')">Tech</div>
+                            <div class="intel-tab" onclick="window.setCategory(this, 'science')">Science</div>
+                            <div class="intel-tab" onclick="window.setCategory(this, 'health')">Health</div>
+                            <div class="intel-tab" onclick="window.setCategory(this, 'sports')">Sports</div>
+                            <div class="intel-tab" onclick="window.setCategory(this, 'entertainment')">Entmt</div>
+                            <div class="intel-tab" onclick="window.setCategory(this, 'environment')">Eco</div>
+                            <div class="intel-tab" onclick="window.setCategory(this, 'crypto')">Crypto</div>
                             <div class="w-12 shrink-0"></div>
                         </div>
                     </div>
                     <div class="content-scroll-area">
-                        <div id="news-loading" class="hidden"><div class="dossier-card h-40 skeleton mb-4"></div><div class="dossier-card h-40 skeleton"></div></div>
-                        <div id="articles-container" class="space-y-6"></div>
+                        <div id="news-loading" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="dossier-card h-48 skeleton"></div>
+                            <div class="dossier-card h-48 skeleton"></div>
+                            <div class="dossier-card h-48 skeleton"></div>
+                            <div class="dossier-card h-48 skeleton"></div>
+                        </div>
+                        <div id="articles-container"></div>
                     </div>
                 </div>
+
                 <div id="tab-atmosphere" class="tab-content">
-                    <div class="content-scroll-area">
-                        <h2 class="text-[12px] font-black text-white uppercase tracking-[0.3em] mb-2">Climatic Payload</h2>
-                        <div class="weather-card rounded-2xl p-8 shadow-2xl bg-gradient-to-br from-blue-600/10 to-transparent border border-white/10 dossier-card mb-4">
-                            <div class="flex justify-between items-start">
-                                <div class="flex-1">
-                                    <div id="weather-temp" class="text-[72px] font-black text-white tabular-nums tracking-tighter leading-none power-readout">--°C</div>
-                                    <div id="weather-desc" class="text-[16px] font-bold text-blue-400 uppercase tracking-[0.2em] mt-3 leading-none">Link Active</div>
+                    <div class="content-scroll-area space-y-6">
+                        <div class="flex flex-col md:flex-row gap-6">
+                            <div class="flex-1 dossier-card relative overflow-hidden group">
+                                <div class="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
+                                    <i id="atmo-main-icon" class="fas fa-cloud-sun text-9xl text-blue-500"></i>
                                 </div>
-                                <div id="weather-icon" class="text-7xl text-slate-500 opacity-60"><i class="fas fa-cloud-sun"></i></div>
+                                <div class="relative z-10 flex flex-col h-full justify-between">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                                            <span class="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Live Telemetry</span>
+                                        </div>
+                                        <div id="atmo-temp" class="text-[80px] font-black text-white leading-none tracking-tighter">-°</div>
+                                        <div id="atmo-condition" class="text-xl text-blue-400 font-bold uppercase tracking-widest mt-2">--</div>
+                                    </div>
+                                    <div class="flex gap-6 mt-6 pt-6 border-t border-white/5">
+                                        <div class="flex flex-col">
+                                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Feels Like</span>
+                                            <span id="atmo-feels" class="text-lg font-mono font-bold text-white">--°</span>
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Low / High</span>
+                                            <span id="atmo-hl" class="text-lg font-mono font-bold text-white">-- / --</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="grid grid-cols-2 gap-6 mt-10 pt-8 border-t border-white/10">
-                                <div class="flex flex-col"><span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-2 leading-none">Wind Velocity</span><span class="text-3xl font-black text-white leading-none"><span id="weather-wind">--</span> <small class="text-[12px] text-slate-500 uppercase">KM/H</small></span></div>
-                                <div class="flex flex-col"><span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-2 leading-none">Humidity</span><span class="text-3xl font-black text-white leading-none"><span id="weather-hum">--</span> <small class="text-[12px] text-slate-500 uppercase">%</small></span></div>
+                            <div class="md:w-1/3 dossier-card bg-gradient-to-br from-amber-500/[0.05] to-transparent border-amber-500/20 flex flex-col justify-between">
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="text-[10px] text-amber-500 font-bold uppercase tracking-widest">Solar Cycle</span>
+                                    <i class="fas fa-sun text-amber-500 text-xl"></i>
+                                </div>
+                                <div class="relative h-24 w-full flex items-end px-2">
+                                    <div class="absolute inset-x-0 bottom-0 h-px bg-white/10"></div>
+                                    <svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+                                        <path d="M0,100 Q50,20 100,100" fill="none" stroke="rgba(245, 158, 11, 0.3)" stroke-width="2" vector-effect="non-scaling-stroke"/>
+                                        <circle cx="50%" cy="50%" r="4" class="fill-amber-500 animate-pulse" />
+                                    </svg>
+                                    <div class="w-full flex justify-between text-[10px] font-mono text-slate-400 pb-1 z-10">
+                                        <span id="atmo-sunrise">--:--</span>
+                                        <span id="atmo-sunset">--:--</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="dossier-card border-white/10 bg-white/[0.01] grid grid-cols-2 gap-x-4 gap-y-4 py-6 px-7 mb-4">
-                            <div class="flex flex-col">
-                                <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 block leading-none">UV Index</span>
-                                <div id="weather-uv" class="text-[28px] font-black text-white tabular-nums leading-none power-readout">--</div>
+                        <div class="dossier-card p-0 overflow-hidden">
+                            <div class="px-5 py-3 border-b border-white/5 bg-white/[0.02]">
+                                <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">24-Hour Projection</span>
                             </div>
-                            <div class="flex flex-col">
-                                <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 block leading-none">Cloud Cover</span>
-                                <div id="weather-cloud" class="text-[28px] font-black text-white tabular-nums leading-none power-readout">-- <small class="text-[12px] text-slate-600">%</small></div>
+                            <div id="atmo-hourly-container" class="flex overflow-x-auto p-5 gap-6 no-scrollbar"></div>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="dossier-card flex flex-col items-center justify-center relative p-6">
+                                <span class="absolute top-4 left-4 text-[9px] text-slate-500 font-bold uppercase tracking-widest">Wind Vector</span>
+                                <div class="relative w-20 h-20 flex items-center justify-center my-2">
+                                    <div class="absolute inset-0 border-2 border-dashed border-white/10 rounded-full"></div>
+                                    <div class="absolute top-0 text-[8px] text-slate-500 font-bold">N</div>
+                                    <div class="absolute bottom-0 text-[8px] text-slate-500 font-bold">S</div>
+                                    <div class="absolute right-0 text-[8px] text-slate-500 font-bold">E</div>
+                                    <div class="absolute left-0 text-[8px] text-slate-500 font-bold">W</div>
+                                    <i id="atmo-wind-arrow" class="fas fa-long-arrow-alt-up text-3xl text-blue-400 transition-transform duration-1000"></i>
+                                </div>
+                                <div class="text-center">
+                                    <div id="atmo-wind-speed" class="text-2xl font-black text-white">--</div>
+                                    <div class="text-[9px] text-slate-500 uppercase">KM/H</div>
+                                </div>
                             </div>
-                             <div class="col-span-2 pt-3 border-t border-white/5 flex justify-between items-center">
-                                <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest leading-none">Surface Pressure</span>
-                                <div id="weather-press" class="text-[28px] font-black text-white tabular-nums leading-none power-readout">-- <small class="text-[12px] text-slate-600">HPA</small></div>
+                            <div class="dossier-card flex flex-col p-6">
+                                <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-4">UV Index</span>
+                                <div class="flex-1 flex flex-col justify-end">
+                                    <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden mb-2">
+                                        <div id="atmo-uv-bar" class="h-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500 w-0 transition-all duration-1000"></div>
+                                    </div>
+                                    <div class="flex justify-between items-end">
+                                        <span id="atmo-uv-val" class="text-2xl font-black text-white leading-none">--</span>
+                                        <span id="atmo-uv-text" class="text-[9px] text-slate-400 font-bold uppercase">--</span>
+                                    </div>
+                                </div>
                             </div>
-                             <div class="col-span-2 pt-3 border-t border-white/5 flex justify-between items-center">
-                                <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest leading-none">Visibility</span>
-                                <div id="weather-vis" class="text-[28px] font-black text-white tabular-nums leading-none power-readout">-- <small class="text-[12px] text-slate-600">KM</small></div>
+                            <div class="dossier-card flex flex-col p-6">
+                                <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-4">Humidity</span>
+                                <div class="flex items-center gap-4 h-full">
+                                    <i class="fas fa-tint text-2xl text-blue-500 opacity-80"></i>
+                                    <div>
+                                        <div id="atmo-humidity" class="text-2xl font-black text-white leading-none">--%</div>
+                                        <div class="text-[9px] text-slate-500 mt-1">Dew Point: <span id="atmo-dew" class="text-white">--°</span></div>
+                                    </div>
+                                </div>
                             </div>
-                             <div class="col-span-2 pt-3 border-t border-white/5 flex justify-between items-center">
-                                <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest leading-none">Dew Point</span>
-                                <div id="weather-dew" class="text-[28px] font-black text-white tabular-nums leading-none power-readout">--°</div>
+                            <div class="dossier-card flex flex-col p-6">
+                                <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-4">Visibility</span>
+                                <div class="flex-1 flex flex-col justify-center gap-1">
+                                    <div class="h-1 w-full bg-blue-500/20 rounded-full"></div>
+                                    <div class="h-1 w-3/4 bg-blue-500/40 rounded-full"></div>
+                                    <div class="h-1 w-1/2 bg-blue-500/60 rounded-full"></div>
+                                </div>
+                                <div class="mt-2 text-right">
+                                    <span id="atmo-visibility" class="text-2xl font-black text-white leading-none">--</span>
+                                    <span class="text-[9px] text-slate-500">KM</span>
+                                </div>
                             </div>
+                             <div class="dossier-card flex flex-col p-6">
+                                <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-2">Pressure</span>
+                                <div class="flex items-end justify-between mt-auto">
+                                    <div>
+                                        <div id="atmo-pressure" class="text-2xl font-black text-white leading-none">--</div>
+                                        <div class="text-[9px] text-slate-500 mt-1">HPA</div>
+                                    </div>
+                                    <i class="fas fa-tachometer-alt text-2xl text-slate-600"></i>
+                                </div>
+                            </div>
+                             <div class="dossier-card flex flex-col p-6 border-indigo-500/20 bg-indigo-500/[0.03]">
+                                <span class="text-[9px] text-indigo-400 font-bold uppercase tracking-widest mb-2">Lunar Phase</span>
+                                <div class="mt-auto flex items-center gap-3">
+                                    <i id="atmo-moon-icon" class="fas fa-moon text-2xl text-indigo-300"></i>
+                                    <span id="atmo-moon-text" class="text-[10px] font-bold text-white uppercase leading-tight">--</span>
+                                </div>
+                            </div>
+                            <div class="dossier-card flex flex-col p-6 bg-slate-800/[0.2] border-slate-700/30">
+                                <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-2">Cloud Ceiling</span>
+                                <div class="mt-auto flex items-end justify-between">
+                                    <div>
+                                        <div id="atmo-cloud-base" class="text-2xl font-black text-white leading-none">--</div>
+                                        <div class="text-[9px] text-slate-500 mt-1">KM</div>
+                                    </div>
+                                    <i class="fas fa-cloud-upload-alt text-2xl text-slate-500"></i>
+                                </div>
+                            </div>
+                            <div class="dossier-card flex flex-col p-6 bg-blue-900/[0.1] border-blue-800/30">
+                                <span class="text-[9px] text-blue-400 font-bold uppercase tracking-widest mb-2">24h Precip</span>
+                                <div class="mt-auto flex items-end justify-between">
+                                    <div>
+                                        <div id="atmo-precip-total" class="text-2xl font-black text-white leading-none">--</div>
+                                        <div class="text-[9px] text-slate-500 mt-1">MM</div>
+                                    </div>
+                                    <i class="fas fa-cloud-showers-heavy text-2xl text-blue-500"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dossier-card p-0">
+                            <div class="px-6 py-4 border-b border-white/5 flex justify-between items-center">
+                                <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">7-Day Tactical Outlook</span>
+                                <i class="fas fa-calendar-alt text-slate-600"></i>
+                            </div>
+                            <div id="atmo-daily-container" class="divide-y divide-white/5"></div>
                         </div>
                     </div>
                 </div>
                 <div id="tab-economic" class="tab-content">
-                    <div class="content-scroll-area">
-                        <h2 class="text-[12px] font-black text-white uppercase tracking-[0.3em] mb-2">Market Telemetry</h2>
-                        <div class="dossier-card bg-emerald-500/[0.05] border-emerald-500/20 py-7 px-8 mb-4">
-                            <span class="text-[10px] text-emerald-500 uppercase font-black tracking-widest block mb-2 leading-none">Exchange (1.00 USD)</span>
-                            <div id="fact-currency" class="power-readout text-white tabular-nums tracking-tight">--</div>
-                        </div>
-                        <div class="dossier-card py-5 px-7 space-y-4 mb-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 block leading-none">Sovereign Region</span>
-                                    <div id="fact-region" class="text-[24px] font-black text-white leading-none power-readout">--</div>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 block leading-none">Dial Code</span>
-                                    <div id="fact-code" class="text-[24px] font-black text-blue-400 leading-none power-readout">--</div>
-                                </div>
-                            </div>
-                            <div class="pt-4 border-t border-white/5 flex justify-between">
-                                 <div>
-                                    <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-2 block leading-none">Land Area</span>
-                                    <div id="fact-area" class="text-[22px] font-black text-white leading-none tracking-tight power-readout">-- <small class="text-[10px] text-slate-600 font-bold uppercase">KM²</small></div>
-                                </div>
-                                 <div class="text-right">
-                                    <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 block leading-none">Gini</span>
-                                    <div id="fact-gini" class="text-[22px] font-black text-white leading-none tracking-tight power-readout">--</div>
+                    <div class="content-scroll-area space-y-6">
+                        <div class="flex flex-col md:flex-row gap-6">
+                            <div class="flex-1 dossier-card bg-gradient-to-br from-emerald-500/[0.05] to-transparent border-emerald-500/20 relative overflow-hidden group">
+                                <div class="absolute -right-4 -top-4 text-emerald-500/10 text-9xl"><i class="fas fa-coins"></i></div>
+                                <div class="relative z-10">
+                                    <span class="text-[10px] text-emerald-500 font-bold uppercase tracking-widest flex items-center gap-2">
+                                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Gross Domestic Product
+                                    </span>
+                                    <div class="mt-2 flex items-baseline gap-2">
+                                        <span class="text-[14px] text-slate-400 font-bold">$</span>
+                                        <span id="eco-gdp" class="text-5xl font-black text-white tracking-tighter">--</span>
+                                        <span class="text-[14px] text-slate-400 font-bold">BN</span>
+                                    </div>
+                                    <div class="mt-4 pt-4 border-t border-white/5 flex gap-8">
+                                        <div>
+                                            <span class="block text-[9px] text-slate-500 font-bold uppercase tracking-widest">Growth Rate</span>
+                                            <span id="eco-growth" class="text-lg font-mono font-bold text-emerald-400">--%</span>
+                                        </div>
+                                        <div>
+                                            <span class="block text-[9px] text-slate-500 font-bold uppercase tracking-widest">Per Capita</span>
+                                            <span id="eco-capita" class="text-lg font-mono font-bold text-white">$--</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="pt-4 border-t border-white/5 flex justify-between">
-                                 <div>
-                                    <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-2 block leading-none">Demonym</span>
-                                    <div id="fact-demonym" class="text-[18px] font-black text-white leading-none tracking-tight power-readout">--</div>
+                            <div class="md:w-1/3 dossier-card flex flex-col justify-between relative overflow-hidden">
+                                <div class="absolute inset-0 bg-blue-500/5 skew-y-12 transform origin-bottom-left scale-150"></div>
+                                <div class="relative z-10 flex justify-between items-start">
+                                    <div>
+                                        <span class="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Forex Uplink</span>
+                                        <div id="eco-currency-code" class="text-3xl font-black text-white mt-1">USD</div>
+                                    </div>
+                                    <i class="fas fa-exchange-alt text-2xl text-blue-500/50"></i>
                                 </div>
-                                 <div class="text-right">
-                                    <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 block leading-none">Driving Side</span>
-                                    <div id="fact-drive" class="text-[18px] font-black text-white leading-none tracking-tight power-readout">--</div>
+                                <div class="relative z-10 mt-auto">
+                                    <div class="flex items-end justify-between">
+                                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">1.00 USD =</span>
+                                    </div>
+                                    <div id="eco-rate" class="text-4xl font-mono font-bold text-white tracking-tighter">--</div>
+                                    <div class="w-full bg-white/10 h-1 mt-2 rounded-full overflow-hidden">
+                                        <div class="h-full bg-blue-500 w-1/2 animate-pulse"></div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="dossier-card py-6 px-7 mb-4">
-                            <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest block mb-2 leading-none">Total Population</span>
-                            <div id="fact-pop" class="power-readout text-white tabular-nums tracking-tight">--</div>
-                        </div>
-                        <div class="dossier-card flex justify-between items-center py-6 px-8 border-blue-500/10">
-                            <div class="flex items-center gap-4">
-                                <span class="text-[11px] text-slate-500 uppercase font-black tracking-widest leading-none">Regional Capital</span>
-                                <div id="fact-cap" class="text-[24px] font-black text-white leading-none tracking-tight">--</div>
                             </div>
                         </div>
-                        <div class="dossier-card border-blue-500/10 bg-white/[0.01] flex justify-between items-center py-6 px-7 mt-auto">
-                            <div class="flex items-center gap-4">
-                                <span class="text-[10px] text-slate-500 uppercase font-black tracking-widest leading-none">Terminal Sync</span>
-                                <div id="local-time" class="text-[24px] font-black text-blue-400 tabular-nums leading-none power-readout">00:00:00</div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="dossier-card p-5 hover:bg-white/5 transition-colors">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Inflation (CPI)</span>
+                                    <i class="fas fa-percentage text-slate-600"></i>
+                                </div>
+                                <div id="eco-inflation" class="text-2xl font-black text-white">--%</div>
+                                <div class="text-[9px] text-slate-500 mt-1">YoY Change</div>
                             </div>
+                            <div class="dossier-card p-5 hover:bg-white/5 transition-colors">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Unemployment</span>
+                                    <i class="fas fa-user-tie text-slate-600"></i>
+                                </div>
+                                <div id="eco-unemployment" class="text-2xl font-black text-white">--%</div>
+                                <div class="text-[9px] text-slate-500 mt-1">Labor Force</div>
+                            </div>
+                            <div class="dossier-card p-5 hover:bg-white/5 transition-colors">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Central Bank Rate</span>
+                                    <i class="fas fa-university text-slate-600"></i>
+                                </div>
+                                <div id="eco-interest" class="text-2xl font-black text-white">--%</div>
+                                <div class="text-[9px] text-slate-500 mt-1">Monetary Policy</div>
+                            </div>
+                            <div class="dossier-card p-5 hover:bg-white/5 transition-colors">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Govt Debt</span>
+                                    <i class="fas fa-balance-scale text-slate-600"></i>
+                                </div>
+                                <div id="eco-debt" class="text-2xl font-black text-white">--%</div>
+                                <div class="text-[9px] text-slate-500 mt-1">of GDP</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="dossier-card p-0">
+                                <div class="px-5 py-3 border-b border-white/5 bg-white/[0.02] flex justify-between items-center">
+                                    <span class="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Major Exports</span>
+                                    <i class="fas fa-ship text-slate-600"></i>
+                                </div>
+                                <div id="eco-exports" class="p-5 space-y-3">
+                                    <div class="h-4 bg-white/10 rounded w-3/4 animate-pulse"></div>
+                                    <div class="h-4 bg-white/10 rounded w-1/2 animate-pulse"></div>
+                                </div>
+                            </div>
+                            <div class="dossier-card p-0">
+                                <div class="px-5 py-3 border-b border-white/5 bg-white/[0.02] flex justify-between items-center">
+                                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Sovereign Data</span>
+                                    <i class="fas fa-globe text-slate-600"></i>
+                                </div>
+                                <div class="p-5 grid grid-cols-2 gap-y-4 gap-x-2">
+                                    <div>
+                                        <span class="text-[9px] text-slate-500 uppercase font-bold block">Population</span>
+                                        <span id="fact-pop-2" class="text-sm font-mono font-bold text-white">--</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-[9px] text-slate-500 uppercase font-bold block">Gini Index</span>
+                                        <span id="fact-gini-2" class="text-sm font-mono font-bold text-white">--</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-[9px] text-slate-500 uppercase font-bold block">Demonym</span>
+                                        <span id="fact-demonym-2" class="text-sm font-mono font-bold text-white">--</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-[9px] text-slate-500 uppercase font-bold block">Area</span>
+                                        <span id="fact-area-2" class="text-sm font-mono font-bold text-white">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dossier-card border-white/10 bg-black/40 p-4 font-mono text-xs">
+                            <span class="text-blue-500 font-bold mr-2">>> MARKET_FEED:</span>
+                            <span id="eco-market-ticker" class="text-slate-300 typing-cursor">Initializing Global Financial Uplink...</span>
                         </div>
                     </div>
                 </div>
@@ -630,8 +870,8 @@ Gold: ${document.getElementById('price-gold').innerText}
 Silver: ${document.getElementById('price-silver').innerText}
 
 [ATMOSPHERIC CONDITIONS]
-Temp: ${document.getElementById('weather-temp').innerText}
-Wind: ${document.getElementById('weather-wind').innerText} KM/H
+Temp: ${document.getElementById('atmo-temp').innerText}
+Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
 
 -- END OF TRANSMISSION --
             `;
@@ -855,6 +1095,69 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 window.playTacticalSound('success');
             } catch (e) { if (text) text.innerText = "Briefing handshake failed."; }
         }
+        async function fetchDetailedEconomics(country) {
+            document.getElementById('eco-gdp').innerText = "--";
+            document.getElementById('eco-growth').innerText = "--%";
+            document.getElementById('eco-inflation').innerText = "--%";
+            document.getElementById('eco-unemployment').innerText = "--%";
+            document.getElementById('eco-exports').innerHTML = '<div class="h-4 bg-white/10 rounded w-3/4 animate-pulse"></div>';
+            
+            try {
+                const prompt = `
+                    Analyze the economy of ${country}. 
+                    Return ONLY a valid JSON object with these keys (use 'N/A' if unknown, estimate if necessary based on 2024/2025 data):
+                    {
+                        "gdp_billions": "number only",
+                        "gdp_growth_percent": "number only",
+                        "gdp_per_capita": "number only",
+                        "inflation_rate": "number only",
+                        "unemployment_rate": "number only",
+                        "interest_rate": "number only",
+                        "debt_to_gdp": "number only",
+                        "major_exports": ["item1", "item2", "item3"],
+                        "market_summary": "1 short sentence on current market status"
+                    }
+                    Do not add markdown formatting. Just the raw JSON string.
+                `;
+
+                const res = await fetch('/api/ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+                
+                const data = await res.json();
+                let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+                const eco = JSON.parse(text);
+
+                if(eco.gdp_billions) document.getElementById('eco-gdp').innerText = eco.gdp_billions;
+                if(eco.gdp_growth_percent) document.getElementById('eco-growth').innerText = (eco.gdp_growth_percent > 0 ? '+' : '') + eco.gdp_growth_percent + '%';
+                if(eco.gdp_per_capita) document.getElementById('eco-capita').innerText = '$' + eco.gdp_per_capita;
+                
+                if(eco.inflation_rate) document.getElementById('eco-inflation').innerText = eco.inflation_rate + '%';
+                if(eco.unemployment_rate) document.getElementById('eco-unemployment').innerText = eco.unemployment_rate + '%';
+                if(eco.interest_rate) document.getElementById('eco-interest').innerText = eco.interest_rate + '%';
+                if(eco.debt_to_gdp) document.getElementById('eco-debt').innerText = eco.debt_to_gdp + '%';
+
+                if(eco.major_exports && Array.isArray(eco.major_exports)) {
+                    document.getElementById('eco-exports').innerHTML = eco.major_exports.map(item => 
+                        `<div class="flex items-center gap-2"><div class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div><span class="text-sm text-slate-300 font-bold uppercase">${item}</span></div>`
+                    ).join('');
+                }
+
+                if(eco.market_summary) {
+                    const ticker = document.getElementById('eco-market-ticker');
+                    ticker.innerText = eco.market_summary.toUpperCase();
+                }
+
+                window.playTacticalSound('success');
+
+            } catch(e) {
+                console.error("Eco Intel Error", e);
+                document.getElementById('eco-market-ticker').innerText = "ECONOMIC DATALINK SEVERED. RETRYING...";
+            }
+        }
         async function fetchMarketIntel(country, currency) {
             const textEl = document.getElementById('market-brief-text');
             const goldEl = document.getElementById('price-gold');
@@ -1027,6 +1330,10 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             try {
                 let url = `/api/news?category=${currentCategory}&country=${iso2Code || ''}&q=${selectedCountry ? encodeURIComponent(selectedCountry.properties.name) : ''}`;
                 const res = await fetch(url); const data = await res.json();
+                
+                // Update total count if available
+                if(data.totalResults) document.getElementById('news-count').innerText = data.totalResults;
+
                 if (data.results && data.results.length > 0) {
                     data.results.forEach((art, i) => {
                         const card = document.createElement('div');
@@ -1037,16 +1344,23 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                         card.onmouseenter = () => window.playTacticalSound('hover');
                         card.innerHTML = `
                             <div class="flex justify-between items-center mb-4">
-                                <div class="text-[10px] font-black text-white/70 uppercase tracking-widest bg-white/5 px-2.5 py-0.5 rounded-lg">${art.source_id || 'UPLINK'}</div>
+                                <div class="text-[10px] font-black text-white/70 uppercase tracking-widest bg-white/5 px-2.5 py-0.5 rounded-lg truncate max-w-[100px]">${art.source_id || 'UPLINK'}</div>
                                 <button class="text-slate-400 hover:text-white transition-all tactical-btn"><i class="fas fa-link text-[13px]"></i></button>
                             </div>
-                            ${img} <h3 class="font-bold text-[19px] text-white leading-tight mb-3 cursor-pointer hover:text-blue-300 transition-colors pr-4" onclick="window.open('${art.link}', '_blank')">${art.title}</h3>
+                            ${img} <h3 class="font-bold text-[16px] text-white leading-tight mb-3 cursor-pointer hover:text-blue-300 transition-colors pr-4" onclick="window.open('${art.link}', '_blank')">${art.title}</h3>
                         `;
                         container.appendChild(card);
                     });
-                } else { if (container) container.innerHTML = `<div class="p-10 text-center text-[12px] text-slate-500 font-black italic uppercase tracking-widest">Zero news fragments in sector.</div>`; }
+                } else { if (container) container.innerHTML = `<div class="col-span-full p-10 text-center text-[12px] text-slate-500 font-black italic uppercase tracking-widest">Zero news fragments in sector.</div>`; }
             } catch (e) {} finally { if (loading) loading.classList.add('hidden'); }
         }
+        window.setCategory = (el, cat) => {
+            window.playTacticalSound('click');
+            document.querySelectorAll('.intel-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            currentCategory = cat;
+            fetchNews();
+        };
         async function fetchAllData(name) {
             try {
                 const res = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fullText=true`);
@@ -1074,51 +1388,200 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                     if(c.latlng) {
                         fetchWeather(c.latlng[0], c.latlng[1]);
                     }
+                    
+                    document.getElementById('fact-pop-2').innerText = (c.population / 1000000).toFixed(1) + 'M';
+                    document.getElementById('fact-gini-2').innerText = c.gini ? Object.values(c.gini)[0] : 'N/A';
+                    document.getElementById('fact-demonym-2').innerText = c.demonyms?.eng?.m || '--';
+                    document.getElementById('fact-area-2').innerText = c.area.toLocaleString() + ' km²';
+
                     fetchCurrency(); 
+                    fetchDetailedEconomics(c.name.common); 
                     fetchNews();
                 }
             } catch (e) { console.error("Data Fetch Error", e); }
         }
         async function fetchCurrency() {
             const el = document.getElementById('fact-currency');
+            const elCode = document.getElementById('eco-currency-code');
+            const elRate = document.getElementById('eco-rate');
+            
             if (!currencyCode || currencyCode === 'USD') { 
-                if (el) el.innerText = "1.00 USD"; 
+                if (el) el.innerText = "1.00 USD";
+                if (elCode) elCode.innerText = "USD"; 
+                if (elRate) elRate.innerText = "1.00";  
                 return; 
             }
+            if(elCode) elCode.innerText = currencyCode;
+            if(elRate) elRate.innerText = "Scanning...";
+
             try {
                 const res = await fetch(`https://open.er-api.com/v6/latest/USD`);
                 const data = await res.json();
                 if (data && data.rates && data.rates[currencyCode]) {
                     const rate = data.rates[currencyCode];
                     if (el) el.innerText = `${rate.toFixed(2)} ${currencyCode}`;
+                    if (elRate) elRate.innerText = rate.toFixed(2);
                 } else {
                     if (el) el.innerText = "Data Unavailable";
+                    if (elRate) elRate.innerText = "---";
                 }
             } catch (e) { 
                 console.error("Currency Error:", e);
                 if (el) el.innerText = "Offline"; 
+                if (elRate) elRate.innerText = "ERR"; 
             }
         }
+        function getWeatherMeta(code, isDay = 1) {
+            const timeClass = isDay ? 'text-amber-400' : 'text-blue-300';
+            const codes = {
+                0: { text: "Clear Sky", icon: isDay ? "fa-sun" : "fa-moon", color: timeClass },
+                1: { text: "Mainly Clear", icon: isDay ? "fa-cloud-sun" : "fa-cloud-moon", color: "text-blue-200" },
+                2: { text: "Partly Cloudy", icon: "fa-cloud", color: "text-slate-300" },
+                3: { text: "Overcast", icon: "fa-cloud", color: "text-slate-400" },
+                45: { text: "Fog", icon: "fa-smog", color: "text-slate-400" },
+                48: { text: "Depositing Rime Fog", icon: "fa-smog", color: "text-slate-400" },
+                51: { text: "Light Drizzle", icon: "fa-cloud-rain", color: "text-blue-400" },
+                53: { text: "Moderate Drizzle", icon: "fa-cloud-rain", color: "text-blue-400" },
+                55: { text: "Dense Drizzle", icon: "fa-cloud-showers-heavy", color: "text-blue-400" },
+                61: { text: "Slight Rain", icon: "fa-cloud-rain", color: "text-blue-500" },
+                63: { text: "Moderate Rain", icon: "fa-cloud-showers-heavy", color: "text-blue-500" },
+                65: { text: "Heavy Rain", icon: "fa-cloud-showers-water", color: "text-blue-600" },
+                71: { text: "Slight Snow", icon: "fa-snowflake", color: "text-white" },
+                73: { text: "Moderate Snow", icon: "fa-snowflake", color: "text-white" },
+                75: { text: "Heavy Snow", icon: "fa-snowflake", color: "text-white" },
+                95: { text: "Thunderstorm", icon: "fa-bolt", color: "text-yellow-400" },
+                96: { text: "Thunderstorm/Hail", icon: "fa-poo-storm", color: "text-yellow-400" }
+            };
+            return codes[code] || { text: "Unknown", icon: "fa-meteor", color: "text-slate-500" };
+        }
+        function getMoonPhase() {
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            let c = 0, e = 0, jd = 0, b = 0;
+            if (month < 3) { year--; month += 12; }
+            ++month;
+            c = 365.25 * year;
+            e = 30.6 * month;
+            jd = c + e + day - 694039.09; 
+            jd /= 29.5305882; 
+            b = parseInt(jd); 
+            jd -= b; 
+            b = Math.round(jd * 8); 
+            if (b >= 8 ) b = 0; 
+            const phases = [
+                {t: "New Moon", i: "fa-circle"},
+                {t: "Waxing Crescent", i: "fa-moon"},
+                {t: "First Quarter", i: "fa-adjust"},
+                {t: "Waxing Gibbous", i: "fa-moon"}, 
+                {t: "Full Moon", i: "fa-circle text-white"},
+                {t: "Waning Gibbous", i: "fa-moon"},
+                {t: "Last Quarter", i: "fa-adjust"},
+                {t: "Waning Crescent", i: "fa-moon"}
+            ];
+            return phases[b];
+        }
         async function fetchWeather(lat, lon) {
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,cloud_base_agl&hourly=temperature_2m,weather_code,visibility,uv_index,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum&timezone=auto`;
             try {
-                const wRes = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
-                const wData = await wRes.json();
-                const cw = wData.current_weather;
-                const hourly = wData.hourly;
-                const nowIndex = new Date().getHours(); 
-                document.getElementById('weather-temp').innerText = `${Math.round(cw.temperature)}°C`;
-                document.getElementById('weather-wind').innerText = Math.round(cw.windspeed);
-                document.getElementById('weather-desc').innerText = cw.weathercode <= 3 ? "Clear Skies" : "Cloud Layer Active";
-                const currentHumidity = hourly.relativehumidity_2m ? hourly.relativehumidity_2m[nowIndex] : 50;
-                document.getElementById('weather-hum').innerText = currentHumidity;
-                document.getElementById('weather-uv').innerText = hourly.uv_index ? (hourly.uv_index[nowIndex] || '1.1') : '--';
-                document.getElementById('weather-vis').innerText = hourly.visibility ? ((hourly.visibility[nowIndex] / 1000).toFixed(1) || '10.0') : '--';
-                document.getElementById('weather-press').innerText = hourly.surface_pressure ? (Math.round(hourly.surface_pressure[nowIndex]) || '--') : '--';
-                document.getElementById('weather-cloud').innerText = hourly.cloudcover ? (hourly.cloudcover[nowIndex] || '12') : '--';
-                const dew = cw.temperature - ((100 - currentHumidity)/5); 
-                document.getElementById('weather-dew').innerText = `${Math.round(dew)}°`;
+                const res = await fetch(url);
+                const data = await res.json();
+                const curr = data.current;
+                const meta = getWeatherMeta(curr.weather_code, curr.is_day);
+                const todayHigh = data.daily.temperature_2m_max[0];
+                const todayLow = data.daily.temperature_2m_min[0];
+                document.getElementById('atmo-temp').innerText = `${Math.round(curr.temperature_2m)}°`;
+                document.getElementById('atmo-condition').innerText = meta.text;
+                document.getElementById('atmo-main-icon').className = `fas ${meta.icon} text-9xl ${meta.color} opacity-80`;
+                document.getElementById('atmo-feels').innerText = `${Math.round(curr.apparent_temperature)}°`;
+                document.getElementById('atmo-hl').innerText = `${Math.round(todayLow)}° / ${Math.round(todayHigh)}°`;
+                const sunrise = new Date(data.daily.sunrise[0]).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
+                const sunset = new Date(data.daily.sunset[0]).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
+                document.getElementById('atmo-sunrise').innerText = sunrise;
+                document.getElementById('atmo-sunset').innerText = sunset;
+                const hourlyContainer = document.getElementById('atmo-hourly-container');
+                hourlyContainer.innerHTML = '';
+                const currentHour = new Date().getHours();
+                for(let i = currentHour; i < currentHour + 24; i++) {
+                    if (!data.hourly.time[i]) break;
+                    const timeStr = new Date(data.hourly.time[i]).toLocaleTimeString([], {hour: 'numeric', hour12: true}).replace(' ', '');
+                    const hTemp = Math.round(data.hourly.temperature_2m[i]);
+                    const hCode = data.hourly.weather_code[i];
+                    const hIsDay = (i % 24) > 6 && (i % 24) < 18 ? 1 : 0; 
+                    const hMeta = getWeatherMeta(hCode, hIsDay);
+                    const hRain = data.hourly.precipitation_probability[i];
+                    const hDiv = document.createElement('div');
+                    hDiv.className = "flex flex-col items-center gap-2 min-w-[3.5rem] p-2 rounded-xl hover:bg-white/5 transition-colors cursor-default border border-transparent hover:border-white/5";
+                    hDiv.innerHTML = `
+                        <span class="text-[10px] text-slate-400 font-bold tracking-tight">${i === currentHour ? 'Now' : timeStr}</span>
+                        <i class="fas ${hMeta.icon} text-lg ${hMeta.color}"></i>
+                        <span class="text-[12px] font-bold text-white">${hTemp}°</span>
+                        ${hRain > 20 ? `<span class="text-[9px] text-blue-400 font-bold">${hRain}%</span>` : ''}
+                    `;
+                    hourlyContainer.appendChild(hDiv);
+                }
+                document.getElementById('atmo-wind-speed').innerText = Math.round(curr.wind_speed_10m);
+                document.getElementById('atmo-wind-arrow').style.transform = `rotate(${curr.wind_direction_10m}deg)`;
+                const uvMax = data.daily.uv_index_max[0];
+                const uvPercent = Math.min((uvMax / 11) * 100, 100);
+                document.getElementById('atmo-uv-val').innerText = uvMax;
+                document.getElementById('atmo-uv-bar').style.width = `${uvPercent}%`;
+                let uvText = "Low";
+                if(uvMax > 2) uvText = "Moderate";
+                if(uvMax > 5) uvText = "High";
+                if(uvMax > 7) uvText = "Very High";
+                if(uvMax > 10) uvText = "Extreme";
+                document.getElementById('atmo-uv-text').innerText = uvText;
+                document.getElementById('atmo-humidity').innerText = `${curr.relative_humidity_2m}%`;
+                const dewCalc = curr.temperature_2m - ((100 - curr.relative_humidity_2m)/5);
+                document.getElementById('atmo-dew').innerText = `${Math.round(dewCalc)}°`;
+                const visKm = data.hourly.visibility[currentHour] / 1000;
+                document.getElementById('atmo-visibility').innerText = visKm.toFixed(1);
+                document.getElementById('atmo-pressure').innerText = Math.round(curr.pressure_msl || curr.surface_pressure);
+                const moon = getMoonPhase();
+                document.getElementById('atmo-moon-text').innerText = moon.t;
+                document.getElementById('atmo-moon-icon').className = `fas ${moon.i} text-2xl text-indigo-300`;
+                
+                const cloudBase = curr.cloud_base_agl || 0;
+                const precipTotal = data.daily.precipitation_sum ? data.daily.precipitation_sum[0] : 0;
+                
+                document.getElementById('atmo-cloud-base').innerText = (cloudBase / 1000).toFixed(1);
+                document.getElementById('atmo-precip-total').innerText = precipTotal.toFixed(1);
+
+                const dailyContainer = document.getElementById('atmo-daily-container');
+                dailyContainer.innerHTML = '';
+                for(let i = 1; i < 7; i++) { 
+                    if(!data.daily.time[i]) break;
+                    const dateObj = new Date(data.daily.time[i]);
+                    const dayName = dateObj.toLocaleDateString('en-US', {weekday: 'long'});
+                    const dMax = Math.round(data.daily.temperature_2m_max[i]);
+                    const dMin = Math.round(data.daily.temperature_2m_min[i]);
+                    const dCode = data.daily.weather_code[i];
+                    const dMeta = getWeatherMeta(dCode, 1);
+                    const dPrecipSum = data.daily.precipitation_sum[i];
+                    const dRow = document.createElement('div');
+                    dRow.className = "px-6 py-3 flex items-center justify-between hover:bg-white/5 transition-colors group";
+                    dRow.innerHTML = `
+                        <span class="text-[12px] text-slate-300 font-bold w-24">${dayName}</span>
+                        <div class="flex items-center gap-3 w-32">
+                             <i class="fas ${dMeta.icon} ${dMeta.color} w-6 text-center"></i>
+                             <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider group-hover:text-blue-400 transition-colors">${dMeta.text}</span>
+                        </div>
+                        <div class="flex items-center gap-4 text-right flex-1 justify-end">
+                            ${dPrecipSum > 0 ? `<div class="flex items-center gap-1 text-[10px] text-blue-400 font-bold"><i class="fas fa-umbrella"></i> ${Math.round(dPrecipSum)}mm</div>` : ''}
+                            <div class="font-mono text-xs font-bold text-white">
+                                <span class="text-slate-500">${dMin}°</span> / ${dMax}°
+                            </div>
+                        </div>
+                    `;
+                    dailyContainer.appendChild(dRow);
+                }
                 window.playTacticalSound('success');
-            } catch (e) { console.error("Weather Error", e); }
+            } catch (e) {
+                console.error("Advanced Atmosphere Error:", e);
+                document.getElementById('atmo-condition').innerText = "Data Uplink Failed";
+            }
         }
         window.switchTab = (id) => {
             window.playTacticalSound('tab');

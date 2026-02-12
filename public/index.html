@@ -23,25 +23,105 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         :root { --glass-bg: rgba(15, 23, 42, 0.96); --glass-border: rgba(255, 255, 255, 0.08); --accent-blue: #3b82f6; --accent-emerald: #10b981; --accent-red: #ef4444; --solar-glow: rgba(59, 130, 246, 0.12); }
-        body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: #020617; background-image: radial-gradient(at 0% 0%, var(--solar-glow) 0, transparent 50%), radial-gradient(at 100% 100%, rgba(30, 41, 59, 0.2) 0, transparent 50%); color: #f8fafc; overflow: hidden; height: 100vh; width: 100vw; transition: background-image 1.2s ease-in-out; }
+        
+        body { 
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #020617; 
+            background-image: radial-gradient(at 0% 0%, var(--solar-glow) 0, transparent 50%), radial-gradient(at 100% 100%, rgba(30, 41, 59, 0.2) 0, transparent 50%); 
+            color: #f8fafc; 
+            overflow-x: hidden; 
+            overflow-y: auto; 
+            width: 100vw; 
+            transition: background-image 1.2s ease-in-out; 
+        }
+
         .glass-panel { background: var(--glass-bg); backdrop-filter: blur(40px); border: 1px solid var(--glass-border); border-radius: 1.5rem; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7); }
-        header { height: 120px; padding: 0 2.5rem; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-        .main-content { height: calc(100vh - 170px); padding: 0 2.5rem 1.5rem 2.5rem; gap: 1.5rem; display: flex; width: 100%; }
-        .map-box { position: relative; flex: 1.4; min-width: 0; overflow: hidden; background: rgba(2, 6, 23, 0.6); border: 1px solid var(--glass-border); }
-        .intel-sidebar { width: 480px; display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0; }
+        
+        header { 
+            height: 120px; 
+            padding: 0 2.5rem; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            flex-shrink: 0;
+            position: fixed; 
+            top: 0; 
+            width: 100%; 
+            z-index: 50; 
+            background: rgba(2, 6, 23, 0.95); 
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .main-content { 
+            margin-top: 120px; 
+            padding: 0 2.5rem 2.5rem 2.5rem; 
+            gap: 2.5rem; 
+            display: flex; 
+            flex-direction: column; 
+            width: 100%; 
+        }
+
+        .map-box { 
+            position: relative; 
+            width: 100%; 
+            height: 85vh; 
+            min-height: 600px; 
+            overflow: hidden; 
+            background: rgba(2, 6, 23, 0.6); 
+            border: 1px solid var(--glass-border); 
+            border-radius: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-interaction-overlay {
+            position: absolute; 
+            inset: 0; 
+            z-index: 20;
+            background: rgba(2, 6, 23, 0.3);
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            transition: all 0.3s ease; 
+            cursor: pointer;
+            backdrop-filter: blur(1px);
+        }
+        
+        .map-interaction-overlay.active { 
+            opacity: 0; 
+            pointer-events: none; 
+        }
+
+        .intel-sidebar { 
+            width: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: visible; 
+            flex-shrink: 0; 
+            min-height: 100vh;
+        }
+
+        #articles-container { 
+            display: grid; 
+            grid-template-columns: repeat(1, 1fr); 
+            gap: 1.5rem; 
+        }
+        @media(min-width: 768px) { #articles-container { grid-template-columns: repeat(2, 1fr); } }
+        @media(min-width: 1200px) { #articles-container { grid-template-columns: repeat(3, 1fr); } }
+
         .country { stroke: #020617; stroke-width: 0.5; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; outline: none; }
         .country:hover { fill: #334155; filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.4)); }
         .country.active { fill: var(--accent-blue); stroke: #fff; stroke-width: 1.5; filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.6)); }
         .dossier-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1rem; padding: 1.5rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; display: flex; flex-direction: column; }
         .dossier-card:hover { background: rgba(255, 255, 255, 0.04); border-color: rgba(59, 130, 246, 0.4); transform: translateY(-2px); }
         .weather-card { background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(30, 41, 59, 0.15) 100%); border: 1px solid rgba(59, 130, 246, 0.2); }
-        .nav-tab { transition: all 0.3s ease; background: rgba(30, 41, 59, 0.4); border-bottom: 4px solid transparent; cursor: pointer; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; flex: 1 1 0px; width: 0; display: flex; align-items: center; justify-content: center; padding: 1.1rem 0; color: #64748b; text-align: center; }
+        .nav-tab { transition: all 0.3s ease; background: rgba(30, 41, 59, 0.4); border-bottom: 4px solid transparent; cursor: pointer; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; flex: 1 1 0px; width: 0; display: flex; align-items: center; justify-content: center; padding: 1.5rem 0; color: #64748b; text-align: center; } 
         .nav-tab.active { color: var(--accent-blue); border-bottom-color: var(--accent-blue); background: rgba(59, 130, 246, 0.06); }
         .category-pill { transition: all 0.2s ease; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); cursor: pointer; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; padding: 0.5rem 1rem; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
         .category-pill.active { background: var(--accent-blue); color: white; border-color: transparent; }
-        .tab-content { display: none; height: 100%; flex-direction: column; overflow: hidden; }
+        .tab-content { display: none; height: 100%; flex-direction: column; overflow: visible; }
         .tab-content.active { display: flex; }
-        .content-scroll-area { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+        .content-scroll-area { flex: 1; overflow-y: visible; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
         .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.02) 75%); background-size: 200% 100%; animation: skeleton-pulse 1.5s infinite linear; }
         @keyframes skeleton-pulse { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         .animate-marquee { display: inline-block; animation: marquee 40s linear infinite; }
@@ -243,9 +323,9 @@
             <span class="tracking-[0.15em] uppercase">India Base</span>
         </button>
     </header>
-    <main class="flex-1 main-content">
-        <div class="map-box glass-panel flex flex-col overflow-hidden">
-            <div class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5">
+    <main class="main-content">
+        <div class="map-box glass-panel overflow-hidden" onmouseleave="deactivateMapInteraction()"> 
+            <div class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5 flex-shrink-0">
                 <div class="flex items-center gap-4">
                     <span id="projection-label" class="text-[14px] font-black text-slate-200 uppercase tracking-widest">Orbital Interface: 2D Active</span>
                     <div id="active-sector-display" class="hidden flex items-center gap-4 bg-blue-500/10 border border-blue-500/20 px-4 py-1.5 rounded-lg animate-in fade-in zoom-in duration-300">
@@ -261,6 +341,11 @@
             </div>
             <div id="map-container" class="flex-1 relative w-full h-full">
                 <svg id="world-map" class="w-full h-full"></svg>
+                <div id="map-overlay-guard" class="map-interaction-overlay" onclick="activateMapInteraction()">
+                    <div class="bg-black/60 border border-blue-500/30 text-blue-400 px-6 py-3 rounded-full font-bold uppercase tracking-widest text-xs flex items-center gap-3 backdrop-blur-md shadow-2xl transition-transform hover:scale-105 group">
+                        <i class="fas fa-mouse-pointer group-hover:animate-bounce"></i> Click to Interact
+                    </div>
+                </div>
             </div>
         </div>
         <div id="sidebar" class="intel-sidebar glass-panel">
@@ -465,8 +550,10 @@
                 ambienceOscillators.forEach(osc => osc.stop());
                 ambienceOscillators = [];
                 isAmbiencePlaying = false;
-                document.getElementById('ambience-text').innerText = "OFF";
-                document.getElementById('ambience-text').classList.remove('text-blue-400');
+                if(document.getElementById('ambience-text')) {
+                    document.getElementById('ambience-text').innerText = "OFF";
+                    document.getElementById('ambience-text').classList.remove('text-blue-400');
+                }
             } else {
                 ambienceGain = audioCtx.createGain();
                 ambienceGain.gain.value = 0.05; 
@@ -481,8 +568,10 @@
                     ambienceOscillators.push(osc);
                 });
                 isAmbiencePlaying = true;
-                document.getElementById('ambience-text').innerText = "ON";
-                document.getElementById('ambience-text').classList.add('text-blue-400');
+                if(document.getElementById('ambience-text')) {
+                    document.getElementById('ambience-text').innerText = "ON";
+                    document.getElementById('ambience-text').classList.add('text-blue-400');
+                }
             }
         };
         window.playTacticalSound = (type) => {
@@ -801,20 +890,35 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 if(textEl) textEl.innerText = "Financial uplink failed.";
             }
         }
+        window.activateMapInteraction = () => {
+            const overlay = document.getElementById('map-overlay-guard');
+            if(overlay) {
+                overlay.classList.add('active');
+                window.playTacticalSound('click');
+            }
+        };
+
+        window.deactivateMapInteraction = () => {
+            const overlay = document.getElementById('map-overlay-guard');
+            if(overlay) {
+                overlay.classList.remove('active');
+            }
+        };
         function initMap(type) {
             projectionType = type;
             const container = document.getElementById('map-container');
             const width = container.clientWidth || 800;
             const height = container.clientHeight || 500;
+            if (width < 50 || height < 50) { setTimeout(() => initMap(type), 300); return; }
             const mapContainer = d3.select("#map-container");
-            mapContainer.html(""); 
-            svg = mapContainer.append("svg")
+            mapContainer.select("svg").remove(); 
+            svg = mapContainer.insert("svg", ":first-child") 
                 .attr("id", "world-map")
                 .attr("viewBox", `0 0 ${width} ${height}`)
                 .attr("class", "w-full h-full");
             g = svg.append("g");
             if (type === '2d') {
-                currentProjection = d3.geoNaturalEarth1().scale(width / 6.6).translate([width / 2, height / 1.95]);
+                currentProjection = d3.geoNaturalEarth1().scale(width / 9).translate([width / 2, height / 2]); 
                 document.getElementById('projection-label').innerText = "Orbital Interface: 2D Active";
             } else {
                 currentProjection = d3.geoOrthographic().scale(height / 2.3).translate([width / 2, height / 2]).clipAngle(90);
@@ -877,6 +981,9 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
             }
             selectedCountry = d;
             window.switchTab('intel'); 
+            
+            document.getElementById('sidebar').scrollIntoView({ behavior: 'smooth' });
+
             if (d && d.properties) {
                 document.getElementById('selected-country-name').innerText = d.properties.name;
                 iso2Code = null; 
@@ -1147,6 +1254,13 @@ Wind: ${document.getElementById('weather-wind').innerText} KM/H
                 toggleAmbience();
             }
         }, { once: true });
+        window.addEventListener('resize', () => {
+            const c = document.getElementById('map-container');
+            if(c) { 
+                d3.select("#world-map").attr("viewBox", `0 0 ${c.clientWidth} ${c.clientHeight}`);
+                initMap(projectionType); 
+            }
+        });
     </script>
 </body>
 </html>

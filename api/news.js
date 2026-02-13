@@ -5,13 +5,13 @@ export default async function handler(req, res) {
     const params = new URLSearchParams({
         apikey: apiKey,
         language: 'en',
-        size: '50',
-        removeduplicate: '1
+        size: '10',
+        removeduplicate: '1'
     });
 
     if (category && category !== 'top') params.append('category', category);
     if (country) params.append('country', country);
-    if (q) params.append('q', q);
+    if (q && q !== 'undefined' && q !== 'null') params.append('q', q);
 
     const externalUrl = `https://newsdata.io/api/1/latest?${params.toString()}`;
 

@@ -101,15 +101,15 @@
             min-height: 100vh;
         }
 
-        /* --- UPDATED GRID FOR 5 COLUMNS --- */
+        /* --- UPDATED GRID FOR 4 COLUMNS --- */
         #articles-container { 
             display: grid; 
             grid-template-columns: repeat(1, 1fr); 
             gap: 1.5rem; 
         }
         @media(min-width: 768px) { #articles-container { grid-template-columns: repeat(2, 1fr); } }
-        /* CHANGED: Forces 5 columns on desktop screens (1024px+) */
-        @media(min-width: 1024px) { #articles-container { grid-template-columns: repeat(5, 1fr); } }
+        /* CHANGED: Forces 4 columns on desktop screens (1024px+) per request */
+        @media(min-width: 1024px) { #articles-container { grid-template-columns: repeat(4, 1fr); } }
 
         .country { stroke: #020617; stroke-width: 0.5; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; outline: none; }
         .country:hover { fill: #334155; filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.4)); }
@@ -1031,9 +1031,11 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                 document.getElementById('neural-id').innerText = "LOCAL MODE (OFFLINE)";
             }
             try {
-                const res = await fetch('https://restcountries.com/v3.1/all?fields=name,flags,cca2,latlng,currencies,population,capital');
+                const res = await fetch('https://restcountries.com/v3.1/all?fields=name,flags,cca2,latlng,currencies,population,capital,capitalInfo');
                 globalSearchData = await res.json();
             } catch(e) {}
+            // Initialize with India coordinates as default to prevent offline mode on start
+            fetchWeather(20.5937, 78.9629);
             fetchNews();
         }
         window.toggleAbout = (show) => {
@@ -1399,8 +1401,18 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                         box.classList.remove('hidden');
                     }
                     countryUTCOffset = c.timezones ? c.timezones[0] : "UTC+00:00";
-                    if(c.latlng) {
-                        fetchWeather(c.latlng[0], c.latlng[1]);
+                    
+                    // FIXED: Check for latlng first, fallback to Capital Info if available
+                    let lat = 0, lon = 0;
+                    if(c.latlng && c.latlng.length === 2) {
+                        [lat, lon] = c.latlng;
+                    } else if (c.capitalInfo && c.capitalInfo.latlng && c.capitalInfo.latlng.length === 2) {
+                        [lat, lon] = c.capitalInfo.latlng;
+                    }
+
+                    // Only call weather if we have valid coordinates
+                    if (lat || lon) {
+                        fetchWeather(lat, lon);
                     }
                     
                     document.getElementById('fact-pop-2').innerText = (c.population / 1000000).toFixed(1) + 'M';
@@ -1497,12 +1509,28 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
             return phases[b];
         }
         async function fetchWeather(lat, lon) {
-            // FIXED: Use direct API call to Open-Meteo instead of internal /api/weather
-            // This URL includes all needed variables for the dashboard
-            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,cloud_base_agl&hourly=temperature_2m,weather_code,visibility,uv_index,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum&timezone=auto`;
+            
+            // ERROR PREVENTION: Ensure we have valid numbers before fetching
+            if (isNaN(lat) || isNaN(lon)) {
+                console.error("Invalid coordinates passed to weather module.");
+                return; 
+            }
+
+            // --- FULLY INTEGRATED WEATHER LOGIC (REPLACING WEATHER.JS) ---
+            const params = new URLSearchParams({
+                latitude: lat,
+                longitude: lon,
+                current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,cloud_base_agl',
+                hourly: 'temperature_2m,weather_code,visibility,uv_index,precipitation_probability',
+                daily: 'weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum',
+                timezone: 'auto'
+            });
+
+            const url = `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+            
             try {
                 const res = await fetch(url);
-                if (!res.ok) throw new Error('Weather fetch failed: ' + res.status);
+                if (!res.ok) throw new Error('Weather fetch failed');
                 const data = await res.json();
                 
                 const curr = data.current;
@@ -1598,7 +1626,7 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                 window.playTacticalSound('success');
             } catch (e) {
                 console.error("Advanced Atmosphere Error:", e);
-                // Added visual feedback for user if weather fails
+                // Added a RETRY button directly in the UI if it fails
                 document.getElementById('atmo-condition').innerHTML = `<span class="text-red-500 text-sm">OFFLINE <button onclick="window.location.reload()" class="underline ml-2">RETRY</button></span>`;
             }
         }

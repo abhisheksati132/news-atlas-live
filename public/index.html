@@ -108,7 +108,7 @@
             gap: 1.5rem; 
         }
         @media(min-width: 768px) { #articles-container { grid-template-columns: repeat(2, 1fr); } }
-        /* CHANGED: Forces 4 columns on desktop screens (1024px+) per request */
+        /* FIXED: Now specifically 4 columns for desktop */
         @media(min-width: 1024px) { #articles-container { grid-template-columns: repeat(4, 1fr); } }
 
         .country { stroke: #020617; stroke-width: 0.5; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; outline: none; }
@@ -1402,7 +1402,7 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                     }
                     countryUTCOffset = c.timezones ? c.timezones[0] : "UTC+00:00";
                     
-                    // FIXED: Check for latlng first, fallback to Capital Info if available
+                    // ERROR FIX: Check latlng first, fallback to Capital Info
                     let lat = 0, lon = 0;
                     if(c.latlng && c.latlng.length === 2) {
                         [lat, lon] = c.latlng;
@@ -1410,7 +1410,6 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                         [lat, lon] = c.capitalInfo.latlng;
                     }
 
-                    // Only call weather if we have valid coordinates
                     if (lat || lon) {
                         fetchWeather(lat, lon);
                     }
@@ -1526,6 +1525,7 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                 timezone: 'auto'
             });
 
+            // Using Direct Client-Side Fetch to avoid 400 Bad Request
             const url = `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
             
             try {

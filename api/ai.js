@@ -28,20 +28,7 @@ export default async function handler(req, res) {
     const returnSimulation = () => {
         let responseText = "";
 
-        if (prompt.includes("briefing") || prompt.includes("tactical") || prompt.includes("intel")) {
-            responseText = "SECURE LINK ESTABLISHED. LIVE FEED OFFLINE. SWITCHING TO CACHED INTELLIGENCE. REGIONAL STABILITY: MODERATE. SECTOR ANALYSIS: ONGOING. WEATHER SYSTEMS NOMINAL.";
-        } 
-        else if (prompt.includes("stock market") || prompt.includes("indices") || prompt.includes("market")) {
-            responseText = `[INDICES]
-• S&P 500: 5,200.00 (+0.5%)
-• NASDAQ: 16,400.00 (+0.8%)
-[METALS]
-• Gold (10g): 2,340.50
-• Silver (1kg): 28.15
-[BRIEF]
-Market volatility detected; tech sector rallying despite geopolitical tension.`;
-        } 
-        else {
+        if (prompt.includes("economy") || prompt.includes("json")) {
             const jsonResponse = {
                 gdp_billions: "2900",
                 gdp_growth_percent: "2.1",
@@ -54,6 +41,24 @@ Market volatility detected; tech sector rallying despite geopolitical tension.`;
                 market_summary: "VOLATILITY DETECTED. ASSETS STABLE."
             };
             responseText = JSON.stringify(jsonResponse);
+        }
+
+        else if (prompt.includes("briefing") || prompt.includes("tactical") || prompt.includes("intel")) {
+            responseText = "SECURE LINK ESTABLISHED. LIVE FEED OFFLINE. SWITCHING TO CACHED INTELLIGENCE. REGIONAL STABILITY: MODERATE. SECTOR ANALYSIS: ONGOING. WEATHER SYSTEMS NOMINAL.";
+        } 
+
+        else if (prompt.includes("stock market") || prompt.includes("indices") || prompt.includes("market")) {
+            responseText = `[INDICES]
+• S&P 500: 5,200.00 (+0.5%)
+• NASDAQ: 16,400.00 (+0.8%)
+[METALS]
+• Gold (10g): 2,340.50
+• Silver (1kg): 28.15
+[BRIEF]
+Market volatility detected; tech sector rallying despite geopolitical tension.`;
+        } 
+        else {
+            responseText = "SYSTEM READY. AWAITING COMMAND.";
         }
 
         return res.status(200).json({

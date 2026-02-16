@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 
 export default async function handler(req, res) {
+
     res.setHeader("Access-Control-Allow-Credentials", true);
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS,PATCH,DELETE,POST,PUT");
@@ -8,13 +9,7 @@ export default async function handler(req, res) {
 
     if (req.method === "OPTIONS") return res.status(200).end();
 
-    const keys = [
-        process.env.GEMINI_API_KEY,
-        process.env.GEMINI_API_KEY_2,
-        process.env.GEMINI_API_KEY_3,
-        process.env.GEMINI_API_KEY_4,
-        process.env.GEMINI_API_KEY_5
-    ].filter(k => k);
+    const apiKey = process.env.GROQ_API_KEY;
 
     let body = req.body;
     try {
@@ -27,8 +22,18 @@ export default async function handler(req, res) {
 
     const returnSimulation = () => {
         let responseText = "";
-
-        if (prompt.includes("economy") || prompt.includes("json")) {
+        if (prompt.includes("briefing") || prompt.includes("tactical") || prompt.includes("intel")) {
+            responseText = "SECURE LINK ESTABLISHED. LIVE FEED OFFLINE (MISSING API KEY). SWITCHING TO CACHED INTELLIGENCE. REGIONAL STABILITY: MODERATE. SECTOR ANALYSIS: ONGOING.";
+        } else if (prompt.includes("stock market") || prompt.includes("indices") || prompt.includes("market")) {
+            responseText = `[INDICES]
+• S&P 500: 5,200.00 (+0.5%)
+• NASDAQ: 16,400.00 (+0.8%)
+[METALS]
+• Gold (10g): 2,340.50
+• Silver (1kg): 28.15
+[BRIEF]
+Market volatility detected; tech sector rallying despite geopolitical tension.`;
+        } else {
             const jsonResponse = {
                 gdp_billions: "2900",
                 gdp_growth_percent: "2.1",
@@ -42,57 +47,59 @@ export default async function handler(req, res) {
             };
             responseText = JSON.stringify(jsonResponse);
         }
-
-        else if (prompt.includes("briefing") || prompt.includes("tactical") || prompt.includes("intel")) {
-            responseText = "SECURE LINK ESTABLISHED. LIVE FEED OFFLINE. SWITCHING TO CACHED INTELLIGENCE. REGIONAL STABILITY: MODERATE. SECTOR ANALYSIS: ONGOING. WEATHER SYSTEMS NOMINAL.";
-        } 
-
-        else if (prompt.includes("stock market") || prompt.includes("indices") || prompt.includes("market")) {
-            responseText = `[INDICES]
-• S&P 500: 5,200.00 (+0.5%)
-• NASDAQ: 16,400.00 (+0.8%)
-[METALS]
-• Gold (10g): 2,340.50
-• Silver (1kg): 28.15
-[BRIEF]
-Market volatility detected; tech sector rallying despite geopolitical tension.`;
-        } 
-        else {
-            responseText = "SYSTEM READY. AWAITING COMMAND.";
-        }
-
         return res.status(200).json({
-            candidates: [{
-                content: { parts: [{ text: responseText }] }
-            }]
+            candidates: [{ content: { parts: [{ text: responseText }] } }]
         });
     };
 
-    if (keys.length === 0) {
+    if (!apiKey) {
+        console.warn("GROQ_API_KEY is missing in Vercel Environment Variables");
         return returnSimulation();
     }
 
-    const apiKey = keys[Math.floor(Math.random() * keys.length)];
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const url = "https://api.groq.com/openai/v1/chat/completions";
+
+    let systemInstruction = "You are a tactical military intelligence interface. Be concise, professional, and data-driven.";
+    
+    if (prompt.includes("json") || prompt.includes("economy")) {
+        systemInstruction += " You MUST return ONLY valid JSON. Do not use Markdown code blocks.";
+    }
 
     try {
         const response = await fetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: body.prompt }] }]
+                model: "llama-3.3-70b-versatile",
+                messages: [
+                    { role: "system", content: systemInstruction },
+                    { role: "user", content: body.prompt }
+                ],
+                temperature: 0.5,
+                max_tokens: 500
             })
         });
 
         const data = await response.json();
 
         if (data.error) {
-            return returnSimulation(); 
+            console.error("Groq API Error:", data.error);
+            return returnSimulation();
         }
 
-        res.status(200).json(data);
+        const aiText = data.choices[0].message.content;
+
+        res.status(200).json({
+            candidates: [{
+                content: { parts: [{ text: aiText }] }
+            }]
+        });
 
     } catch (error) {
+        console.error("Server Connection Error:", error);
         return returnSimulation();
     }
 }

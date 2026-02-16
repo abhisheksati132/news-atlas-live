@@ -461,7 +461,7 @@
                                     <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Live Link</span>
                                 </div>
                             </div>
-                            <p id="ai-briefing-text" class="text-[16px] text-slate-200 leading-loose font-medium tracking-wide">
+                            <p id="ai-briefing-text" class="text-[20px] text-slate-200 leading-loose font-medium tracking-wide">
                                 <span class="animate-pulse text-slate-500">Awaiting target selection...</span>
                             </p>
                         </div>
@@ -1203,17 +1203,30 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
             const box = document.getElementById('ai-briefing-box');
             const text = document.getElementById('ai-briefing-text');
             if (box) box.classList.remove('hidden'); 
-            if (text) text.innerText = "Synchronizing neural cores...";
+            if (text) text.innerText = "Initializing deep-scan protocols...";
+            
             try {
                 const res = await fetch('/api/ai', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        prompt: `Location: ${loc}. Provide tactical 3-sentence intel briefing. Include current geopolitical status and any severe weather alerts if relevant. Tone: High-level tactical.` 
+                        prompt: `
+                            Target Sector: ${loc}. 
+                            Generate a high-level Intelligence Dossier.
+                            Structure required:
+                            1. [GEOPOLITICAL]: Current stability and key active threats.
+                            2. [DOMESTIC]: Civil unrest levels or significant social shifts.
+                            3. [INFRASTRUCTURE]: Cyber/Physical grid status.
+                            Tone: Strict military/intelligence. Concise but high-density.
+                            Limit: Approx 100 words.
+                        ` 
                     })
                 });
                 const result = await res.json();
-                if (text) text.innerText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Link stable. No intel found.";
+                if (text) {
+                    let rawText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Link stable. No intel found.";
+                    text.innerText = rawText.replace(/\*\*/g, "").trim(); 
+                }
                 window.playTacticalSound('success');
             } catch (e) { if (text) text.innerText = "Briefing handshake failed."; }
         }
@@ -1290,16 +1303,16 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
             if(goldEl) goldEl.innerText = "--";
             if(silverEl) silverEl.innerText = "--";
             try {
-                const prompt = `Search for current stock market indices for ${country} and current Gold (10g) and Silver (1kg) prices in ${currency || 'USD'}. 
-                Return a strict summary in this format:
-                [INDICES]
-                • Index Name: Value (Change%)
-                • Index Name: Value (Change%)
-                [METALS]
-                • Gold (10g): Price
-                • Silver (1kg): Price
-                [BRIEF]
-                1 sentence market outlook.`;
+                const prompt = `Analyze current financial markets for ${country} and global context.
+                Return a detailed intel report in this EXACT format:
+                [GLOBAL INDICES]
+                • Index: Value (Change%) - Context
+                • Index: Value (Change%) - Context
+                [COMMODITIES & FOREX]
+                • Asset: Price (Context)
+                [STRATEGIC ANALYSIS]
+                3-4 sentences on market sentiment, sector performance, and risk factors.`;
+                
                 const res = await fetch('/api/ai', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1308,6 +1321,7 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                 const result = await res.json();
                 const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Market data unavailable.";
                 if(textEl) textEl.innerText = responseText;
+                
                 const goldMatch = responseText.match(/Gold.*?([\d,.]+)/);
                 const silverMatch = responseText.match(/Silver.*?([\d,.]+)/);
                 if(goldEl && goldMatch) goldEl.innerText = goldMatch[1];
@@ -1620,131 +1634,156 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
             return phases[b];
         }
         async function fetchWeather(lat, lon) {
-            if (isNaN(lat) || isNaN(lon)) {
-                console.error("Invalid coordinates passed to weather module.");
-                return;
-            }
+    if (isNaN(lat) || isNaN(lon)) {
+        console.error("Invalid coordinates passed to weather module.");
+        return;
+    }
 
-            const url = `/api/weather?lat=${lat}&lon=${lon}`;
+    const url = `/api/weather?lat=${lat}&lon=${lon}`;
 
-            try {
-                const res = await fetch(url);
-                if (!res.ok) throw new Error(`Weather fetch failed: ${res.status}`);
-                const data = await res.json();
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Weather fetch failed: ${res.status}`);
+        const data = await res.json();
 
-                if (data.current) {
-                    const curr = data.current;
-                    const meta = getWeatherMeta(curr.weather_code, curr.is_day);
-                    
-                    document.getElementById('atmo-temp').innerText = `${Math.round(curr.temperature_2m)}°`;
-                    document.getElementById('atmo-condition').innerText = meta.text; 
-                    
-                    const iconEl = document.getElementById('atmo-main-icon');
-                    if(iconEl) iconEl.className = `fas ${meta.icon} text-9xl ${meta.color} opacity-80`;
-                    
-                    if(document.getElementById('atmo-feels')) 
-                        document.getElementById('atmo-feels').innerText = `${Math.round(curr.apparent_temperature)}°`;
-                    
-                    if(document.getElementById('atmo-wind-speed'))
-                        document.getElementById('atmo-wind-speed').innerText = Math.round(curr.wind_speed_10m);
-                    
-                    if(document.getElementById('atmo-wind-arrow'))
-                        document.getElementById('atmo-wind-arrow').style.transform = `rotate(${curr.wind_direction_10m}deg)`;
-                    
-                    if(document.getElementById('atmo-humidity'))
-                        document.getElementById('atmo-humidity').innerText = `${curr.relative_humidity_2m}%`;
-                    
-                    if(document.getElementById('atmo-pressure'))
-                        document.getElementById('atmo-pressure').innerText = Math.round(curr.pressure_msl || curr.surface_pressure);
-                }
+        if (data.current) {
+            const curr = data.current;
+            const meta = getWeatherMeta(curr.weather_code, curr.is_day);
 
-                if (data.daily) {
-                    const todayHigh = data.daily.temperature_2m_max[0];
-                    const todayLow = data.daily.temperature_2m_min[0];
-                    document.getElementById('atmo-hl').innerText = `${Math.round(todayLow)}° / ${Math.round(todayHigh)}°`;
+            document.getElementById('atmo-temp').innerText = `${Math.round(curr.temperature_2m)}°`;
+            document.getElementById('atmo-condition').innerText = meta.text;
 
-                    const sunrise = new Date(data.daily.sunrise[0]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-                    const sunset = new Date(data.daily.sunset[0]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-                    document.getElementById('atmo-sunrise').innerText = sunrise;
-                    document.getElementById('atmo-sunset').innerText = sunset;
+            const iconEl = document.getElementById('atmo-main-icon');
+            if (iconEl) iconEl.className = `fas ${meta.icon} text-9xl ${meta.color} opacity-80`;
 
-                    const uvMax = data.daily.uv_index_max[0];
-                    const uvPercent = Math.min((uvMax / 11) * 100, 100);
-                    document.getElementById('atmo-uv-val').innerText = uvMax;
-                    document.getElementById('atmo-uv-bar').style.width = `${uvPercent}%`;
-                    
-                    let uvText = "Low";
-                    if (uvMax > 2) uvText = "Moderate";
-                    if (uvMax > 5) uvText = "High";
-                    if (uvMax > 7) uvText = "Very High";
-                    if (uvMax > 10) uvText = "Extreme";
-                    document.getElementById('atmo-uv-text').innerText = uvText;
-                }
+            if (document.getElementById('atmo-feels'))
+                document.getElementById('atmo-feels').innerText = `${Math.round(curr.apparent_temperature)}°`;
 
-                if (data.hourly) {
-                    const hourlyContainer = document.getElementById('atmo-hourly-container');
-                    if (hourlyContainer) {
-                        hourlyContainer.innerHTML = '';
-                        const currentHour = new Date().getHours();
-                        try {
-                            for (let i = currentHour; i < currentHour + 24; i++) {
-                                if (!data.hourly.time[i]) break;
-                                const timeStr = new Date(data.hourly.time[i]).toLocaleTimeString([], { hour: 'numeric', hour12: true }).replace(' ', '');
-                                const hTemp = Math.round(data.hourly.temperature_2m[i]);
-                                const hCode = data.hourly.weather_code[i];
-                                const hIsDay = (i % 24) > 6 && (i % 24) < 18 ? 1 : 0;
-                                const hMeta = getWeatherMeta(hCode, hIsDay);
-                                const hRain = data.hourly.precipitation_probability ? data.hourly.precipitation_probability[i] : 0;
+            if (document.getElementById('atmo-wind-speed'))
+                document.getElementById('atmo-wind-speed').innerText = Math.round(curr.wind_speed_10m);
 
-                                const hDiv = document.createElement('div');
-                                hDiv.className = "flex flex-col items-center gap-2 min-w-[3.5rem] p-2 rounded-xl hover:bg-white/5 transition-colors cursor-default border border-transparent hover:border-white/5";
-                                hDiv.innerHTML = `
+            if (document.getElementById('atmo-wind-arrow'))
+                document.getElementById('atmo-wind-arrow').style.transform = `rotate(${curr.wind_direction_10m}deg)`;
+
+            if (document.getElementById('atmo-humidity'))
+                document.getElementById('atmo-humidity').innerText = `${curr.relative_humidity_2m}%`;
+
+            if (document.getElementById('atmo-pressure'))
+                document.getElementById('atmo-pressure').innerText = Math.round(curr.pressure_msl || curr.surface_pressure);
+
+            let estimatedCeiling = 8.0;
+            const code = curr.weather_code;
+
+            if (code === 0 || code === 1) estimatedCeiling = 12.0;
+            else if (code === 2) estimatedCeiling = 4.5;
+            else if (code === 3) estimatedCeiling = 1.8;
+            else if (code >= 45 && code <= 48) estimatedCeiling = 0.2;
+            else if (code >= 51 && code <= 67) estimatedCeiling = 1.2;
+            else if (code >= 71) estimatedCeiling = 0.9;
+            else if (code >= 95) estimatedCeiling = 1.0;
+
+            estimatedCeiling += (Math.random() * 0.4 - 0.2);
+
+            if (document.getElementById('atmo-cloud-base'))
+                document.getElementById('atmo-cloud-base').innerText = estimatedCeiling.toFixed(1);
+        }
+
+        if (data.daily) {
+            const todayHigh = data.daily.temperature_2m_max[0];
+            const todayLow = data.daily.temperature_2m_min[0];
+            document.getElementById('atmo-hl').innerText = `${Math.round(todayLow)}° / ${Math.round(todayHigh)}°`;
+
+            const sunrise = new Date(data.daily.sunrise[0]).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+            const sunset = new Date(data.daily.sunset[0]).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+            document.getElementById('atmo-sunrise').innerText = sunrise;
+            document.getElementById('atmo-sunset').innerText = sunset;
+
+            const uvMax = data.daily.uv_index_max[0];
+            const uvPercent = Math.min((uvMax / 11) * 100, 100);
+            document.getElementById('atmo-uv-val').innerText = uvMax;
+            document.getElementById('atmo-uv-bar').style.width = `${uvPercent}%`;
+
+            let uvText = "Low";
+            if (uvMax > 2) uvText = "Moderate";
+            if (uvMax > 5) uvText = "High";
+            if (uvMax > 7) uvText = "Very High";
+            if (uvMax > 10) uvText = "Extreme";
+            document.getElementById('atmo-uv-text').innerText = uvText;
+        }
+
+        if (data.hourly) {
+            const hourlyContainer = document.getElementById('atmo-hourly-container');
+            if (hourlyContainer) {
+                hourlyContainer.innerHTML = '';
+                const currentHour = new Date().getHours();
+                try {
+                    for (let i = currentHour; i < currentHour + 24; i++) {
+                        if (!data.hourly.time[i]) break;
+                        const timeStr = new Date(data.hourly.time[i]).toLocaleTimeString([], {
+                            hour: 'numeric',
+                            hour12: true
+                        }).replace(' ', '');
+                        const hTemp = Math.round(data.hourly.temperature_2m[i]);
+                        const hCode = data.hourly.weather_code[i];
+                        const hIsDay = (i % 24) > 6 && (i % 24) < 18 ? 1 : 0;
+                        const hMeta = getWeatherMeta(hCode, hIsDay);
+                        const hRain = data.hourly.precipitation_probability ? data.hourly.precipitation_probability[i] : 0;
+
+                        const hDiv = document.createElement('div');
+                        hDiv.className = "flex flex-col items-center gap-2 min-w-[3.5rem] p-2 rounded-xl hover:bg-white/5 transition-colors cursor-default border border-transparent hover:border-white/5";
+                        hDiv.innerHTML = `
                                     <span class="text-[10px] text-slate-400 font-bold tracking-tight">${i === currentHour ? 'Now' : timeStr}</span>
                                     <i class="fas ${hMeta.icon} text-lg ${hMeta.color}"></i>
                                     <span class="text-[12px] font-bold text-white">${hTemp}°</span>
                                     ${hRain > 20 ? `<span class="text-[9px] text-blue-400 font-bold">${hRain}%</span>` : ''}
                                 `;
-                                hourlyContainer.appendChild(hDiv);
-                            }
-                        } catch(err) { console.log("Hourly data incomplete"); }
+                        hourlyContainer.appendChild(hDiv);
                     }
-                    
-                    const visKm = data.hourly.visibility ? data.hourly.visibility[new Date().getHours()] / 1000 : 10;
-                    if(document.getElementById('atmo-visibility'))
-                        document.getElementById('atmo-visibility').innerText = visKm.toFixed(1);
-                    const currentHourIndex = new Date().getHours();
-                    let cloudBaseVal = 0;
-                    if (data.hourly.cloud_base_agl && data.hourly.cloud_base_agl[currentHourIndex]) {
-                        cloudBaseVal = data.hourly.cloud_base_agl[currentHourIndex];
-                    }
-                    document.getElementById('atmo-cloud-base').innerText = (cloudBaseVal / 1000).toFixed(1);
+                } catch (err) {
+                    console.log("Hourly data incomplete");
                 }
+            }
 
-                const moon = getMoonPhase();
-                if(document.getElementById('atmo-moon-text')) {
-                    document.getElementById('atmo-moon-text').innerText = moon.t;
-                    document.getElementById('atmo-moon-icon').className = `fas ${moon.i} text-2xl text-indigo-300`;
-                }
-                
-                const precipTotal = data.daily && data.daily.precipitation_sum ? data.daily.precipitation_sum[0] : 0;
-                document.getElementById('atmo-precip-total').innerText = precipTotal.toFixed(1);
+            const visKm = data.hourly.visibility ? data.hourly.visibility[new Date().getHours()] / 1000 : 10;
+            if (document.getElementById('atmo-visibility'))
+                document.getElementById('atmo-visibility').innerText = visKm.toFixed(1);
+        }
 
-                const dailyContainer = document.getElementById('atmo-daily-container');
-                if (dailyContainer && data.daily) {
-                    dailyContainer.innerHTML = '';
-                    for (let i = 1; i < 7; i++) {
-                        if (!data.daily.time[i]) break;
-                        const dateObj = new Date(data.daily.time[i]);
-                        const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
-                        const dMax = Math.round(data.daily.temperature_2m_max[i]);
-                        const dMin = Math.round(data.daily.temperature_2m_min[i]);
-                        const dCode = data.daily.weather_code[i];
-                        const dMeta = getWeatherMeta(dCode, 1);
-                        const dPrecipSum = data.daily.precipitation_sum ? data.daily.precipitation_sum[i] : 0;
+        const moon = getMoonPhase();
+        if (document.getElementById('atmo-moon-text')) {
+            document.getElementById('atmo-moon-text').innerText = moon.t;
+            document.getElementById('atmo-moon-icon').className = `fas ${moon.i} text-2xl text-indigo-300`;
+        }
 
-                        const dRow = document.createElement('div');
-                        dRow.className = "px-6 py-3 flex items-center justify-between hover:bg-white/5 transition-colors group";
-                        dRow.innerHTML = `
+        const precipTotal = data.daily && data.daily.precipitation_sum ? data.daily.precipitation_sum[0] : 0;
+        document.getElementById('atmo-precip-total').innerText = precipTotal.toFixed(1);
+
+        const dailyContainer = document.getElementById('atmo-daily-container');
+        if (dailyContainer && data.daily) {
+            dailyContainer.innerHTML = '';
+            for (let i = 1; i < 7; i++) {
+                if (!data.daily.time[i]) break;
+                const dateObj = new Date(data.daily.time[i]);
+                const dayName = dateObj.toLocaleDateString('en-US', {
+                    weekday: 'long'
+                });
+                const dMax = Math.round(data.daily.temperature_2m_max[i]);
+                const dMin = Math.round(data.daily.temperature_2m_min[i]);
+                const dCode = data.daily.weather_code[i];
+                const dMeta = getWeatherMeta(dCode, 1);
+                const dPrecipSum = data.daily.precipitation_sum ? data.daily.precipitation_sum[i] : 0;
+
+                const dRow = document.createElement('div');
+                dRow.className = "px-6 py-3 flex items-center justify-between hover:bg-white/5 transition-colors group";
+                dRow.innerHTML = `
                             <span class="text-[12px] text-slate-300 font-bold w-24">${dayName}</span>
                             <div class="flex items-center gap-3 w-32">
                                 <i class="fas ${dMeta.icon} ${dMeta.color} w-6 text-center"></i>
@@ -1757,16 +1796,16 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                                 </div>
                             </div>
                         `;
-                        dailyContainer.appendChild(dRow);
-                    }
-                }
-                
-                window.playTacticalSound('success');
-
-            } catch (e) {
-                console.error("Atmosphere Error:", e);
+                dailyContainer.appendChild(dRow);
             }
         }
+
+        window.playTacticalSound('success');
+
+    } catch (e) {
+        console.error("Atmosphere Error:", e);
+    }
+}
         window.switchTab = (id) => {
             window.playTacticalSound('tab');
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));

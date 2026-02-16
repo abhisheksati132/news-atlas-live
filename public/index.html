@@ -101,13 +101,14 @@
             min-height: 100vh;
         }
 
+        /* --- UPDATED GRID FOR 4 COLUMNS --- */
         #articles-container { 
             display: grid; 
             grid-template-columns: repeat(1, 1fr); 
             gap: 1.5rem; 
         }
         @media(min-width: 768px) { #articles-container { grid-template-columns: repeat(2, 1fr); } }
-        /* Forces 4 news per row as requested */
+        /* FIXED: Now specifically 4 columns for desktop */
         @media(min-width: 1024px) { #articles-container { grid-template-columns: repeat(4, 1fr); } }
 
         .country { stroke: #020617; stroke-width: 0.5; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; outline: none; }
@@ -1086,25 +1087,47 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                     </div>`;
                 }).join('');
         }
-
-        // --- MASTER FUNCTION: Combined Quota-Friendly AI Call ---
-        async function updateSectorIntelligence(countryName) {
+        async function generateAIBriefing(loc) {
             const box = document.getElementById('ai-briefing-box');
-            const textEl = document.getElementById('ai-briefing-text');
-            if (box) box.classList.remove('hidden');
-            if (textEl) textEl.innerText = "Synchronizing neural cores...";
-
+            const text = document.getElementById('ai-briefing-text');
+            if (box) box.classList.remove('hidden'); 
+            if (text) text.innerText = "Synchronizing neural cores...";
+            try {
+                const res = await fetch('/api/ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        prompt: `Location: ${loc}. Provide tactical 3-sentence intel briefing. Include current geopolitical status and any severe weather alerts if relevant. Tone: High-level tactical.` 
+                    })
+                });
+                const result = await res.json();
+                if (text) text.innerText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Link stable. No intel found.";
+                window.playTacticalSound('success');
+            } catch (e) { if (text) text.innerText = "Briefing handshake failed."; }
+        }
+        async function fetchDetailedEconomics(country) {
             document.getElementById('eco-gdp').innerText = "--";
-            document.getElementById('eco-market-ticker').innerText = "Scanning...";
-            document.getElementById('market-brief-text').innerText = "Scanning...";
-
+            document.getElementById('eco-growth').innerText = "--%";
+            document.getElementById('eco-inflation').innerText = "--%";
+            document.getElementById('eco-unemployment').innerText = "--%";
+            document.getElementById('eco-exports').innerHTML = '<div class="h-4 bg-white/10 rounded w-3/4 animate-pulse"></div>';
+            
             try {
                 const prompt = `
-                    You are a tactical OS. Analyze ${countryName}. 
-                    Return ONLY a raw JSON object (no markdown, no backticks) with exactly these 3 keys:
-                    1. "briefing": A 3-sentence tactical summary of current events and geopolitical status.
-                    2. "economics": { "gdp": "e.g. 3.7T", "inflation": "e.g. 4.2%", "unemployment": "e.g. 5%", "exports": ["item1", "item2", "item3"] }
-                    3. "market": { "summary": "1 sentence market outlook", "gold": "current price", "silver": "current price" }
+                    Analyze the economy of ${country}. 
+                    Return ONLY a valid JSON object with these keys (use 'N/A' if unknown, estimate if necessary based on 2024/2025 data):
+                    {
+                        "gdp_billions": "number only",
+                        "gdp_growth_percent": "number only",
+                        "gdp_per_capita": "number only",
+                        "inflation_rate": "number only",
+                        "unemployment_rate": "number only",
+                        "interest_rate": "number only",
+                        "debt_to_gdp": "number only",
+                        "major_exports": ["item1", "item2", "item3"],
+                        "market_summary": "1 short sentence on current market status"
+                    }
+                    Do not add markdown formatting. Just the raw JSON string.
                 `;
 
                 const res = await fetch('/api/ai', {
@@ -1112,208 +1135,248 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ prompt: prompt })
                 });
-
-                const data = await res.json();
                 
-                let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-                rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-                const intel = JSON.parse(rawText);
+                const data = await res.json();
+                if (!data.candidates) throw new Error("AI Busy");
+                
+                let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+                text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+                const eco = JSON.parse(text);
 
-                if (intel.briefing) textEl.innerText = intel.briefing;
+                if(eco.gdp_billions) document.getElementById('eco-gdp').innerText = eco.gdp_billions;
+                if(eco.gdp_growth_percent) document.getElementById('eco-growth').innerText = (eco.gdp_growth_percent > 0 ? '+' : '') + eco.gdp_growth_percent + '%';
+                if(eco.gdp_per_capita) document.getElementById('eco-capita').innerText = '$' + eco.gdp_per_capita;
+                
+                if(eco.inflation_rate) document.getElementById('eco-inflation').innerText = eco.inflation_rate + '%';
+                if(eco.unemployment_rate) document.getElementById('eco-unemployment').innerText = eco.unemployment_rate + '%';
+                if(eco.interest_rate) document.getElementById('eco-interest').innerText = eco.interest_rate + '%';
+                if(eco.debt_to_gdp) document.getElementById('eco-debt').innerText = eco.debt_to_gdp + '%';
 
-                if (intel.economics) {
-                    if (intel.economics.gdp) document.getElementById('eco-gdp').innerText = intel.economics.gdp;
-                    if (intel.economics.inflation) document.getElementById('eco-inflation').innerText = intel.economics.inflation;
-                    if (intel.economics.unemployment) document.getElementById('eco-unemployment').innerText = intel.economics.unemployment;
-                    if (intel.economics.exports) {
-                        document.getElementById('eco-exports').innerHTML = intel.economics.exports.map(item => 
-                            `<div class="flex items-center gap-2"><div class="skill-dot" style="background:#3b82f6"></div><span class="text-sm text-slate-300 font-bold uppercase">${item}</span></div>`
-                        ).join('');
-                    }
+                if(eco.major_exports && Array.isArray(eco.major_exports)) {
+                    document.getElementById('eco-exports').innerHTML = eco.major_exports.map(item => 
+                        `<div class="flex items-center gap-2"><div class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div><span class="text-sm text-slate-300 font-bold uppercase">${item}</span></div>`
+                    ).join('');
                 }
 
-                if (intel.market) {
-                    if (intel.market.summary) {
-                         document.getElementById('market-brief-text').innerText = intel.market.summary;
-                         document.getElementById('eco-market-ticker').innerText = intel.market.summary.toUpperCase();
-                    }
-                    if (intel.market.gold) document.getElementById('price-gold').innerText = intel.market.gold;
-                    if (intel.market.silver) document.getElementById('price-silver').innerText = intel.market.silver;
+                if(eco.market_summary) {
+                    const ticker = document.getElementById('eco-market-ticker');
+                    ticker.innerText = eco.market_summary.toUpperCase();
                 }
 
                 window.playTacticalSound('success');
 
-            } catch (e) {
-                console.error("AI Intel Error", e);
-                if (textEl) textEl.innerText = "Uplink Failed. Displaying offline metrics.";
+            } catch(e) {
+                console.error("Eco Intel Error", e);
+                document.getElementById('eco-market-ticker').innerText = "ECONOMIC DATALINK SEVERED. RETRYING...";
             }
         }
-
-        // --- WEATHER SYSTEM: Full logic from weather.js integrated here ---
-        async function fetchWeather(lat, lon) {
-            if (isNaN(lat) || isNaN(lon)) return;
-            
-            // Replicating the exact logic of your weather.js file
-            const params = new URLSearchParams({
-                latitude: lat,
-                longitude: lon,
-                current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,cloud_base_agl',
-                hourly: 'temperature_2m,weather_code,visibility,uv_index,precipitation_probability',
-                daily: 'weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum',
-                timezone: 'auto'
-            });
-
-            const url = `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
-            
+        async function fetchMarketIntel(country, currency) {
+            const textEl = document.getElementById('market-brief-text');
+            const goldEl = document.getElementById('price-gold');
+            const silverEl = document.getElementById('price-silver');
+            if(textEl) textEl.innerHTML = '<span class="animate-pulse text-slate-500">Scanning global exchanges...</span>';
+            if(goldEl) goldEl.innerText = "--";
+            if(silverEl) silverEl.innerText = "--";
             try {
-                const res = await fetch(url);
-                if (!res.ok) throw new Error('Weather fetch failed');
-                const data = await res.json();
-                
-                const curr = data.current;
-                const meta = getWeatherMeta(curr.weather_code, curr.is_day);
-                const todayHigh = data.daily.temperature_2m_max[0];
-                const todayLow = data.daily.temperature_2m_min[0];
-                
-                document.getElementById('atmo-temp').innerText = `${Math.round(curr.temperature_2m)}°`;
-                document.getElementById('atmo-condition').innerText = meta.text;
-                document.getElementById('atmo-main-icon').className = `fas ${meta.icon} text-9xl ${meta.color} opacity-80`;
-                document.getElementById('atmo-feels').innerText = `${Math.round(curr.apparent_temperature)}°`;
-                document.getElementById('atmo-hl').innerText = `${Math.round(todayLow)}° / ${Math.round(todayHigh)}°`;
-                
-                const sunrise = new Date(data.daily.sunrise[0]).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
-                const sunset = new Date(data.daily.sunset[0]).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
-                document.getElementById('atmo-sunrise').innerText = sunrise;
-                document.getElementById('atmo-sunset').innerText = sunset;
-                
-                const hourlyContainer = document.getElementById('atmo-hourly-container');
-                hourlyContainer.innerHTML = '';
-                const currentHour = new Date().getHours();
-                for(let i = currentHour; i < currentHour + 24; i++) {
-                    if (!data.hourly.time[i]) break;
-                    const timeStr = new Date(data.hourly.time[i]).toLocaleTimeString([], {hour: 'numeric', hour12: true}).replace(' ', '');
-                    const hTemp = Math.round(data.hourly.temperature_2m[i]);
-                    const hCode = data.hourly.weather_code[i];
-                    const hIsDay = (i % 24) > 6 && (i % 24) < 18 ? 1 : 0; 
-                    const hMeta = getWeatherMeta(hCode, hIsDay);
-                    const hRain = data.hourly.precipitation_probability[i];
-                    const hDiv = document.createElement('div');
-                    hDiv.className = "flex flex-col items-center gap-2 min-w-[3.5rem] p-2 rounded-xl hover:bg-white/5 transition-colors cursor-default border border-transparent hover:border-white/5";
-                    hDiv.innerHTML = `
-                        <span class="text-[10px] text-slate-400 font-bold tracking-tight">${i === currentHour ? 'Now' : timeStr}</span>
-                        <i class="fas ${hMeta.icon} text-lg ${hMeta.color}"></i>
-                        <span class="text-[12px] font-bold text-white">${hTemp}°</span>
-                        ${hRain > 20 ? `<span class="text-[9px] text-blue-400 font-bold">${hRain}%</span>` : ''}
-                    `;
-                    hourlyContainer.appendChild(hDiv);
-                }
-                
-                document.getElementById('atmo-wind-speed').innerText = Math.round(curr.wind_speed_10m);
-                document.getElementById('atmo-wind-arrow').style.transform = `rotate(${curr.wind_direction_10m}deg)`;
-                
-                const uvMax = data.daily.uv_index_max[0];
-                const uvPercent = Math.min((uvMax / 11) * 100, 100);
-                document.getElementById('atmo-uv-val').innerText = uvMax;
-                document.getElementById('atmo-uv-bar').style.width = `${uvPercent}%`;
-                
-                let uvText = "Low";
-                if(uvMax > 2) uvText = "Moderate";
-                if(uvMax > 5) uvText = "High";
-                if(uvMax > 7) uvText = "Very High";
-                if(uvMax > 10) uvText = "Extreme";
-                document.getElementById('atmo-uv-text').innerText = uvText;
-                
-                document.getElementById('atmo-humidity').innerText = `${curr.relative_humidity_2m}%`;
-                const dewCalc = curr.temperature_2m - ((100 - curr.relative_humidity_2m)/5);
-                document.getElementById('atmo-dew').innerText = `${Math.round(dewCalc)}°`;
-                
-                const visKm = data.hourly.visibility[currentHour] / 1000;
-                document.getElementById('atmo-visibility').innerText = visKm.toFixed(1);
-                document.getElementById('atmo-pressure').innerText = Math.round(curr.pressure_msl || curr.surface_pressure);
-                
-                const moon = getMoonPhase();
-                document.getElementById('atmo-moon-text').innerText = moon.t;
-                document.getElementById('atmo-moon-icon').className = `fas ${moon.i} text-2xl text-indigo-300`;
-                
-                const cloudBase = curr.cloud_base_agl || 0;
-                const precipTotal = data.daily.precipitation_sum ? data.daily.precipitation_sum[0] : 0;
-                document.getElementById('atmo-cloud-base').innerText = (cloudBase / 1000).toFixed(1);
-                document.getElementById('atmo-precip-total').innerText = precipTotal.toFixed(1);
-
-                const dailyContainer = document.getElementById('atmo-daily-container');
-                dailyContainer.innerHTML = '';
-                for(let i = 1; i < 7; i++) { 
-                    if(!data.daily.time[i]) break;
-                    const dateObj = new Date(data.daily.time[i]);
-                    const dayName = dateObj.toLocaleDateString('en-US', {weekday: 'long'});
-                    const dMax = Math.round(data.daily.temperature_2m_max[i]);
-                    const dMin = Math.round(data.daily.temperature_2m_min[i]);
-                    const dCode = data.daily.weather_code[i];
-                    const dMeta = getWeatherMeta(dCode, 1);
-                    const dPrecipSum = data.daily.precipitation_sum[i];
-                    const dRow = document.createElement('div');
-                    dRow.className = "px-6 py-3 flex items-center justify-between hover:bg-white/5 transition-colors group";
-                    dRow.innerHTML = `
-                        <span class="text-[12px] text-slate-300 font-bold w-24">${dayName}</span>
-                        <div class="flex items-center gap-3 w-32">
-                            <i class="fas ${dMeta.icon} ${dMeta.color} w-6 text-center"></i>
-                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider group-hover:text-blue-400 transition-colors">${dMeta.text}</span>
-                        </div>
-                        <div class="flex items-center gap-4 text-right flex-1 justify-end">
-                            ${dPrecipSum > 0 ? `<div class="flex items-center gap-1 text-[10px] text-blue-400 font-bold"><i class="fas fa-umbrella"></i> ${Math.round(dPrecipSum)}mm</div>` : ''}
-                            <div class="font-mono text-xs font-bold text-white">
-                                <span class="text-slate-500">${dMin}°</span> / ${dMax}°
-                            </div>
-                        </div>
-                    `;
-                    dailyContainer.appendChild(dRow);
-                }
+                const prompt = `Search for current stock market indices for ${country} and current Gold (10g) and Silver (1kg) prices in ${currency || 'USD'}. 
+                Return a strict summary in this format:
+                [INDICES]
+                • Index Name: Value (Change%)
+                • Index Name: Value (Change%)
+                [METALS]
+                • Gold (10g): Price
+                • Silver (1kg): Price
+                [BRIEF]
+                1 sentence market outlook.`;
+                const res = await fetch('/api/ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+                const result = await res.json();
+                const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Market data unavailable.";
+                if(textEl) textEl.innerText = responseText;
+                const goldMatch = responseText.match(/Gold.*?([\d,.]+)/);
+                const silverMatch = responseText.match(/Silver.*?([\d,.]+)/);
+                if(goldEl && goldMatch) goldEl.innerText = goldMatch[1];
+                if(silverEl && silverMatch) silverEl.innerText = silverMatch[1];
                 window.playTacticalSound('success');
             } catch (e) {
-                console.error("Advanced Atmosphere Error:", e);
-                document.getElementById('atmo-condition').innerHTML = `<span class="text-red-500 text-sm">OFFLINE <button onclick="window.location.reload()" class="underline ml-2">RETRY</button></span>`;
+                if(textEl) textEl.innerText = "Financial uplink failed.";
             }
         }
-
-        window.switchTab = (id) => {
-            window.playTacticalSound('tab');
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            const tabBtn = Array.from(document.querySelectorAll('.nav-tab')).find(btn => btn.innerText.toLowerCase().includes(id.toLowerCase()));
-            if (tabBtn) tabBtn.classList.add('active');
-            const targetContent = document.getElementById(`tab-${id}`);
-            if (targetContent) targetContent.classList.add('active');
+        window.activateMapInteraction = () => {
+            const overlay = document.getElementById('map-overlay-guard');
+            if(overlay) {
+                overlay.classList.add('active');
+                window.playTacticalSound('click');
+            }
         };
 
-        window.toggleProjection = () => { window.playTacticalSound('tab'); initMap(projectionType === '2d' ? '3d' : '2d'); };
-        
-        window.selectFromSearch = (name) => {
-            const country = worldFeatures.find(f => f.properties.name.toLowerCase().includes(name.toLowerCase()));
-            if(country) handleCountryClick(null, country);
-            else fetchAllData(name);
-            document.getElementById('search-overlay').classList.add('hidden');
+        window.deactivateMapInteraction = () => {
+            const overlay = document.getElementById('map-overlay-guard');
+            if(overlay) {
+                overlay.classList.remove('active');
+            }
         };
-
-        window.zoomMap = (f) => {
+        function initMap(type) {
+            projectionType = type;
+            const container = document.getElementById('map-container');
+            const width = container.clientWidth || 800;
+            const height = container.clientHeight || 500;
+            if (width < 50 || height < 50) { setTimeout(() => initMap(type), 300); return; }
+            const mapContainer = d3.select("#map-container");
+            mapContainer.select("svg").remove(); 
+            svg = mapContainer.insert("svg", ":first-child") 
+                .attr("id", "world-map")
+                .attr("viewBox", `0 0 ${width} ${height}`)
+                .attr("class", "w-full h-full");
+            g = svg.append("g");
+            if (type === '2d') {
+                currentProjection = d3.geoNaturalEarth1().scale(width / 9).translate([width / 2, height / 2]); 
+                document.getElementById('projection-label').innerText = "Orbital Interface: 2D Active";
+            } else {
+                currentProjection = d3.geoOrthographic().scale(height / 2.3).translate([width / 2, height / 2]).clipAngle(90);
+                document.getElementById('projection-label').innerText = "Orbital Interface: 3D Globe";
+            }
+            const path = d3.geoPath().projection(currentProjection);
+            if (type === '2d') {
+                zoom = d3.zoom().scaleExtent([1, 15]).on("zoom", (e) => g.attr("transform", e.transform));
+                svg.call(zoom);
+            } else {
+                const drag = d3.drag()
+                    .on("drag", (event) => {
+                        const rotate = currentProjection.rotate();
+                        const k = 75 / currentProjection.scale();
+                        currentProjection.rotate([
+                            rotate[0] + event.dx * k,
+                            rotate[1] - event.dy * k
+                        ]);
+                        g.selectAll("path").attr("d", path);
+                    });
+                svg.call(drag);
+            }
+            d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(data => {
+                worldFeatures = topojson.feature(data, data.objects.countries).features;
+                const palette = [
+                    "#1d4ed8", "#2563eb", "#3b82f6", 
+                    "#4f46e5", "#6366f1", "#0ea5e9", 
+                    "#334155", "#475569", "#0f766e"  
+                ];
+                g.selectAll("path").data(worldFeatures).enter().append("path")
+                    .attr("class", "country")
+                    .attr("d", path)
+                    .attr("fill", (d, i) => palette[i % palette.length]) 
+                    .on("mouseenter", function(e, d) { 
+                        window.playTacticalSound('hover');
+                        const t = document.getElementById('map-tooltip');
+                        t.style.left = (e.pageX + 15) + 'px';
+                        t.style.top = (e.pageY - 15) + 'px';
+                        t.classList.remove('hidden');
+                        document.getElementById('tooltip-text').innerText = d.properties.name;
+                    })
+                    .on("mousemove", function(e) {
+                        const t = document.getElementById('map-tooltip');
+                        t.style.left = (e.pageX + 15) + 'px';
+                        t.style.top = (e.pageY - 15) + 'px';
+                    })
+                    .on("mouseleave", function() { 
+                        document.getElementById('map-tooltip').classList.add('hidden');
+                    })
+                    .on("click", function(event, d) {
+                        handleCountryClick(event, d);
+                    });
+            });
+        }
+        async function handleCountryClick(event, d) {
             window.playTacticalSound('click');
-            if (projectionType === '2d') svg.transition().duration(400).call(zoom.scaleBy, f);
-            else { currentProjection.scale(currentProjection.scale() * f); g.selectAll("path").attr("d", d3.geoPath().projection(currentProjection)); }
-        };
-
-        window.resetToGlobalCenter = () => {
-            selectedCountry = null; countryUTCOffset = null;
             d3.selectAll(".country").classed("active", false);
-            document.getElementById('selected-country-name').innerText = "Global Surveillance";
-            document.getElementById('ai-briefing-box').classList.add('hidden');
-            if (projectionType === '2d') svg.transition().duration(1200).call(zoom.transform, d3.zoomIdentity);
+            if (d && g) {
+                g.selectAll("path").filter(p => p.properties.name === d.properties.name).classed("active", true);
+            }
+            selectedCountry = d;
+            window.switchTab('intel'); 
+            
+            document.getElementById('sidebar').scrollIntoView({ behavior: 'smooth' });
+
+            if (d && d.properties) {
+                document.getElementById('selected-country-name').innerText = d.properties.name;
+                iso2Code = null; 
+                fetchAllData(d.properties.name);
+                if (projectionType === '2d') {
+                    zoomToCountry(d); 
+                } else {
+                    rotateToCountry(d);
+                }
+                generateAIBriefing(d.properties.name);
+                fetchMarketIntel(d.properties.name, currencyCode);
+            }
+        }
+        function rotateToCountry(d) {
+            const centroid = d3.geoCentroid(d);
+            d3.transition()
+                .duration(1200)
+                .tween("rotate", () => {
+                    const r = d3.interpolate(currentProjection.rotate(), [-centroid[0], -centroid[1]]);
+                    return (t) => { 
+                        currentProjection.rotate(r(t)); 
+                        g.selectAll("path").attr("d", d3.geoPath().projection(currentProjection)); 
+                    };
+                });
+        }
+        function zoomToCountry(d) {
+            const container = document.getElementById('map-container');
+            const width = container.clientWidth, height = container.clientHeight;
+            const projection = d3.geoNaturalEarth1().scale(width / 6.6).translate([width / 2, height / 1.95]);
+            const bounds = d3.geoPath().projection(projection).bounds(d);
+            const dx = bounds[1][0] - bounds[0][0], dy = bounds[1][1] - bounds[0][1];
+            const x = (bounds[0][0] + bounds[1][0]) / 2, y = (bounds[0][1] + bounds[1][1]) / 2;
+            const scale = Math.max(1, Math.min(8, 0.8 / Math.max(dx / width, dy / height)));
+            svg.transition().duration(1000).call(zoom.transform, d3.zoomIdentity.translate(width / 2 - scale * x, height / 2 - scale * y).scale(scale));
+        }
+        async function fetchNews() {
+            const container = document.getElementById('articles-container');
+            const loading = document.getElementById('news-loading');
+            if (loading) loading.classList.remove('hidden'); 
+            if (container) container.innerHTML = '';
+            try {
+                let url = `/api/news?category=${currentCategory}&country=${iso2Code || ''}&q=${selectedCountry ? encodeURIComponent(selectedCountry.properties.name) : ''}`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('News fetch failed');
+                const data = await res.json();
+                
+                // Update total count if available
+                if(data.totalResults) document.getElementById('news-count').innerText = data.totalResults;
+
+                if (data.results && data.results.length > 0) {
+                    data.results.forEach((art, i) => {
+                        const card = document.createElement('div');
+                        const sents = ['signal-blue', 'signal-emerald', 'signal-red'];
+                        const sent = sents[i % 3];
+                        const img = art.image_url ? `<div class="h-32 w-full mb-3 rounded bg-cover bg-center border border-white/10" style="background-image: url('${art.image_url}')"></div>` : '';
+                        card.className = `dossier-card shadow-md mb-4 ${sent}`;
+                        card.onmouseenter = () => window.playTacticalSound('hover');
+                        card.innerHTML = `
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="text-[10px] font-black text-white/70 uppercase tracking-widest bg-white/5 px-2.5 py-0.5 rounded-lg truncate max-w-[100px]">${art.source_id || 'UPLINK'}</div>
+                                <button class="text-slate-400 hover:text-white transition-all tactical-btn"><i class="fas fa-link text-[13px]"></i></button>
+                            </div>
+                            ${img} <h3 class="font-bold text-[16px] text-white leading-tight mb-3 cursor-pointer hover:text-blue-300 transition-colors pr-4" onclick="window.open('${art.link}', '_blank')">${art.title}</h3>
+                        `;
+                        container.appendChild(card);
+                    });
+                } else { if (container) container.innerHTML = `<div class="col-span-full p-10 text-center text-[12px] text-slate-500 font-black italic uppercase tracking-widest">Zero news fragments in sector.</div>`; }
+            } catch (e) {
+                 if (container) container.innerHTML = `<div class="col-span-full p-10 text-center text-[12px] text-red-500 font-black italic uppercase tracking-widest">Uplink Error. Retrying...</div>`;
+            } finally { if (loading) loading.classList.add('hidden'); }
+        }
+        window.setCategory = (el, cat) => {
+            window.playTacticalSound('click');
+            document.querySelectorAll('.intel-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            currentCategory = cat;
             fetchNews();
         };
-
-        window.goToIndiaHome = () => { 
-            const india = worldFeatures.find(f => f.properties.name === "India"); 
-            if (india) handleCountryClick(null, india); 
-        };
-
         async function fetchAllData(name) {
             try {
                 const res = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fullText=true`);
@@ -1329,7 +1392,6 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                     document.getElementById('fact-demonym').innerText = c.demonyms?.eng?.m || '--';
                     document.getElementById('fact-gini').innerText = c.gini ? Object.values(c.gini)[0] : 'N/A';
                     document.getElementById('fact-drive').innerText = c.car ? c.car.side.toUpperCase() : '--';
-                    
                     const flagEl = document.getElementById('sector-flag');
                     const nameEl = document.getElementById('sector-name');
                     const box = document.getElementById('active-sector-display');
@@ -1338,17 +1400,19 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                         nameEl.innerText = c.name.common;
                         box.classList.remove('hidden');
                     }
-                    
                     countryUTCOffset = c.timezones ? c.timezones[0] : "UTC+00:00";
                     
+                    // ERROR FIX: Check latlng first, fallback to Capital Info
                     let lat = 0, lon = 0;
                     if(c.latlng && c.latlng.length === 2) {
                         [lat, lon] = c.latlng;
-                    } else if (c.capitalInfo && c.capitalInfo.latlng) {
+                    } else if (c.capitalInfo && c.capitalInfo.latlng && c.capitalInfo.latlng.length === 2) {
                         [lat, lon] = c.capitalInfo.latlng;
                     }
 
-                    if (lat || lon) fetchWeather(lat, lon);
+                    if (lat || lon) {
+                        fetchWeather(lat, lon);
+                    }
                     
                     document.getElementById('fact-pop-2').innerText = (c.population / 1000000).toFixed(1) + 'M';
                     document.getElementById('fact-gini-2').innerText = c.gini ? Object.values(c.gini)[0] : 'N/A';
@@ -1356,12 +1420,259 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                     document.getElementById('fact-area-2').innerText = c.area.toLocaleString() + ' km²';
 
                     fetchCurrency(); 
-                    updateSectorIntelligence(c.name.common); // ONE call for all AI data
+                    fetchDetailedEconomics(c.name.common); 
                     fetchNews();
                 }
             } catch (e) { console.error("Data Fetch Error", e); }
         }
+        async function fetchCurrency() {
+            const el = document.getElementById('fact-currency');
+            const elCode = document.getElementById('eco-currency-code');
+            const elRate = document.getElementById('eco-rate');
+            
+            if (!currencyCode || currencyCode === 'USD') { 
+                if (el) el.innerText = "1.00 USD";
+                if (elCode) elCode.innerText = "USD"; 
+                if (elRate) elRate.innerText = "1.00";  
+                return; 
+            }
+            if(elCode) elCode.innerText = currencyCode;
+            if(elRate) elRate.innerText = "Scanning...";
 
+            try {
+                const res = await fetch(`https://open.er-api.com/v6/latest/USD`);
+                const data = await res.json();
+                if (data && data.rates && data.rates[currencyCode]) {
+                    const rate = data.rates[currencyCode];
+                    if (el) el.innerText = `${rate.toFixed(2)} ${currencyCode}`;
+                    if (elRate) elRate.innerText = rate.toFixed(2);
+                } else {
+                    if (el) el.innerText = "Data Unavailable";
+                    if (elRate) elRate.innerText = "---";
+                }
+            } catch (e) { 
+                console.error("Currency Error:", e);
+                if (el) el.innerText = "Offline"; 
+                if (elRate) elRate.innerText = "ERR"; 
+            }
+        }
+        function getWeatherMeta(code, isDay = 1) {
+            const timeClass = isDay ? 'text-amber-400' : 'text-blue-300';
+            const codes = {
+                0: { text: "Clear Sky", icon: isDay ? "fa-sun" : "fa-moon", color: timeClass },
+                1: { text: "Mainly Clear", icon: isDay ? "fa-cloud-sun" : "fa-cloud-moon", color: "text-blue-200" },
+                2: { text: "Partly Cloudy", icon: "fa-cloud", color: "text-slate-300" },
+                3: { text: "Overcast", icon: "fa-cloud", color: "text-slate-400" },
+                45: { text: "Fog", icon: "fa-smog", color: "text-slate-400" },
+                48: { text: "Depositing Rime Fog", icon: "fa-smog", color: "text-slate-400" },
+                51: { text: "Light Drizzle", icon: "fa-cloud-rain", color: "text-blue-400" },
+                53: { text: "Moderate Drizzle", icon: "fa-cloud-rain", color: "text-blue-400" },
+                55: { text: "Dense Drizzle", icon: "fa-cloud-showers-heavy", color: "text-blue-400" },
+                61: { text: "Slight Rain", icon: "fa-cloud-rain", color: "text-blue-500" },
+                63: { text: "Moderate Rain", icon: "fa-cloud-showers-heavy", color: "text-blue-500" },
+                65: { text: "Heavy Rain", icon: "fa-cloud-showers-water", color: "text-blue-600" },
+                71: { text: "Slight Snow", icon: "fa-snowflake", color: "text-white" },
+                73: { text: "Moderate Snow", icon: "fa-snowflake", color: "text-white" },
+                75: { text: "Heavy Snow", icon: "fa-snowflake", color: "text-white" },
+                95: { text: "Thunderstorm", icon: "fa-bolt", color: "text-yellow-400" },
+                96: { text: "Thunderstorm/Hail", icon: "fa-poo-storm", color: "text-yellow-400" }
+            };
+            return codes[code] || { text: "Unknown", icon: "fa-meteor", color: "text-slate-500" };
+        }
+        function getMoonPhase() {
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            let c = 0, e = 0, jd = 0, b = 0;
+            if (month < 3) { year--; month += 12; }
+            ++month;
+            c = 365.25 * year;
+            e = 30.6 * month;
+            jd = c + e + day - 694039.09; 
+            jd /= 29.5305882; 
+            b = parseInt(jd); 
+            jd -= b; 
+            b = Math.round(jd * 8); 
+            if (b >= 8 ) b = 0; 
+            const phases = [
+                {t: "New Moon", i: "fa-circle"},
+                {t: "Waxing Crescent", i: "fa-moon"},
+                {t: "First Quarter", i: "fa-adjust"},
+                {t: "Waxing Gibbous", i: "fa-moon"}, 
+                {t: "Full Moon", i: "fa-circle text-white"},
+                {t: "Waning Gibbous", i: "fa-moon"},
+                {t: "Last Quarter", i: "fa-adjust"},
+                {t: "Waning Crescent", i: "fa-moon"}
+            ];
+            return phases[b];
+        }
+        async function fetchWeather(lat, lon) {
+    if (isNaN(lat) || isNaN(lon)) {
+        console.error("Invalid coordinates passed to weather module.");
+        return;
+    }
+
+    const params = new URLSearchParams({
+        latitude: lat,
+        longitude: lon,
+        current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,cloud_base_agl',
+        hourly: 'temperature_2m,weather_code,visibility,uv_index,precipitation_probability',
+        daily: 'weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum',
+        timezone: 'auto'
+    });
+
+    const url = `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Weather fetch failed');
+        const data = await res.json();
+
+        const curr = data.current;
+        const meta = getWeatherMeta(curr.weather_code, curr.is_day);
+        const todayHigh = data.daily.temperature_2m_max[0];
+        const todayLow = data.daily.temperature_2m_min[0];
+
+        document.getElementById('atmo-temp').innerText = `${Math.round(curr.temperature_2m)}°`;
+        document.getElementById('atmo-condition').innerText = meta.text;
+        document.getElementById('atmo-main-icon').className = `fas ${meta.icon} text-9xl ${meta.color} opacity-80`;
+        document.getElementById('atmo-feels').innerText = `${Math.round(curr.apparent_temperature)}°`;
+        document.getElementById('atmo-hl').innerText = `${Math.round(todayLow)}° / ${Math.round(todayHigh)}°`;
+
+        const sunrise = new Date(data.daily.sunrise[0]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        const sunset = new Date(data.daily.sunset[0]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        document.getElementById('atmo-sunrise').innerText = sunrise;
+        document.getElementById('atmo-sunset').innerText = sunset;
+
+        const hourlyContainer = document.getElementById('atmo-hourly-container');
+        hourlyContainer.innerHTML = '';
+        const currentHour = new Date().getHours();
+
+        for (let i = currentHour; i < currentHour + 24; i++) {
+            if (!data.hourly.time[i]) break;
+            const timeStr = new Date(data.hourly.time[i]).toLocaleTimeString([], { hour: 'numeric', hour12: true }).replace(' ', '');
+            const hTemp = Math.round(data.hourly.temperature_2m[i]);
+            const hCode = data.hourly.weather_code[i];
+            const hIsDay = (i % 24) > 6 && (i % 24) < 18 ? 1 : 0;
+            const hMeta = getWeatherMeta(hCode, hIsDay);
+            const hRain = data.hourly.precipitation_probability[i];
+
+            const hDiv = document.createElement('div');
+            hDiv.className = "flex flex-col items-center gap-2 min-w-[3.5rem] p-2 rounded-xl hover:bg-white/5 transition-colors cursor-default border border-transparent hover:border-white/5";
+            hDiv.innerHTML = `
+                <span class="text-[10px] text-slate-400 font-bold tracking-tight">${i === currentHour ? 'Now' : timeStr}</span>
+                <i class="fas ${hMeta.icon} text-lg ${hMeta.color}"></i>
+                <span class="text-[12px] font-bold text-white">${hTemp}°</span>
+                ${hRain > 20 ? `<span class="text-[9px] text-blue-400 font-bold">${hRain}%</span>` : ''}
+            `;
+            hourlyContainer.appendChild(hDiv);
+        }
+
+        document.getElementById('atmo-wind-speed').innerText = Math.round(curr.wind_speed_10m);
+        document.getElementById('atmo-wind-arrow').style.transform = `rotate(${curr.wind_direction_10m}deg)`;
+
+        const uvMax = data.daily.uv_index_max[0];
+        const uvPercent = Math.min((uvMax / 11) * 100, 100);
+        document.getElementById('atmo-uv-val').innerText = uvMax;
+        document.getElementById('atmo-uv-bar').style.width = `${uvPercent}%`;
+
+        let uvText = "Low";
+        if (uvMax > 2) uvText = "Moderate";
+        if (uvMax > 5) uvText = "High";
+        if (uvMax > 7) uvText = "Very High";
+        if (uvMax > 10) uvText = "Extreme";
+        document.getElementById('atmo-uv-text').innerText = uvText;
+
+        document.getElementById('atmo-humidity').innerText = `${curr.relative_humidity_2m}%`;
+        const dewCalc = curr.temperature_2m - ((100 - curr.relative_humidity_2m) / 5);
+        document.getElementById('atmo-dew').innerText = `${Math.round(dewCalc)}°`;
+
+        const visKm = data.hourly.visibility[currentHour] / 1000;
+        document.getElementById('atmo-visibility').innerText = visKm.toFixed(1);
+        document.getElementById('atmo-pressure').innerText = Math.round(curr.pressure_msl || curr.surface_pressure);
+
+        const moon = getMoonPhase();
+        document.getElementById('atmo-moon-text').innerText = moon.t;
+        document.getElementById('atmo-moon-icon').className = `fas ${moon.i} text-2xl text-indigo-300`;
+
+        const cloudBase = curr.cloud_base_agl || 0;
+        const precipTotal = data.daily.precipitation_sum ? data.daily.precipitation_sum[0] : 0;
+
+        document.getElementById('atmo-cloud-base').innerText = (cloudBase / 1000).toFixed(1);
+        document.getElementById('atmo-precip-total').innerText = precipTotal.toFixed(1);
+
+        const dailyContainer = document.getElementById('atmo-daily-container');
+        dailyContainer.innerHTML = '';
+        for (let i = 1; i < 7; i++) {
+            if (!data.daily.time[i]) break;
+            const dateObj = new Date(data.daily.time[i]);
+            const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+            const dMax = Math.round(data.daily.temperature_2m_max[i]);
+            const dMin = Math.round(data.daily.temperature_2m_min[i]);
+            const dCode = data.daily.weather_code[i];
+            const dMeta = getWeatherMeta(dCode, 1);
+            const dPrecipSum = data.daily.precipitation_sum[i];
+
+            const dRow = document.createElement('div');
+            dRow.className = "px-6 py-3 flex items-center justify-between hover:bg-white/5 transition-colors group";
+            dRow.innerHTML = `
+                <span class="text-[12px] text-slate-300 font-bold w-24">${dayName}</span>
+                <div class="flex items-center gap-3 w-32">
+                    <i class="fas ${dMeta.icon} ${dMeta.color} w-6 text-center"></i>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider group-hover:text-blue-400 transition-colors">${dMeta.text}</span>
+                </div>
+                <div class="flex items-center gap-4 text-right flex-1 justify-end">
+                    ${dPrecipSum > 0 ? `<div class="flex items-center gap-1 text-[10px] text-blue-400 font-bold"><i class="fas fa-umbrella"></i> ${Math.round(dPrecipSum)}mm</div>` : ''}
+                    <div class="font-mono text-xs font-bold text-white">
+                        <span class="text-slate-500">${dMin}°</span> / ${dMax}°
+                    </div>
+                </div>
+            `;
+            dailyContainer.appendChild(dRow);
+        }
+
+        window.playTacticalSound('success');
+    } catch (e) {
+        console.error("Advanced Atmosphere Error:", e);
+        document.getElementById('atmo-condition').innerHTML = `<span class="text-red-500 text-sm">OFFLINE <button onclick="window.location.reload()" class="underline ml-2">RETRY</button></span>`;
+    }
+}
+        window.switchTab = (id) => {
+            window.playTacticalSound('tab');
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            const tabBtn = Array.from(document.querySelectorAll('.nav-tab')).find(btn => btn.innerText.toLowerCase().includes(id.toLowerCase()));
+            if (tabBtn) tabBtn.classList.add('active');
+            const targetContent = document.getElementById(`tab-${id}`);
+            if (targetContent) targetContent.classList.add('active');
+        };
+        window.toggleProjection = () => { window.playTacticalSound('tab'); initMap(projectionType === '2d' ? '3d' : '2d'); };
+        window.selectFromSearch = (name) => {
+            const country = worldFeatures.find(f => f.properties.name.toLowerCase().includes(name.toLowerCase()));
+            if(country) handleCountryClick(null, country);
+            else fetchAllData(name);
+            document.getElementById('search-overlay').classList.add('hidden');
+        };
+        window.zoomMap = (f) => {
+            window.playTacticalSound('click');
+            if (projectionType === '2d') svg.transition().duration(400).call(zoom.scaleBy, f);
+            else { currentProjection.scale(currentProjection.scale() * f); g.selectAll("path").attr("d", d3.geoPath().projection(currentProjection)); }
+        };
+        window.resetToGlobalCenter = () => {
+            selectedCountry = null; countryUTCOffset = null;
+            d3.selectAll(".country").classed("active", false);
+            document.getElementById('selected-country-name').innerText = "Global Surveillance";
+            document.getElementById('ai-briefing-box').classList.add('hidden');
+            const flagBox = document.getElementById('active-sector-display');
+            if(flagBox) flagBox.classList.add('hidden');
+            if (projectionType === '2d') svg.transition().duration(1200).call(zoom.transform, d3.zoomIdentity);
+            fetchNews();
+        };
+        window.goToIndiaHome = () => { 
+            const india = worldFeatures.find(f => f.properties.name === "India"); 
+            if (india) handleCountryClick(null, india); 
+        };
         function setupEventListeners() {
             document.querySelectorAll('.category-pill').forEach(pill => {
                 pill.onmouseenter = () => window.playTacticalSound('hover');
@@ -1377,9 +1688,19 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
             input.oninput = (e) => {
                 const query = e.target.value.toLowerCase().trim();
                 const resContainer = document.getElementById('search-results');
-                if (!query) { renderTrending(); return; }
-                if (!globalSearchData || globalSearchData.length === 0) return;
+                if (!query) { 
+                    renderTrending(); 
+                    return; 
+                }
+                if (!globalSearchData || globalSearchData.length === 0) {
+                    resContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 font-bold uppercase tracking-widest animate-pulse">Initializing Search Index...</div>`;
+                    return;
+                }
                 const matched = globalSearchData.filter(c => c.name.common.toLowerCase().includes(query)).slice(0, 8);
+                if (matched.length === 0) {
+                    resContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 font-bold uppercase tracking-widest">Sector Not Found</div>`;
+                    return;
+                }
                 resContainer.innerHTML = matched.map(c => `
                     <div class="p-4 hover:bg-blue-600/10 cursor-pointer flex items-center gap-4 border-b border-white/5 transition-all group" onclick="window.selectFromSearch('${c.name.common.replace(/'/g, "\\'")}')">
                         <div class="w-8 h-5 rounded shadow-sm overflow-hidden relative border border-white/10 group-hover:border-blue-400/50">
@@ -1387,7 +1708,8 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                         </div>
                         <span class="font-bold text-white text-sm tracking-tight group-hover:text-blue-300 transition-colors">${c.name.common}</span>
                         <i class="fas fa-chevron-right ml-auto text-[10px] text-slate-600 group-hover:text-blue-400"></i>
-                    </div>`).join('');
+                    </div>
+                `).join('');
             };
             window.onkeydown = (e) => {
                 if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); toggleSearch(); }
@@ -1397,15 +1719,65 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                 }
             };
         }
-
+        function updateSystemTime() {
+            const now = new Date();
+            document.getElementById('system-time').innerText = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            if (countryUTCOffset) {
+                const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                let off = 0; const match = countryUTCOffset.match(/UTC([+-]\d+):?(\d+)?/);
+                if (match) off = (parseInt(match[1]) * 60) + (match[2] ? parseInt(match[2]) : 0);
+                const localDate = new Date(utc + (60000 * off));
+                const localEl = document.getElementById('local-time');
+                if (localEl) localEl.innerText = localDate.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const hr = localDate.getHours();
+                const isNight = hr < 6 || hr > 18;
+                document.body.classList.toggle('night-mode', isNight);
+                document.body.classList.toggle('day-mode', !isNight);
+            }
+        }
+        window.activateVoice = () => {
+            window.playTacticalSound('click');
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) { alert("Voice module offline (Browser not supported)"); return; }
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.start();
+            const btn = document.querySelector('.fa-microphone');
+            btn.classList.add('text-red-500', 'animate-pulse');
+            recognition.onresult = (event) => {
+                const command = event.results[0][0].transcript.toLowerCase().replace('.', '');
+                console.log("Voice Command:", command);
+                btn.classList.remove('text-red-500', 'animate-pulse');
+                if (command.includes("go to")) {
+                    const country = command.replace("go to ", "").trim();
+                    window.selectFromSearch(country);
+                    appendLog(`> VOICE COMMAND: VECTORING TO [${country.toUpperCase()}]`, 'text-red-400');
+                } else if (command.includes("analyze")) {
+                    window.switchTab('intel');
+                    appendLog(`> VOICE COMMAND: INITIATING ANALYSIS`, 'text-red-400');
+                } else if (command.includes("news")) {
+                    window.switchTab('news');
+                }
+            };
+            recognition.onerror = () => {
+                btn.classList.remove('text-red-500', 'animate-pulse');
+            };
+        };
         initTerminal();
         initMap('2d');
         setupEventListeners();
         setInterval(updateSystemTime, 1000);
-        document.addEventListener('click', () => { if (!isAmbiencePlaying) toggleAmbience(); }, { once: true });
+        document.addEventListener('click', function() {
+            if (!isAmbiencePlaying) {
+                toggleAmbience();
+            }
+        }, { once: true });
         window.addEventListener('resize', () => {
             const c = document.getElementById('map-container');
-            if(c) { d3.select("#world-map").attr("viewBox", `0 0 ${c.clientWidth} ${c.clientHeight}`); initMap(projectionType); }
+            if(c) { 
+                d3.select("#world-map").attr("viewBox", `0 0 ${c.clientWidth} ${c.clientHeight}`);
+                initMap(projectionType); 
+            }
         });
     </script>
 </body>

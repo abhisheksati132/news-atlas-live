@@ -23,16 +23,17 @@ export default async function handler(req, res) {
         let responseText = "";
 
         if (prompt.includes("briefing") || prompt.includes("tactical") || prompt.includes("intel")) {
-            responseText = `>> SECURE LINK ESTABLISHED. LIVE FEED OFFLINE.
-            
-[GEOPOLITICAL]
-Regional stability index is MODERATE. Diplomatic channels indicate heightened activity regarding trade sanctions. Border surveillance indicates normal traffic flow with minor irregularities in sector 4.
-
-[DOMESTIC]
-Civil sentiment remains stable (Index: 84.2). No significant unrest detected. Local law enforcement reports nominal baseline activity.
-
-[INFRASTRUCTURE]
-Cyber-grid integrity at 98%. Power and logistics networks operating within nominal parameters. No immediate physical threats detected.`;
+            responseText = `[STRATEGIC METRICS DASHBOARD]
+1. [GOV_STABILITY]: 68/100 (Moderate) - Executive branch facing legislative gridlock.
+2. [BORDER_INTEGRITY]: 92% - Surveillance nominal, minor infractions in Sector 4.
+3. [CYBER_THREAT]: HIGH - Active state-sponsored probing on grid infrastructure.
+4. [CIVIL_UNREST]: LOW - Isolated protests restricted to metropolitan centers.
+5. [MILITARY_READINESS]: DEFCON 4 - Standard peacetime operations; naval exercises ongoing.
+6. [ENERGY_RESERVES]: 85% - Strategic petroleum stockpiles above seasonal average.
+7. [SUPPLY_CHAIN]: STRESSED - Semiconductor imports delayed by 2 weeks.
+8. [INFLATION_PRESSURE]: RISING - CPI projections adjusted upward to 4.5%.
+9. [FOREIGN_RELATIONS]: STRAINED - Diplomatic channels with trade partners are tense.
+10. [INFRASTRUCTURE]: NOMINAL - Power and logistics networks operating at 98% efficiency.`;
         } 
         else if (prompt.includes("stock market") || prompt.includes("indices") || prompt.includes("market")) {
             responseText = `[GLOBAL INDICES]
@@ -43,8 +44,8 @@ Cyber-grid integrity at 98%. Power and logistics networks operating within nomin
 • FTSE 100: 7,950.30 (+0.3%) - Financials Stable
 
 [COMMODITIES & FOREX]
-• Gold (Spot): 2,320.10 (Safe Haven Inflow)
-• Silver (Spot): 28.15 (Industrial Demand High)
+• GOLD_PRICE: 2,320.10
+• SILVER_PRICE: 28.15
 • Crude Oil (WTI): 82.40 (+1.5% - Supply Tightening)
 • EUR/USD: 1.085 (Neutral)
 
@@ -61,7 +62,7 @@ Global equity markets are exhibiting high variance due to shifting interest rate
                 interest_rate: "6.5",
                 debt_to_gdp: "84",
                 major_exports: ["Technology", "Refined Petroleum", "Pharmaceuticals"],
-                market_summary: "VOLATILITY DETECTED. ASSETS STABLE."
+                market_summary: "Market volatility has increased significantly following the latest central bank announcements. Industrial output remains sluggish, but the services sector is showing unexpected resilience. Investors are pivoting toward defensive assets as global trade tensions escalate."
             };
             responseText = JSON.stringify(jsonResponse);
         }
@@ -99,7 +100,7 @@ Global equity markets are exhibiting high variance due to shifting interest rate
                     { role: "user", content: body.prompt }
                 ],
                 temperature: 0.5,
-                max_tokens: 600
+                max_tokens: 800
             })
         });
 

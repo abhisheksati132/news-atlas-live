@@ -1212,13 +1212,13 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                     body: JSON.stringify({ 
                         prompt: `
                             Target Sector: ${loc}. 
-                            Generate a high-level Intelligence Dossier.
-                            Structure required:
-                            1. [GEOPOLITICAL]: Current stability and key active threats.
-                            2. [DOMESTIC]: Civil unrest levels or significant social shifts.
-                            3. [INFRASTRUCTURE]: Cyber/Physical grid status.
-                            Tone: Strict military/intelligence. Concise but high-density.
-                            Limit: Approx 100 words.
+                            Generate a high-density Intelligence Dossier with exactly 10 numbered strategic metrics.
+                            Format:
+                            1. [METRIC_NAME]: Value/Status - Brief Context.
+                            ...
+                            10. [METRIC_NAME]: Value/Status - Brief Context.
+                            Include metrics like Political Stability, Border Integrity, Cyber Threat, Civil Unrest, Military Readiness, Energy Reserves, Supply Chain, Inflation, Foreign Relations, and Infrastructure.
+                            Tone: Strict military/intelligence.
                         ` 
                     })
                 });
@@ -1309,9 +1309,11 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                 • Index: Value (Change%) - Context
                 • Index: Value (Change%) - Context
                 [COMMODITIES & FOREX]
+                • GOLD_PRICE: 2345.67 (Example)
+                • SILVER_PRICE: 28.90 (Example)
                 • Asset: Price (Context)
                 [STRATEGIC ANALYSIS]
-                3-4 sentences on market sentiment, sector performance, and risk factors.`;
+                3-4 detailed sentences on market sentiment, sector performance, and risk factors.`;
                 
                 const res = await fetch('/api/ai', {
                     method: 'POST',
@@ -1322,10 +1324,12 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                 const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Market data unavailable.";
                 if(textEl) textEl.innerText = responseText;
                 
-                const goldMatch = responseText.match(/Gold.*?([\d,.]+)/);
-                const silverMatch = responseText.match(/Silver.*?([\d,.]+)/);
+                const goldMatch = responseText.match(/GOLD_PRICE:\s*([\d,.]+)/i);
+                const silverMatch = responseText.match(/SILVER_PRICE:\s*([\d,.]+)/i);
+                
                 if(goldEl && goldMatch) goldEl.innerText = goldMatch[1];
                 if(silverEl && silverMatch) silverEl.innerText = silverMatch[1];
+                
                 window.playTacticalSound('success');
             } catch (e) {
                 if(textEl) textEl.innerText = "Financial uplink failed.";

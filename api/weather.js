@@ -14,11 +14,12 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: "Missing coordinates" });
     }
 
+    // SAFE PARAMETERS LIST - Removes conflicting variables
     const params = new URLSearchParams({
         latitude: lat,
         longitude: lon,
         current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m',
-        hourly: 'temperature_2m,weather_code,visibility,uv_index,precipitation_probability,cloud_base_agl',
+        hourly: 'temperature_2m,weather_code,visibility,uv_index,precipitation_probability', // Removed cloud_base_agl to prevent 400 errors
         daily: 'weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum',
         timezone: 'auto'
     });
@@ -27,7 +28,11 @@ export default async function handler(req, res) {
 
     try {
         const response = await fetch(url);
-        if (!response.ok) throw new Error("Weather API failed");
+        if (!response.ok) {
+            const errText = await response.text();
+            console.error("OpenMeteo Error:", errText);
+            throw new Error("Weather API failed");
+        }
         const data = await response.json();
         res.status(200).json(data);
     } catch (error) {

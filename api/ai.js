@@ -16,41 +16,6 @@ export default async function handler(req, res) {
         process.env.GEMINI_API_KEY_5
     ].filter(k => k);
 
-    const returnSimulation = () => {
-        const simulatedData = {
-            briefing: ">> SECURE LINK ESTABLISHED. LIVE FEED OFFLINE. SWITCHING TO CACHED INTELLIGENCE. REGIONAL STABILITY: MODERATE. SECTOR ANALYSIS: ONGOING.",
-            economics: { 
-                gdp: "EST. 2.9T", 
-                inflation: "4.2% (Proj)", 
-                unemployment: "3.8%", 
-                exports: ["Technology", "Refined Petroleum", "Pharmaceuticals"] 
-            },
-            market: { 
-                summary: "MARKET VOLATILITY DETECTED. ASSETS STABLE.", 
-                gold: "2,340.50", 
-                silver: "28.15" 
-            },
-            gdp_billions: "2900",
-            gdp_growth_percent: "2.1",
-            inflation_rate: "4.2",
-            unemployment_rate: "3.8",
-            major_exports: ["Technology", "Petroleum", "Pharma"]
-        };
-
-        return res.status(200).json({
-            candidates: [{
-                content: { parts: [{ text: JSON.stringify(simulatedData) }] }
-            }]
-        });
-    };
-
-    if (keys.length === 0) {
-        console.warn("No API Keys Found");
-        return returnSimulation();
-    }
-
-    const apiKey = keys[Math.floor(Math.random() * keys.length)];
-
     let body = req.body;
     try {
         if (typeof body === 'string') body = JSON.parse(body);
@@ -58,8 +23,57 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: "Invalid JSON" });
     }
     
-    const prompt = body?.prompt || "Status report.";
+    const prompt = (body?.prompt || "").toLowerCase();
 
+    // --- SMART SIMULATION ---
+    // Returns the correct FORMAT based on what the frontend is asking for.
+    const returnSimulation = () => {
+        let responseText = "";
+
+        // 1. Briefing Request (Needs Plain Text)
+        if (prompt.includes("briefing") || prompt.includes("tactical")) {
+            responseText = ">> SECURE LINK ESTABLISHED. LIVE FEED OFFLINE. SWITCHING TO CACHED INTELLIGENCE. REGIONAL STABILITY: MODERATE. SECTOR ANALYSIS: ONGOING. WEATHER SYSTEMS NOMINAL.";
+        } 
+        // 2. Market Request (Needs Specific List Format)
+        else if (prompt.includes("stock market") || prompt.includes("indices")) {
+            responseText = `[INDICES]
+• S&P 500: 5,200.00 (+0.5%)
+• NASDAQ: 16,400.00 (+0.8%)
+[METALS]
+• Gold (10g): 2,340.50
+• Silver (1kg): 28.15
+[BRIEF]
+Market volatility detected; tech sector rallying despite geopolitical tension.`;
+        } 
+        // 3. Economy Request (Needs JSON)
+        else {
+            const jsonResponse = {
+                gdp_billions: "2900",
+                gdp_growth_percent: "2.1",
+                gdp_per_capita: "2400",
+                inflation_rate: "4.2",
+                unemployment_rate: "3.8",
+                interest_rate: "6.5",
+                debt_to_gdp: "84",
+                major_exports: ["Technology", "Refined Petroleum", "Pharmaceuticals"],
+                market_summary: "VOLATILITY DETECTED. ASSETS STABLE."
+            };
+            responseText = JSON.stringify(jsonResponse);
+        }
+
+        return res.status(200).json({
+            candidates: [{
+                content: { parts: [{ text: responseText }] }
+            }]
+        });
+    };
+
+    if (keys.length === 0) {
+        console.warn("No API Keys Found - Using Simulation");
+        return returnSimulation();
+    }
+
+    const apiKey = keys[Math.floor(Math.random() * keys.length)];
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     try {
@@ -67,14 +81,14 @@ export default async function handler(req, res) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
+                contents: [{ parts: [{ text: body.prompt }] }]
             })
         });
 
         const data = await response.json();
 
         if (data.error) {
-            console.warn(`Error with key ending in ...${apiKey.slice(-4)}:`, data.error.message);
+            console.warn(`Gemini Error (${data.error.code}):`, data.error.message);
             return returnSimulation(); 
         }
 

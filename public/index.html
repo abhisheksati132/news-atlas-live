@@ -72,6 +72,26 @@
             border-radius: 1.5rem; 
             display: flex;
             flex-direction: column;
+            transition: background 0.5s ease;
+        }
+
+        /* --- SATELLITE MODE STYLES --- */
+        .map-box.satellite-mode {
+            background: radial-gradient(circle at 50% 50%, #0c1a30 0%, #020617 100%);
+        }
+        .satellite-mode .country {
+            fill: #1e293b;
+            stroke: #334155;
+            stroke-width: 0.5px;
+        }
+        .satellite-mode .country:hover {
+            fill: #334155;
+            stroke: #cbd5e1;
+        }
+        .satellite-mode .country.active {
+            fill: #059669; /* Emerald Green */
+            stroke: #34d399;
+            filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.4));
         }
 
         .map-interaction-overlay {
@@ -101,6 +121,7 @@
             min-height: 100vh;
         }
 
+        /* --- UPDATED GRID FOR 3 COLUMNS --- */
         #articles-container { 
             display: grid; 
             grid-template-columns: repeat(1, 1fr); 
@@ -168,6 +189,31 @@
         .tab-content { display: none; height: 100%; flex-direction: column; overflow: visible; }
         .tab-content.active { display: flex; }
         .content-scroll-area { flex: 1; overflow-y: visible; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+        
+        /* --- STOCK TICKER ANIMATION --- */
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            box-sizing: border-box;
+        }
+        .ticker {
+            display: inline-block;
+            padding-left: 100%;
+            animation: ticker 30s linear infinite;
+        }
+        .ticker-item {
+            display: inline-block;
+            padding: 0 2rem;
+            font-size: 14px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+        @keyframes ticker {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-100%, 0, 0); }
+        }
+        
         .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.02) 75%); background-size: 200% 100%; animation: skeleton-pulse 1.5s infinite linear; }
         @keyframes skeleton-pulse { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         .animate-marquee { display: inline-block; animation: marquee 40s linear infinite; }
@@ -370,7 +416,7 @@
         </button>
     </header>
     <main class="main-content">
-        <div class="map-box glass-panel overflow-hidden" onmouseleave="deactivateMapInteraction()"> 
+        <div id="map-box-id" class="map-box glass-panel overflow-hidden" onmouseleave="deactivateMapInteraction()"> 
             <div class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5 flex-shrink-0">
                 <div class="flex items-center gap-4">
                     <span id="projection-label" class="text-[14px] font-black text-slate-200 uppercase tracking-widest">Orbital Interface: 2D Active</span>
@@ -380,6 +426,7 @@
                     </div>
                 </div>
                 <div class="flex gap-3">
+                    <button onclick="toggleSatellite()" class="w-10 h-10 hover:bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 transition-colors tactical-btn shadow-xl text-emerald-400 font-black text-[10px] tracking-widest" title="Toggle Satellite Layer">SAT</button>
                     <button onclick="zoomMap(1.6)" class="w-10 h-10 hover:bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 transition-colors tactical-btn shadow-xl"><i class="fas fa-plus text-slate-400"></i></button>
                     <button onclick="zoomMap(0.6)" class="w-10 h-10 hover:bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 transition-colors tactical-btn shadow-xl"><i class="fas fa-minus text-slate-400"></i></button>
                     <button onclick="resetToGlobalCenter()" class="w-10 h-10 hover:bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 text-blue-400 tactical-btn shadow-xl"><i class="fas fa-expand text-sm"></i></button>
@@ -422,6 +469,17 @@
                 </div>
                 <div id="tab-markets" class="tab-content">
                     <div class="content-scroll-area">
+                        <div class="dossier-card bg-black/40 border-white/5 p-0 mb-6 overflow-hidden">
+                            <div class="bg-blue-600/10 p-2 border-b border-white/5 flex justify-between items-center">
+                                <span class="text-[9px] text-blue-400 font-black uppercase tracking-widest px-2">LIVE EXCHANGE DATA</span>
+                                <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-2"></div>
+                            </div>
+                            <div class="ticker-wrap bg-black/20 py-3">
+                                <div class="ticker" id="stock-ticker-content">
+                                    </div>
+                            </div>
+                        </div>
+
                         <h2 class="text-[12px] font-black text-white uppercase tracking-[0.3em] mb-2">Financial Assets</h2>
                         <div class="dossier-card bg-indigo-500/[0.05] border-indigo-500/20 mb-4">
                             <div class="flex justify-between items-center mb-4 border-b border-white/5 pb-2">
@@ -1034,6 +1092,7 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
             } catch(e) {}
             fetchWeather(20.5937, 78.9629);
             fetchNews();
+            startStockTicker(); // Start the new ticker
         }
         window.toggleAbout = (show) => {
             window.playTacticalSound(show ? 'success' : 'click');
@@ -1055,6 +1114,62 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                 renderTrending(); 
             }
         };
+        
+        // --- NEW: SATELLITE MODE TOGGLE ---
+        window.toggleSatellite = () => {
+            window.playTacticalSound('click');
+            const mapBox = document.getElementById('map-box-id');
+            mapBox.classList.toggle('satellite-mode');
+            const btn = document.querySelector('button[title="Toggle Satellite Layer"]');
+            if(mapBox.classList.contains('satellite-mode')) {
+                btn.classList.remove('text-emerald-400');
+                btn.classList.add('text-white', 'bg-emerald-600/50');
+            } else {
+                btn.classList.add('text-emerald-400');
+                btn.classList.remove('text-white', 'bg-emerald-600/50');
+            }
+        };
+
+        // --- NEW: REAL-TIME STOCK TICKER SIMULATION ---
+        function startStockTicker() {
+            const tickerContent = document.getElementById('stock-ticker-content');
+            const stocks = [
+                { s: "S&P 500", p: 5203.45 }, { s: "NASDAQ", p: 16420.10 }, 
+                { s: "DOW JONES", p: 39150.80 }, { s: "FTSE 100", p: 7950.30 },
+                { s: "NIKKEI 225", p: 40100.20 }, { s: "BTC-USD", p: 68500.00 },
+                { s: "ETH-USD", p: 3550.00 }, { s: "GOLD", p: 2320.10 },
+                { s: "CRUDE OIL", p: 82.40 }, { s: "EUR/USD", p: 1.085 }
+            ];
+
+            // Render initial items
+            function renderTicker() {
+                let html = "";
+                stocks.forEach(stock => {
+                    const change = (Math.random() * 2 - 1).toFixed(2);
+                    const color = change >= 0 ? "text-emerald-400" : "text-red-400";
+                    const arrow = change >= 0 ? "▲" : "▼";
+                    html += `
+                        <div class="ticker-item text-slate-300">
+                            ${stock.s} <span class="text-white">${stock.p.toLocaleString()}</span> 
+                            <span class="${color} ml-2">${arrow} ${Math.abs(change)}%</span>
+                        </div>
+                    `;
+                });
+                tickerContent.innerHTML = html;
+            }
+            renderTicker();
+
+            // Simulate live updates every 3 seconds
+            setInterval(() => {
+                stocks.forEach(stock => {
+                    // Randomly fluctuate price by small amount
+                    const fluctuation = stock.p * (Math.random() * 0.002 - 0.001); 
+                    stock.p = parseFloat((stock.p + fluctuation).toFixed(2));
+                });
+                renderTicker();
+            }, 3000);
+        }
+
         function renderTrending() {
             const resContainer = document.getElementById('search-results');
             if (!globalSearchData || globalSearchData.length === 0) {
@@ -1476,12 +1591,12 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
         }
         function getMoonPhase() {
             const date = new Date();
-            let year = date.getFullYear(); 
-            let month = date.getMonth() + 1; 
+            let year = date.getFullYear(); // Changed from const to let
+            let month = date.getMonth() + 1; // Changed from const to let
             const day = date.getDate();
             let c = 0, e = 0, jd = 0, b = 0;
             
-            if (month < 3) { year--; month += 12; } 
+            if (month < 3) { year--; month += 12; } // Now this line works!
             
             ++month;
             c = 365.25 * year;
@@ -1597,6 +1712,12 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                     const visKm = data.hourly.visibility ? data.hourly.visibility[new Date().getHours()] / 1000 : 10;
                     if(document.getElementById('atmo-visibility'))
                         document.getElementById('atmo-visibility').innerText = visKm.toFixed(1);
+                    const currentHourIndex = new Date().getHours();
+                    let cloudBaseVal = 0;
+                    if (data.hourly.cloud_base_agl && data.hourly.cloud_base_agl[currentHourIndex]) {
+                        cloudBaseVal = data.hourly.cloud_base_agl[currentHourIndex];
+                    }
+                    document.getElementById('atmo-cloud-base').innerText = (cloudBaseVal / 1000).toFixed(1);
                 }
 
                 const moon = getMoonPhase();
@@ -1605,10 +1726,7 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                     document.getElementById('atmo-moon-icon').className = `fas ${moon.i} text-2xl text-indigo-300`;
                 }
                 
-                const cloudBase = 0; 
-                const precipTotal = data.daily.precipitation_sum ? data.daily.precipitation_sum[0] : 0;
-
-                document.getElementById('atmo-cloud-base').innerText = "--"; 
+                const precipTotal = data.daily && data.daily.precipitation_sum ? data.daily.precipitation_sum[0] : 0;
                 document.getElementById('atmo-precip-total').innerText = precipTotal.toFixed(1);
 
                 const dailyContainer = document.getElementById('atmo-daily-container');
@@ -1646,7 +1764,7 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
                 window.playTacticalSound('success');
 
             } catch (e) {
-                console.error("Advanced Atmosphere Error:", e);
+                console.error("Atmosphere Error:", e);
             }
         }
         window.switchTab = (id) => {

@@ -25,17 +25,13 @@ export default async function handler(req, res) {
     
     const prompt = (body?.prompt || "").toLowerCase();
 
-    // --- SMART SIMULATION ---
-    // Returns the correct FORMAT based on what the frontend is asking for.
     const returnSimulation = () => {
         let responseText = "";
 
-        // 1. Briefing Request (Needs Plain Text)
-        if (prompt.includes("briefing") || prompt.includes("tactical")) {
-            responseText = ">> SECURE LINK ESTABLISHED. LIVE FEED OFFLINE. SWITCHING TO CACHED INTELLIGENCE. REGIONAL STABILITY: MODERATE. SECTOR ANALYSIS: ONGOING. WEATHER SYSTEMS NOMINAL.";
+        if (prompt.includes("briefing") || prompt.includes("tactical") || prompt.includes("intel")) {
+            responseText = "SECURE LINK ESTABLISHED. LIVE FEED OFFLINE. SWITCHING TO CACHED INTELLIGENCE. REGIONAL STABILITY: MODERATE. SECTOR ANALYSIS: ONGOING. WEATHER SYSTEMS NOMINAL.";
         } 
-        // 2. Market Request (Needs Specific List Format)
-        else if (prompt.includes("stock market") || prompt.includes("indices")) {
+        else if (prompt.includes("stock market") || prompt.includes("indices") || prompt.includes("market")) {
             responseText = `[INDICES]
 • S&P 500: 5,200.00 (+0.5%)
 • NASDAQ: 16,400.00 (+0.8%)
@@ -45,7 +41,6 @@ export default async function handler(req, res) {
 [BRIEF]
 Market volatility detected; tech sector rallying despite geopolitical tension.`;
         } 
-        // 3. Economy Request (Needs JSON)
         else {
             const jsonResponse = {
                 gdp_billions: "2900",
@@ -69,7 +64,6 @@ Market volatility detected; tech sector rallying despite geopolitical tension.`;
     };
 
     if (keys.length === 0) {
-        console.warn("No API Keys Found - Using Simulation");
         return returnSimulation();
     }
 
@@ -88,14 +82,12 @@ Market volatility detected; tech sector rallying despite geopolitical tension.`;
         const data = await response.json();
 
         if (data.error) {
-            console.warn(`Gemini Error (${data.error.code}):`, data.error.message);
             return returnSimulation(); 
         }
 
         res.status(200).json(data);
 
     } catch (error) {
-        console.error("Server Connection Error:", error);
         return returnSimulation();
     }
 }

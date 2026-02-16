@@ -18,6 +18,20 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        window.upgradeToGoogle = async () => {
+        const auth = getAuth();
+        const provider = new GoogleAuthProvider();
+        if (auth.currentUser && auth.currentUser.isAnonymous) {
+            try {
+                const result = await linkWithPopup(auth.currentUser, provider);
+                const user = result.user;
+                document.getElementById('neural-id').innerText = `ID: ${user.displayName.toUpperCase()}`;
+                window.playTacticalSound('success');
+            } catch (error) {
+                console.error("Linking failed", error);
+                }
+            }
+        };
         window.firebaseCore = { initializeApp, getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp };
     </script>
     <style>

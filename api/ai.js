@@ -24,33 +24,33 @@ export default async function handler(req, res) {
 
         if (prompt.includes("briefing") || prompt.includes("tactical") || prompt.includes("intel")) {
             responseText = `[STRATEGIC METRICS DASHBOARD]
-1. [GOV_STABILITY]: 68/100 (Moderate) - Executive branch facing legislative gridlock.
-2. [BORDER_INTEGRITY]: 92% - Surveillance nominal, minor infractions in Sector 4.
-3. [CYBER_THREAT]: HIGH - Active state-sponsored probing on grid infrastructure.
-4. [CIVIL_UNREST]: LOW - Isolated protests restricted to metropolitan centers.
-5. [MILITARY_READINESS]: DEFCON 4 - Standard peacetime operations; naval exercises ongoing.
-6. [ENERGY_RESERVES]: 85% - Strategic petroleum stockpiles above seasonal average.
-7. [SUPPLY_CHAIN]: STRESSED - Semiconductor imports delayed by 2 weeks.
-8. [INFLATION_PRESSURE]: RISING - CPI projections adjusted upward to 4.5%.
-9. [FOREIGN_RELATIONS]: STRAINED - Diplomatic channels with trade partners are tense.
-10. [INFRASTRUCTURE]: NOMINAL - Power and logistics networks operating at 98% efficiency.`;
+    1. [GOV_STABILITY]: 68/100 (Moderate) - Executive branch facing legislative gridlock.
+    2. [BORDER_INTEGRITY]: 92% - Surveillance nominal, minor infractions in Sector 4.
+    3. [CYBER_THREAT]: HIGH - Active state-sponsored probing on grid infrastructure.
+    4. [CIVIL_UNREST]: LOW - Isolated protests restricted to metropolitan centers.
+    5. [MILITARY_READINESS]: DEFCON 4 - Standard peacetime operations; naval exercises ongoing.
+    6. [ENERGY_RESERVES]: 85% - Strategic petroleum stockpiles above seasonal average.
+    7. [SUPPLY_CHAIN]: STRESSED - Semiconductor imports delayed by 2 weeks.
+    8. [INFLATION_PRESSURE]: RISING - CPI projections adjusted upward to 4.5%.
+    9. [FOREIGN_RELATIONS]: STRAINED - Diplomatic channels with trade partners are tense.
+    10. [INFRASTRUCTURE]: NOMINAL - Power and logistics networks operating at 98% efficiency.`;
         } 
         else if (prompt.includes("stock market") || prompt.includes("indices") || prompt.includes("market")) {
             responseText = `[GLOBAL INDICES]
-• S&P 500: 5,203.45 (+0.5%) - Tech & Semis Leading
-• NASDAQ: 16,420.10 (+0.8%) - AI Sector Breakout
-• DOW JONES: 39,150.80 (-0.1%) - Manufacturing Drag
-• NIKKEI 225: 40,100.20 (+1.2%) - Export Strength
-• FTSE 100: 7,950.30 (+0.3%) - Financials Stable
+    • S&P 500: 5,203.45 (+0.5%) - Tech & Semis Leading
+    • NASDAQ: 16,420.10 (+0.8%) - AI Sector Breakout
+    • DOW JONES: 39,150.80 (-0.1%) - Manufacturing Drag
+    • NIKKEI 225: 40,100.20 (+1.2%) - Export Strength
+    • FTSE 100: 7,950.30 (+0.3%) - Financials Stable
 
-[COMMODITIES & FOREX]
-• GOLD_PRICE: 2,320.10
-• SILVER_PRICE: 28.15
-• Crude Oil (WTI): 82.40 (+1.5% - Supply Tightening)
-• EUR/USD: 1.085 (Neutral)
+    [COMMODITIES & FOREX]
+    • GOLD_PRICE: 2,320.10
+    • SILVER_PRICE: 28.15
+    • Crude Oil (WTI): 82.40 (+1.5% - Supply Tightening)
+    • EUR/USD: 1.085 (Neutral)
 
-[STRATEGIC ANALYSIS]
-Global equity markets are exhibiting high variance due to shifting interest rate expectations. The technology sector remains the primary driver of liquidity, obscuring weaknesses in traditional manufacturing. Geopolitical friction in energy-producing regions is creating upward pressure on crude futures, signaling potential inflationary headwinds next quarter.`;
+    [STRATEGIC ANALYSIS]
+    Global equity markets are exhibiting high variance due to shifting interest rate expectations. The technology sector remains the primary driver of liquidity, obscuring weaknesses in traditional manufacturing. Geopolitical friction in energy-producing regions is creating upward pressure on crude futures, signaling potential inflationary headwinds next quarter.`;
         } 
         else {
             const jsonResponse = {

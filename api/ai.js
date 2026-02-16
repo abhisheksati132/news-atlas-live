@@ -8,7 +8,13 @@ export default async function handler(req, res) {
 
     if (req.method === "OPTIONS") return res.status(200).end();
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const keys = [
+        process.env.GEMINI_API_KEY,
+        process.env.GEMINI_API_KEY_2,
+        process.env.GEMINI_API_KEY_3,
+        process.env.GEMINI_API_KEY_4,
+        process.env.GEMINI_API_KEY_5
+    ].filter(k => k);
 
     const returnSimulation = () => {
         const simulatedData = {
@@ -38,10 +44,12 @@ export default async function handler(req, res) {
         });
     };
 
-    if (!apiKey) {
-        console.warn("API Key Missing");
+    if (keys.length === 0) {
+        console.warn("No API Keys Found");
         return returnSimulation();
     }
+
+    const apiKey = keys[Math.floor(Math.random() * keys.length)];
 
     let body = req.body;
     try {
@@ -66,7 +74,7 @@ export default async function handler(req, res) {
         const data = await response.json();
 
         if (data.error) {
-            console.warn("Gemini API Error:", data.error.message);
+            console.warn(`Error with key ending in ...${apiKey.slice(-4)}:`, data.error.message);
             return returnSimulation(); 
         }
 

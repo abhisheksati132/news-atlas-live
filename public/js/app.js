@@ -1,56 +1,33 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, GoogleAuthProvider, linkWithPopup, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, linkWithPopup, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-// --- EXPOSE FIREBASE TO WINDOW (Fixed Missing Function) ---
+// --- EXPOSE FIREBASE ---
 window.firebaseCore = { 
     initializeApp, getAuth, onAuthStateChanged, signInAnonymously, 
-    signInWithCustomToken, getFirestore, doc, collection, 
-    onSnapshot, setDoc, deleteDoc, serverTimestamp,
-    GoogleAuthProvider, linkWithPopup, signInWithPopup // <--- THIS WAS MISSING
+    getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp,
+    GoogleAuthProvider, linkWithPopup, signInWithPopup
 };
 
-// --- SMART LOGIN FUNCTION ---
+// --- ROBUST LOGIN FUNCTION (No Conflicts) ---
 window.upgradeToGoogle = async () => {
     const btn = document.querySelector('button[title="Verify Identity"]');
     const originalContent = btn.innerHTML;
+    
+    // 1. Loading State
     btn.innerHTML = '<i class="fas fa-spinner fa-spin text-2xl text-yellow-500"></i>';
     
     const auth = window.firebaseCore.getAuth();
     const provider = new window.firebaseCore.GoogleAuthProvider();
 
     try {
-        if (auth.currentUser) {
-            // 1. Try to LINK (Upgrade Guest -> Google)
-            await window.firebaseCore.linkWithPopup(auth.currentUser, provider);
-        }
-    } catch (error) {
-        // 2. If already linked, Force SIGN IN instead
-        if (error.code === 'auth/credential-already-in-use') {
-            console.log("Account exists. Switching to existing user...");
-            
-            // SECURITY FIX: Alert user before retry to prevent Popup Blocker
-            alert("Account already exists. Click OK to switch accounts.");
-            
-            try {
-                await window.firebaseCore.signInWithPopup(auth, provider);
-            } catch (signInError) {
-                console.error("Force Login Failed:", signInError);
-                btn.innerHTML = originalContent;
-                alert("Login Failed: " + signInError.message);
-                return;
-            }
-        } else {
-            console.error("Link Error:", error);
-            btn.innerHTML = originalContent;
-            alert("Error: " + error.message);
-            return;
-        }
-    }
+        // 2. Direct Sign In (Bypasses "Already Linked" errors)
+        const result = await window.firebaseCore.signInWithPopup(auth, provider);
+        const user = result.user;
 
-    // 3. SUCCESS UI UPDATE
-    const user = auth.currentUser;
-    if (user) {
+        // --- SUCCESS VISUALS ---
+        
+        // Update ID Label
         const idEl = document.getElementById('neural-id');
         if (idEl) {
             idEl.innerText = `ID: ${user.displayName.toUpperCase()}`;
@@ -58,18 +35,31 @@ window.upgradeToGoogle = async () => {
             idEl.classList.add('text-emerald-400', 'drop-shadow-glow');
         }
 
+        // Update Button Icon
         if (user.photoURL) {
             btn.innerHTML = `<img src="${user.photoURL}" class="w-8 h-8 rounded-full border-2 border-emerald-500 shadow-[0_0_10px_#10b981]">`;
         } else {
             btn.innerHTML = `<i class="fas fa-user-check text-2xl text-emerald-500"></i>`;
         }
 
+        // Sound & Toast
         window.playTacticalSound('success');
         if (window.showToast) {
             window.showToast(`WELCOME COMMANDER ${user.displayName.split(' ')[0].toUpperCase()}`, 'success');
         } else {
-            alert(`ACCESS GRANTED: Welcome, Commander ${user.displayName}`);
+            // Fallback if toast isn't set up
+            console.log("Login Successful");
         }
+
+    } catch (error) {
+        console.error("Login Error:", error);
+        btn.innerHTML = originalContent; // Reset button
+        
+        if (error.code === 'auth/popup-closed-by-user') {
+            // Ignore this, user just closed the window
+            return;
+        }
+        alert("LOGIN ERROR: " + error.message);
     }
 };
 
@@ -321,23 +311,29 @@ async function initTerminal() {
         auth = window.firebaseCore.getAuth(firebaseApp);
         db = window.firebaseCore.getFirestore(firebaseApp);
         
+        // Initial Anon Auth
         await window.firebaseCore.signInAnonymously(auth);
         
         window.firebaseCore.onAuthStateChanged(auth, (u) => {
             user = u;
             if (u) {
                 const idEl = document.getElementById('neural-id');
-                if(idEl) {
-                    idEl.innerText = `ID: ${u.uid.substring(0, 8).toUpperCase()}`;
+                // Only update ID if user is NOT anonymous (Google Login)
+                if(idEl && !u.isAnonymous) {
+                    idEl.innerText = `ID: ${u.displayName.toUpperCase()}`;
                     idEl.classList.add('text-emerald-500');
+                } else if(idEl && u.isAnonymous) {
+                    // Keep it simple for anon
+                    idEl.innerText = `ID: ${u.uid.substring(0, 8).toUpperCase()}`;
                 }
+
                 try {
                     const userRef = window.firebaseCore.doc(db, "visitors", u.uid);
                     window.firebaseCore.setDoc(userRef, {
                         last_login: window.firebaseCore.serverTimestamp(),
                         device: navigator.userAgent
                     }, { merge: true });
-                } catch(e) { console.log("DB Write failed (Test Mode rules might be off)"); }
+                } catch(e) { console.log("DB Log error (harmless)"); }
             }
         });
     } catch (e) {

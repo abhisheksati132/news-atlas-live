@@ -1,638 +1,831 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NewsAtlas | Global Intelligence Terminal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NewsAtlas | Global Intelligence Terminal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 
-    <meta name="description" content="NewsAtlas: Real-time Global Intelligence Terminal featuring 3D geospatial visualization, live financial telemetry, and AI-driven situation reports.">
-    <meta property="og:title" content="NewsAtlas | Global Intelligence Terminal">
-    <meta property="og:description" content="Access real-time global news, market data, and AI intelligence via a secure orbital interface.">
-    <meta property="og:image" content="https://news-atlas-live.vercel.app/screenshot.png"> 
-    <meta name="theme-color" content="#020617">
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2072/2072130.png" type="image/x-icon">
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, GoogleAuthProvider, linkWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
-        window.firebaseCore = { 
-            initializeApp, getAuth, onAuthStateChanged, signInAnonymously, 
-            signInWithCustomToken, getFirestore, doc, collection, 
-            onSnapshot, setDoc, deleteDoc, serverTimestamp,
-            GoogleAuthProvider, linkWithPopup
+  <meta name="description" content="NewsAtlas: Real-time Global Intelligence Terminal."/>
+  <meta name="theme-color" content="#020617"/>
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2072/2072130.png" type="image/x-icon"/>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const bar = document.getElementById('boot-bar');
+      const screen = document.getElementById('boot-screen');
+      const logs = document.getElementById('boot-log');
+      const messages = ["SYSTEM_INIT...", "BYPASSING_ERRORS...", "FORCE_MOUNT_UI...", "ACCESS_GRANTED"];
+      
+      let progress = 0;
+      let msgIndex = 0;
+
+      // Force load interval
+      const interval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress > 100) progress = 100;
+        if (bar) bar.style.width = progress + '%';
+
+        // Add fake logs
+        if (progress > (msgIndex + 1) * 25 && msgIndex < messages.length && logs) {
+           const p = document.createElement('div');
+           p.innerText = "> " + messages[msgIndex++];
+           logs.appendChild(p);
         }
 
-        window.upgradeToGoogle = async () => {
-            const auth = window.firebaseCore.getAuth();
-            const provider = new window.firebaseCore.GoogleAuthProvider();
-            if (auth.currentUser) {
-                try {
-                    const result = await window.firebaseCore.linkWithPopup(auth.currentUser, provider);
-                    const user = result.user;
-                    const idEl = document.getElementById('neural-id');
-                    if (idEl) {
-                        idEl.innerText = `ID: ${user.displayName.toUpperCase()}`;
-                        idEl.classList.add('text-emerald-500');
-                    }
-                    window.playTacticalSound('success');
-                } catch (error) {
-                    console.error("Auth Handshake Failed:", error.code);
-                    if (error.code === 'auth/popup-blocked') {
-                        alert("Security block detected. Please allow popups for this terminal.");
-                    }
-                }
+        if (progress === 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            if (screen) {
+              screen.style.opacity = '0';
+              setTimeout(() => screen.remove(), 800); // Remove from DOM
             }
-        };
-    </script>
+          }, 500);
+        }
+      }, 200);
+    });
+  </script>
+
+  <style>
+    :root {
+      --blue:#3b82f6; --cyan:#06b6d4; --emerald:#10b981;
+      --red:#ef4444; --amber:#f59e0b; --bg:#020617;
+      --glass:rgba(5,15,40,0.93); --border:rgba(59,130,246,0.11);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+    body {
+      font-family:'Syne','Segoe UI',sans-serif;
+      background-color:var(--bg);
+      background-image:
+        radial-gradient(ellipse at 0% 0%,rgba(59,130,246,0.09) 0,transparent 55%),
+        radial-gradient(ellipse at 100% 100%,rgba(6,182,212,0.05) 0,transparent 55%),
+        linear-gradient(rgba(59,130,246,0.03) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(59,130,246,0.03) 1px,transparent 1px);
+      background-size:auto,auto,48px 48px,48px 48px;
+      color:#e2e8f0; overflow-x:hidden; overflow-y:auto; width:100vw; cursor:crosshair;
+    }
+
+    body::before {
+      content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
+      background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.09) 2px,rgba(0,0,0,0.09) 4px);
+      opacity:.55;
+    }
+    body::after {
+      content:'';position:fixed;inset:0;z-index:9998;pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+      opacity:.32;
+    }
+
+    .glass-panel {
+      background:var(--glass);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);
+      border:1px solid var(--border);border-radius:1rem;
+      box-shadow:0 0 0 1px rgba(59,130,246,0.04),0 20px 60px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+
+    header {
+      height:72px;padding:0 1.5rem;
+      display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+      position:fixed;top:0;width:100%;z-index:50;
+      background:rgba(2,6,23,0.97);
+      border-bottom:1px solid rgba(59,130,246,0.1);
+      box-shadow:0 1px 40px rgba(0,0,0,0.6);
+    }
+
+    .main-content {
+      margin-top:72px;padding:1.25rem;
+      gap:1.25rem;display:flex;flex-direction:column;width:100%;
+    }
+
+    .map-box {
+      position:relative;width:100%;height:82vh;min-height:520px;overflow:hidden;
+      background:rgba(2,6,23,0.7);border:1px solid rgba(59,130,246,0.14);border-radius:1rem;
+      display:flex;flex-direction:column;transition:background .5s ease;
+      box-shadow:0 0 0 1px rgba(59,130,246,0.04),0 0 60px rgba(59,130,246,0.04);
+    }
+    .map-box.satellite-mode{background:radial-gradient(circle at 50% 50%,#0c1a30 0%,#020617 100%)}
+    .satellite-mode .country{fill:#1e293b;stroke:#334155;stroke-width:.5px}
+    .satellite-mode .country:hover{fill:#334155;stroke:#cbd5e1}
+    .satellite-mode .country.active{fill:#059669;stroke:#34d399;filter:drop-shadow(0 0 15px rgba(16,185,129,.4))}
+    .map-interaction-overlay {
+      position:absolute;inset:0;z-index:20;
+      background:rgba(2,6,23,.28);
+      display:flex;align-items:center;justify-content:center;
+      transition:all .4s ease;cursor:pointer;backdrop-filter:blur(1px);
+    }
+    .map-interaction-overlay.active{opacity:0;pointer-events:none}
+
+    @keyframes mapscan{0%{top:-2px}100%{top:100%}}
+    .map-scan-line{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(6,182,212,.35),transparent);animation:mapscan 5s linear infinite;pointer-events:none;z-index:5}
+
+    .intel-sidebar{width:100%;display:flex;flex-direction:column;overflow:visible;flex-shrink:0;min-height:100vh}
+
+    .country{stroke:#020617;stroke-width:.4;transition:all .25s cubic-bezier(.4,0,.2,1);cursor:pointer}
+    .country:hover{fill:#1e3a5f;filter:drop-shadow(0 0 8px rgba(59,130,246,.5))}
+    .country.active{fill:var(--blue);stroke:rgba(255,255,255,.6);stroke-width:1.5;filter:drop-shadow(0 0 25px rgba(59,130,246,.7))}
+
+    .dossier-card {
+      background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);
+      border-radius:.875rem;padding:1.25rem;
+      transition:all .3s cubic-bezier(.4,0,.2,1);position:relative;display:flex;flex-direction:column;
+    }
+    .dossier-card:hover{background:rgba(59,130,246,.04);border-color:rgba(59,130,246,.25);transform:translateY(-1px);box-shadow:0 0 20px rgba(59,130,246,.07)}
+
+    .nav-tab {
+      transition:all .25s ease;background:transparent;border-bottom:2px solid transparent;cursor:pointer;
+      font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+      text-transform:uppercase;letter-spacing:.15em;
+      flex:1 1 0;display:flex;align-items:center;justify-content:center;
+      padding:1.1rem 0;color:rgba(100,116,139,.7);
+    }
+    .nav-tab:hover{color:#e2e8f0;background:rgba(59,130,246,.06)}
+    .nav-tab.active{color:var(--blue);border-bottom-color:var(--blue);background:rgba(59,130,246,.05);text-shadow:0 0 15px rgba(59,130,246,.4)}
+
+    .intel-tab {
+      cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:800;
+      text-transform:uppercase;letter-spacing:.15em;color:rgba(100,116,139,.7);
+      padding:.6rem 0;margin-right:1.5rem;transition:all .25s ease;white-space:nowrap;position:relative;
+    }
+    .intel-tab:hover{color:#e2e8f0}
+    .intel-tab.active{color:var(--blue)}
+    .intel-tab.active::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:1.5px;background:var(--blue);box-shadow:0 0 8px var(--blue)}
+
+    .tab-content{display:none;height:100%;flex-direction:column;overflow:visible}
+    .tab-content.active{display:flex}
+    .content-scroll-area{flex:1;overflow-y:visible;padding:1.25rem;display:flex;flex-direction:column;gap:1rem}
+
+    #articles-container{display:grid;grid-template-columns:repeat(1,1fr);gap:1rem}
+    @media(min-width:768px){#articles-container{grid-template-columns:repeat(2,1fr)}}
+    @media(min-width:1024px){#articles-container{grid-template-columns:repeat(3,1fr)}}
+
+    .ticker-wrap{width:100%;overflow:hidden;white-space:nowrap}
+    .ticker{display:inline-block;padding-left:100%;animation:ticker-anim 32s linear infinite}
+    .ticker-item{display:inline-block;padding:0 1.5rem;font-size:12px;font-family:'JetBrains Mono',monospace;font-weight:700}
+    @keyframes ticker-anim{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-100%,0,0)}}
+
+    .skeleton{
+      background:linear-gradient(90deg,rgba(255,255,255,.02) 25%,rgba(255,255,255,.05) 50%,rgba(255,255,255,.02) 75%);
+      background-size:200% 100%;animation:skel 1.5s infinite linear;
+    }
+    @keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    .animate-marquee{display:inline-block;animation:marquee 50s linear infinite}
+    @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+    ::-webkit-scrollbar{width:3px}
+    ::-webkit-scrollbar-thumb{background:rgba(59,130,246,.3);border-radius:10px}
+    ::-webkit-scrollbar-track{background:transparent}
+    .no-scrollbar::-webkit-scrollbar{display:none}
+    .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+
+    #search-overlay,#about-overlay{background:rgba(2,6,23,.98);backdrop-filter:blur(24px);z-index:1000}
+
+    .tactical-btn{transition:all .2s cubic-bezier(.4,0,.2,1)}
+    .tactical-btn:hover{transform:scale(1.08);filter:drop-shadow(0 0 8px rgba(59,130,246,.55))}
+
+    .signal-blue{border-left:3px solid var(--blue)}
+    .signal-emerald{border-left:3px solid var(--emerald)}
+    .signal-red{border-left:3px solid var(--red)}
+
+    .skill-tag{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:#60a5fa;font-size:10px;font-weight:900;font-family:'JetBrains Mono',monospace;padding:5px 12px;border-radius:6px;text-transform:uppercase;display:flex;align-items:center;gap:5px}
+    .skill-dot{width:5px;height:5px;border-radius:50%;background:#60a5fa;box-shadow:0 0 5px #60a5fa}
+
+    .meter-bg{background:rgba(255,255,255,.08);height:3px;width:100%;border-radius:2px;overflow:hidden;margin-top:5px}
+    .meter-fill{height:100%;background:var(--blue);width:0%;transition:width .8s cubic-bezier(.4,0,.2,1);box-shadow:0 0 6px var(--blue)}
+
+    .scanner-container{position:relative;overflow:hidden}
+    .scanner-line{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to bottom,transparent,rgba(59,130,246,.7),transparent);transform:translateY(-150%);animation:scan-anim 2.5s infinite linear}
+    @keyframes scan-anim{0%{transform:translateY(-150%)}100%{transform:translateY(150%)}}
+
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+    .typing-cursor::after{content:'|';animation:blink 1s infinite}
+
+    .map-ctrl-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);transition:all .2s ease;cursor:pointer;color:rgba(148,163,184,.7)}
+    .map-ctrl-btn:hover{background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.3);color:#e2e8f0}
+
+    #boot-screen{transition:opacity .8s ease-out}
+
+    @keyframes logFade{0%{opacity:0;transform:translateX(-8px)}100%{opacity:1;transform:translateX(0)}}
+    .log-entry{animation:logFade .3s ease-out forwards}
+
+    #map-tooltip{pointer-events:none;z-index:100;transition:all .1s ease-out;backdrop-filter:blur(8px);font-family:'JetBrains Mono',monospace}
+
+    .day-mode{--solar-glow:rgba(59,130,246,.08)}
+    .night-mode{--solar-glow:rgba(139,92,246,.12)}
+
+    .tech-line{display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.04);padding:5px 0;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(100,116,139,.7)}
+    .tech-line span:last-child{color:#94a3b8;font-weight:700}
+
+    #ai-briefing-text{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.9}
+
+    ::selection{background:rgba(59,130,246,.3);color:#fff}
+  </style>
 </head>
+
 <body class="flex flex-col day-mode">
-    <div id="boot-screen" class="fixed inset-0 bg-[#020617] z-[9999] flex flex-col items-center justify-center font-mono text-emerald-500 text-xs p-10">
-        <div class="w-full max-w-md space-y-2">
-            <div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
-                <div id="boot-bar" class="h-full bg-emerald-500 w-0 transition-all duration-300"></div>
-            </div>
-            <div id="boot-log" class="h-32 overflow-hidden flex flex-col justify-end text-slate-400 font-bold uppercase tracking-widest"></div>
+
+  <div id="boot-screen" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center" style="background:#020617">
+    <div class="w-full max-w-sm space-y-4 px-8">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg,#1d4ed8,#0e7490);box-shadow:0 0 16px rgba(59,130,246,.4)">
+          <i class="fas fa-satellite-dish text-white text-sm"></i>
         </div>
+        <span class="font-bold tracking-widest text-white text-sm" style="font-family:'JetBrains Mono',monospace">NEWS<span class="text-blue-400">ATLAS</span></span>
+        <span class="text-[9px] font-mono text-blue-400/40 border border-blue-500/20 px-1.5 py-0.5 rounded">v3.7</span>
+      </div>
+      <div class="h-0.5 w-full bg-slate-900 rounded-full overflow-hidden">
+        <div id="boot-bar" class="h-full w-0 transition-all duration-300 rounded-full" style="background:linear-gradient(90deg,#3b82f6,#06b6d4);box-shadow:0 0 10px #3b82f6"></div>
+      </div>
+      <div id="boot-log" class="h-28 overflow-hidden flex flex-col justify-end space-y-1.5"
+           style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(100,116,139,.8);font-weight:700;text-transform:uppercase;letter-spacing:.1em"></div>
     </div>
-    <div id="map-tooltip" class="fixed hidden bg-slate-900/90 border border-blue-500/30 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest shadow-xl border-l-4 border-l-blue-500">
-        <span id="tooltip-text"></span>
+  </div>
+
+  <div id="map-tooltip" class="fixed hidden text-white px-3 py-1.5 rounded-lg text-xs shadow-xl border-l-4 border-l-blue-500"
+       style="background:rgba(2,6,23,.95);border:1px solid rgba(59,130,246,.3)">
+    <span id="tooltip-text"></span>
+  </div>
+
+  <div id="about-overlay" class="fixed inset-0 hidden flex items-center justify-center p-6">
+    <div class="glass-panel max-w-4xl w-full p-0 border-blue-500/20 relative overflow-hidden flex flex-col z-20 h-[85vh]" style="border-radius:1.25rem">
+      <div class="p-7 border-b border-white/5 relative overflow-hidden flex-shrink-0" style="background:rgba(59,130,246,0.06)">
+        <div class="absolute -top-10 -right-10 w-64 h-64 rounded-full blur-[80px]" style="background:rgba(59,130,246,.12)"></div>
+        <button onclick="toggleAbout(false)" class="absolute top-5 right-5 tactical-btn w-9 h-9 flex items-center justify-center rounded-lg border border-white/10 text-slate-400 hover:text-white hover:border-white/20 z-50 cursor-pointer" style="background:rgba(255,255,255,.04)">
+          <i class="fas fa-times text-sm"></i>
+        </button>
+        <div class="flex items-center gap-5 relative z-10">
+          <div class="w-16 h-16 rounded-xl flex items-center justify-center shadow-lg border border-white/15 scanner-container" style="background:linear-gradient(135deg,#1d4ed8,#312e81)">
+            <i class="fas fa-fingerprint text-3xl text-white"></i>
+            <div class="scanner-line"></div>
+          </div>
+          <div>
+            <h2 class="text-2xl font-black text-white uppercase tracking-tight">Abhishek Sati</h2>
+            <p class="text-blue-400 font-bold text-xs uppercase tracking-[.3em] mt-1" style="font-family:'JetBrains Mono',monospace">Lead Systems Architect</p>
+            <div class="flex items-center gap-2 mt-2">
+              <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+              <span class="text-emerald-400 font-bold uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace;font-size:9px">Clearance: Level 5</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex-1 overflow-y-auto p-7" style="background:rgba(2,6,23,.92)">
+        <div class="grid grid-cols-12 gap-6 h-full">
+          <div class="col-span-4 flex flex-col gap-5">
+            <div class="dossier-card min-h-[120px]" style="background:rgba(255,255,255,.015);border-color:rgba(255,255,255,.05)">
+              <h3 class="text-[9px] font-black text-slate-500 uppercase tracking-[.2em] mb-3" style="font-family:'JetBrains Mono',monospace">Architect Statement</h3>
+              <p id="bio-text" class="text-sm leading-relaxed text-slate-300 font-medium typing-cursor"></p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span class="skill-tag"><div class="skill-dot"></div>Systems Design</span>
+              <span class="skill-tag"><div class="skill-dot"></div>D3 Visualization</span>
+              <span class="skill-tag"><div class="skill-dot"></div>Gemini Core</span>
+              <span class="skill-tag"><div class="skill-dot"></div>Real-time IO</span>
+            </div>
+            <div class="dossier-card mt-auto" style="background:rgba(255,255,255,.015);border-color:rgba(255,255,255,.05)">
+              <div class="flex gap-5 justify-center">
+                <a href="https://github.com/abhisheksati132" target="_blank" class="text-slate-500 hover:text-white transition-colors tactical-btn"><i class="fab fa-github text-xl"></i></a>
+                <a href="https://www.linkedin.com/in/abhisheksati132" target="_blank" class="text-slate-500 hover:text-blue-400 transition-colors tactical-btn"><i class="fab fa-linkedin text-xl"></i></a>
+                <a href="https://www.instagram.com/satiabhishek/" target="_blank" class="text-slate-500 hover:text-pink-500 transition-colors tactical-btn"><i class="fab fa-instagram text-xl"></i></a>
+              </div>
+            </div>
+          </div>
+          <div class="col-span-8 flex flex-col gap-5">
+            <div class="grid grid-cols-3 gap-3">
+              <div class="dossier-card p-4" style="background:rgba(59,130,246,.04);border-color:rgba(59,130,246,.15)">
+                <div class="flex justify-between items-end mb-1">
+                  <div class="text-[9px] text-slate-500 uppercase font-black tracking-widest" style="font-family:'JetBrains Mono',monospace">CPU Load</div>
+                  <div class="text-[10px] text-blue-400 font-mono font-bold" id="cpu-val">0%</div>
+                </div>
+                <div class="meter-bg"><div id="cpu-bar" class="meter-fill" style="width:0%"></div></div>
+              </div>
+              <div class="dossier-card p-4" style="background:rgba(16,185,129,.03);border-color:rgba(16,185,129,.15)">
+                <div class="flex justify-between items-end mb-1">
+                  <div class="text-[9px] text-slate-500 uppercase font-black tracking-widest" style="font-family:'JetBrains Mono',monospace">Memory</div>
+                  <div class="text-[10px] text-emerald-400 font-mono font-bold" id="mem-val">0GB</div>
+                </div>
+                <div class="meter-bg"><div id="mem-bar" class="meter-fill" style="width:0%;background:#10b981;box-shadow:0 0 6px #10b981"></div></div>
+              </div>
+              <div class="dossier-card p-4" style="background:rgba(99,102,241,.03);border-color:rgba(99,102,241,.15)">
+                <div class="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1" style="font-family:'JetBrains Mono',monospace">Uptime</div>
+                <div class="text-xl font-black text-white tabular-nums" id="uptime-counter" style="font-family:'JetBrains Mono',monospace">00:00:00</div>
+              </div>
+            </div>
+            <div class="dossier-card p-0 overflow-hidden relative h-28" style="background:rgba(0,0,0,.5);border-color:rgba(255,255,255,.05)">
+              <div class="absolute top-2 left-3 right-3 flex justify-between z-10">
+                <div class="text-[9px] text-slate-500 font-black uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">Network Traffic</div>
+                <div class="text-[9px] text-blue-400 font-mono font-bold"><i class="fas fa-arrow-down"></i> <span id="net-down">0</span> MB/s &nbsp;<i class="fas fa-arrow-up"></i> <span id="net-up">0</span> MB/s</div>
+              </div>
+              <canvas id="traffic-canvas" class="w-full h-full opacity-60"></canvas>
+            </div>
+            <div class="dossier-card p-0 font-mono text-[10px] h-36 overflow-hidden flex flex-col relative" style="background:rgba(0,0,0,.75);border-color:rgba(255,255,255,.08)">
+              <div class="px-3 py-2 border-b border-white/5 flex justify-between items-center" style="background:rgba(59,130,246,.05)">
+                <span class="text-blue-400 font-bold uppercase tracking-widest text-[9px]">Command Line Interface</span>
+                <div class="flex gap-1.5"><div class="w-2 h-2 rounded-full bg-red-500/80"></div><div class="w-2 h-2 rounded-full bg-yellow-500/80"></div><div class="w-2 h-2 rounded-full bg-emerald-500/80"></div></div>
+              </div>
+              <div id="cli-output" class="flex-1 overflow-y-auto p-3 space-y-1.5 text-slate-300 no-scrollbar">
+                <div class="text-emerald-400/70">> SYSTEM READY. WAITING FOR INPUT...</div>
+              </div>
+              <div class="p-2 border-t border-white/8 flex items-center gap-2" style="background:rgba(59,130,246,.03)">
+                <span class="text-blue-400 font-bold">›</span>
+                <input type="text" id="cli-input" class="bg-transparent border-none outline-none w-full text-white placeholder-slate-700 text-[11px]"
+                       style="font-family:'JetBrains Mono',monospace" placeholder="Enter command (e.g., 'analyze economy')..." autocomplete="off">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pt-5 border-t border-white/5 flex items-center justify-between mt-8">
+          <div class="flex items-center gap-2">
+            <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+            <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">System Online</span>
+          </div>
+          <p class="text-[9px] text-slate-600 font-black uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">© 2026 ABHISHEK SATI</p>
+        </div>
+      </div>
     </div>
-    <div id="about-overlay" class="fixed inset-0 hidden flex items-center justify-center p-6">
-        <div class="glass-panel max-w-4xl w-full p-0 border-blue-500/40 relative overflow-hidden shadow-2xl flex flex-col z-20 h-[85vh]">
-            <div class="bg-blue-600/10 p-8 border-b border-white/5 relative overflow-hidden flex-shrink-0">
-                <div class="absolute -top-10 -right-10 w-64 h-64 bg-blue-500/20 rounded-full blur-[80px]"></div>
-                <button onclick="toggleAbout(false)" class="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors tactical-btn bg-white/5 w-12 h-12 flex items-center justify-center rounded-xl cursor-pointer z-50">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-                <div class="flex items-center gap-6 relative z-10">
-                    <div class="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-900 rounded-2xl flex items-center justify-center shadow-lg border border-white/20 scanner-container">
-                        <i class="fas fa-fingerprint text-4xl text-white"></i>
-                        <div class="scanner-line"></div>
+  </div>
+
+  <div id="search-overlay" class="fixed inset-0 hidden flex items-center justify-center z-[100] px-6">
+    <div class="glass-panel max-w-3xl w-full border-blue-500/20 flex flex-col max-h-[75vh] overflow-hidden p-0">
+      <div class="flex items-center p-6 gap-5 shrink-0 border-b border-white/8">
+        <i class="fas fa-crosshairs text-blue-400 text-2xl"></i>
+        <input type="text" id="country-search" autocomplete="off" placeholder="Sector designation..."
+               class="w-full bg-transparent border-none outline-none text-2xl font-black text-white placeholder-slate-800">
+        <span class="text-[10px] font-black text-slate-600 px-3 py-1.5 rounded-lg uppercase tracking-widest cursor-pointer hover:text-white transition-colors"
+              style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);font-family:'JetBrains Mono',monospace"
+              onclick="toggleSearch()">ESC</span>
+      </div>
+      <div id="search-results" class="flex-1 overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <header>
+    <div class="flex items-center gap-4 cursor-pointer group" onclick="resetToGlobalCenter()">
+      <div class="relative w-12 h-12">
+        <div class="absolute inset-0 rounded-xl flex items-center justify-center transition-transform group-hover:rotate-6"
+             style="background:linear-gradient(135deg,#1d4ed8,#0e7490);box-shadow:0 0 20px rgba(59,130,246,.3)">
+          <i class="fas fa-satellite-dish text-2xl text-white"></i>
+        </div>
+        <div class="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-[#020617] animate-pulse"></div>
+      </div>
+      <div>
+        <h1 class="text-2xl font-black tracking-tighter text-white leading-none">News<span class="text-blue-400">Atlas</span></h1>
+        <p class="text-[9px] uppercase tracking-[.3em] text-slate-500 font-black mt-0.5 leading-none" style="font-family:'JetBrains Mono',monospace">Intelligence Terminal</p>
+      </div>
+    </div>
+
+    <div class="hidden lg:flex items-center gap-7 px-7 py-2.5 rounded-xl" style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06)">
+      <div class="flex flex-col min-w-[160px]">
+        <span id="selected-country-name" class="font-black text-white text-lg uppercase truncate tracking-tight leading-tight">Global Signal</span>
+        <span id="neural-id" class="text-[9px] font-bold text-slate-500 uppercase tracking-[.2em] mt-0.5 leading-none" style="font-family:'JetBrains Mono',monospace">handshake verified</span>
+      </div>
+      <div class="h-8 w-px bg-slate-800"></div>
+      <div class="flex flex-col items-center">
+        <span id="system-time" class="text-2xl font-black text-blue-400 tabular-nums leading-none" style="font-family:'JetBrains Mono',monospace">00:00:00</span>
+        <span class="text-[8px] font-bold text-slate-600 uppercase mt-0.5 tracking-[.2em]" style="font-family:'JetBrains Mono',monospace">UTC · <span id="local-time" class="text-slate-500">--:--:--</span></span>
+      </div>
+      <div class="h-8 w-px bg-slate-800"></div>
+      <div class="flex gap-5">
+        <button onclick="upgradeToGoogle()" class="text-slate-500 hover:text-white transition-all tactical-btn" title="Verify Identity"><i class="fas fa-user-shield text-lg"></i></button>
+        <button onclick="downloadDossier()" class="text-slate-500 hover:text-white transition-all tactical-btn" title="Download Intel Dossier"><i class="fas fa-file-download text-lg"></i></button>
+        <button onclick="toggleProjection()" class="text-slate-500 hover:text-blue-400 transition-all tactical-btn" title="Toggle Projection"><i class="fas fa-globe-asia text-lg"></i></button>
+        <button onclick="toggleSearch()" class="text-slate-500 hover:text-blue-400 transition-all tactical-btn" title="Search"><i class="fas fa-search text-lg"></i></button>
+        <button onclick="activateVoice()" class="text-slate-500 hover:text-red-400 transition-all tactical-btn" title="Voice Command"><i class="fas fa-microphone text-lg"></i></button>
+        <button onclick="toggleAbout(true)" class="text-slate-500 hover:text-emerald-400 transition-all tactical-btn" title="About"><i class="fas fa-info-circle text-lg"></i></button>
+      </div>
+    </div>
+
+    <button onclick="goToIndiaHome()"
+      class="flex items-center gap-3 px-5 py-2.5 rounded-xl tactical-btn group transition-all"
+      style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.07)">
+      <i class="fas fa-home text-blue-400 text-base group-hover:scale-110 transition-transform"></i>
+      <span class="tracking-[.15em] uppercase text-xs font-black text-slate-300 hidden sm:block" style="font-family:'JetBrains Mono',monospace">India Base</span>
+    </button>
+  </header>
+
+  <main class="main-content">
+
+    <div id="map-box-id" class="map-box" onmouseleave="deactivateMapInteraction()">
+
+      <div class="px-4 py-3 border-b border-white/6 flex justify-between items-center flex-shrink-0" style="background:rgba(59,130,246,.03)">
+        <div class="flex items-center gap-3">
+          <span id="projection-label" class="text-xs font-black text-slate-300 uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">Orbital Interface: 2D Active</span>
+          <div id="active-sector-display" class="hidden flex items-center gap-3 px-3 py-1 rounded-lg" style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2)">
+            <img id="sector-flag" src="" alt="Flag" class="w-7 h-4.5 object-cover rounded shadow-sm"/>
+            <span id="sector-name" class="text-[11px] font-black text-blue-200 uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">--</span>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="toggleSatellite()" class="map-ctrl-btn text-emerald-400 font-black text-[9px] tracking-widest" title="Toggle Satellite" style="font-family:'JetBrains Mono',monospace">SAT</button>
+          <button onclick="zoomMap(1.6)" class="map-ctrl-btn" title="Zoom In"><i class="fas fa-plus text-xs"></i></button>
+          <button onclick="zoomMap(0.6)" class="map-ctrl-btn" title="Zoom Out"><i class="fas fa-minus text-xs"></i></button>
+          <button onclick="resetToGlobalCenter()" class="map-ctrl-btn text-blue-400" title="Reset View"><i class="fas fa-expand text-xs"></i></button>
+        </div>
+      </div>
+
+      <div id="map-container" class="flex-1 relative w-full h-full">
+        <svg id="world-map" class="w-full h-full"></svg>
+        <div class="map-scan-line"></div>
+        <div id="map-overlay-guard" class="map-interaction-overlay" onclick="activateMapInteraction()">
+          <div class="flex items-center gap-3 px-5 py-2.5 rounded-full font-bold uppercase tracking-widest text-xs text-blue-300 transition-transform hover:scale-105"
+               style="background:rgba(2,6,23,.7);border:1px solid rgba(59,130,246,.3);backdrop-filter:blur(8px);font-family:'JetBrains Mono',monospace">
+            <i class="fas fa-mouse-pointer"></i> Click to Interact
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="sidebar" class="intel-sidebar glass-panel">
+
+      <nav class="flex border-b border-white/6 w-full overflow-hidden" style="border-radius:1rem 1rem 0 0">
+        <div class="nav-tab active" onmouseenter="playTacticalSound('hover')" onclick="switchTab('intel')">Intel</div>
+        <div class="nav-tab" onmouseenter="playTacticalSound('hover')" onclick="switchTab('news')">News</div>
+        <div class="nav-tab" onmouseenter="playTacticalSound('hover')" onclick="switchTab('markets')">Markets</div>
+        <div class="nav-tab" onmouseenter="playTacticalSound('hover')" onclick="switchTab('atmosphere')">Atmosphere</div>
+        <div class="nav-tab" onmouseenter="playTacticalSound('hover')" onclick="switchTab('economic')">Economic</div>
+      </nav>
+
+      <div id="sidebar-content" class="flex-1 overflow-hidden relative">
+
+        <div id="tab-intel" class="tab-content active">
+          <div class="content-scroll-area">
+            <h2 class="text-[11px] font-black text-white uppercase tracking-[.3em]" style="font-family:'JetBrains Mono',monospace">Tactical Briefing</h2>
+            <div id="ai-briefing-box" class="dossier-card" style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.2)">
+              <div class="flex justify-between items-center mb-5 border-b border-white/5 pb-4">
+                <span class="text-[9px] text-blue-400 uppercase font-black tracking-widest flex items-center gap-2" style="font-family:'JetBrains Mono',monospace">
+                  <i class="fas fa-brain text-base"></i> Neural Synthesis
+                </span>
+                <div class="flex items-center gap-2">
+                  <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+                  <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">Live Link</span>
+                </div>
+              </div>
+              <p id="ai-briefing-text" class="text-slate-300">
+                <span class="animate-pulse text-slate-500">Awaiting target selection...</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-news" class="tab-content">
+          <div class="px-5 py-4 flex flex-col gap-3 border-b border-white/5" style="background:rgba(59,130,246,.02)">
+            <div class="flex justify-between items-end">
+              <h2 class="text-[11px] font-black text-white uppercase tracking-[.3em]" style="font-family:'JetBrains Mono',monospace">Signal Intelligence</h2>
+              <span class="text-[9px] text-slate-500 uppercase font-bold tracking-widest" style="font-family:'JetBrains Mono',monospace"><span id="news-count">0</span> FRAGMENTS</span>
+            </div>
+            <div class="flex gap-2 overflow-x-auto no-scrollbar w-full items-center">
+              <div class="intel-tab active" onclick="window.setCategory(this,'top')">Headlines</div>
+              <div class="intel-tab" onclick="window.setCategory(this,'politics')">Politics</div>
+              <div class="intel-tab" onclick="window.setCategory(this,'business')">Business</div>
+              <div class="intel-tab" onclick="window.setCategory(this,'technology')">Tech</div>
+              <div class="intel-tab" onclick="window.setCategory(this,'science')">Science</div>
+              <div class="intel-tab" onclick="window.setCategory(this,'health')">Health</div>
+              <div class="intel-tab" onclick="window.setCategory(this,'sports')">Sports</div>
+              <div class="intel-tab" onclick="window.setCategory(this,'entertainment')">Entmt</div>
+              <div class="intel-tab" onclick="window.setCategory(this,'environment')">Eco</div>
+              <div class="intel-tab" onclick="window.setCategory(this,'crypto')">Crypto</div>
+              <div class="w-10 shrink-0"></div>
+            </div>
+          </div>
+          <div class="content-scroll-area">
+            <div id="news-loading" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div class="dossier-card h-44 skeleton"></div>
+              <div class="dossier-card h-44 skeleton"></div>
+              <div class="dossier-card h-44 skeleton"></div>
+            </div>
+            <div id="articles-container"></div>
+          </div>
+        </div>
+
+        <div id="tab-markets" class="tab-content">
+          <div class="content-scroll-area">
+            <div class="dossier-card p-0 overflow-hidden" style="background:rgba(0,0,0,.5);border-color:rgba(255,255,255,.05)">
+              <div class="px-4 py-2 border-b border-white/5 flex justify-between items-center" style="background:rgba(59,130,246,.05)">
+                <span class="text-[9px] text-blue-400 font-black uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">LIVE EXCHANGE DATA</span>
+                <div class="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
+              </div>
+              <div class="ticker-wrap py-2.5 bg-black/30">
+                <div class="ticker" id="stock-ticker-content"></div>
+              </div>
+            </div>
+            <h2 class="text-[11px] font-black text-white uppercase tracking-[.3em]" style="font-family:'JetBrains Mono',monospace">Financial Assets</h2>
+            <div class="dossier-card" style="background:rgba(99,102,241,.04);border-color:rgba(99,102,241,.15)">
+              <div class="flex justify-between items-center mb-4 border-b border-white/5 pb-2">
+                <span class="text-[9px] text-indigo-400 uppercase font-black tracking-widest" style="font-family:'JetBrains Mono',monospace"><i class="fas fa-chart-line mr-2"></i>Market Intel</span>
+                <span class="text-[9px] text-slate-500 font-bold uppercase" style="font-family:'JetBrains Mono',monospace">Real-Time</span>
+              </div>
+              <div id="market-brief-text" class="text-slate-300 leading-relaxed whitespace-pre-line" style="font-family:'JetBrains Mono',monospace;font-size:12px">
+                <span class="animate-pulse text-slate-500">Initializing financial uplink...</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="dossier-card p-4">
+                <span class="text-[9px] text-yellow-400 uppercase font-black tracking-widest block mb-2" style="font-family:'JetBrains Mono',monospace">Gold (Au)</span>
+                <div class="text-2xl font-black text-white" id="price-gold" style="font-family:'JetBrains Mono',monospace">--</div>
+              </div>
+              <div class="dossier-card p-4">
+                <span class="text-[9px] text-slate-400 uppercase font-black tracking-widest block mb-2" style="font-family:'JetBrains Mono',monospace">Silver (Ag)</span>
+                <div class="text-2xl font-black text-white" id="price-silver" style="font-family:'JetBrains Mono',monospace">--</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-atmosphere" class="tab-content">
+          <div class="content-scroll-area space-y-4">
+            <div class="flex flex-col md:flex-row gap-4">
+              <div class="flex-1 dossier-card relative overflow-hidden group" style="background:linear-gradient(135deg,rgba(59,130,246,.06),rgba(30,41,59,.1));border-color:rgba(59,130,246,.15)">
+                <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <i id="atmo-main-icon" class="fas fa-cloud-sun text-8xl text-blue-400"></i>
+                </div>
+                <div class="relative z-10 flex flex-col h-full justify-between">
+                  <div>
+                    <div class="flex items-center gap-2 mb-1">
+                      <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+                      <span class="text-[9px] text-emerald-400 font-bold uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">Live Telemetry</span>
+                    </div>
+                    <div id="atmo-temp" class="font-black text-white leading-none tracking-tighter" style="font-size:72px">-°</div>
+                    <div id="atmo-condition" class="text-lg text-blue-400 font-bold uppercase tracking-widest mt-1" style="font-family:'JetBrains Mono',monospace">--</div>
+                  </div>
+                  <div class="flex gap-6 mt-4 pt-4 border-t border-white/5">
+                    <div>
+                      <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest block" style="font-family:'JetBrains Mono',monospace">Feels Like</span>
+                      <span id="atmo-feels" class="text-base font-mono font-bold text-white">--°</span>
                     </div>
                     <div>
-                        <h2 class="text-3xl font-black text-white uppercase tracking-tight">Abhishek Sati</h2>
-                        <p class="text-blue-400 font-bold text-xs uppercase tracking-[0.3em] mt-1">Lead Systems Architect</p>
-                        <div class="flex items-center gap-2 mt-2">
-                            <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
-                            <span class="text-[9px] text-emerald-500 font-bold uppercase tracking-widest">Clearance: Level 5</span>
-                        </div>
+                      <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest block" style="font-family:'JetBrains Mono',monospace">Low / High</span>
+                      <span id="atmo-hl" class="text-base font-mono font-bold text-white">-- / --</span>
                     </div>
+                  </div>
                 </div>
+              </div>
+              <div class="md:w-1/3 dossier-card flex flex-col justify-between" style="background:rgba(245,158,11,.04);border-color:rgba(245,158,11,.15)">
+                <div class="flex justify-between items-center mb-3">
+                  <span class="text-[9px] text-amber-400 font-bold uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">Solar Cycle</span>
+                  <i class="fas fa-sun text-amber-400 text-base"></i>
+                </div>
+                <div class="relative h-20 w-full flex items-end px-2">
+                  <div class="absolute inset-x-0 bottom-0 h-px bg-white/8"></div>
+                  <svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+                    <path d="M0,100 Q50,20 100,100" fill="none" stroke="rgba(245,158,11,.25)" stroke-width="2" vector-effect="non-scaling-stroke"/>
+                    <circle cx="50%" cy="50%" r="3" class="fill-amber-400 animate-pulse"/>
+                  </svg>
+                  <div class="w-full flex justify-between text-[9px] font-mono text-slate-400 pb-1 z-10">
+                    <span id="atmo-sunrise">--:--</span>
+                    <span id="atmo-sunset">--:--</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="flex-1 overflow-y-auto p-8 bg-[#020617]/90">
-                <div class="grid grid-cols-12 gap-8 h-full">
-                    <div class="col-span-4 flex flex-col gap-6">
-                        <div class="dossier-card border-white/5 bg-white/[0.02] min-h-[140px]">
-                            <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Architect Statement</h3>
-                            <p id="bio-text" class="text-sm leading-relaxed text-slate-300 font-medium typing-cursor"></p>
-                        </div>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="skill-tag"><div class="skill-dot"></div>Systems Design</span>
-                            <span class="skill-tag"><div class="skill-dot"></div>D3 Visualization</span>
-                            <span class="skill-tag"><div class="skill-dot"></div>Gemini Core</span>
-                            <span class="skill-tag"><div class="skill-dot"></div>Real-time IO</span>
-                        </div>
-                        <div class="dossier-card border-white/5 bg-white/[0.02] mt-auto mb-6">
-                            <div class="flex gap-4 justify-center">
-                                <a href="https://github.com/abhisheksati132" target="_blank" class="text-slate-500 hover:text-white transition-colors"><i class="fab fa-github text-2xl"></i></a>
-                                <a href="https://www.linkedin.com/in/abhisheksati132" target="_blank" class="text-slate-500 hover:text-blue-400 transition-colors"><i class="fab fa-linkedin text-2xl"></i></a>
-                                <a href="https://www.instagram.com/satiabhishek/" target="_blank" class="text-slate-500 hover:text-pink-500 transition-colors"><i class="fab fa-instagram text-2xl"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-span-8 flex flex-col gap-6">
-                        <div class="grid grid-cols-3 gap-4">
-                            <div class="dossier-card p-4 bg-blue-500/[0.03] border-blue-500/20">
-                                <div class="flex justify-between items-end mb-1">
-                                    <div class="text-[9px] text-slate-500 uppercase font-black tracking-widest">CPU Load</div>
-                                    <div class="text-[10px] text-blue-400 font-mono font-bold" id="cpu-val">0%</div>
-                                </div>
-                                <div class="meter-bg"><div id="cpu-bar" class="meter-fill" style="width: 0%"></div></div>
-                            </div>
-                            <div class="dossier-card p-4 bg-emerald-500/[0.03] border-emerald-500/20">
-                                <div class="flex justify-between items-end mb-1">
-                                    <div class="text-[9px] text-slate-500 uppercase font-black tracking-widest">Memory</div>
-                                    <div class="text-[10px] text-emerald-400 font-mono font-bold" id="mem-val">0GB</div>
-                                </div>
-                                <div class="meter-bg"><div id="mem-bar" class="meter-fill" style="width: 0%; background: #10b981; box-shadow: 0 0 8px #10b981;"></div></div>
-                            </div>
-                            <div class="dossier-card p-4 bg-indigo-500/[0.03] border-indigo-500/20">
-                                <div class="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">Uptime</div>
-                                <div class="text-xl font-black text-white tabular-nums" id="uptime-counter">00:00:00</div>
-                            </div>
-                        </div>
-                        <div class="dossier-card p-0 overflow-hidden relative h-32 border-white/5 bg-black/40">
-                            <div class="absolute top-3 left-4 right-4 flex justify-between z-10">
-                                <div class="text-[9px] text-slate-500 font-black uppercase tracking-widest">Network Traffic</div>
-                                <div class="text-[9px] text-blue-400 font-mono font-bold"><i class="fas fa-arrow-down"></i> <span id="net-down">0</span> MB/s &nbsp; <i class="fas fa-arrow-up"></i> <span id="net-up">0</span> MB/s</div>
-                            </div>
-                            <canvas id="traffic-canvas" class="w-full h-full opacity-60"></canvas>
-                        </div>
-                        <div class="dossier-card p-0 bg-black/80 border-white/10 font-mono text-[10px] h-40 overflow-hidden flex flex-col relative font-medium shadow-inner">
-                            <div class="bg-white/5 p-2 border-b border-white/5 flex justify-between items-center">
-                                <span class="text-blue-400 font-bold uppercase tracking-widest">Command Line Interface</span>
-                                <div class="flex gap-1"><div class="w-2 h-2 rounded-full bg-red-500"></div><div class="w-2 h-2 rounded-full bg-yellow-500"></div><div class="w-2 h-2 rounded-full bg-green-500"></div></div>
-                            </div>
-                            <div id="cli-output" class="flex-1 overflow-y-auto p-3 space-y-2 text-slate-300 no-scrollbar">
-                                <div class="text-emerald-500/80">> SYSTEM READY. WAITING FOR INPUT...</div>
-                            </div>
-                            <div class="p-2 border-t border-white/10 flex items-center gap-2 bg-white/5">
-                                <span class="text-blue-500 font-bold">></span>
-                                <input type="text" id="cli-input" class="bg-transparent border-none outline-none w-full text-white placeholder-slate-600 font-mono" placeholder="Enter command (e.g., 'analyze economy')..." autocomplete="off">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="pt-6 border-t border-white/5 flex items-center justify-between mt-12">
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">System Online</span>
-                    </div>
-                    <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest">© 2026 ABHISHEK SATI</p>
-                </div>
+
+            <div class="dossier-card p-0 overflow-hidden">
+              <div class="px-4 py-2.5 border-b border-white/5" style="background:rgba(255,255,255,.02)">
+                <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">24-Hour Projection</span>
+              </div>
+              <div id="atmo-hourly-container" class="flex overflow-x-auto p-4 gap-5 no-scrollbar"></div>
             </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div class="dossier-card flex flex-col items-center justify-center relative p-5">
+                <span class="absolute top-3 left-3 text-[9px] text-slate-500 font-bold uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">Wind</span>
+                <div class="relative w-16 h-16 flex items-center justify-center my-1">
+                  <div class="absolute inset-0 border border-dashed border-white/10 rounded-full"></div>
+                  <div class="absolute top-0 text-[7px] text-slate-500 font-bold">N</div>
+                  <div class="absolute bottom-0 text-[7px] text-slate-500 font-bold">S</div>
+                  <div class="absolute right-0 text-[7px] text-slate-500 font-bold">E</div>
+                  <div class="absolute left-0 text-[7px] text-slate-500 font-bold">W</div>
+                  <i id="atmo-wind-arrow" class="fas fa-long-arrow-alt-up text-2xl text-blue-400 transition-transform duration-1000"></i>
+                </div>
+                <div class="text-center">
+                  <div id="atmo-wind-speed" class="text-xl font-black text-white" style="font-family:'JetBrains Mono',monospace">--</div>
+                  <div class="text-[8px] text-slate-500 uppercase" style="font-family:'JetBrains Mono',monospace">KM/H</div>
+                </div>
+              </div>
+              <div class="dossier-card flex flex-col p-5">
+                <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-3" style="font-family:'JetBrains Mono',monospace">UV Index</span>
+                <div class="flex-1 flex flex-col justify-end">
+                  <div class="w-full bg-white/8 h-1 rounded-full overflow-hidden mb-2">
+                    <div id="atmo-uv-bar" class="h-full w-0 transition-all duration-1000" style="background:linear-gradient(90deg,#22c55e,#eab308,#ef4444)"></div>
+                  </div>
+                  <div class="flex justify-between items-end">
+                    <span id="atmo-uv-val" class="text-2xl font-black text-white leading-none" style="font-family:'JetBrains Mono',monospace">--</span>
+                    <span id="atmo-uv-text" class="text-[9px] text-slate-400 font-bold uppercase" style="font-family:'JetBrains Mono',monospace">--</span>
+                  </div>
+                </div>
+              </div>
+              <div class="dossier-card flex flex-col p-5">
+                <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-3" style="font-family:'JetBrains Mono',monospace">Humidity</span>
+                <div class="flex items-center gap-3 h-full">
+                  <i class="fas fa-tint text-xl text-blue-400 opacity-70"></i>
+                  <div>
+                    <div id="atmo-humidity" class="text-2xl font-black text-white leading-none" style="font-family:'JetBrains Mono',monospace">--%</div>
+                    <div class="text-[9px] text-slate-500 mt-1" style="font-family:'JetBrains Mono',monospace">Dew Point: <span id="atmo-dew" class="text-white">--°</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="dossier-card flex flex-col p-5">
+                <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-3" style="font-family:'JetBrains Mono',monospace">Visibility</span>
+                <div class="flex-1 flex flex-col justify-center gap-1">
+                  <div class="h-0.5 w-full rounded-full" style="background:rgba(59,130,246,.2)"></div>
+                  <div class="h-0.5 w-3/4 rounded-full" style="background:rgba(59,130,246,.35)"></div>
+                  <div class="h-0.5 w-1/2 rounded-full" style="background:rgba(59,130,246,.55)"></div>
+                </div>
+                <div class="mt-2 text-right">
+                  <span id="atmo-visibility" class="text-2xl font-black text-white" style="font-family:'JetBrains Mono',monospace">--</span>
+                  <span class="text-[9px] text-slate-500 ml-1" style="font-family:'JetBrains Mono',monospace">KM</span>
+                </div>
+              </div>
+              <div class="dossier-card flex flex-col p-5">
+                <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-2" style="font-family:'JetBrains Mono',monospace">Pressure</span>
+                <div class="flex items-end justify-between mt-auto">
+                  <div>
+                    <div id="atmo-pressure" class="text-2xl font-black text-white leading-none">--</div>
+                    <div class="text-[8px] text-slate-500 mt-1" style="font-family:'JetBrains Mono',monospace">HPA</div>
+                  </div>
+                  <i class="fas fa-tachometer-alt text-xl text-slate-600"></i>
+                </div>
+              </div>
+              <div class="dossier-card flex flex-col p-5" style="background:rgba(99,102,241,.03);border-color:rgba(99,102,241,.15)">
+                <span class="text-[9px] text-indigo-400 font-bold uppercase tracking-widest mb-2" style="font-family:'JetBrains Mono',monospace">Lunar Phase</span>
+                <div class="mt-auto flex items-center gap-3">
+                  <i id="atmo-moon-icon" class="fas fa-moon text-xl text-indigo-300"></i>
+                  <span id="atmo-moon-text" class="text-[10px] font-bold text-white uppercase leading-tight" style="font-family:'JetBrains Mono',monospace">--</span>
+                </div>
+              </div>
+              <div class="dossier-card flex flex-col p-5">
+                <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-2" style="font-family:'JetBrains Mono',monospace">Cloud Ceiling</span>
+                <div class="mt-auto flex items-end justify-between">
+                  <div>
+                    <div id="atmo-cloud-base" class="text-2xl font-black text-white leading-none">--</div>
+                    <div class="text-[8px] text-slate-500 mt-1" style="font-family:'JetBrains Mono',monospace">KM</div>
+                  </div>
+                  <i class="fas fa-cloud-upload-alt text-xl text-slate-500"></i>
+                </div>
+              </div>
+              <div class="dossier-card flex flex-col p-5" style="background:rgba(59,130,246,.04);border-color:rgba(59,130,246,.12)">
+                <span class="text-[9px] text-blue-400 font-bold uppercase tracking-widest mb-2" style="font-family:'JetBrains Mono',monospace">24h Precip</span>
+                <div class="mt-auto flex items-end justify-between">
+                  <div>
+                    <div id="atmo-precip-total" class="text-2xl font-black text-white leading-none">--</div>
+                    <div class="text-[8px] text-slate-500 mt-1" style="font-family:'JetBrains Mono',monospace">MM</div>
+                  </div>
+                  <i class="fas fa-cloud-showers-heavy text-xl text-blue-400 opacity-70"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="dossier-card p-0">
+              <div class="px-5 py-3 border-b border-white/5 flex justify-between items-center" style="background:rgba(255,255,255,.02)">
+                <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">7-Day Tactical Outlook</span>
+                <i class="fas fa-calendar-alt text-slate-600 text-sm"></i>
+              </div>
+              <div id="atmo-daily-container" class="divide-y divide-white/5"></div>
+            </div>
+          </div>
         </div>
+
+        <div id="tab-economic" class="tab-content">
+          <div class="content-scroll-area space-y-4">
+            <div class="flex flex-col md:flex-row gap-4">
+              <div class="flex-1 dossier-card relative overflow-hidden" style="background:rgba(16,185,129,.04);border-color:rgba(16,185,129,.15)">
+                <div class="absolute -right-4 -top-4 text-9xl" style="color:rgba(16,185,129,.06)"><i class="fas fa-coins"></i></div>
+                <div class="relative z-10">
+                  <span class="text-[9px] text-emerald-400 font-bold uppercase tracking-widest flex items-center gap-2" style="font-family:'JetBrains Mono',monospace">
+                    <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>Gross Domestic Product
+                  </span>
+                  <div class="mt-2 flex items-baseline gap-2">
+                    <span class="text-sm text-slate-400 font-bold">$</span>
+                    <span id="eco-gdp" class="text-5xl font-black text-white tracking-tighter" style="font-family:'JetBrains Mono',monospace">--</span>
+                    <span class="text-sm text-slate-400 font-bold">BN</span>
+                  </div>
+                  <div class="mt-4 pt-4 border-t border-white/5 flex gap-8">
+                    <div>
+                      <span class="block text-[9px] text-slate-500 font-bold uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">Growth Rate</span>
+                      <span id="eco-growth" class="text-lg font-mono font-bold text-emerald-400">--%</span>
+                    </div>
+                    <div>
+                      <span class="block text-[9px] text-slate-500 font-bold uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">Per Capita</span>
+                      <span id="eco-capita" class="text-lg font-mono font-bold text-white">$--</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="md:w-1/3 dossier-card flex flex-col justify-between relative overflow-hidden">
+                <div class="absolute inset-0 skew-y-12 transform origin-bottom-left scale-150" style="background:rgba(59,130,246,.04)"></div>
+                <div class="relative z-10 flex justify-between items-start">
+                  <div>
+                    <span class="text-[9px] text-blue-400 font-bold uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">Forex Uplink</span>
+                    <div id="eco-currency-code" class="text-3xl font-black text-white mt-1" style="font-family:'JetBrains Mono',monospace">USD</div>
+                  </div>
+                  <i class="fas fa-exchange-alt text-xl text-blue-400 opacity-40"></i>
+                </div>
+                <div class="relative z-10 mt-auto">
+                  <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">1.00 USD =</span>
+                  <div id="eco-rate" class="text-4xl font-mono font-bold text-white tracking-tighter">--</div>
+                  <div class="w-full bg-white/8 h-0.5 mt-2 rounded-full overflow-hidden">
+                    <div class="h-full w-1/2 animate-pulse" style="background:var(--blue)"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div class="dossier-card p-4">
+                <div class="flex justify-between items-start mb-2">
+                  <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">Inflation (CPI)</span>
+                  <i class="fas fa-percentage text-slate-600 text-sm"></i>
+                </div>
+                <div id="eco-inflation" class="text-2xl font-black text-white" style="font-family:'JetBrains Mono',monospace">--%</div>
+                <div class="text-[9px] text-slate-500 mt-1" style="font-family:'JetBrains Mono',monospace">YoY Change</div>
+              </div>
+              <div class="dossier-card p-4">
+                <div class="flex justify-between items-start mb-2">
+                  <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">Unemployment</span>
+                  <i class="fas fa-user-tie text-slate-600 text-sm"></i>
+                </div>
+                <div id="eco-unemployment" class="text-2xl font-black text-white" style="font-family:'JetBrains Mono',monospace">--%</div>
+                <div class="text-[9px] text-slate-500 mt-1" style="font-family:'JetBrains Mono',monospace">Labor Force</div>
+              </div>
+              <div class="dossier-card p-4">
+                <div class="flex justify-between items-start mb-2">
+                  <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">Central Bank Rate</span>
+                  <i class="fas fa-university text-slate-600 text-sm"></i>
+                </div>
+                <div id="eco-interest" class="text-2xl font-black text-white" style="font-family:'JetBrains Mono',monospace">--%</div>
+                <div class="text-[9px] text-slate-500 mt-1" style="font-family:'JetBrains Mono',monospace">Monetary Policy</div>
+              </div>
+              <div class="dossier-card p-4">
+                <div class="flex justify-between items-start mb-2">
+                  <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">Govt Debt</span>
+                  <i class="fas fa-balance-scale text-slate-600 text-sm"></i>
+                </div>
+                <div id="eco-debt" class="text-2xl font-black text-white" style="font-family:'JetBrains Mono',monospace">--%</div>
+                <div class="text-[9px] text-slate-500 mt-1" style="font-family:'JetBrains Mono',monospace">of GDP</div>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="dossier-card p-0">
+                <div class="px-4 py-2.5 border-b border-white/5 flex justify-between items-center" style="background:rgba(255,255,255,.02)">
+                  <span class="text-[9px] text-blue-400 font-bold uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">Major Exports</span>
+                  <i class="fas fa-ship text-slate-600 text-sm"></i>
+                </div>
+                <div id="eco-exports" class="p-4 space-y-2">
+                  <div class="h-3 rounded w-3/4 animate-pulse" style="background:rgba(255,255,255,.08)"></div>
+                  <div class="h-3 rounded w-1/2 animate-pulse" style="background:rgba(255,255,255,.08)"></div>
+                </div>
+              </div>
+              <div class="dossier-card p-0">
+                <div class="px-4 py-2.5 border-b border-white/5 flex justify-between items-center" style="background:rgba(255,255,255,.02)">
+                  <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">Sovereign Data</span>
+                  <i class="fas fa-globe text-slate-600 text-sm"></i>
+                </div>
+                <div class="p-4 grid grid-cols-2 gap-y-3 gap-x-2">
+                  <div><span class="text-[8px] text-slate-500 uppercase font-bold block" style="font-family:'JetBrains Mono',monospace">Population</span><span id="fact-pop-2" class="text-sm font-mono font-bold text-white">--</span></div>
+                  <div><span class="text-[8px] text-slate-500 uppercase font-bold block" style="font-family:'JetBrains Mono',monospace">Gini Index</span><span id="fact-gini-2" class="text-sm font-mono font-bold text-white">--</span></div>
+                  <div><span class="text-[8px] text-slate-500 uppercase font-bold block" style="font-family:'JetBrains Mono',monospace">Demonym</span><span id="fact-demonym-2" class="text-sm font-mono font-bold text-white">--</span></div>
+                  <div><span class="text-[8px] text-slate-500 uppercase font-bold block" style="font-family:'JetBrains Mono',monospace">Area</span><span id="fact-area-2" class="text-sm font-mono font-bold text-white">--</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="dossier-card p-3" style="background:rgba(0,0,0,.5);border-color:rgba(255,255,255,.06)">
+              <span class="text-blue-400 font-bold mr-2" style="font-family:'JetBrains Mono',monospace;font-size:11px">>> MARKET_FEED:</span>
+              <span id="eco-market-ticker" class="text-slate-300 typing-cursor" style="font-family:'JetBrains Mono',monospace;font-size:11px">Initializing Global Financial Uplink...</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
-    <div id="search-overlay" class="fixed inset-0 hidden flex items-center justify-center z-[100] px-6">
-        <div class="glass-panel max-w-3xl w-full border-blue-500/40 shadow-2xl flex flex-col max-h-[80vh] overflow-hidden p-0">
-            <div class="flex items-center p-8 gap-6 shrink-0 border-b border-white/10">
-                <i class="fas fa-crosshairs text-blue-500 text-3xl"></i>
-                <input type="text" id="country-search" autocomplete="off" placeholder="Sector designation..." class="w-full bg-transparent border-none outline-none text-3xl font-black text-white placeholder-slate-800">
-                <span class="text-[12px] font-black text-slate-600 bg-white/5 px-4 py-2 rounded-xl uppercase tracking-widest cursor-pointer hover:text-white transition-colors" onclick="toggleSearch()">ESC to abort</span>
-            </div>
-            <div id="search-results" class="flex-1 overflow-y-auto"></div>
-        </div>
+  </main>
+
+  <footer class="h-11 border-t overflow-hidden flex items-center flex-shrink-0"
+          style="background:rgba(2,6,23,.98);border-color:rgba(59,130,246,.1)">
+    <div class="animate-marquee whitespace-nowrap flex-1 text-center">
+      <span class="text-[10px] font-black text-blue-400 uppercase tracking-[.3em] mx-16" style="font-family:'JetBrains Mono',monospace">SYSTEM: MAP ENGINE CALIBRATED v9.7</span>
+      <span class="text-[10px] font-black text-slate-500 uppercase tracking-[.3em] mx-16" style="font-family:'JetBrains Mono',monospace">LATENCY: 4MS | PACKET INTEGRITY: 100% | UPLINK: VERIFIED</span>
+      <span class="text-[10px] font-black text-blue-400 uppercase tracking-[.3em] mx-16" style="font-family:'JetBrains Mono',monospace">ENCRYPTION: AES-512 | SAT-LINK: ARTEMIS-X ACTIVE | NEURAL ID: GRANTED</span>
+      <span class="text-[10px] font-black text-slate-500 uppercase tracking-[.3em] mx-16" style="font-family:'JetBrains Mono',monospace">CORE THERMALS: 28.1°C | NEURAL SYNAPSE LOAD: 3.2% | QUANTUM ENTROPY: NOMINAL</span>
+      <span class="text-[10px] font-black text-blue-400 uppercase tracking-[.3em] mx-16" style="font-family:'JetBrains Mono',monospace">DATA HANDSHAKE: VERIFIED | GLOBAL FEED: ONLINE | ARCHITECT: ABHISHEK SATI</span>
+      <span class="text-[10px] font-black text-blue-400 uppercase tracking-[.3em] mx-16" style="font-family:'JetBrains Mono',monospace">SYSTEM: MAP ENGINE CALIBRATED v9.7</span>
+      <span class="text-[10px] font-black text-slate-500 uppercase tracking-[.3em] mx-16" style="font-family:'JetBrains Mono',monospace">LATENCY: 4MS | PACKET INTEGRITY: 100% | UPLINK: VERIFIED</span>
+      <span class="text-[10px] font-black text-blue-400 uppercase tracking-[.3em] mx-16" style="font-family:'JetBrains Mono',monospace">ENCRYPTION: AES-512 | SAT-LINK: ARTEMIS-X ACTIVE | NEURAL ID: GRANTED</span>
+      <span class="text-[10px] font-black text-slate-500 uppercase tracking-[.3em] mx-16" style="font-family:'JetBrains Mono',monospace">CORE THERMALS: 28.1°C | NEURAL SYNAPSE LOAD: 3.2% | QUANTUM ENTROPY: NOMINAL</span>
+      <span class="text-[10px] font-black text-blue-400 uppercase tracking-[.3em] mx-16" style="font-family:'JetBrains Mono',monospace">DATA HANDSHAKE: VERIFIED | GLOBAL FEED: ONLINE | ARCHITECT: ABHISHEK SATI</span>
     </div>
-    <header class="z-50">
-        <div class="flex items-center gap-6 cursor-pointer group" onclick="resetToGlobalCenter()">
-            <div class="relative">
-                <div class="w-16 h-16 bg-blue-600 rounded-[1.25rem] rotate-12 flex items-center justify-center transition-transform group-hover:rotate-0 shadow-2xl shadow-blue-500/30">
-                    <i class="fas fa-satellite-dish text-4xl text-white -rotate-12 group-hover:rotate-0 transition-transform"></i>
-                </div>
-                <div class="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-4 border-[#020617] animate-pulse"></div>
-            </div>
-            <div>
-                <h1 class="text-[38px] font-black tracking-tighter text-white leading-none">News<span class="text-blue-500">Atlas</span></h1>
-                <p class="text-[11px] uppercase tracking-[0.3em] text-slate-500 font-extrabold mt-3 leading-none opacity-80">Intelligence Terminal</p>
-            </div>
-        </div>
-        <div class="hidden lg:flex items-center glass-panel px-10 py-3 gap-10 rounded-full border-white/5 shadow-2xl">
-            <div class="flex flex-col min-w-[180px]">
-                <span id="selected-country-name" class="font-black text-white text-[20px] uppercase truncate tracking-tighter">Global Signal</span>
-                <span id="neural-id" class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-0.5 leading-none">handshake verified</span>
-            </div>
-            <div class="h-10 w-px bg-slate-800"></div>
-            <div class="flex flex-col items-center min-w-[120px]">
-                <span id="system-time" class="text-[30px] font-black text-blue-400 tabular-nums leading-none">00:00:00</span>
-                <span class="text-[9px] font-bold text-slate-600 uppercase mt-1 tracking-[0.2em]">Terminal Time</span>
-            </div>
-            <div class="h-10 w-px bg-slate-800"></div>
-            <div class="flex gap-7">
-                <button onclick="upgradeToGoogle()" class="text-slate-500 hover:text-white transition-all tactical-btn" title="Verify Identity">
-                <i class="fas fa-user-shield text-2xl"></i>
-                </button>
-                <button onclick="downloadDossier()" class="text-slate-500 hover:text-white transition-all tactical-btn" title="Download Intel Dossier">
-                    <i class="fas fa-file-download text-2xl"></i>
-                </button>
-                <button onclick="toggleProjection()" class="text-slate-500 hover:text-blue-400 transition-all tactical-btn" title="Toggle Projection">
-                    <i class="fas fa-globe-asia text-2xl"></i>
-                </button>
-                <button onclick="toggleSearch()" class="text-slate-500 hover:text-blue-400 transition-all tactical-btn" title="Search">
-                    <i class="fas fa-search text-2xl"></i>
-                </button>
-                <button onclick="activateVoice()" class="text-slate-500 hover:text-red-500 transition-all tactical-btn" title="Voice Command">
-                    <i class="fas fa-microphone text-2xl"></i>
-                </button>
-                <button onclick="toggleAbout(true)" class="text-slate-500 hover:text-emerald-400 transition-all tactical-btn" title="Command Info">
-                    <i class="fas fa-info-circle text-2xl"></i>
-                </button>
-            </div>
-        </div>
-        <button onclick="goToIndiaHome()" class="glass-panel px-12 py-5 hover:bg-blue-600/20 transition-all text-[14px] font-black flex items-center gap-5 border-blue-500/20 rounded-full tactical-btn group">
-            <i class="fas fa-home text-blue-400 text-2xl group-hover:scale-110 transition-transform"></i>
-            <span class="tracking-[0.15em] uppercase">India Base</span>
-        </button>
-    </header>
-    <main class="main-content">
-        <div id="map-box-id" class="map-box glass-panel overflow-hidden" onmouseleave="deactivateMapInteraction()"> 
-            <div class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5 flex-shrink-0">
-                <div class="flex items-center gap-4">
-                    <span id="projection-label" class="text-[14px] font-black text-slate-200 uppercase tracking-widest">Orbital Interface: 2D Active</span>
-                    <div id="active-sector-display" class="hidden flex items-center gap-4 bg-blue-500/10 border border-blue-500/20 px-4 py-1.5 rounded-lg animate-in fade-in zoom-in duration-300">
-                        <img id="sector-flag" src="" alt="Flag" class="w-8 h-5 object-cover rounded shadow-sm opacity-90">
-                        <span id="sector-name" class="text-[12px] font-black text-blue-100 uppercase tracking-widest">--</span>
-                    </div>
-                </div>
-                <div class="flex gap-3">
-                    <button onclick="toggleSatellite()" class="w-10 h-10 hover:bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 transition-colors tactical-btn shadow-xl text-emerald-400 font-black text-[10px] tracking-widest" title="Toggle Satellite Layer">SAT</button>
-                    <button onclick="zoomMap(1.6)" class="w-10 h-10 hover:bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 transition-colors tactical-btn shadow-xl"><i class="fas fa-plus text-slate-400"></i></button>
-                    <button onclick="zoomMap(0.6)" class="w-10 h-10 hover:bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 transition-colors tactical-btn shadow-xl"><i class="fas fa-minus text-slate-400"></i></button>
-                    <button onclick="resetToGlobalCenter()" class="w-10 h-10 hover:bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 text-blue-400 tactical-btn shadow-xl"><i class="fas fa-expand text-sm"></i></button>
-                </div>
-            </div>
-            <div id="map-container" class="flex-1 relative w-full h-full">
-                <svg id="world-map" class="w-full h-full"></svg>
-                <div id="map-overlay-guard" class="map-interaction-overlay" onclick="activateMapInteraction()">
-                    <div class="bg-black/60 border border-blue-500/30 text-blue-400 px-6 py-3 rounded-full font-bold uppercase tracking-widest text-xs flex items-center gap-3 backdrop-blur-md shadow-2xl transition-transform hover:scale-105 group">
-                        <i class="fas fa-mouse-pointer group-hover:animate-bounce"></i> Click to Interact
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="sidebar" class="intel-sidebar glass-panel">
-            <nav class="flex border-b border-white/10 bg-white/5 w-full rounded-t-[1.5rem] overflow-hidden">
-                <div class="nav-tab active" onmouseenter="playTacticalSound('hover')" onclick="switchTab('intel')">Intel</div>
-                <div class="nav-tab" onmouseenter="playTacticalSound('hover')" onclick="switchTab('news')">News</div>
-                <div class="nav-tab" onmouseenter="playTacticalSound('hover')" onclick="switchTab('markets')">Markets</div>
-                <div class="nav-tab" onmouseenter="playTacticalSound('hover')" onclick="switchTab('atmosphere')">Atmosphere</div>
-                <div class="nav-tab" onmouseenter="playTacticalSound('hover')" onclick="switchTab('economic')">Economic</div>
-            </nav>
-            <div id="sidebar-content" class="flex-1 overflow-hidden relative">
-                <div id="tab-intel" class="tab-content active">
-                    <div class="content-scroll-area">
-                        <h2 class="text-[12px] font-black text-white uppercase tracking-[0.3em] mb-4">Tactical Briefing</h2>
-                        <div id="ai-briefing-box" class="dossier-card bg-blue-500/[0.08] border-blue-500/30 mb-4">
-                            <div class="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
-                                <span class="text-[10px] text-blue-400 uppercase font-black tracking-widest flex items-center gap-3"><i class="fas fa-brain text-lg"></i> Neural Synthesis</span>
-                                <div class="flex items-center gap-2">
-                                    <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
-                                    <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Live Link</span>
-                                </div>
-                            </div>
-                            <p id="ai-briefing-text" class="text-[18px] text-slate-200 leading-loose font-medium tracking-wide">
-                                <span class="animate-pulse text-slate-500">Awaiting target selection...</span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div id="tab-markets" class="tab-content">
-                    <div class="content-scroll-area">
-                        <div class="dossier-card bg-black/40 border-white/5 p-0 mb-6 overflow-hidden">
-                            <div class="bg-blue-600/10 p-2 border-b border-white/5 flex justify-between items-center">
-                                <span class="text-[9px] text-blue-400 font-black uppercase tracking-widest px-2">LIVE EXCHANGE DATA</span>
-                                <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-2"></div>
-                            </div>
-                            <div class="ticker-wrap bg-black/20 py-3">
-                                <div class="ticker" id="stock-ticker-content">
-                                    </div>
-                            </div>
-                        </div>
+  </footer>
 
-                        <h2 class="text-[12px] font-black text-white uppercase tracking-[0.3em] mb-2">Financial Assets</h2>
-                        <div class="dossier-card bg-indigo-500/[0.05] border-indigo-500/20 mb-4">
-                            <div class="flex justify-between items-center mb-4 border-b border-white/5 pb-2">
-                                <span class="text-[10px] text-indigo-400 uppercase font-black tracking-widest"><i class="fas fa-chart-line mr-2"></i> Market Intel</span>
-                                <span class="text-[9px] text-slate-500 font-bold uppercase">Real-Time Search</span>
-                            </div>
-                            <div id="market-brief-text" class="text-[14px] text-slate-300 leading-relaxed font-mono whitespace-pre-line">
-                                <span class="animate-pulse text-slate-500">Initializing financial uplink...</span>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div class="dossier-card p-4 border-white/10 bg-white/[0.02]">
-                                <span class="text-[9px] text-yellow-500 uppercase font-black tracking-widest block mb-2">Gold (Au)</span>
-                                <div class="text-2xl font-black text-white" id="price-gold">--</div>
-                            </div>
-                            <div class="dossier-card p-4 border-white/10 bg-white/[0.02]">
-                                <span class="text-[9px] text-slate-400 uppercase font-black tracking-widest block mb-2">Silver (Ag)</span>
-                                <div class="text-2xl font-black text-white" id="price-silver">--</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="tab-news" class="tab-content">
-                    <div class="px-8 py-5 flex flex-col gap-4 border-b border-white/5 bg-white/5">
-                        <div class="flex justify-between items-end">
-                            <h2 class="text-[12px] font-black text-white uppercase tracking-[0.3em]">Signal Intelligence</h2>
-                            <span class="text-[9px] text-slate-500 uppercase font-bold tracking-widest"><span id="news-count">0</span> FRAGMENTS INTERCEPTED</span>
-                        </div>
-                        <div class="flex gap-2 overflow-x-auto no-scrollbar w-full items-center">
-                            <div class="intel-tab active" onclick="window.setCategory(this, 'top')">Headlines</div>
-                            <div class="intel-tab" onclick="window.setCategory(this, 'politics')">Politics</div>
-                            <div class="intel-tab" onclick="window.setCategory(this, 'business')">Business</div>
-                            <div class="intel-tab" onclick="window.setCategory(this, 'technology')">Tech</div>
-                            <div class="intel-tab" onclick="window.setCategory(this, 'science')">Science</div>
-                            <div class="intel-tab" onclick="window.setCategory(this, 'health')">Health</div>
-                            <div class="intel-tab" onclick="window.setCategory(this, 'sports')">Sports</div>
-                            <div class="intel-tab" onclick="window.setCategory(this, 'entertainment')">Entmt</div>
-                            <div class="intel-tab" onclick="window.setCategory(this, 'environment')">Eco</div>
-                            <div class="intel-tab" onclick="window.setCategory(this, 'crypto')">Crypto</div>
-                            <div class="w-12 shrink-0"></div>
-                        </div>
-                    </div>
-                    <div class="content-scroll-area">
-                        <div id="news-loading" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div class="dossier-card h-48 skeleton"></div>
-                            <div class="dossier-card h-48 skeleton"></div>
-                            <div class="dossier-card h-48 skeleton"></div>
-                            <div class="dossier-card h-48 skeleton"></div>
-                        </div>
-                        <div id="articles-container"></div>
-                    </div>
-                </div>
+  <div id="fact-pop"      class="hidden"></div>
+  <div id="fact-currency" class="hidden"></div>
+  <div id="fact-cap"      class="hidden"></div>
+  <div id="fact-region"   class="hidden"></div>
+  <div id="fact-area"     class="hidden"></div>
+  <div id="fact-code"     class="hidden"></div>
+  <div id="fact-demonym"  class="hidden"></div>
+  <div id="fact-gini"     class="hidden"></div>
+  <div id="fact-drive"    class="hidden"></div>
 
-                <div id="tab-atmosphere" class="tab-content">
-                    <div class="content-scroll-area space-y-6">
-                        <div class="flex flex-col md:flex-row gap-6">
-                            <div class="flex-1 dossier-card relative overflow-hidden group">
-                                <div class="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
-                                    <i id="atmo-main-icon" class="fas fa-cloud-sun text-9xl text-blue-500"></i>
-                                </div>
-                                <div class="relative z-10 flex flex-col h-full justify-between">
-                                    <div>
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                                            <span class="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Live Telemetry</span>
-                                        </div>
-                                        <div id="atmo-temp" class="text-[80px] font-black text-white leading-none tracking-tighter">-°</div>
-                                        <div id="atmo-condition" class="text-xl text-blue-400 font-bold uppercase tracking-widest mt-2">--</div>
-                                    </div>
-                                    <div class="flex gap-6 mt-6 pt-6 border-t border-white/5">
-                                        <div class="flex flex-col">
-                                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Feels Like</span>
-                                            <span id="atmo-feels" class="text-lg font-mono font-bold text-white">--°</span>
-                                        </div>
-                                        <div class="flex flex-col">
-                                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Low / High</span>
-                                            <span id="atmo-hl" class="text-lg font-mono font-bold text-white">-- / --</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="md:w-1/3 dossier-card bg-gradient-to-br from-amber-500/[0.05] to-transparent border-amber-500/20 flex flex-col justify-between">
-                                <div class="flex justify-between items-center mb-4">
-                                    <span class="text-[10px] text-amber-500 font-bold uppercase tracking-widest">Solar Cycle</span>
-                                    <i class="fas fa-sun text-amber-500 text-xl"></i>
-                                </div>
-                                <div class="relative h-24 w-full flex items-end px-2">
-                                    <div class="absolute inset-x-0 bottom-0 h-px bg-white/10"></div>
-                                    <svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none">
-                                        <path d="M0,100 Q50,20 100,100" fill="none" stroke="rgba(245, 158, 11, 0.3)" stroke-width="2" vector-effect="non-scaling-stroke"/>
-                                        <circle cx="50%" cy="50%" r="4" class="fill-amber-500 animate-pulse" />
-                                    </svg>
-                                    <div class="w-full flex justify-between text-[10px] font-mono text-slate-400 pb-1 z-10">
-                                        <span id="atmo-sunrise">--:--</span>
-                                        <span id="atmo-sunset">--:--</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="dossier-card p-0 overflow-hidden">
-                            <div class="px-5 py-3 border-b border-white/5 bg-white/[0.02]">
-                                <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">24-Hour Projection</span>
-                            </div>
-                            <div id="atmo-hourly-container" class="flex overflow-x-auto p-5 gap-6 no-scrollbar"></div>
-                        </div>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="dossier-card flex flex-col items-center justify-center relative p-6">
-                                <span class="absolute top-4 left-4 text-[9px] text-slate-500 font-bold uppercase tracking-widest">Wind Vector</span>
-                                <div class="relative w-20 h-20 flex items-center justify-center my-2">
-                                    <div class="absolute inset-0 border-2 border-dashed border-white/10 rounded-full"></div>
-                                    <div class="absolute top-0 text-[8px] text-slate-500 font-bold">N</div>
-                                    <div class="absolute bottom-0 text-[8px] text-slate-500 font-bold">S</div>
-                                    <div class="absolute right-0 text-[8px] text-slate-500 font-bold">E</div>
-                                    <div class="absolute left-0 text-[8px] text-slate-500 font-bold">W</div>
-                                    <i id="atmo-wind-arrow" class="fas fa-long-arrow-alt-up text-3xl text-blue-400 transition-transform duration-1000"></i>
-                                </div>
-                                <div class="text-center">
-                                    <div id="atmo-wind-speed" class="text-2xl font-black text-white">--</div>
-                                    <div class="text-[9px] text-slate-500 uppercase">KM/H</div>
-                                </div>
-                            </div>
-                            <div class="dossier-card flex flex-col p-6">
-                                <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-4">UV Index</span>
-                                <div class="flex-1 flex flex-col justify-end">
-                                    <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden mb-2">
-                                        <div id="atmo-uv-bar" class="h-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500 w-0 transition-all duration-1000"></div>
-                                    </div>
-                                    <div class="flex justify-between items-end">
-                                        <span id="atmo-uv-val" class="text-2xl font-black text-white leading-none">--</span>
-                                        <span id="atmo-uv-text" class="text-[9px] text-slate-400 font-bold uppercase">--</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="dossier-card flex flex-col p-6">
-                                <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-4">Humidity</span>
-                                <div class="flex items-center gap-4 h-full">
-                                    <i class="fas fa-tint text-2xl text-blue-500 opacity-80"></i>
-                                    <div>
-                                        <div id="atmo-humidity" class="text-2xl font-black text-white leading-none">--%</div>
-                                        <div class="text-[9px] text-slate-500 mt-1">Dew Point: <span id="atmo-dew" class="text-white">--°</span></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="dossier-card flex flex-col p-6">
-                                <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-4">Visibility</span>
-                                <div class="flex-1 flex flex-col justify-center gap-1">
-                                    <div class="h-1 w-full bg-blue-500/20 rounded-full"></div>
-                                    <div class="h-1 w-3/4 bg-blue-500/40 rounded-full"></div>
-                                    <div class="h-1 w-1/2 bg-blue-500/60 rounded-full"></div>
-                                </div>
-                                <div class="mt-2 text-right">
-                                    <span id="atmo-visibility" class="text-2xl font-black text-white leading-none">--</span>
-                                    <span class="text-[9px] text-slate-500">KM</span>
-                                </div>
-                            </div>
-                            <div class="dossier-card flex flex-col p-6">
-                                <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-2">Pressure</span>
-                                <div class="flex items-end justify-between mt-auto">
-                                    <div>
-                                        <div id="atmo-pressure" class="text-2xl font-black text-white leading-none">--</div>
-                                        <div class="text-[9px] text-slate-500 mt-1">HPA</div>
-                                    </div>
-                                    <i class="fas fa-tachometer-alt text-2xl text-slate-600"></i>
-                                </div>
-                            </div>
-                            <div class="dossier-card flex flex-col p-6 border-indigo-500/20 bg-indigo-500/[0.03]">
-                                <span class="text-[9px] text-indigo-400 font-bold uppercase tracking-widest mb-2">Lunar Phase</span>
-                                <div class="mt-auto flex items-center gap-3">
-                                    <i id="atmo-moon-icon" class="fas fa-moon text-2xl text-indigo-300"></i>
-                                    <span id="atmo-moon-text" class="text-[10px] font-bold text-white uppercase leading-tight">--</span>
-                                </div>
-                            </div>
-                            <div class="dossier-card flex flex-col p-6 bg-slate-800/[0.2] border-slate-700/30">
-                                <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-2">Cloud Ceiling</span>
-                                <div class="mt-auto flex items-end justify-between">
-                                    <div>
-                                        <div id="atmo-cloud-base" class="text-2xl font-black text-white leading-none">--</div>
-                                        <div class="text-[9px] text-slate-500 mt-1">KM</div>
-                                    </div>
-                                    <i class="fas fa-cloud-upload-alt text-2xl text-slate-500"></i>
-                                </div>
-                            </div>
-                            <div class="dossier-card flex flex-col p-6 bg-blue-900/[0.1] border-blue-800/30">
-                                <span class="text-[9px] text-blue-400 font-bold uppercase tracking-widest mb-2">24h Precip</span>
-                                <div class="mt-auto flex items-end justify-between">
-                                    <div>
-                                        <div id="atmo-precip-total" class="text-2xl font-black text-white leading-none">--</div>
-                                        <div class="text-[9px] text-slate-500 mt-1">MM</div>
-                                    </div>
-                                    <i class="fas fa-cloud-showers-heavy text-2xl text-blue-500"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="dossier-card p-0">
-                            <div class="px-6 py-4 border-b border-white/5 flex justify-between items-center">
-                                <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">7-Day Tactical Outlook</span>
-                                <i class="fas fa-calendar-alt text-slate-600"></i>
-                            </div>
-                            <div id="atmo-daily-container" class="divide-y divide-white/5"></div>
-                        </div>
-                    </div>
-                </div>
-                <div id="tab-economic" class="tab-content">
-                    <div class="content-scroll-area space-y-6">
-                        <div class="flex flex-col md:flex-row gap-6">
-                            <div class="flex-1 dossier-card bg-gradient-to-br from-emerald-500/[0.05] to-transparent border-emerald-500/20 relative overflow-hidden group">
-                                <div class="absolute -right-4 -top-4 text-emerald-500/10 text-9xl"><i class="fas fa-coins"></i></div>
-                                <div class="relative z-10">
-                                    <span class="text-[10px] text-emerald-500 font-bold uppercase tracking-widest flex items-center gap-2">
-                                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Gross Domestic Product
-                                    </span>
-                                    <div class="mt-2 flex items-baseline gap-2">
-                                        <span class="text-[14px] text-slate-400 font-bold">$</span>
-                                        <span id="eco-gdp" class="text-5xl font-black text-white tracking-tighter">--</span>
-                                        <span class="text-[14px] text-slate-400 font-bold">BN</span>
-                                    </div>
-                                    <div class="mt-4 pt-4 border-t border-white/5 flex gap-8">
-                                        <div>
-                                            <span class="block text-[9px] text-slate-500 font-bold uppercase tracking-widest">Growth Rate</span>
-                                            <span id="eco-growth" class="text-lg font-mono font-bold text-emerald-400">--%</span>
-                                        </div>
-                                        <div>
-                                            <span class="block text-[9px] text-slate-500 font-bold uppercase tracking-widest">Per Capita</span>
-                                            <span id="eco-capita" class="text-lg font-mono font-bold text-white">$--</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="md:w-1/3 dossier-card flex flex-col justify-between relative overflow-hidden">
-                                <div class="absolute inset-0 bg-blue-500/5 skew-y-12 transform origin-bottom-left scale-150"></div>
-                                <div class="relative z-10 flex justify-between items-start">
-                                    <div>
-                                        <span class="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Forex Uplink</span>
-                                        <div id="eco-currency-code" class="text-3xl font-black text-white mt-1">USD</div>
-                                    </div>
-                                    <i class="fas fa-exchange-alt text-2xl text-blue-500/50"></i>
-                                </div>
-                                <div class="relative z-10 mt-auto">
-                                    <div class="flex items-end justify-between">
-                                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">1.00 USD =</span>
-                                    </div>
-                                    <div id="eco-rate" class="text-4xl font-mono font-bold text-white tracking-tighter">--</div>
-                                    <div class="w-full bg-white/10 h-1 mt-2 rounded-full overflow-hidden">
-                                        <div class="h-full bg-blue-500 w-1/2 animate-pulse"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="dossier-card p-5 hover:bg-white/5 transition-colors">
-                                <div class="flex justify-between items-start mb-2">
-                                    <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Inflation (CPI)</span>
-                                    <i class="fas fa-percentage text-slate-600"></i>
-                                </div>
-                                <div id="eco-inflation" class="text-2xl font-black text-white">--%</div>
-                                <div class="text-[9px] text-slate-500 mt-1">YoY Change</div>
-                            </div>
-                            <div class="dossier-card p-5 hover:bg-white/5 transition-colors">
-                                <div class="flex justify-between items-start mb-2">
-                                    <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Unemployment</span>
-                                    <i class="fas fa-user-tie text-slate-600"></i>
-                                </div>
-                                <div id="eco-unemployment" class="text-2xl font-black text-white">--%</div>
-                                <div class="text-[9px] text-slate-500 mt-1">Labor Force</div>
-                            </div>
-                            <div class="dossier-card p-5 hover:bg-white/5 transition-colors">
-                                <div class="flex justify-between items-start mb-2">
-                                    <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Central Bank Rate</span>
-                                    <i class="fas fa-university text-slate-600"></i>
-                                </div>
-                                <div id="eco-interest" class="text-2xl font-black text-white">--%</div>
-                                <div class="text-[9px] text-slate-500 mt-1">Monetary Policy</div>
-                            </div>
-                            <div class="dossier-card p-5 hover:bg-white/5 transition-colors">
-                                <div class="flex justify-between items-start mb-2">
-                                    <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Govt Debt</span>
-                                    <i class="fas fa-balance-scale text-slate-600"></i>
-                                </div>
-                                <div id="eco-debt" class="text-2xl font-black text-white">--%</div>
-                                <div class="text-[9px] text-slate-500 mt-1">of GDP</div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="dossier-card p-0">
-                                <div class="px-5 py-3 border-b border-white/5 bg-white/[0.02] flex justify-between items-center">
-                                    <span class="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Major Exports</span>
-                                    <i class="fas fa-ship text-slate-600"></i>
-                                </div>
-                                <div id="eco-exports" class="p-5 space-y-3">
-                                    <div class="h-4 bg-white/10 rounded w-3/4 animate-pulse"></div>
-                                    <div class="h-4 bg-white/10 rounded w-1/2 animate-pulse"></div>
-                                </div>
-                            </div>
-                            <div class="dossier-card p-0">
-                                <div class="px-5 py-3 border-b border-white/5 bg-white/[0.02] flex justify-between items-center">
-                                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Sovereign Data</span>
-                                    <i class="fas fa-globe text-slate-600"></i>
-                                </div>
-                                <div class="p-5 grid grid-cols-2 gap-y-4 gap-x-2">
-                                    <div>
-                                        <span class="text-[9px] text-slate-500 uppercase font-bold block">Population</span>
-                                        <span id="fact-pop-2" class="text-sm font-mono font-bold text-white">--</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-[9px] text-slate-500 uppercase font-bold block">Gini Index</span>
-                                        <span id="fact-gini-2" class="text-sm font-mono font-bold text-white">--</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-[9px] text-slate-500 uppercase font-bold block">Demonym</span>
-                                        <span id="fact-demonym-2" class="text-sm font-mono font-bold text-white">--</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-[9px] text-slate-500 uppercase font-bold block">Area</span>
-                                        <span id="fact-area-2" class="text-sm font-mono font-bold text-white">--</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="dossier-card border-white/10 bg-black/40 p-4 font-mono text-xs">
-                            <span class="text-blue-500 font-bold mr-2">>> MARKET_FEED:</span>
-                            <span id="eco-market-ticker" class="text-slate-300 typing-cursor">Initializing Global Financial Uplink...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-    <footer class="h-14 bg-black/80 border-t border-white/10 flex items-center overflow-hidden shadow-[0_-10px_40px_rgba(0,0,0,0.5)] justify-between px-6">
-        <div class="animate-marquee whitespace-nowrap flex-1 text-center">
-            <span class="text-[12px] font-black text-blue-400 uppercase tracking-[0.3em] mx-24">SYSTEM: MAP ENGINE CALIBRATED v9.7</span>
-            <span class="text-[12px] font-black text-slate-500 uppercase tracking-[0.3em] mx-24">LATENCY: 4MS | PACKET INTEGRITY: 100% | UPLINK: VERIFIED</span>
-            <span class="text-[12px] font-black text-blue-400 uppercase tracking-[0.3em] mx-24">ENCRYPTION: AES-512 | SAT-LINK: ARTEMIS-X ACTIVE | NEURAL ID: GRANTED</span>
-            <span class="text-[12px] font-black text-slate-500 uppercase tracking-[0.3em] mx-24">CORE THERMALS: 28.1°C | NEURAL SYNAPSE LOAD: 3.2% | QUANTUM ENTROPY: NOMINAL</span>
-            <span class="text-[12px] font-black text-blue-400 uppercase tracking-[0.3em] mx-24">DATA HANDSHAKE: VERIFIED | GLOBAL FEED: ONLINE | ARCHITECT: ABHISHEK SATI</span>
-        </div>
-    </footer>
-    <div id="fact-pop" class="hidden"></div>
-    <div id="fact-currency" class="hidden"></div>
-    <div id="fact-cap" class="hidden"></div>
-    <div id="fact-region" class="hidden"></div>
-    <div id="fact-area" class="hidden"></div>
-    <div id="fact-code" class="hidden"></div>
-    <div id="fact-demonym" class="hidden"></div>
-    <div id="fact-gini" class="hidden"></div>
-    <div id="fact-drive" class="hidden"></div>
-
-    <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>

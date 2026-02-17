@@ -1,9 +1,16 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-// ADDED signInWithPopup HERE vvv
 import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, GoogleAuthProvider, linkWithPopup, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-// --- SMART LOGIN FUNCTION (Fixed) ---
+// --- EXPOSE FIREBASE TO WINDOW (Fixed Missing Function) ---
+window.firebaseCore = { 
+    initializeApp, getAuth, onAuthStateChanged, signInAnonymously, 
+    signInWithCustomToken, getFirestore, doc, collection, 
+    onSnapshot, setDoc, deleteDoc, serverTimestamp,
+    GoogleAuthProvider, linkWithPopup, signInWithPopup // <--- THIS WAS MISSING
+};
+
+// --- SMART LOGIN FUNCTION ---
 window.upgradeToGoogle = async () => {
     const btn = document.querySelector('button[title="Verify Identity"]');
     const originalContent = btn.innerHTML;
@@ -21,8 +28,11 @@ window.upgradeToGoogle = async () => {
         // 2. If already linked, Force SIGN IN instead
         if (error.code === 'auth/credential-already-in-use') {
             console.log("Account exists. Switching to existing user...");
+            
+            // SECURITY FIX: Alert user before retry to prevent Popup Blocker
+            alert("Account already exists. Click OK to switch accounts.");
+            
             try {
-                // This will now work because we imported it correctly
                 await window.firebaseCore.signInWithPopup(auth, provider);
             } catch (signInError) {
                 console.error("Force Login Failed:", signInError);
@@ -66,14 +76,7 @@ window.upgradeToGoogle = async () => {
 const apiKey = ""; 
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'news-atlas-v7';
 
-// ADDED signInWithPopup HERE vvv
-window.firebaseCore = { 
-    initializeApp, getAuth, onAuthStateChanged, signInAnonymously, 
-    signInWithCustomToken, getFirestore, doc, collection, 
-    onSnapshot, setDoc, deleteDoc, serverTimestamp,
-    GoogleAuthProvider, linkWithPopup, signInWithPopup
-};
-
+// --- GLOBAL VARIABLES ---
 let auth, db, user, selectedCountry;
 let currentCategory = 'top';
 let worldFeatures = [];

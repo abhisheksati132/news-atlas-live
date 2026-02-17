@@ -21,16 +21,28 @@ window.upgradeToGoogle = async () => {
     const provider = new window.firebaseCore.GoogleAuthProvider();
 
     try {
-        // 2. Direct Sign In (Bypasses "Already Linked" errors)
+        // 2. Direct Sign In (The most reliable method)
         const result = await window.firebaseCore.signInWithPopup(auth, provider);
         const user = result.user;
+
+        // --- SAFETY CHECK: Handle missing names ---
+        // If display name is missing, use the part of the email before the "@"
+        let safeName = "COMMANDER";
+        if (user.displayName) {
+            safeName = user.displayName;
+        } else if (user.email) {
+            safeName = user.email.split('@')[0];
+        }
+        
+        const upperName = safeName.toUpperCase();
+        const shortName = safeName.split(' ')[0].toUpperCase();
 
         // --- SUCCESS VISUALS ---
         
         // Update ID Label
         const idEl = document.getElementById('neural-id');
         if (idEl) {
-            idEl.innerText = `ID: ${user.displayName.toUpperCase()}`;
+            idEl.innerText = `ID: ${upperName}`;
             idEl.classList.remove('text-slate-500');
             idEl.classList.add('text-emerald-400', 'drop-shadow-glow');
         }
@@ -42,13 +54,12 @@ window.upgradeToGoogle = async () => {
             btn.innerHTML = `<i class="fas fa-user-check text-2xl text-emerald-500"></i>`;
         }
 
-        // Sound & Toast
+        // Sound & Notification
         window.playTacticalSound('success');
         if (window.showToast) {
-            window.showToast(`WELCOME COMMANDER ${user.displayName.split(' ')[0].toUpperCase()}`, 'success');
+            window.showToast(`WELCOME COMMANDER ${shortName}`, 'success');
         } else {
-            // Fallback if toast isn't set up
-            console.log("Login Successful");
+            alert(`ACCESS GRANTED: Welcome, Commander ${shortName}`);
         }
 
     } catch (error) {
@@ -56,12 +67,15 @@ window.upgradeToGoogle = async () => {
         btn.innerHTML = originalContent; // Reset button
         
         if (error.code === 'auth/popup-closed-by-user') {
-            // Ignore this, user just closed the window
+            return; // Ignore if user closed it
+        }
+        if (error.code === 'auth/popup-blocked') {
+            alert("Security Warning: Popup Blocked.\nPlease allow popups for this site in your browser settings (top right address bar).");
             return;
         }
         alert("LOGIN ERROR: " + error.message);
     }
-};
+};;
 
 const apiKey = ""; 
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'news-atlas-v7';

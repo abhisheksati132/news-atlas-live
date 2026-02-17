@@ -50,10 +50,13 @@ window.upgradeToGoogle = async () => {
         }
 
         window.playTacticalSound('success');
+        
+        // --- CALL THE NEW PERSONALIZER ---
+        personalizeSession(user); 
+        // ---------------------------------
+
         if (window.showToast) {
-            window.showToast(`WELCOME COMMANDER`, 'success');
-        } else {
-            alert(`ACCESS GRANTED: Welcome Commander`);
+            window.showToast(`WELCOME COMMANDER ${user.displayName.split(' ')[0].toUpperCase()}`, 'success');
         }
 
     } catch (error) {
@@ -1176,6 +1179,41 @@ window.activateVoice = () => {
         btn.classList.remove('text-red-500', 'animate-pulse');
     };
 };
+// --- NEW PERSONALIZATION ENGINE ---
+function personalizeSession(user) {
+    // 1. Audio Greeting (Text-to-Speech)
+    // We wait 1 second for the sound effect to finish, then speak
+    setTimeout(() => {
+        const text = `Identity confirmed. Welcome back, Commander ${user.displayName.split(' ')[0]}`;
+        const speech = new SpeechSynthesisUtterance(text);
+        speech.pitch = 0.8; // Lower pitch = more "tactical"
+        speech.rate = 0.9;  // Slightly slower
+        speech.volume = 1.0;
+        
+        // Try to find a "Google US English" voice for better quality
+        const voices = window.speechSynthesis.getVoices();
+        const googleVoice = voices.find(v => v.name.includes('Google US English'));
+        if (googleVoice) speech.voice = googleVoice;
+
+        window.speechSynthesis.speak(speech);
+    }, 1000);
+
+    // 2. Inject Data into the "About" ID Card
+    // This makes the "Command Info" button show YOUR details
+    const aboutOverlay = document.getElementById('about-overlay');
+    if (aboutOverlay) {
+        const nameEl = aboutOverlay.querySelector('h2');
+        const roleEl = aboutOverlay.querySelector('p.text-blue-400');
+        const levelEl = aboutOverlay.querySelector('.text-emerald-500');
+        
+        if (nameEl) {
+            nameEl.innerText = user.displayName.toUpperCase();
+            nameEl.classList.add('text-blue-200'); // Add a slight tint
+        }
+        if (roleEl) roleEl.innerText = "AUTHENTICATED FIELD OPERATOR";
+        if (levelEl) levelEl.innerText = "CLEARANCE: OMEGA-LEVEL (VERIFIED)";
+    }
+}
 initTerminal();
 initMap('2d');
 setupEventListeners();

@@ -30,7 +30,6 @@
             GoogleAuthProvider, linkWithPopup
         }
 
-        // Keep this here so the HTML button can find it immediately
         window.upgradeToGoogle = async () => {
             const auth = window.firebaseCore.getAuth();
             const provider = new window.firebaseCore.GoogleAuthProvider();

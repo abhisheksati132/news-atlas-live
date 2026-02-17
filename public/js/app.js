@@ -2,30 +2,26 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebas
 import { getAuth, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, linkWithPopup, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-// --- EXPOSE FIREBASE TO WINDOW ---
 window.firebaseCore = { 
     initializeApp, getAuth, onAuthStateChanged, signInAnonymously, 
     getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp,
     GoogleAuthProvider, linkWithPopup, signInWithPopup, signOut
 };
 
-// --- LOGIN / LOGOUT TOGGLE FUNCTION ---
 window.upgradeToGoogle = async () => {
     const btn = document.querySelector('button[title="Verify Identity"]');
     const auth = window.firebaseCore.getAuth();
     
-    // 1. LOGOUT LOGIC (If already signed in as Commander)
     if (auth.currentUser && !auth.currentUser.isAnonymous) {
         const confirmLogout = confirm("⚠️ COMMANDER: Do you want to terminate this session?");
         if (confirmLogout) {
             window.playTacticalSound('click');
             await window.firebaseCore.signOut(auth);
-            window.location.reload(); // Reboot terminal to Guest Mode
+            window.location.reload(); 
         }
         return;
     }
 
-    // 2. LOGIN LOGIC (If Guest)
     const originalContent = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin text-2xl text-yellow-500"></i>';
     const provider = new window.firebaseCore.GoogleAuthProvider();
@@ -34,7 +30,6 @@ window.upgradeToGoogle = async () => {
         const result = await window.firebaseCore.signInWithPopup(auth, provider);
         const user = result.user;
 
-        // --- SUCCESS VISUALS ---
         const idEl = document.getElementById('neural-id');
         let safeName = user.displayName || user.email.split('@')[0];
         if (idEl) {
@@ -51,9 +46,7 @@ window.upgradeToGoogle = async () => {
 
         window.playTacticalSound('success');
         
-        // --- CALL THE NEW PERSONALIZER ---
         personalizeSession(user); 
-        // ---------------------------------
 
         if (window.showToast) {
             window.showToast(`WELCOME COMMANDER ${user.displayName.split(' ')[0].toUpperCase()}`, 'success');
@@ -61,7 +54,7 @@ window.upgradeToGoogle = async () => {
 
     } catch (error) {
         console.error("Login Error:", error);
-        btn.innerHTML = originalContent; // Reset button
+        btn.innerHTML = originalContent; 
         if (error.code === 'auth/popup-closed-by-user') return;
         if (error.code === 'auth/popup-blocked') {
             alert("Security Warning: Popup Blocked. Please allow popups for this site.");
@@ -74,7 +67,6 @@ window.upgradeToGoogle = async () => {
 const apiKey = ""; 
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'news-atlas-v7';
 
-// --- GLOBAL VARIABLES ---
 let auth, db, user, selectedCountry;
 let currentCategory = 'top';
 let worldFeatures = [];
@@ -288,7 +280,6 @@ function startAboutStats() {
     }, 1000);
 }
 
-// --- INITIALIZATION ---
 async function runBootSequence() {
     const logs = ["SYSTEM_INIT...", "CONNECTING_SAT_UPLINK...", "DECRYPTING_GLOBAL_FEED...", "HANDSHAKE_VERIFIED", "ACCESS_GRANTED"];
     const logEl = document.getElementById('boot-log');
@@ -326,7 +317,6 @@ async function initTerminal() {
             user = u;
             if (u) {
                 const idEl = document.getElementById('neural-id');
-                // Only update ID for authenticated users
                 if(idEl && !u.isAnonymous && u.displayName) {
                     idEl.innerText = `ID: ${u.displayName.toUpperCase()}`;
                     idEl.classList.add('text-emerald-500');
@@ -356,7 +346,6 @@ async function initTerminal() {
     startStockTicker(); 
 }
 
-// --- EVENT HANDLERS ---
 window.toggleAbout = (show) => {
     window.playTacticalSound(show ? 'success' : 'click');
     const overlay = document.getElementById('about-overlay');
@@ -1179,14 +1168,11 @@ window.activateVoice = () => {
         btn.classList.remove('text-red-500', 'animate-pulse');
     };
 };
-// --- NEW PERSONALIZATION ENGINE ---
-// --- NEW PERSONALIZATION ENGINE (Fixed) ---
+
 function personalizeSession(user) {
-    // Safety Check: Use email if name is missing
     let safeName = user.displayName || user.email.split('@')[0];
     const shortName = safeName.split(' ')[0];
 
-    // 1. Audio Greeting (Text-to-Speech)
     setTimeout(() => {
         const text = `Identity confirmed. Welcome back, Commander ${shortName}`;
         const speech = new SpeechSynthesisUtterance(text);
@@ -1201,7 +1187,6 @@ function personalizeSession(user) {
         window.speechSynthesis.speak(speech);
     }, 1000);
 
-    // 2. Inject Data into the "About" ID Card
     const aboutOverlay = document.getElementById('about-overlay');
     if (aboutOverlay) {
         const nameEl = aboutOverlay.querySelector('h2');
@@ -1209,7 +1194,6 @@ function personalizeSession(user) {
         const levelEl = aboutOverlay.querySelector('.text-emerald-500');
         
         if (nameEl) {
-            // Uses the safe name (no more crash)
             nameEl.innerText = safeName.toUpperCase(); 
             nameEl.classList.add('text-blue-200');
         }

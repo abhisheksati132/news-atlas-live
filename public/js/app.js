@@ -1,81 +1,78 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, linkWithPopup, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, linkWithPopup, signInWithPopup, signout } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // --- EXPOSE FIREBASE ---
 window.firebaseCore = { 
     initializeApp, getAuth, onAuthStateChanged, signInAnonymously, 
     getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp,
-    GoogleAuthProvider, linkWithPopup, signInWithPopup
+    GoogleAuthProvider, linkWithPopup, signInWithPopup, signout
 };
 
 // --- ROBUST LOGIN FUNCTION (No Conflicts) ---
 window.upgradeToGoogle = async () => {
     const btn = document.querySelector('button[title="Verify Identity"]');
-    const originalContent = btn.innerHTML;
+    const auth = window.firebaseCore.getAuth();
     
-    // 1. Loading State
+    // --- LOGOUT LOGIC (If already signed in) ---
+    if (auth.currentUser && !auth.currentUser.isAnonymous) {
+        const confirmLogout = confirm("⚠️ COMMANDER: Do you want to terminate this session?");
+        if (confirmLogout) {
+            window.playTacticalSound('click');
+            await window.firebaseCore.signOut(auth);
+            // Reload page to reset the terminal to "Guest Mode" cleanly
+            window.location.reload();
+        }
+        return;
+    }
+
+    // --- LOGIN LOGIC (If Guest) ---
+    const originalContent = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin text-2xl text-yellow-500"></i>';
     
-    const auth = window.firebaseCore.getAuth();
     const provider = new window.firebaseCore.GoogleAuthProvider();
 
     try {
-        // 2. Direct Sign In (The most reliable method)
+        // Direct Sign In
         const result = await window.firebaseCore.signInWithPopup(auth, provider);
         const user = result.user;
 
-        // --- SAFETY CHECK: Handle missing names ---
-        // If display name is missing, use the part of the email before the "@"
-        let safeName = "COMMANDER";
-        if (user.displayName) {
-            safeName = user.displayName;
-        } else if (user.email) {
-            safeName = user.email.split('@')[0];
-        }
-        
-        const upperName = safeName.toUpperCase();
-        const shortName = safeName.split(' ')[0].toUpperCase();
-
         // --- SUCCESS VISUALS ---
-        
-        // Update ID Label
         const idEl = document.getElementById('neural-id');
         if (idEl) {
-            idEl.innerText = `ID: ${upperName}`;
+            // Use email handle if name is missing
+            let safeName = user.displayName || user.email.split('@')[0];
+            idEl.innerText = `ID: ${safeName.toUpperCase()}`;
             idEl.classList.remove('text-slate-500');
             idEl.classList.add('text-emerald-400', 'drop-shadow-glow');
         }
 
-        // Update Button Icon
         if (user.photoURL) {
-            btn.innerHTML = `<img src="${user.photoURL}" class="w-8 h-8 rounded-full border-2 border-emerald-500 shadow-[0_0_10px_#10b981]">`;
+            // Add a red border on hover to indicate "Logout" action available
+            btn.innerHTML = `<img src="${user.photoURL}" class="w-8 h-8 rounded-full border-2 border-emerald-500 shadow-[0_0_10px_#10b981] hover:border-red-500 transition-colors" title="Click to Logout">`;
         } else {
             btn.innerHTML = `<i class="fas fa-user-check text-2xl text-emerald-500"></i>`;
         }
 
-        // Sound & Notification
         window.playTacticalSound('success');
         if (window.showToast) {
-            window.showToast(`WELCOME COMMANDER ${shortName}`, 'success');
+            window.showToast(`WELCOME COMMANDER`, 'success');
         } else {
-            alert(`ACCESS GRANTED: Welcome, Commander ${shortName}`);
+            alert(`ACCESS GRANTED: Welcome Commander`);
         }
 
     } catch (error) {
         console.error("Login Error:", error);
         btn.innerHTML = originalContent; // Reset button
         
-        if (error.code === 'auth/popup-closed-by-user') {
-            return; // Ignore if user closed it
-        }
+        if (error.code === 'auth/popup-closed-by-user') return;
         if (error.code === 'auth/popup-blocked') {
-            alert("Security Warning: Popup Blocked.\nPlease allow popups for this site in your browser settings (top right address bar).");
+            alert("Security Warning: Popup Blocked. Please allow popups for this site.");
             return;
         }
         alert("LOGIN ERROR: " + error.message);
     }
-};;
+};
 
 const apiKey = ""; 
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'news-atlas-v7';

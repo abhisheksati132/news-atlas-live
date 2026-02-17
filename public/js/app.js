@@ -7,43 +7,55 @@ window.upgradeToGoogle = async () => {
     const originalContent = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin text-2xl text-yellow-500"></i>';
     
+    const auth = window.firebaseCore.getAuth();
+    const provider = new window.firebaseCore.GoogleAuthProvider();
+
     try {
-        const auth = window.firebaseCore.getAuth();
-        const provider = new window.firebaseCore.GoogleAuthProvider();
-
         if (auth.currentUser) {
-            const result = await window.firebaseCore.linkWithPopup(auth.currentUser, provider);
-            const user = result.user;
-
-            const idEl = document.getElementById('neural-id');
-            if (idEl) {
-                idEl.innerText = `ID: ${user.displayName.toUpperCase()}`;
-                idEl.classList.remove('text-slate-500');
-                idEl.classList.add('text-emerald-400', 'drop-shadow-glow');
-            }
-
-            if (user.photoURL) {
-                btn.innerHTML = `<img src="${user.photoURL}" class="w-8 h-8 rounded-full border-2 border-emerald-500 shadow-[0_0_10px_#10b981]">`;
-            } else {
-                btn.innerHTML = `<i class="fas fa-user-check text-2xl text-emerald-500"></i>`;
-            }
-
-            window.playTacticalSound('success');
-            if (window.showToast) {
-                window.showToast(`WELCOME COMMANDER ${user.displayName.split(' ')[0].toUpperCase()}`, 'success');
-            } else {
-                alert(`ACCESS GRANTED: Welcome, Commander ${user.displayName}`);
-            }
-
+            // 1. Try to LINK the account first (Upgrade Guest -> Google)
+            await window.firebaseCore.linkWithPopup(auth.currentUser, provider);
         }
     } catch (error) {
-        console.error("Login Error:", error);
-        btn.innerHTML = originalContent;
-        
+        // 2. If already linked, force SIGN IN instead
         if (error.code === 'auth/credential-already-in-use') {
-            alert("This Google Account is already linked to another terminal session. Please refresh.");
+            console.log("Account exists. Switching to existing user...");
+            try {
+                await window.firebaseCore.signInWithPopup(auth, provider);
+            } catch (signInError) {
+                console.error("Force Login Failed:", signInError);
+                btn.innerHTML = originalContent;
+                alert("Login Failed: " + signInError.message);
+                return;
+            }
         } else {
-            alert("LOGIN FAILED: " + error.code);
+            console.error("Link Error:", error);
+            btn.innerHTML = originalContent;
+            alert("Error: " + error.message);
+            return;
+        }
+    }
+
+    // 3. SUCCESS: Update UI (Runs for both Link AND Sign-In)
+    const user = auth.currentUser;
+    if (user) {
+        const idEl = document.getElementById('neural-id');
+        if (idEl) {
+            idEl.innerText = `ID: ${user.displayName.toUpperCase()}`;
+            idEl.classList.remove('text-slate-500');
+            idEl.classList.add('text-emerald-400', 'drop-shadow-glow');
+        }
+
+        if (user.photoURL) {
+            btn.innerHTML = `<img src="${user.photoURL}" class="w-8 h-8 rounded-full border-2 border-emerald-500 shadow-[0_0_10px_#10b981]">`;
+        } else {
+            btn.innerHTML = `<i class="fas fa-user-check text-2xl text-emerald-500"></i>`;
+        }
+
+        window.playTacticalSound('success');
+        if (window.showToast) {
+            window.showToast(`WELCOME COMMANDER ${user.displayName.split(' ')[0].toUpperCase()}`, 'success');
+        } else {
+            alert(`ACCESS GRANTED: Welcome, Commander ${user.displayName}`);
         }
     }
 };

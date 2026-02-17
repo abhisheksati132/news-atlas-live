@@ -1,7 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, GoogleAuthProvider, linkWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+// ADDED signInWithPopup HERE vvv
+import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, GoogleAuthProvider, linkWithPopup, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+// --- SMART LOGIN FUNCTION (Fixed) ---
 window.upgradeToGoogle = async () => {
     const btn = document.querySelector('button[title="Verify Identity"]');
     const originalContent = btn.innerHTML;
@@ -12,14 +14,15 @@ window.upgradeToGoogle = async () => {
 
     try {
         if (auth.currentUser) {
-            // 1. Try to LINK the account first (Upgrade Guest -> Google)
+            // 1. Try to LINK (Upgrade Guest -> Google)
             await window.firebaseCore.linkWithPopup(auth.currentUser, provider);
         }
     } catch (error) {
-        // 2. If already linked, force SIGN IN instead
+        // 2. If already linked, Force SIGN IN instead
         if (error.code === 'auth/credential-already-in-use') {
             console.log("Account exists. Switching to existing user...");
             try {
+                // This will now work because we imported it correctly
                 await window.firebaseCore.signInWithPopup(auth, provider);
             } catch (signInError) {
                 console.error("Force Login Failed:", signInError);
@@ -35,7 +38,7 @@ window.upgradeToGoogle = async () => {
         }
     }
 
-    // 3. SUCCESS: Update UI (Runs for both Link AND Sign-In)
+    // 3. SUCCESS UI UPDATE
     const user = auth.currentUser;
     if (user) {
         const idEl = document.getElementById('neural-id');
@@ -63,15 +66,14 @@ window.upgradeToGoogle = async () => {
 const apiKey = ""; 
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'news-atlas-v7';
 
-// Expose Firebase to Window (for other scripts if needed)
+// ADDED signInWithPopup HERE vvv
 window.firebaseCore = { 
     initializeApp, getAuth, onAuthStateChanged, signInAnonymously, 
     signInWithCustomToken, getFirestore, doc, collection, 
     onSnapshot, setDoc, deleteDoc, serverTimestamp,
-    GoogleAuthProvider, linkWithPopup 
+    GoogleAuthProvider, linkWithPopup, signInWithPopup
 };
 
-// --- GLOBAL VARIABLES ---
 let auth, db, user, selectedCountry;
 let currentCategory = 'top';
 let worldFeatures = [];
@@ -83,7 +85,6 @@ let ambienceOscillators = [];
 let ambienceGain = null;
 let isAmbiencePlaying = false;
 
-// --- AUDIO ENGINE ---
 function initAudio() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -151,7 +152,6 @@ window.playTacticalSound = (type) => {
     } catch(e) {}
 }
 
-// --- DOSSIER DOWNLOAD ---
 window.downloadDossier = () => {
     window.playTacticalSound('success');
     const cName = selectedCountry ? selectedCountry.properties.name : "GLOBAL_CONTEXT";
@@ -193,7 +193,6 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
     document.body.removeChild(a);
 };
 
-// --- VISUALIZATIONS ---
 function initTrafficCanvas() {
     const canvas = document.getElementById('traffic-canvas');
     if(!canvas) return;
@@ -217,7 +216,6 @@ function initTrafficCanvas() {
     draw();
 }
 
-// --- CLI HANDLER ---
 const cliInput = document.getElementById('cli-input');
 const cliOutput = document.getElementById('cli-output');
 if (cliInput) {
@@ -289,7 +287,6 @@ function startAboutStats() {
     }, 1000);
 }
 
-// --- INITIALIZATION SEQUENCE ---
 async function runBootSequence() {
     const logs = ["SYSTEM_INIT...", "CONNECTING_SAT_UPLINK...", "DECRYPTING_GLOBAL_FEED...", "HANDSHAKE_VERIFIED", "ACCESS_GRANTED"];
     const logEl = document.getElementById('boot-log');
@@ -317,13 +314,13 @@ async function initTerminal() {
         appId: "1:177473843770:web:f9abb15747f79f28a9bb03"
     };
     try {
-        const firebaseApp = initializeApp(config);
-        auth = getAuth(firebaseApp);
-        db = getFirestore(firebaseApp);
+        const firebaseApp = window.firebaseCore.initializeApp(config);
+        auth = window.firebaseCore.getAuth(firebaseApp);
+        db = window.firebaseCore.getFirestore(firebaseApp);
         
-        await signInAnonymously(auth);
+        await window.firebaseCore.signInAnonymously(auth);
         
-        onAuthStateChanged(auth, (u) => {
+        window.firebaseCore.onAuthStateChanged(auth, (u) => {
             user = u;
             if (u) {
                 const idEl = document.getElementById('neural-id');
@@ -332,9 +329,9 @@ async function initTerminal() {
                     idEl.classList.add('text-emerald-500');
                 }
                 try {
-                    const userRef = doc(db, "visitors", u.uid);
-                    setDoc(userRef, {
-                        last_login: serverTimestamp(),
+                    const userRef = window.firebaseCore.doc(db, "visitors", u.uid);
+                    window.firebaseCore.setDoc(userRef, {
+                        last_login: window.firebaseCore.serverTimestamp(),
                         device: navigator.userAgent
                     }, { merge: true });
                 } catch(e) { console.log("DB Write failed (Test Mode rules might be off)"); }
@@ -353,7 +350,6 @@ async function initTerminal() {
     startStockTicker(); 
 }
 
-// --- UI EVENT HANDLERS ---
 window.toggleAbout = (show) => {
     window.playTacticalSound(show ? 'success' : 'click');
     const overlay = document.getElementById('about-overlay');
@@ -390,7 +386,6 @@ window.toggleSatellite = () => {
     }
 };
 
-// --- DATA FETCHING & RENDERING ---
 function startStockTicker() {
     const tickerContent = document.getElementById('stock-ticker-content');
     const stocks = [
@@ -456,7 +451,6 @@ function renderTrending() {
             </div>`;
         }).join('');
 }
-
 async function generateAIBriefing(loc) {
     const box = document.getElementById('ai-briefing-box');
     const text = document.getElementById('ai-briefing-text');
@@ -488,7 +482,6 @@ async function generateAIBriefing(loc) {
         window.playTacticalSound('success');
     } catch (e) { if (text) text.innerText = "Briefing handshake failed."; }
 }
-
 async function fetchDetailedEconomics(country) {
     document.getElementById('eco-gdp').innerText = "--";
     document.getElementById('eco-growth').innerText = "--%";
@@ -554,7 +547,6 @@ async function fetchDetailedEconomics(country) {
         document.getElementById('eco-market-ticker').innerText = "ECONOMIC DATALINK SEVERED. RETRYING...";
     }
 }
-
 async function fetchMarketIntel(country, currency) {
     const textEl = document.getElementById('market-brief-text');
     const goldEl = document.getElementById('price-gold');
@@ -595,8 +587,6 @@ async function fetchMarketIntel(country, currency) {
         if(textEl) textEl.innerText = "Financial uplink failed.";
     }
 }
-
-// --- MAP ENGINE ---
 window.activateMapInteraction = () => {
     const overlay = document.getElementById('map-overlay-guard');
     if(overlay) {
@@ -611,7 +601,6 @@ window.deactivateMapInteraction = () => {
         overlay.classList.remove('active');
     }
 };
-
 function initMap(type) {
     projectionType = type;
     const container = document.getElementById('map-container');
@@ -681,7 +670,6 @@ function initMap(type) {
             });
     });
 }
-
 async function handleCountryClick(event, d) {
     window.playTacticalSound('click');
     d3.selectAll(".country").classed("active", false);
@@ -706,7 +694,6 @@ async function handleCountryClick(event, d) {
         fetchMarketIntel(d.properties.name, currencyCode);
     }
 }
-
 function rotateToCountry(d) {
     const centroid = d3.geoCentroid(d);
     d3.transition()
@@ -719,7 +706,6 @@ function rotateToCountry(d) {
             };
         });
 }
-
 function zoomToCountry(d) {
     const container = document.getElementById('map-container');
     const width = container.clientWidth, height = container.clientHeight;
@@ -730,7 +716,6 @@ function zoomToCountry(d) {
     const scale = Math.max(1, Math.min(8, 0.8 / Math.max(dx / width, dy / height)));
     svg.transition().duration(1000).call(zoom.transform, d3.zoomIdentity.translate(width / 2 - scale * x, height / 2 - scale * y).scale(scale));
 }
-
 async function fetchNews() {
     const container = document.getElementById('articles-container');
     const loading = document.getElementById('news-loading');
@@ -766,7 +751,6 @@ async function fetchNews() {
          if (container) container.innerHTML = `<div class="col-span-full p-10 text-center text-[12px] text-red-500 font-black italic uppercase tracking-widest">Uplink Error. Retrying...</div>`;
     } finally { if (loading) loading.classList.add('hidden'); }
 }
-
 window.setCategory = (el, cat) => {
     window.playTacticalSound('click');
     document.querySelectorAll('.intel-tab').forEach(t => t.classList.remove('active'));
@@ -774,7 +758,6 @@ window.setCategory = (el, cat) => {
     currentCategory = cat;
     fetchNews();
 };
-
 async function fetchAllData(name) {
     try {
         const res = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fullText=true`);
@@ -822,7 +805,6 @@ async function fetchAllData(name) {
         }
     } catch (e) { console.error("Data Fetch Error", e); }
 }
-
 async function fetchCurrency() {
     const el = document.getElementById('fact-currency');
     const elCode = document.getElementById('eco-currency-code');
@@ -854,7 +836,6 @@ async function fetchCurrency() {
         if (elRate) elRate.innerText = "ERR"; 
     }
 }
-
 function getWeatherMeta(code, isDay = 1) {
     const timeClass = isDay ? 'text-amber-400' : 'text-blue-300';
     const codes = {
@@ -878,7 +859,6 @@ function getWeatherMeta(code, isDay = 1) {
     };
     return codes[code] || { text: "Unknown", icon: "fa-meteor", color: "text-slate-500" };
 }
-
 function getMoonPhase() {
     const date = new Date();
     let year = date.getFullYear(); 
@@ -909,7 +889,6 @@ function getMoonPhase() {
     ];
     return phases[b];
 }
-
 async function fetchWeather(lat, lon) {
     if (isNaN(lat) || isNaN(lon)) {
         console.error("Invalid coordinates passed to weather module.");
@@ -1068,7 +1047,6 @@ async function fetchWeather(lat, lon) {
         console.error("Atmosphere Error:", e);
     }
 }
-
 window.switchTab = (id) => {
     window.playTacticalSound('tab');
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -1078,22 +1056,18 @@ window.switchTab = (id) => {
     const targetContent = document.getElementById(`tab-${id}`);
     if (targetContent) targetContent.classList.add('active');
 };
-
 window.toggleProjection = () => { window.playTacticalSound('tab'); initMap(projectionType === '2d' ? '3d' : '2d'); };
-
 window.selectFromSearch = (name) => {
     const country = worldFeatures.find(f => f.properties.name.toLowerCase().includes(name.toLowerCase()));
     if(country) handleCountryClick(null, country);
     else fetchAllData(name);
     document.getElementById('search-overlay').classList.add('hidden');
 };
-
 window.zoomMap = (f) => {
     window.playTacticalSound('click');
     if (projectionType === '2d') svg.transition().duration(400).call(zoom.scaleBy, f);
     else { currentProjection.scale(currentProjection.scale() * f); g.selectAll("path").attr("d", d3.geoPath().projection(currentProjection)); }
 };
-
 window.resetToGlobalCenter = () => {
     selectedCountry = null; countryUTCOffset = null;
     d3.selectAll(".country").classed("active", false);
@@ -1104,12 +1078,10 @@ window.resetToGlobalCenter = () => {
     if (projectionType === '2d') svg.transition().duration(1200).call(zoom.transform, d3.zoomIdentity);
     fetchNews();
 };
-
 window.goToIndiaHome = () => { 
     const india = worldFeatures.find(f => f.properties.name === "India"); 
     if (india) handleCountryClick(null, india); 
 };
-
 function setupEventListeners() {
     document.querySelectorAll('.category-pill').forEach(pill => {
         pill.onmouseenter = () => window.playTacticalSound('hover');
@@ -1156,7 +1128,6 @@ function setupEventListeners() {
         }
     };
 }
-
 function updateSystemTime() {
     const now = new Date();
     document.getElementById('system-time').innerText = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -1173,7 +1144,6 @@ function updateSystemTime() {
         document.body.classList.toggle('day-mode', !isNight);
     }
 }
-
 window.activateVoice = () => {
     window.playTacticalSound('click');
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1202,7 +1172,6 @@ window.activateVoice = () => {
         btn.classList.remove('text-red-500', 'animate-pulse');
     };
 };
-
 initTerminal();
 initMap('2d');
 setupEventListeners();

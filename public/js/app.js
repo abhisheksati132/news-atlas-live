@@ -1,46 +1,42 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, linkWithPopup, signInWithPopup, signout } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, linkWithPopup, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-// --- EXPOSE FIREBASE ---
+// --- EXPOSE FIREBASE TO WINDOW ---
 window.firebaseCore = { 
     initializeApp, getAuth, onAuthStateChanged, signInAnonymously, 
     getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp,
-    GoogleAuthProvider, linkWithPopup, signInWithPopup, signout
+    GoogleAuthProvider, linkWithPopup, signInWithPopup, signOut
 };
 
-// --- ROBUST LOGIN FUNCTION (No Conflicts) ---
+// --- LOGIN / LOGOUT TOGGLE FUNCTION ---
 window.upgradeToGoogle = async () => {
     const btn = document.querySelector('button[title="Verify Identity"]');
     const auth = window.firebaseCore.getAuth();
     
-    // --- LOGOUT LOGIC (If already signed in) ---
+    // 1. LOGOUT LOGIC (If already signed in as Commander)
     if (auth.currentUser && !auth.currentUser.isAnonymous) {
         const confirmLogout = confirm("⚠️ COMMANDER: Do you want to terminate this session?");
         if (confirmLogout) {
             window.playTacticalSound('click');
             await window.firebaseCore.signOut(auth);
-            // Reload page to reset the terminal to "Guest Mode" cleanly
-            window.location.reload();
+            window.location.reload(); // Reboot terminal to Guest Mode
         }
         return;
     }
 
-    // --- LOGIN LOGIC (If Guest) ---
+    // 2. LOGIN LOGIC (If Guest)
     const originalContent = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin text-2xl text-yellow-500"></i>';
-    
     const provider = new window.firebaseCore.GoogleAuthProvider();
 
     try {
-        // Direct Sign In
         const result = await window.firebaseCore.signInWithPopup(auth, provider);
         const user = result.user;
 
         // --- SUCCESS VISUALS ---
         const idEl = document.getElementById('neural-id');
         if (idEl) {
-            // Use email handle if name is missing
             let safeName = user.displayName || user.email.split('@')[0];
             idEl.innerText = `ID: ${safeName.toUpperCase()}`;
             idEl.classList.remove('text-slate-500');
@@ -48,7 +44,6 @@ window.upgradeToGoogle = async () => {
         }
 
         if (user.photoURL) {
-            // Add a red border on hover to indicate "Logout" action available
             btn.innerHTML = `<img src="${user.photoURL}" class="w-8 h-8 rounded-full border-2 border-emerald-500 shadow-[0_0_10px_#10b981] hover:border-red-500 transition-colors" title="Click to Logout">`;
         } else {
             btn.innerHTML = `<i class="fas fa-user-check text-2xl text-emerald-500"></i>`;
@@ -64,7 +59,6 @@ window.upgradeToGoogle = async () => {
     } catch (error) {
         console.error("Login Error:", error);
         btn.innerHTML = originalContent; // Reset button
-        
         if (error.code === 'auth/popup-closed-by-user') return;
         if (error.code === 'auth/popup-blocked') {
             alert("Security Warning: Popup Blocked. Please allow popups for this site.");
@@ -291,6 +285,7 @@ function startAboutStats() {
     }, 1000);
 }
 
+// --- INITIALIZATION ---
 async function runBootSequence() {
     const logs = ["SYSTEM_INIT...", "CONNECTING_SAT_UPLINK...", "DECRYPTING_GLOBAL_FEED...", "HANDSHAKE_VERIFIED", "ACCESS_GRANTED"];
     const logEl = document.getElementById('boot-log');
@@ -322,19 +317,17 @@ async function initTerminal() {
         auth = window.firebaseCore.getAuth(firebaseApp);
         db = window.firebaseCore.getFirestore(firebaseApp);
         
-        // Initial Anon Auth
         await window.firebaseCore.signInAnonymously(auth);
         
         window.firebaseCore.onAuthStateChanged(auth, (u) => {
             user = u;
             if (u) {
                 const idEl = document.getElementById('neural-id');
-                // Only update ID if user is NOT anonymous (Google Login)
-                if(idEl && !u.isAnonymous) {
+                // Only update ID for authenticated users
+                if(idEl && !u.isAnonymous && u.displayName) {
                     idEl.innerText = `ID: ${u.displayName.toUpperCase()}`;
                     idEl.classList.add('text-emerald-500');
                 } else if(idEl && u.isAnonymous) {
-                    // Keep it simple for anon
                     idEl.innerText = `ID: ${u.uid.substring(0, 8).toUpperCase()}`;
                 }
 
@@ -360,6 +353,7 @@ async function initTerminal() {
     startStockTicker(); 
 }
 
+// --- EVENT HANDLERS ---
 window.toggleAbout = (show) => {
     window.playTacticalSound(show ? 'success' : 'click');
     const overlay = document.getElementById('about-overlay');

@@ -36,8 +36,8 @@ window.upgradeToGoogle = async () => {
 
         // --- SUCCESS VISUALS ---
         const idEl = document.getElementById('neural-id');
+        let safeName = user.displayName || user.email.split('@')[0];
         if (idEl) {
-            let safeName = user.displayName || user.email.split('@')[0];
             idEl.innerText = `ID: ${safeName.toUpperCase()}`;
             idEl.classList.remove('text-slate-500');
             idEl.classList.add('text-emerald-400', 'drop-shadow-glow');
@@ -1180,17 +1180,20 @@ window.activateVoice = () => {
     };
 };
 // --- NEW PERSONALIZATION ENGINE ---
+// --- NEW PERSONALIZATION ENGINE (Fixed) ---
 function personalizeSession(user) {
+    // Safety Check: Use email if name is missing
+    let safeName = user.displayName || user.email.split('@')[0];
+    const shortName = safeName.split(' ')[0];
+
     // 1. Audio Greeting (Text-to-Speech)
-    // We wait 1 second for the sound effect to finish, then speak
     setTimeout(() => {
-        const text = `Identity confirmed. Welcome back, Commander ${user.displayName.split(' ')[0]}`;
+        const text = `Identity confirmed. Welcome back, Commander ${shortName}`;
         const speech = new SpeechSynthesisUtterance(text);
-        speech.pitch = 0.8; // Lower pitch = more "tactical"
-        speech.rate = 0.9;  // Slightly slower
+        speech.pitch = 0.8; 
+        speech.rate = 0.9;  
         speech.volume = 1.0;
         
-        // Try to find a "Google US English" voice for better quality
         const voices = window.speechSynthesis.getVoices();
         const googleVoice = voices.find(v => v.name.includes('Google US English'));
         if (googleVoice) speech.voice = googleVoice;
@@ -1199,7 +1202,6 @@ function personalizeSession(user) {
     }, 1000);
 
     // 2. Inject Data into the "About" ID Card
-    // This makes the "Command Info" button show YOUR details
     const aboutOverlay = document.getElementById('about-overlay');
     if (aboutOverlay) {
         const nameEl = aboutOverlay.querySelector('h2');
@@ -1207,8 +1209,9 @@ function personalizeSession(user) {
         const levelEl = aboutOverlay.querySelector('.text-emerald-500');
         
         if (nameEl) {
-            nameEl.innerText = user.displayName.toUpperCase();
-            nameEl.classList.add('text-blue-200'); // Add a slight tint
+            // Uses the safe name (no more crash)
+            nameEl.innerText = safeName.toUpperCase(); 
+            nameEl.classList.add('text-blue-200');
         }
         if (roleEl) roleEl.innerText = "AUTHENTICATED FIELD OPERATOR";
         if (levelEl) levelEl.innerText = "CLEARANCE: OMEGA-LEVEL (VERIFIED)";

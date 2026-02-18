@@ -210,22 +210,6 @@ firebase.js             -> Database & Auth Configuration
 
 ---
 
-## 📸 Screenshots
-
-![Boot Sequence](screenshots/boot.png)
-*Cinematic boot animation with progress bar and system logs*
-
-![God-Tier Map](screenshots/map-godtier.png)
-*Interactive globe with particle network, matrix rain, and holographic glow*
-
-![Intel Briefing](screenshots/intel.png)
-*AI-generated strategic analysis with JetBrains Mono typography*
-
-![Weather Dashboard](screenshots/weather.png)
-*Comprehensive atmospheric telemetry with solar cycle visualization*
-
----
-
 ## 🔮 Future Enhancements
 
 - [ ] WebSocket integration for true real-time data streaming

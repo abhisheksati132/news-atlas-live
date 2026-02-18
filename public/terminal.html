@@ -14,24 +14,56 @@
   <meta name="theme-color" content="#020617"/>
   <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2072/2072130.png" type="image/x-icon"/>
 
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, GoogleAuthProvider, linkWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    
+    window.firebaseCore = { 
+      initializeApp, getAuth, onAuthStateChanged, signInAnonymously, 
+      signInWithCustomToken, getFirestore, doc, collection, 
+      onSnapshot, setDoc, deleteDoc, serverTimestamp,
+      GoogleAuthProvider, linkWithPopup
+    };
+
+    window.upgradeToGoogle = async () => {
+      const auth = window.firebaseCore.getAuth();
+      const provider = new window.firebaseCore.GoogleAuthProvider();
+      if (auth.currentUser) {
+        try {
+          const result = await window.firebaseCore.linkWithPopup(auth.currentUser, provider);
+          const user = result.user;
+          const idEl = document.getElementById('neural-id');
+          if (idEl) {
+            idEl.innerText = `ID: ${user.displayName.toUpperCase()}`;
+            idEl.classList.add('text-emerald-400');
+          }
+          if (window.playTacticalSound) window.playTacticalSound('success');
+        } catch (error) {
+          console.error("Auth Error:", error.code);
+          if (error.code === 'auth/popup-blocked') {
+            alert("Security block detected. Please allow popups.");
+          }
+        }
+      }
+    };
+  </script>
+
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const bar = document.getElementById('boot-bar');
       const screen = document.getElementById('boot-screen');
       const logs = document.getElementById('boot-log');
-      const messages = ["SYSTEM_INIT...", "BYPASSING_ERRORS...", "FORCE_MOUNT_UI...", "ACCESS_GRANTED"];
+      const messages = ["SYSTEM_INIT...", "CONNECTING_SAT_UPLINK...", "DECRYPTING_GLOBAL_FEED...", "HANDSHAKE_VERIFIED", "ACCESS_GRANTED"];
       
-      let progress = 0;
-      let msgIndex = 0;
+      let progress = 0, msgIndex = 0;
 
-      // Force load interval
       const interval = setInterval(() => {
         progress += Math.random() * 15;
         if (progress > 100) progress = 100;
         if (bar) bar.style.width = progress + '%';
 
-        // Add fake logs
-        if (progress > (msgIndex + 1) * 25 && msgIndex < messages.length && logs) {
+        if (progress > (msgIndex + 1) * 20 && msgIndex < messages.length && logs) {
            const p = document.createElement('div');
            p.innerText = "> " + messages[msgIndex++];
            logs.appendChild(p);
@@ -42,7 +74,7 @@
           setTimeout(() => {
             if (screen) {
               screen.style.opacity = '0';
-              setTimeout(() => screen.remove(), 800); // Remove from DOM
+              setTimeout(() => screen.remove(), 800);
             }
           }, 500);
         }
@@ -216,9 +248,6 @@
 
     .day-mode{--solar-glow:rgba(59,130,246,.08)}
     .night-mode{--solar-glow:rgba(139,92,246,.12)}
-
-    .tech-line{display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.04);padding:5px 0;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(100,116,139,.7)}
-    .tech-line span:last-child{color:#94a3b8;font-weight:700}
 
     #ai-briefing-text{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.9}
 

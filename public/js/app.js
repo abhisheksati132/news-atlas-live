@@ -273,27 +273,60 @@ window.toggleSatellite = () => {
     window.playTacticalSound('click');
     const mapBox = document.getElementById('map-box-id');
     const btn = document.querySelector('button[title="Toggle Satellite Layer"]') || document.querySelector('button[title="Toggle Satellite"]');
-    const svgEl = document.getElementById('world-map');
-    let overlay = document.getElementById('satellite-overlay');
+    const overlay = document.getElementById('satellite-overlay');
+    const container = document.getElementById('map-container');
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+
     if (overlay) {
-        const isVisible = overlay.style.opacity !== '0';
-        overlay.style.opacity = isVisible ? '0' : '1';
-        mapBox.classList.toggle('satellite-mode', !isVisible);
-        if (btn) { btn.classList.toggle('text-emerald-400', isVisible); btn.classList.toggle('bg-emerald-600/50', !isVisible); }
-        return;
+        // Turning OFF
+        overlay.remove();
+        mapBox.classList.remove('satellite-mode');
+        if (btn) { btn.classList.remove('text-emerald-400'); btn.classList.add('bg-emerald-600/50'); }
+        // Revert to original projection
+        initMap(projectionType);
+    } else {
+        // Turning ON
+        // Switch to Equirectangular for correct image mapping
+        currentProjection = d3.geoEquirectangular()
+            .scale(w / 6.3) // Fit width roughly
+            .translate([w / 2, h / 2]);
+
+        const path = d3.geoPath().projection(currentProjection);
+        g.selectAll("path").transition().duration(750).attr("d", path).attr("fill", "none").attr("stroke", "rgba(255,255,255,0.2)"); // Make countries transparent outlines
+
+        // Calculate image bounds in pixels based on projection
+        // Equirectangular maps [-180, 180] longitude to width
+        const pTL = currentProjection([-180, 90]);
+        const pBR = currentProjection([180, -90]);
+
+        const imgX = pTL[0];
+        const imgY = pTL[1];
+        const imgW = pBR[0] - pTL[0];
+        const imgH = pBR[1] - pTL[1];
+
+        // NASA GIBS WMS URL (Blue Marble Next Generation)
+        const gibsUrl = 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=BlueMarble_NextGeneration&FORMAT=image/jpeg&TRANSPARENT=FALSE&WIDTH=2048&HEIGHT=1024&CRS=CRS:84&BBOX=-180,-90,180,90';
+
+        const newOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+        newOverlay.id = 'satellite-overlay';
+        newOverlay.setAttribute('href', gibsUrl);
+        newOverlay.setAttribute('x', imgX);
+        newOverlay.setAttribute('y', imgY);
+        newOverlay.setAttribute('width', imgW);
+        newOverlay.setAttribute('height', imgH);
+        newOverlay.setAttribute('preserveAspectRatio', 'none');
+        newOverlay.style.cssText = 'opacity:0; pointer-events:none; transition:opacity 1s ease; mix-blend-mode: normal;';
+
+        // Insert as first child of G to be behind countries
+        if (g) g.node().insertBefore(newOverlay, g.node().firstChild);
+
+        // Fade in
+        requestAnimationFrame(() => newOverlay.style.opacity = '1');
+
+        mapBox.classList.add('satellite-mode');
+        if (btn) { btn.classList.add('text-emerald-400'); btn.classList.remove('bg-emerald-600/50'); }
     }
-    const gibsUrl = 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=BlueMarble_NextGeneration&FORMAT=image/jpeg&TRANSPARENT=FALSE&WIDTH=2048&HEIGHT=1024&CRS=CRS:84&BBOX=-180,-90,180,90';
-    overlay = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-    overlay.id = 'satellite-overlay';
-    overlay.setAttribute('href', gibsUrl);
-    overlay.setAttribute('x', '-180'); overlay.setAttribute('y', '-90');
-    overlay.setAttribute('width', '360'); overlay.setAttribute('height', '180');
-    overlay.setAttribute('preserveAspectRatio', 'none');
-    overlay.style.cssText = 'opacity:1;pointer-events:none;transition:opacity 0.6s ease;';
-    if (svgEl && svgEl.querySelector('g')) svgEl.querySelector('g').insertBefore(overlay, svgEl.querySelector('g').firstChild);
-    else if (svgEl) svgEl.insertBefore(overlay, svgEl.firstChild);
-    mapBox.classList.add('satellite-mode');
-    if (btn) { btn.classList.remove('text-emerald-400'); btn.classList.add('bg-emerald-600/50'); }
 };
 
 window.switchTab = (id) => {

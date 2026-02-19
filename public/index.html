@@ -47,16 +47,18 @@
             class="text-sm font-mono text-slate-400 hover:text-blue-400 transition-colors tracking-wider">FEATURES</a>
           <a href="#terminal"
             class="text-sm font-mono text-slate-400 hover:text-blue-400 transition-colors tracking-wider">TERMINAL</a>
-          <a href="#intel"
-            class="text-sm font-mono text-slate-400 hover:text-blue-400 transition-colors tracking-wider">INTEL</a>
           <a href="#status"
             class="text-sm font-mono text-slate-400 hover:text-blue-400 transition-colors tracking-wider">STATUS</a>
         </div>
 
         <div class="flex items-center gap-3">
-          <button
-            class="hidden md:block text-sm font-mono text-slate-300 hover:text-white transition-colors px-4 py-2 tracking-wider">
-            LOG IN
+          <button id="google-login-btn"
+            class="hidden md:flex items-center gap-2 text-sm font-mono text-slate-300 hover:text-white transition-colors px-4 py-2 tracking-wider">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .533 5.347.533 12S5.867 24 12.48 24c3.44 0 6.013-1.133 8.053-3.24 2.08-2.16 2.72-5.333 2.72-8.027 0-.72-.08-1.587-.213-2.187h-10.56z" />
+            </svg>
+            LOGIN WITH GOOGLE
           </button>
           <a href="terminal.html"
             class="cta-btn text-sm font-mono text-blue-300 font-semibold px-5 py-2 rounded tracking-widest inline-block">
@@ -79,7 +81,6 @@
         class="block text-sm font-mono text-slate-400 hover:text-blue-400 py-2 tracking-wider">FEATURES</a>
       <a href="#terminal"
         class="block text-sm font-mono text-slate-400 hover:text-blue-400 py-2 tracking-wider">TERMINAL</a>
-      <a href="#intel" class="block text-sm font-mono text-slate-400 hover:text-blue-400 py-2 tracking-wider">INTEL</a>
       <a href="#status"
         class="block text-sm font-mono text-slate-400 hover:text-blue-400 py-2 tracking-wider">STATUS</a>
     </div>
@@ -288,7 +289,8 @@
         class="cta-btn relative rounded px-8 py-4 text-white font-bold tracking-widest text-sm sm:text-base font-mono inline-block text-center decoration-0">
         ⬡ LAUNCH TERMINAL
       </a>
-      <button class="sec-btn rounded px-8 py-4 text-slate-300 font-mono tracking-widest text-sm sm:text-base">
+      <button id="view-briefing-btn"
+        class="sec-btn rounded px-8 py-4 text-slate-300 font-mono tracking-widest text-sm sm:text-base">
         VIEW BRIEFING →
       </button>
     </div>
@@ -388,7 +390,7 @@
           </div>
         </div>
 
-        <div class="feat-card glass corner-bracket rounded-lg p-6 border border-white/5">
+        <div id="ai-briefing" class="feat-card glass corner-bracket rounded-lg p-6 border border-white/5">
           <div class="float-icon mb-5 w-12 h-12 flex items-center justify-center rounded glass-blue"
             style="animation-delay: 0.5s">
             <svg class="card-icon w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" stroke-width="1.5"
@@ -710,123 +712,7 @@
     </div>
   </section>
 
-  <section id="intel" class="relative py-24 px-4 sm:px-6">
-    <div class="absolute inset-0 radial-blue opacity-20 pointer-events-none"></div>
-    <div class="max-w-7xl mx-auto">
-      <div class="text-center mb-16">
-        <div class="inline-flex items-center gap-2 glass-blue rounded-full px-4 py-1.5 mb-4">
-          <span class="text-xs font-mono text-blue-400 tracking-widest">OPERATOR TESTIMONIALS</span>
-        </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-          Trusted by Analysts.
-          <span class="text-blue-400">Feared by Uncertainty.</span>
-        </h2>
-      </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="glass corner-bracket rounded-lg p-6 border border-white/5">
-          <div class="flex items-center gap-1 mb-4">
-            <span class="text-yellow-400 text-xs">★★★★★</span>
-          </div>
-          <p class="text-slate-300 text-sm leading-relaxed mb-5 font-mono">
-            "NewsAtlas replaced three separate tools we used to run
-            simultaneously. The GEOINT layer alone paid for itself in the
-            first week of the Ukraine escalation cycle."
-          </p>
-          <div class="flex items-center gap-3 pt-4 border-t border-white/5">
-            <div
-              class="w-9 h-9 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-xs font-bold text-blue-300">
-              RK
-            </div>
-            <div>
-              <div class="text-sm font-semibold text-white">R. Kowalski</div>
-              <div class="text-xs font-mono text-slate-500">
-                Senior Analyst, ThreatBridge LLC
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="glass corner-bracket rounded-lg p-6 border border-blue-500/20 box-glow-blue">
-          <div class="flex items-center gap-1 mb-4">
-            <span class="text-yellow-400 text-xs">★★★★★</span>
-          </div>
-          <p class="text-slate-300 text-sm leading-relaxed mb-5 font-mono">
-            "The AI briefings are genuinely impressive. They read like
-            something out of an NSA morning brief—except I get them at 6AM
-            before my coffee. The latency is sub-100ms. Nothing else is
-            close."
-          </p>
-          <div class="flex items-center gap-3 pt-4 border-t border-white/5">
-            <div
-              class="w-9 h-9 rounded-full bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-xs font-bold text-cyan-300">
-              MC
-            </div>
-            <div>
-              <div class="text-sm font-semibold text-white">M. Chen</div>
-              <div class="text-xs font-mono text-slate-500">
-                Director of Risk, Apex Capital
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="glass corner-bracket rounded-lg p-6 border border-white/5">
-          <div class="flex items-center gap-1 mb-4">
-            <span class="text-yellow-400 text-xs">★★★★★</span>
-          </div>
-          <p class="text-slate-300 text-sm leading-relaxed mb-5 font-mono">
-            "We run a 24/7 ops center. NewsAtlas is the first screen on and
-            the last screen off. The 3D globe with conflict overlays gives the
-            whole room an immediate shared operating picture."
-          </p>
-          <div class="flex items-center gap-3 pt-4 border-t border-white/5">
-            <div
-              class="w-9 h-9 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xs font-bold text-emerald-300">
-              JH
-            </div>
-            <div>
-              <div class="text-sm font-semibold text-white">J. Hartmann</div>
-              <div class="text-xs font-mono text-slate-500">
-                VP Operations, Sentinel Group
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="mt-16 glass rounded-lg border border-blue-500/20 p-8 sm:p-12 text-center box-glow-blue relative overflow-hidden">
-        <div class="absolute inset-0 radial-blue opacity-40 pointer-events-none"></div>
-        <div class="relative">
-          <div class="text-xs font-mono text-blue-400 tracking-widest mb-3">
-            ACCESS TIER
-          </div>
-          <h3 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">
-            Ready to Deploy?
-          </h3>
-          <p class="text-slate-400 font-mono text-sm max-w-lg mx-auto mb-8">
-            Join 12,000+ analysts, traders, and operators who rely on
-            NewsAtlas every single day. 14-day free trial. No credit card.
-          </p>
-          <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <button class="cta-btn rounded px-10 py-4 text-white font-bold tracking-widest text-sm font-mono">
-              ⬡ DEPLOY NOW — FREE
-            </button>
-            <button class="sec-btn rounded px-8 py-4 text-slate-300 font-mono tracking-widest text-sm">
-              REQUEST BRIEFING
-            </button>
-          </div>
-          <div class="mt-6 flex flex-wrap justify-center gap-6 text-xs font-mono text-slate-500">
-            <span class="flex items-center gap-1"><span class="text-emerald-400">✓</span> No credit card</span>
-            <span class="flex items-center gap-1"><span class="text-emerald-400">✓</span> 14-day free trial</span>
-            <span class="flex items-center gap-1"><span class="text-emerald-400">✓</span> Cancel anytime</span>
-            <span class="flex items-center gap-1"><span class="text-emerald-400">✓</span> SOC 2 Type II</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <footer id="status" class="border-t border-white/5 py-10 px-4 sm:px-6" style="background: rgba(1, 4, 14, 0.9)">
     <div class="max-w-7xl mx-auto">
@@ -942,6 +828,7 @@
     </div>
   </footer>
 
+  <script type="module" src="js/core/firebase.js"></script>
   <script src="js/landing.js"></script>
 </body>
 

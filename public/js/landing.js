@@ -91,3 +91,38 @@ document.querySelectorAll(".feat-card, .glass").forEach((el) => {
     el.style.transition = "opacity 0.6s ease, transform 0.6s ease";
     observer.observe(el);
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    const loginBtn = document.getElementById('google-login-btn');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', async () => {
+            if (!window.firebaseCore) {
+                console.error("Firebase core not loaded yet.");
+                alert("Security handshake initializing... please retry in 2 seconds.");
+                return;
+            }
+            try {
+                const provider = new window.firebaseCore.GoogleAuthProvider();
+                const auth = window.firebaseCore.getAuth();
+                await window.firebaseCore.signInWithPopup(auth, provider);
+                window.location.href = 'terminal.html';
+            } catch (error) {
+                console.error("Login failed", error);
+                alert("LOGIN FAILED: " + error.message);
+            }
+        });
+    }
+
+    const viewBriefingBtn = document.getElementById('view-briefing-btn');
+    if (viewBriefingBtn) {
+        viewBriefingBtn.addEventListener('click', () => {
+            const target = document.getElementById('ai-briefing');
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Add a temporary glow effect to highlight the section
+                target.classList.add('box-glow-cyan');
+                setTimeout(() => target.classList.remove('box-glow-cyan'), 2000);
+            }
+        });
+    }
+});

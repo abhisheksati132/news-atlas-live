@@ -224,3 +224,21 @@ function displayWeatherAlerts(alerts) {
 }
 window.fetchWeather = fetchWeather;
 window.generateWeatherAnalysis = generateWeatherAnalysis;
+
+window.resetWeatherData = () => {
+    const ids = ['atmo-temp', 'atmo-condition', 'atmo-feels', 'atmo-wind-speed', 'atmo-humidity',
+        'atmo-pressure', 'atmo-cloud-base', 'atmo-hl', 'atmo-sunrise', 'atmo-sunset',
+        'atmo-uv-val', 'atmo-uv-text'];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = '--';
+    });
+    const iconEl = document.getElementById('atmo-main-icon');
+    if (iconEl) iconEl.className = 'fas fa-meteor text-9xl text-slate-500 opacity-20';
+
+    if (document.getElementById('atmo-wind-arrow')) document.getElementById('atmo-wind-arrow').style.transform = 'rotate(0deg)';
+    if (document.getElementById('atmo-uv-bar')) document.getElementById('atmo-uv-bar').style.width = '0%';
+
+    const hourlyContainer = document.getElementById('atmo-hourly-container');
+    if (hourlyContainer) hourlyContainer.innerHTML = '<div class="text-xs text-slate-600 font-mono p-4 text-center">AWAITING SECTOR UPLINK...</div>';
+};

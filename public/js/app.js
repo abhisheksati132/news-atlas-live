@@ -273,12 +273,13 @@ window.zoomMap = (f) => {
 window.resetToGlobalCenter = () => {
     selectedCountry = null; window.selectedCountry = null; countryUTCOffset = null;
     d3.selectAll(".country").classed("active", false);
-    document.getElementById('selected-country-name').innerText = "Global Surveillance";
+    document.getElementById('selected-country-name').innerText = "GLOBAL SURVEILLANCE";
     document.getElementById('ai-briefing-box').classList.add('hidden');
     const flagBox = document.getElementById('active-sector-display');
     if (flagBox) flagBox.classList.add('hidden');
     if (projectionType === '2d') svg.transition().duration(1200).call(zoom.transform, d3.zoomIdentity);
     window.fetchNews();
+    if (window.resetWeatherData) window.resetWeatherData();
 };
 window.goToIndiaHome = () => {
     const india = worldFeatures.find(f => f.properties.name === "India");

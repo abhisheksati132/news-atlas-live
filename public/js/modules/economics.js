@@ -4,7 +4,6 @@ async function fetchDetailedEconomics(country) {
     document.getElementById('eco-inflation').innerText = "--%";
     document.getElementById('eco-unemployment').innerText = "--%";
     document.getElementById('eco-exports').innerHTML = '<div class="h-4 bg-white/10 rounded w-3/4 animate-pulse"></div>';
-
     try {
         const prompt = `
             Analyze the economy of ${country}.
@@ -22,20 +21,16 @@ async function fetchDetailedEconomics(country) {
             }
             Do not add markdown formatting. Just the raw JSON string.
         `;
-
         const res = await fetch('/api/ai', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt })
         });
-
         const data = await res.json();
         if (!data.candidates) throw new Error("AI Busy");
-
         let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
         text = text.replace(/```json/g, '').replace(/```/g, '').trim();
         const eco = JSON.parse(text);
-
         if (eco.gdp_billions) document.getElementById('eco-gdp').innerText = eco.gdp_billions;
         if (eco.gdp_growth_percent) document.getElementById('eco-growth').innerText = (eco.gdp_growth_percent > 0 ? '+' : '') + eco.gdp_growth_percent + '%';
         if (eco.gdp_per_capita) document.getElementById('eco-capita').innerText = '$' + eco.gdp_per_capita;
@@ -43,17 +38,14 @@ async function fetchDetailedEconomics(country) {
         if (eco.unemployment_rate) document.getElementById('eco-unemployment').innerText = eco.unemployment_rate + '%';
         if (eco.interest_rate) document.getElementById('eco-interest').innerText = eco.interest_rate + '%';
         if (eco.debt_to_gdp) document.getElementById('eco-debt').innerText = eco.debt_to_gdp + '%';
-
         if (eco.major_exports && Array.isArray(eco.major_exports)) {
             document.getElementById('eco-exports').innerHTML = eco.major_exports.map(item =>
                 `<div class="flex items-center gap-2"><div class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div><span class="text-sm text-slate-300 font-bold uppercase">${item}</span></div>`
             ).join('');
         }
-
         if (eco.market_summary) {
             document.getElementById('eco-market-ticker').innerText = eco.market_summary.toUpperCase();
         }
-
         window.playTacticalSound('success');
         drawGDPTrend(country);
     } catch (e) {
@@ -61,7 +53,6 @@ async function fetchDetailedEconomics(country) {
         drawGDPTrend(country);
     }
 }
-
 async function drawGDPTrend(country) {
     const canvas = document.getElementById('gdp-trend-chart');
     if (!canvas) return;
@@ -69,10 +60,8 @@ async function drawGDPTrend(country) {
     canvas.width = canvas.parentElement.offsetWidth || 600;
     canvas.height = 150;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     const iso = window._isoAlpha3 || '';
     if (!iso) { drawGDPFallback(ctx, canvas, country); return; }
-
     try {
         const r = await fetch(`https://api.worldbank.org/v2/country/${iso}/indicator/NY.GDP.MKTP.CD?format=json&mrv=6&per_page=6`);
         const json = await r.json();
@@ -83,7 +72,6 @@ async function drawGDPTrend(country) {
         drawGDPFallback(ctx, canvas, country);
     }
 }
-
 function drawGDPFallback(ctx, canvas, country) {
     const seed = (country || 'X').charCodeAt(0);
     const values = Array.from({ length: 5 }, (_, i) => 800 + Math.sin(seed + i) * 300 + i * 120);
@@ -91,7 +79,6 @@ function drawGDPFallback(ctx, canvas, country) {
     const years = Array.from({ length: 5 }, (_, i) => String(year - 4 + i));
     renderGDPCanvas(ctx, canvas, values, years);
 }
-
 function renderGDPCanvas(ctx, canvas, values, years) {
     const W = canvas.width, H = canvas.height;
     const pad = { top: 20, right: 16, bottom: 30, left: 52 };
@@ -101,14 +88,11 @@ function renderGDPCanvas(ctx, canvas, values, years) {
     const maxV = Math.max(...values) * 1.08;
     const xScale = i => pad.left + (i / (values.length - 1)) * chartW;
     const yScale = v => pad.top + chartH - ((v - minV) / (maxV - minV)) * chartH;
-
     ctx.fillStyle = 'rgba(255,255,255,0.03)';
     ctx.fillRect(0, 0, W, H);
-
     const grad = ctx.createLinearGradient(0, pad.top, 0, H - pad.bottom);
     grad.addColorStop(0, 'rgba(59,130,246,0.35)');
     grad.addColorStop(1, 'rgba(59,130,246,0.01)');
-
     ctx.beginPath();
     values.forEach((v, i) => { i === 0 ? ctx.moveTo(xScale(i), yScale(v)) : ctx.lineTo(xScale(i), yScale(v)); });
     ctx.lineTo(xScale(values.length - 1), H - pad.bottom);
@@ -116,14 +100,12 @@ function renderGDPCanvas(ctx, canvas, values, years) {
     ctx.closePath();
     ctx.fillStyle = grad;
     ctx.fill();
-
     ctx.beginPath();
     values.forEach((v, i) => { i === 0 ? ctx.moveTo(xScale(i), yScale(v)) : ctx.lineTo(xScale(i), yScale(v)); });
     ctx.strokeStyle = '#3b82f6';
     ctx.lineWidth = 2.5;
     ctx.lineJoin = 'round';
     ctx.stroke();
-
     values.forEach((v, i) => {
         const x = xScale(i), y = yScale(v);
         ctx.beginPath();
@@ -133,29 +115,24 @@ function renderGDPCanvas(ctx, canvas, values, years) {
         ctx.strokeStyle = '#1e3a5f';
         ctx.lineWidth = 1.5;
         ctx.stroke();
-
         ctx.fillStyle = 'rgba(148,163,184,0.9)';
         ctx.font = 'bold 9px JetBrains Mono, monospace';
         ctx.textAlign = 'center';
         ctx.fillText(years[i], x, H - pad.bottom + 14);
-
         const label = v >= 1000 ? `$${(v / 1000).toFixed(1)}T` : `$${v.toFixed(0)}B`;
         ctx.fillStyle = 'rgba(96,165,250,0.95)';
         ctx.font = 'bold 9px JetBrains Mono, monospace';
         ctx.fillText(label, x, y - 8);
     });
-
     ctx.fillStyle = 'rgba(148,163,184,0.5)';
     ctx.font = '8px JetBrains Mono, monospace';
     ctx.textAlign = 'right';
     ctx.fillText('GDP (USD)', pad.left - 4, pad.top + 6);
 }
-
 async function fetchCurrency() {
     const el = document.getElementById('fact-currency');
     const elCode = document.getElementById('eco-currency-code');
     const elRate = document.getElementById('eco-rate');
-
     if (!window.currencyCode || window.currencyCode === 'USD') {
         if (el) el.innerText = "1.00 USD";
         if (elCode) elCode.innerText = "USD";
@@ -164,7 +141,6 @@ async function fetchCurrency() {
     }
     if (elCode) elCode.innerText = window.currencyCode;
     if (elRate) elRate.innerText = "Scanning...";
-
     try {
         const res = await fetch(`https://open.er-api.com/v6/latest/USD`);
         const data = await res.json();
@@ -181,7 +157,6 @@ async function fetchCurrency() {
         if (elRate) elRate.innerText = "ERR";
     }
 }
-
 async function fetchMarketIntel(country, currency) {
     const textEl = document.getElementById('market-ai-analysis');
     if (textEl) textEl.innerHTML = '<span class="animate-pulse text-slate-500">Scanning global exchanges...</span>';
@@ -195,7 +170,6 @@ async function fetchMarketIntel(country, currency) {
         • SILVER_PRICE: 28.90 (Example)
         [STRATEGIC ANALYSIS]
         3-4 detailed sentences on market sentiment, sector performance, and risk factors.`;
-
         const res = await fetch('/api/ai', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -204,21 +178,18 @@ async function fetchMarketIntel(country, currency) {
         const result = await res.json();
         const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Market data unavailable.";
         if (textEl) textEl.innerText = responseText;
-
         const goldMatch = responseText.match(/GOLD_PRICE:\s*([\d,.]+)/i);
         const silverMatch = responseText.match(/SILVER_PRICE:\s*([\d,.]+)/i);
         const goldEl = document.getElementById('price-gold');
         const silverEl = document.getElementById('price-silver');
         if (goldEl && goldMatch) goldEl.innerText = goldMatch[1];
         if (silverEl && silverMatch) silverEl.innerText = silverMatch[1];
-
         window.playTacticalSound('success');
     } catch (e) {
         if (textEl) textEl.innerText = "Financial uplink failed.";
     }
 }
-
 window.fetchDetailedEconomics = fetchDetailedEconomics;
 window.drawGDPTrend = drawGDPTrend;
 window.fetchCurrency = fetchCurrency;
-window.fetchMarketIntel = fetchMarketIntel;
+window.fetchMarketIntel = fetchMarketIntel;

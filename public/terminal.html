@@ -17,10 +17,6 @@
   <meta name="theme-color" content="#020617" />
   <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2072/2072130.png" type="image/x-icon" />
 
-  <!-- Firebase Logic moved to js/core/firebase.js -->
-
-  <!-- Boot Animation Logic moved to js/app.js -->
-
   <style>
     :root {
       --blue: #3b82f6;
@@ -875,53 +871,70 @@
                   <div class="skill-dot"></div>Tailwind CSS
                 </span>
                 <span class="skill-tag">
-                  <div class="skill-dot"></div>Gemini AI
+                  <div class="skill-dot"></div>Groq AI
                 </span>
               </div>
             </div>
-            <div class="dossier-card" style="background:rgba(16,185,129,.03);border-color:rgba(16,185,129,.12)">
+            <div class="dossier-card flex-1 flex flex-col justify-center"
+              style="background:rgba(16,185,129,.03);border-color:rgba(16,185,129,.12)">
               <h3 class="text-[9px] font-black text-emerald-400 uppercase tracking-[.2em] mb-3"
-                style="font-family:'JetBrains Mono',monospace">Live Data APIs</h3>
-              <div class="space-y-1.5 text-[10px] font-mono">
-                <div class="flex items-center gap-2">
-                  <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div><span class="text-slate-300">Newsdata.io —
-                    50 articles/req</span>
+                style="font-family:'JetBrains Mono',monospace">Active Intel Feeds</h3>
+              <div class="space-y-2 text-[10px] font-mono">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div><span
+                      class="text-slate-300">Newsdata.io</span>
+                  </div>
+                  <span class="text-slate-500">Global Feed</span>
                 </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div><span class="text-slate-300">CoinGecko —
-                    Top 20 crypto live</span>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div><span
+                      class="text-slate-300">CoinGecko</span>
+                  </div>
+                  <span class="text-slate-500">Crypto Mkts</span>
                 </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div><span
-                    class="text-slate-300">OpenExchangeRate — 170+ pairs</span>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div><span
+                      class="text-slate-300">OpenExchange</span>
+                  </div>
+                  <span class="text-slate-500">Forex Rates</span>
                 </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div><span class="text-slate-300">Gold-API —
-                    XAU/XAG/XPT/XPD</span>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div><span
+                      class="text-slate-300">Gold-API</span>
+                  </div>
+                  <span class="text-slate-300">Commodities</span>
                 </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div><span class="text-slate-300">Yahoo Finance
-                    — 8 commodity tickers</span>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-1.5 h-1.5 bg-blue-400 rounded-full"></div><span class="text-slate-300">World
+                      Bank</span>
+                  </div>
+                  <span class="text-slate-500">GDP/Debt</span>
                 </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-1.5 h-1.5 bg-blue-400 rounded-full"></div><span class="text-slate-300">World Bank — GDP
-                    6-year historical</span>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-1.5 h-1.5 bg-blue-400 rounded-full"></div><span
+                      class="text-slate-300">Open-Meteo</span>
+                  </div>
+                  <span class="text-slate-500">Atmosphere</span>
                 </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-1.5 h-1.5 bg-blue-400 rounded-full"></div><span class="text-slate-300">Open-Meteo —
-                    Weather + Geocoding</span>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-1.5 h-1.5 bg-purple-400 rounded-full"></div><span class="text-slate-300">NASA
+                      GIBS</span>
+                  </div>
+                  <span class="text-slate-500">Sat Imagery</span>
                 </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-1.5 h-1.5 bg-blue-400 rounded-full"></div><span class="text-slate-300">CountriesNow —
-                    250+ country geo</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-1.5 h-1.5 bg-purple-400 rounded-full"></div><span class="text-slate-300">NASA GIBS —
-                    Blue Marble imagery</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-1.5 h-1.5 bg-purple-400 rounded-full"></div><span class="text-slate-300">REST Countries
-                    — 250+ metadata</span>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div class="w-1.5 h-1.5 bg-purple-400 rounded-full"></div><span
+                      class="text-slate-300">CountriesNow</span>
+                  </div>
+                  <span class="text-slate-500">Geo-Data</span>
                 </div>
               </div>
             </div>
@@ -983,38 +996,38 @@
             <div class="grid grid-cols-2 gap-3">
               <div class="dossier-card" style="background:rgba(139,92,246,.04);border-color:rgba(139,92,246,.15)">
                 <h3 class="text-[9px] font-black text-purple-400 uppercase tracking-[.2em] mb-3"
-                  style="font-family:'JetBrains Mono',monospace">Architecture</h3>
+                  style="font-family:'JetBrains Mono',monospace">System Architecture</h3>
                 <div class="space-y-2 text-[10px] font-mono text-slate-400">
                   <div class="flex items-center gap-2"><i
-                      class="fas fa-layer-group text-purple-400 text-xs"></i>Serverless API Routes (Vercel)</div>
+                      class="fas fa-layer-group text-purple-400 text-xs"></i>Serverless Routes (Vercel)</div>
                   <div class="flex items-center gap-2"><i class="fas fa-map text-blue-400 text-xs"></i>D3.js
-                    geoNaturalEarth1 Projection</div>
+                    Geo Projection</div>
                   <div class="flex items-center gap-2"><i class="fas fa-fire text-amber-400 text-xs"></i>Firebase Auth +
-                    Firestore Realtime</div>
-                  <div class="flex items-center gap-2"><i class="fas fa-brain text-emerald-400 text-xs"></i>Gemini 1.5
-                    Flash AI Synthesis</div>
+                    DB</div>
+                  <div class="flex items-center gap-2"><i class="fas fa-brain text-emerald-400 text-xs"></i>Groq Llama 3
+                    AI Core</div>
                   <div class="flex items-center gap-2"><i class="fas fa-satellite text-cyan-400 text-xs"></i>NASA GIBS
-                    WMS Satellite Imagery</div>
+                    Satellite WMS</div>
                   <div class="flex items-center gap-2"><i class="fas fa-wave-square text-pink-400 text-xs"></i>Web Audio
-                    API — Tactical SFX</div>
+                    API Engine</div>
                 </div>
               </div>
               <div class="dossier-card" style="background:rgba(6,182,212,.04);border-color:rgba(6,182,212,.15)">
                 <h3 class="text-[9px] font-black text-cyan-400 uppercase tracking-[.2em] mb-3"
-                  style="font-family:'JetBrains Mono',monospace">Map Features</h3>
+                  style="font-family:'JetBrains Mono',monospace">Map Capabilities</h3>
                 <div class="space-y-2 text-[10px] font-mono text-slate-400">
                   <div class="flex items-center gap-2"><i class="fas fa-circle-nodes text-blue-400 text-xs"></i>Particle
-                    Network Overlay</div>
+                    Data Mesh</div>
                   <div class="flex items-center gap-2"><i
-                      class="fas fa-location-dot text-emerald-400 text-xs"></i>Pulsing City Data Nodes</div>
+                      class="fas fa-location-dot text-emerald-400 text-xs"></i>Interactive Sovereignty</div>
                   <div class="flex items-center gap-2"><i class="fas fa-search-plus text-amber-400 text-xs"></i>Smooth
-                    D3 Zoom + Pan</div>
-                  <div class="flex items-center gap-2"><i class="fas fa-globe text-purple-400 text-xs"></i>Orthographic
-                    / Natural Earth</div>
-                  <div class="flex items-center gap-2"><i class="fas fa-satellite text-cyan-400 text-xs"></i>NASA Blue
-                    Marble Imagery</div>
-                  <div class="flex items-center gap-2"><i class="fas fa-chart-area text-pink-400 text-xs"></i>Live Stats
-                    Ticker Overlay</div>
+                    Vector Zoom</div>
+                  <div class="flex items-center gap-2"><i class="fas fa-globe text-purple-400 text-xs"></i>Dual 2D/3D
+                    Projection</div>
+                  <div class="flex items-center gap-2"><i class="fas fa-satellite text-cyan-400 text-xs"></i>Real-time
+                    Orbital Layer</div>
+                  <div class="flex items-center gap-2"><i class="fas fa-chart-area text-pink-400 text-xs"></i>Live
+                    Telemetry Ticker</div>
                 </div>
               </div>
             </div>

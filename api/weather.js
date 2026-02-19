@@ -1,19 +1,14 @@
 import fetch from 'node-fetch';
-
 export default async function handler(req, res) {
     res.setHeader("Access-Control-Allow-Credentials", true);
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS,PATCH,DELETE,POST,PUT");
     res.setHeader("Access-Control-Allow-Headers", "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version");
-
     if (req.method === "OPTIONS") return res.status(200).end();
-
     const { lat, lon } = req.query;
-
     if (!lat || !lon) {
         return res.status(400).json({ error: "Missing coordinates" });
     }
-
     const params = new URLSearchParams({
         latitude: lat,
         longitude: lon,
@@ -22,9 +17,7 @@ export default async function handler(req, res) {
         daily: 'weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum',
         timezone: 'auto'
     });
-
     const url = `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
-
     try {
         const response = await fetch(url);
         if (!response.ok) {

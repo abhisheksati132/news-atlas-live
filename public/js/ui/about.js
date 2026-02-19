@@ -1,5 +1,4 @@
 let aboutStatsInterval;
-
 function initTrafficCanvas() {
     const canvas = document.getElementById('traffic-canvas');
     if (!canvas) return;
@@ -22,7 +21,6 @@ function initTrafficCanvas() {
     }
     draw();
 }
-
 function startAboutStats() {
     const bioText = "Engineering high-fidelity command terminals that synchronize high-frequency global data with real-time geospatial telemetry.";
     const bioEl = document.getElementById('bio-text');
@@ -51,7 +49,6 @@ function startAboutStats() {
         if (uptimeEl) uptimeEl.innerText = `${h}:${m}:${s}`;
     }, 1000);
 }
-
 window.toggleAbout = (show) => {
     window.playTacticalSound(show ? 'success' : 'click');
     const overlay = document.getElementById('about-overlay');
@@ -59,10 +56,8 @@ window.toggleAbout = (show) => {
     if (show) { initTrafficCanvas(); startAboutStats(); }
     else { if (aboutStatsInterval) clearInterval(aboutStatsInterval); }
 };
-
 const cliInput = document.getElementById('cli-input');
 const cliOutput = document.getElementById('cli-output');
-
 function appendLog(text, colorClass) {
     const div = document.createElement('div');
     div.className = `log-entry ${colorClass} leading-relaxed`;
@@ -70,7 +65,6 @@ function appendLog(text, colorClass) {
     cliOutput.appendChild(div);
     cliOutput.scrollTop = cliOutput.scrollHeight;
 }
-
 if (cliInput) {
     cliInput.addEventListener('keypress', async (e) => {
         if (e.key === 'Enter') {
@@ -102,5 +96,4 @@ if (cliInput) {
         }
     });
 }
-
-window.appendLog = appendLog;
+window.appendLog = appendLog;

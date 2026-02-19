@@ -27,7 +27,6 @@ function renderTrending() {
             </div>`;
         }).join('');
 }
-
 window.toggleSearch = () => {
     window.playTacticalSound('click');
     const overlay = document.getElementById('search-overlay');
@@ -37,5 +36,4 @@ window.toggleSearch = () => {
         renderTrending();
     }
 };
-
-window.renderTrending = renderTrending;
+window.renderTrending = renderTrending;

@@ -6,7 +6,6 @@ window.toggleMarketCategory = (category) => {
     chevron.classList.toggle('fa-chevron-down');
     chevron.classList.toggle('fa-chevron-up');
 };
-
 async function displayPreciousMetals() {
     const container = document.getElementById('metals-content');
     if (!container) return;
@@ -37,7 +36,6 @@ async function displayPreciousMetals() {
         if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-xs col-span-3">No metals data</div>';
     } catch (e) { container.innerHTML = '<div class="text-slate-500 text-xs col-span-3">Data unavailable</div>'; }
 }
-
 function displayCountryIndices(countryName) {
     const container = document.getElementById('indices-content');
     if (!container) return;
@@ -45,9 +43,7 @@ function displayCountryIndices(countryName) {
     if (indicesLabelEl) indicesLabelEl.innerText = countryName || 'Global';
     container.innerHTML = `<div class="col-span-2 text-slate-500 text-xs py-3"><i class="fas fa-info-circle mr-1"></i>Country index data shown when market APIs for ${countryName || 'this country'} are available via live subscription or exchange data feeds.</div>`;
 }
-
 window.getIndicesForCountry = () => ({});
-
 async function displayCrypto() {
     const container = document.getElementById('crypto-content');
     if (!container) return;
@@ -75,7 +71,6 @@ async function displayCrypto() {
         });
     } catch (e) { container.innerHTML = '<div class="text-slate-500 text-xs">Data unavailable</div>'; }
 }
-
 async function displayForex() {
     const container = document.getElementById('forex-content');
     if (!container) return;
@@ -99,7 +94,6 @@ async function displayForex() {
         });
     } catch (e) { container.innerHTML = '<div class="text-slate-500 text-xs">Data unavailable</div>'; }
 }
-
 async function displayCommodities() {
     const container = document.getElementById('commodities-content');
     if (!container) return;
@@ -128,7 +122,6 @@ async function displayCommodities() {
         if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-xs col-span-3">No commodity data</div>';
     } catch (e) { container.innerHTML = '<div class="text-slate-500 text-xs col-span-3">Data unavailable</div>'; }
 }
-
 function initializeMarkets(countryName) {
     displayPreciousMetals();
     displayCountryIndices(countryName || 'Global');
@@ -136,10 +129,9 @@ function initializeMarkets(countryName) {
     displayForex();
     displayCommodities();
 }
-
 window.displayPreciousMetals = displayPreciousMetals;
 window.displayCountryIndices = displayCountryIndices;
 window.displayCrypto = displayCrypto;
 window.displayForex = displayForex;
 window.displayCommodities = displayCommodities;
-window.initializeMarkets = initializeMarkets;
+window.initializeMarkets = initializeMarkets;

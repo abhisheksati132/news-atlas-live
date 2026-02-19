@@ -5,7 +5,7 @@
 ---
 
 ## 🚀 Project Overview
-NewsAtlas is a cutting-edge Single Page Application (SPA) that transforms global data streams into an immersive "Command Terminal" experience. It aggregates real-time news, financial metrics, and weather telemetry, enhanced with Generative AI to produce detailed situation reports. The platform features a cinematic boot sequence, procedural audio ambience, god-tier visual effects (particle networks, matrix rain, holographic glow), and a seamless 2D/3D orbital interface inspired by Web3 dashboards like Etherscan and Dune Analytics.
+NewsAtlas is a cutting-edge Single Page Application (SPA) that transforms global data streams into an immersive "Command Terminal" experience. It aggregates real-time news, financial metrics, and weather telemetry, enhanced with Generative AI to produce detailed situation reports. The platform features a cinematic boot sequence, procedural audio ambience, interactive particle networks, and a seamless 2D/3D orbital interface inspired by Web3 dashboards like Etherscan and Dune Analytics.
 
 ---
 
@@ -14,7 +14,7 @@ NewsAtlas is a cutting-edge Single Page Application (SPA) that transforms global
 - **Core Logic:** Vanilla JavaScript (ES6+), Web Audio API (Procedural Sound), Web Speech API
 - **Backend:** Node.js (Vercel Serverless Functions)
 - **Database/Auth:** Google Firebase (Firestore & Authentication with Google OAuth/Anonymous)
-- **AI Core:** **Gemini 1.5 Flash** (via Vercel Edge) for ultra-fast, high-density intelligence synthesis
+- **AI Core:** **Groq Cloud** (Llama 3-70b-versatile) for ultra-fast, high-density intelligence synthesis
 - **Data Streams:**
   - **News:** NewsData.io / GNews (Live Filtering)
   - **Weather:** Open-Meteo High-Precision API with tactical estimation algorithms
@@ -31,18 +31,15 @@ NewsAtlas is a cutting-edge Single Page Application (SPA) that transforms global
 * **NASA Satellite Layer:** Real-time WMS overlay using NASA's GIBS Blue Marble data
 * **Vector Tooltips:** Interactive hover states displaying sector sovereignty data
 * **Holographic Country Glow:** Triple-layer neon glow effects on hover with pulsing animations
-* **Data Flow Lines:** Animated curved connections showing data routes between selected country and major global hubs
 
 ### 2. 🗺️ Deep-Dive Geography Engine
 * **Hierarchical Navigation:** Drill down from **Country** → **State/Province** → **City** level
 * **Smart Breadcrumbs:** Real-time tracking of current geographical context
 * **Location Intelligence:** Auto-fetches weather and news for specific grid coordinates of selected cities
 
-### 3. 🎨 God-Tier Visual Effects
+### 3. 🎨 Visual Effects
 * **Particle Network Overlay:** 50+ floating nodes with dynamic connections that follow mouse movement using Canvas API
-* **Matrix Rain Effect:** Japanese/binary character waterfall animation (configurable opacity)
 * **Traffic Pattern Canvas:** Real-time network traffic visualization in the About section
-* **Pulsing Data Nodes:** 10 major cities (NY, London, Tokyo, Singapore, etc.) with expanding ripple effects
 * **Smooth Camera Controls:** Buttery 60fps zoom/pan with cubic-bezier easing
 
 ### 4. 🧠 AI-Powered Intelligence
@@ -91,7 +88,7 @@ Power user navigation with full keyboard control:
 
 ```text
 /api                    -> Vercel Serverless Functions
-   ├── ai.js            -> Gemini 1.5 Flash handler
+   ├── ai.js            -> Groq Llama 3 handler
    ├── news.js          -> News aggregation proxy
    ├── market.js        -> Unified crypto/forex/metals fetcher
    ├── geo.js           -> CountriesNow hierarchy fetcher
@@ -106,12 +103,12 @@ Power user navigation with full keyboard control:
    │   │   ├── audio.js    -> Sound Engine
    │   │   └── firebase.js -> Auth & DB
    │   ├── /modules     -> Feature Modules
-   │   │   ├── map-engine.js -> Visual Effects (Particles, Matrix)
+   │   │   ├── map-engine.js -> Visual Effects (Particles)
    │   │   ├── geography.js  -> Drill-down Logic
    │   │   ├── markets.js    -> Financial Data Logic
    │   │   ├── economics.js  -> GDP & Macro Data
    │   │   ├── news.js       -> Feed Manager
-   │   │   └── weather.js    -> Atmosphere Logic
+   │   │   ├── weather.js    -> Atmosphere Logic
    │   └── /ui          -> UI Components
    │       ├── search.js     -> Global Search Overlay
    │       └── about.js      -> System Stats & CLI
@@ -142,7 +139,6 @@ Power user navigation with full keyboard control:
 ## 🚀 Performance
 * **60 FPS** animations using `requestAnimationFrame`
 * **Canvas-based rendering** for particle effects (GPU-accelerated)
-* **Lazy loading** - God-tier effects initialize after map loads
 * **Modular Logic** - JS split into micro-modules for better maintainability and caching
 
 ---
@@ -155,7 +151,7 @@ Power user navigation with full keyboard control:
 
 ---
 
-## ‍💻 Author
+## 👨‍💻 Author
 **Abhishek Sati**
 Lead Systems Architect | Full-Stack Developer
 

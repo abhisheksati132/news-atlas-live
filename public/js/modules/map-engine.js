@@ -259,7 +259,7 @@ class DataFlows {
     toCoordsList.forEach((toCoords, i) => {
       const to = this.projection(toCoords);
       const midX = (from[0] + to[0]) / 2;
-      const midY = (from[1] + to[1]) / 2 - 100; // Arc upward
+      const midY = (from[1] + to[1]) / 2 - 100; 
       const path = this.group.append('path')
         .attr('d', `M ${from[0]} ${from[1]} Q ${midX} ${midY} ${to[0]} ${to[1]}`)
         .attr('stroke', 'url(#flow-gradient)')
@@ -536,10 +536,10 @@ class GodTierMap {
   showDataFlows(fromCountry) {
     if (!this.effects.dataFlows) return;
     const majorHubs = [
-      [-74.006, 40.7128],  // New York
-      [-0.1276, 51.5074],  // London
-      [139.6917, 35.6895], // Tokyo
-      [103.8198, 1.3521]   // Singapore
+      [-74.006, 40.7128],  
+      [-0.1276, 51.5074],  
+      [139.6917, 35.6895], 
+      [103.8198, 1.3521]   
     ];
     this.effects.dataFlows.showFlows(fromCountry, majorHubs);
   }
@@ -551,23 +551,6 @@ class GodTierMap {
     this.isInitialized = false;
   }
 }
-/*
-// Auto-init disabled during refactor to modular architecture. Core map logic is now in app.js
-// window.godTierMap = new GodTierMap();
-// if (document.readyState === 'loading') {
-//   document.addEventListener('DOMContentLoaded', () => window.godTierMap.init());
-// } else {
-//   window.godTierMap.init();
-// }
-// const originalSelectCountry = window.selectCountry;
-// if (originalSelectCountry) {
-//   window.selectCountry = function (event, d) {
-//     originalSelectCountry.call(this, event, d);
-//     const centroid = d3.geoCentroid(d);
-//     window.godTierMap.showDataFlows(centroid);
-//   };
-// }
-*/
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     GodTierMap,
@@ -576,4 +559,4 @@ if (typeof module !== 'undefined' && module.exports) {
     LiveStatsTicker,
     SmoothCamera
   };
-}
+}

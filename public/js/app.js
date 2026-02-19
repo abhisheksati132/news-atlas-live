@@ -7,12 +7,10 @@ let currentProjection, svg, g, zoom;
 let worldFeatures = [];
 let globalSearchData = [];
 let currentCategory = 'top';
-
 window.selectedCountry = selectedCountry;
 window.currencyCode = currencyCode;
 window.iso2Code = iso2Code;
 window.currentCategory = currentCategory;
-
 async function runBootSequence() {
     const logs = ["SYSTEM_INIT...", "CONNECTING_SAT_UPLINK...", "DECRYPTING_GLOBAL_FEED...", "HANDSHAKE_VERIFIED", "ACCESS_GRANTED"];
     const logEl = document.getElementById('boot-log');
@@ -28,7 +26,6 @@ async function runBootSequence() {
     document.getElementById('boot-screen').style.opacity = '0';
     setTimeout(() => document.getElementById('boot-screen').remove(), 800);
 }
-
 async function initTerminal() {
     runBootSequence();
     const config = {
@@ -43,9 +40,7 @@ async function initTerminal() {
         const firebaseApp = window.firebaseCore.initializeApp(config);
         const auth = window.firebaseCore.getAuth(firebaseApp);
         const db = window.firebaseCore.getFirestore(firebaseApp);
-
         await window.firebaseCore.signInAnonymously(auth);
-
         window.firebaseCore.onAuthStateChanged(auth, (u) => {
             if (u) {
                 const idEl = document.getElementById('neural-id');
@@ -65,19 +60,16 @@ async function initTerminal() {
         console.warn("Firebase Auth failed:", e);
         document.getElementById('neural-id').innerText = "LOCAL MODE (OFFLINE)";
     }
-
     try {
         const res = await fetch('https://restcountries.com/v3.1/all?fields=name,flags,cca2,latlng,currencies,population,capital,capitalInfo');
         globalSearchData = await res.json();
         window.globalSearchData = globalSearchData;
     } catch (e) { }
-
     window.fetchWeather(20.5937, 78.9629);
     window.fetchNews();
     startStockTicker();
     window.initializeMarkets('Global');
 }
-
 function startStockTicker() {
     const tickerContent = document.getElementById('stock-ticker-content');
     const stocks = [
@@ -103,7 +95,6 @@ function startStockTicker() {
         renderTicker();
     }, 3000);
 }
-
 async function fetchAllData(name) {
     try {
         const res = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fullText=true`);
@@ -115,7 +106,6 @@ async function fetchAllData(name) {
             window._isoAlpha3 = c.cca3 || '';
             window.iso2Code = iso2Code;
             window.currencyCode = currencyCode;
-
             document.getElementById('fact-pop').innerText = (c.population / 1000000).toFixed(1) + 'M';
             document.getElementById('fact-cap').innerText = c.capital ? c.capital[0] : 'N/A';
             document.getElementById('fact-region').innerText = c.region || '--';
@@ -124,31 +114,25 @@ async function fetchAllData(name) {
             document.getElementById('fact-demonym').innerText = c.demonyms?.eng?.m || '--';
             document.getElementById('fact-gini').innerText = c.gini ? Object.values(c.gini)[0] : 'N/A';
             document.getElementById('fact-drive').innerText = c.car ? c.car.side.toUpperCase() : '--';
-
             const flagEl = document.getElementById('sector-flag');
             const nameEl = document.getElementById('sector-name');
             const box = document.getElementById('active-sector-display');
             if (flagEl && nameEl && box) { flagEl.src = c.flags.svg; nameEl.innerText = c.name.common; box.classList.remove('hidden'); }
-
             countryUTCOffset = c.timezones ? c.timezones[0] : "UTC+00:00";
-
             let lat = 0, lon = 0;
             if (c.latlng && c.latlng.length === 2) { [lat, lon] = c.latlng; }
             else if (c.capitalInfo && c.capitalInfo.latlng && c.capitalInfo.latlng.length === 2) { [lat, lon] = c.capitalInfo.latlng; }
             if (lat || lon) window.fetchWeather(lat, lon);
-
             document.getElementById('fact-pop-2').innerText = (c.population / 1000000).toFixed(1) + 'M';
             document.getElementById('fact-gini-2').innerText = c.gini ? Object.values(c.gini)[0] : 'N/A';
             document.getElementById('fact-demonym-2').innerText = c.demonyms?.eng?.m || '--';
             document.getElementById('fact-area-2').innerText = c.area.toLocaleString() + ' km²';
-
             window.fetchCurrency();
             window.fetchDetailedEconomics(c.name.common);
             window.fetchNews();
         }
     } catch (e) { console.error("Data Fetch Error", e); }
 }
-
 async function generateAIBriefing(loc) {
     const box = document.getElementById('ai-briefing-box');
     const text = document.getElementById('ai-briefing-text');
@@ -174,7 +158,6 @@ async function generateAIBriefing(loc) {
         window.playTacticalSound('success');
     } catch (e) { if (text) text.innerText = "Briefing handshake failed."; }
 }
-
 function initMap(type) {
     projectionType = type;
     const container = document.getElementById('map-container');
@@ -229,7 +212,6 @@ function initMap(type) {
             .on("click", function (event, d) { handleCountryClick(event, d); });
     });
 }
-
 async function handleCountryClick(event, d) {
     window.playTacticalSound('click');
     d3.selectAll(".country").classed("active", false);
@@ -249,7 +231,6 @@ async function handleCountryClick(event, d) {
         window.fetchMarketIntel(d.properties.name, currencyCode);
     }
 }
-
 function rotateToCountry(d) {
     const centroid = d3.geoCentroid(d);
     d3.transition().duration(1200).tween("rotate", () => {
@@ -257,7 +238,6 @@ function rotateToCountry(d) {
         return (t) => { currentProjection.rotate(r(t)); g.selectAll("path").attr("d", d3.geoPath().projection(currentProjection)); };
     });
 }
-
 function zoomToCountry(d) {
     const container = document.getElementById('map-container');
     const width = container.clientWidth, height = container.clientHeight;
@@ -268,7 +248,6 @@ function zoomToCountry(d) {
     const scale = Math.max(1, Math.min(8, 0.8 / Math.max(dx / width, dy / height)));
     svg.transition().duration(1000).call(zoom.transform, d3.zoomIdentity.translate(width / 2 - scale * x, height / 2 - scale * y).scale(scale));
 }
-
 window.toggleSatellite = () => {
     window.playTacticalSound('click');
     const mapBox = document.getElementById('map-box-id');
@@ -277,58 +256,46 @@ window.toggleSatellite = () => {
     const container = document.getElementById('map-container');
     const w = container.clientWidth;
     const h = container.clientHeight;
-
     if (overlay) {
-        // Turning OFF
         overlay.remove();
         mapBox.classList.remove('satellite-mode');
         if (btn) { btn.classList.remove('text-emerald-400'); btn.classList.add('bg-emerald-600/50'); }
-        // Revert to original projection
         initMap(projectionType);
     } else {
-        // Turning ON
-        // Switch to Equirectangular for correct image mapping
+        const scale = w / (2 * Math.PI); 
         currentProjection = d3.geoEquirectangular()
-            .scale(w / 6.3) // Fit width roughly
+            .scale(scale)
             .translate([w / 2, h / 2]);
-
         const path = d3.geoPath().projection(currentProjection);
-        g.selectAll("path").transition().duration(750).attr("d", path).attr("fill", "none").attr("stroke", "rgba(255,255,255,0.2)"); // Make countries transparent outlines
-
-        // Calculate image bounds in pixels based on projection
-        // Equirectangular maps [-180, 180] longitude to width
+        g.selectAll("path")
+            .transition().duration(750)
+            .attr("d", path)
+            .attr("fill", "none")
+            .attr("stroke", "rgba(255,255,255,0.3)")
+            .style("pointer-events", "none");
         const pTL = currentProjection([-180, 90]);
         const pBR = currentProjection([180, -90]);
-
-        const imgX = pTL[0];
-        const imgY = pTL[1];
-        const imgW = pBR[0] - pTL[0];
-        const imgH = pBR[1] - pTL[1];
-
-        // NASA GIBS WMS URL (Blue Marble Next Generation)
         const gibsUrl = 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=BlueMarble_NextGeneration&FORMAT=image/jpeg&TRANSPARENT=FALSE&WIDTH=2048&HEIGHT=1024&CRS=CRS:84&BBOX=-180,-90,180,90';
-
         const newOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'image');
         newOverlay.id = 'satellite-overlay';
         newOverlay.setAttribute('href', gibsUrl);
-        newOverlay.setAttribute('x', imgX);
-        newOverlay.setAttribute('y', imgY);
-        newOverlay.setAttribute('width', imgW);
-        newOverlay.setAttribute('height', imgH);
+        newOverlay.setAttribute('x', pTL[0]);
+        newOverlay.setAttribute('y', pTL[1]);
+        newOverlay.setAttribute('width', pBR[0] - pTL[0]);
+        newOverlay.setAttribute('height', pBR[1] - pTL[1]);
         newOverlay.setAttribute('preserveAspectRatio', 'none');
-        newOverlay.style.cssText = 'opacity:0; pointer-events:none; transition:opacity 1s ease; mix-blend-mode: normal;';
-
-        // Insert as first child of G to be behind countries
-        if (g) g.node().insertBefore(newOverlay, g.node().firstChild);
-
-        // Fade in
+        newOverlay.style.cssText = 'opacity:0; transition:opacity 1s ease; mix-blend-mode: normal;';
+        if (g.node().firstChild) {
+            g.node().insertBefore(newOverlay, g.node().firstChild);
+        } else {
+            g.node().appendChild(newOverlay);
+        }
+        svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
         requestAnimationFrame(() => newOverlay.style.opacity = '1');
-
         mapBox.classList.add('satellite-mode');
         if (btn) { btn.classList.add('text-emerald-400'); btn.classList.remove('bg-emerald-600/50'); }
     }
 };
-
 window.switchTab = (id) => {
     window.playTacticalSound('tab');
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -338,7 +305,6 @@ window.switchTab = (id) => {
     const targetContent = document.getElementById(`tab-${id}`);
     if (targetContent) targetContent.classList.add('active');
 };
-
 window.toggleProjection = () => { window.playTacticalSound('tab'); initMap(projectionType === '2d' ? '3d' : '2d'); };
 window.selectFromSearch = (name) => {
     const country = worldFeatures.find(f => f.properties.name.toLowerCase().includes(name.toLowerCase()));
@@ -373,7 +339,6 @@ window.deactivateMapInteraction = () => {
     const overlay = document.getElementById('map-overlay-guard');
     if (overlay) overlay.classList.remove('active');
 };
-
 function setupEventListeners() {
     document.querySelectorAll('.category-pill').forEach(pill => {
         pill.onmouseenter = () => window.playTacticalSound('hover');
@@ -414,7 +379,6 @@ function setupEventListeners() {
         }
     };
 }
-
 function updateSystemTime() {
     const now = new Date();
     document.getElementById('system-time').innerText = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -431,7 +395,6 @@ function updateSystemTime() {
         document.body.classList.toggle('day-mode', hr >= 6 && hr <= 18);
     }
 }
-
 window.activateVoice = () => {
     window.playTacticalSound('click');
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -450,7 +413,6 @@ window.activateVoice = () => {
     };
     recognition.onerror = () => btn.classList.remove('text-red-500', 'animate-pulse');
 };
-
 window.personalizeSession = (user) => {
     const safeName = user.displayName || user.email.split('@')[0];
     const shortName = safeName.split(' ')[0];
@@ -469,9 +431,7 @@ window.personalizeSession = (user) => {
     if (roleEl) roleEl.innerText = "AUTHENTICATED FIELD OPERATOR";
     if (levelEl) levelEl.innerText = "CLEARANCE: OMEGA-LEVEL (VERIFIED)";
 };
-
 window.generateAIBriefing = generateAIBriefing;
-
 initTerminal();
 initMap('2d');
 setupEventListeners();

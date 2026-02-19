@@ -21,7 +21,6 @@ function getWeatherMeta(code, isDay = 1) {
     };
     return codes[code] || { text: "Unknown", icon: "fa-meteor", color: "text-slate-500" };
 }
-
 function getMoonPhase() {
     const date = new Date();
     let year = date.getFullYear(), month = date.getMonth() + 1;
@@ -43,14 +42,12 @@ function getMoonPhase() {
     ];
     return phases[b];
 }
-
 async function fetchWeather(lat, lon) {
     if (isNaN(lat) || isNaN(lon)) { console.error("Invalid coordinates passed to weather module."); return; }
     try {
         const res = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
         if (!res.ok) throw new Error(`Weather fetch failed: ${res.status}`);
         const data = await res.json();
-
         if (data.current) {
             const curr = data.current;
             const meta = getWeatherMeta(curr.weather_code, curr.is_day);
@@ -63,7 +60,6 @@ async function fetchWeather(lat, lon) {
             if (document.getElementById('atmo-wind-arrow')) document.getElementById('atmo-wind-arrow').style.transform = `rotate(${curr.wind_direction_10m}deg)`;
             if (document.getElementById('atmo-humidity')) document.getElementById('atmo-humidity').innerText = `${curr.relative_humidity_2m}%`;
             if (document.getElementById('atmo-pressure')) document.getElementById('atmo-pressure').innerText = Math.round(curr.pressure_msl || curr.surface_pressure);
-
             let estimatedCeiling = 8.0;
             const code = curr.weather_code;
             if (code === 0 || code === 1) estimatedCeiling = 12.0;
@@ -76,7 +72,6 @@ async function fetchWeather(lat, lon) {
             estimatedCeiling += (Math.random() * 0.4 - 0.2);
             if (document.getElementById('atmo-cloud-base')) document.getElementById('atmo-cloud-base').innerText = estimatedCeiling.toFixed(1);
         }
-
         if (data.daily) {
             const todayHigh = data.daily.temperature_2m_max[0];
             const todayLow = data.daily.temperature_2m_min[0];
@@ -96,7 +91,6 @@ async function fetchWeather(lat, lon) {
             if (uvMax > 10) uvText = "Extreme";
             document.getElementById('atmo-uv-text').innerText = uvText;
         }
-
         if (data.hourly) {
             const hourlyContainer = document.getElementById('atmo-hourly-container');
             if (hourlyContainer) {
@@ -125,16 +119,13 @@ async function fetchWeather(lat, lon) {
             const visKm = data.hourly.visibility ? data.hourly.visibility[new Date().getHours()] / 1000 : 10;
             if (document.getElementById('atmo-visibility')) document.getElementById('atmo-visibility').innerText = visKm.toFixed(1);
         }
-
         const moon = getMoonPhase();
         if (document.getElementById('atmo-moon-text')) {
             document.getElementById('atmo-moon-text').innerText = moon.t;
             document.getElementById('atmo-moon-icon').className = `fas ${moon.i} text-2xl text-indigo-300`;
         }
-
         const precipTotal = data.daily && data.daily.precipitation_sum ? data.daily.precipitation_sum[0] : 0;
         document.getElementById('atmo-precip-total').innerText = precipTotal.toFixed(1);
-
         const dailyContainer = document.getElementById('atmo-daily-container');
         if (dailyContainer && data.daily) {
             dailyContainer.innerHTML = '';
@@ -162,9 +153,7 @@ async function fetchWeather(lat, lon) {
                 dailyContainer.appendChild(dRow);
             }
         }
-
         window.playTacticalSound('success');
-
         try {
             const weatherSummary = {
                 temp: data.current ? Math.round(data.current.temperature_2m) : '--',
@@ -184,7 +173,6 @@ async function fetchWeather(lat, lon) {
         } catch (err) { }
     } catch (e) { console.error("Atmosphere Error:", e); }
 }
-
 async function generateWeatherAnalysis(weatherData, cityName) {
     const el = document.getElementById('weather-ai-analysis');
     if (!el) return;
@@ -196,7 +184,6 @@ async function generateWeatherAnalysis(weatherData, cityName) {
   Humidity: ${weatherData.humidity}%, Wind: ${weatherData.wind_speed} km/h, UV: ${weatherData.uv_index}, Visibility: ${weatherData.visibility} km
   7-Day: ${forecastStr}
   In 150 words cover: Overall assessment, travel advisories, health warnings (UV/air), outdoor impact, recommended actions.`;
-
         const res = await fetch('/api/ai', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -207,7 +194,6 @@ async function generateWeatherAnalysis(weatherData, cityName) {
     } catch (e) { el.innerText = 'Weather analysis link failed.'; }
     generateWeatherAlerts(weatherData);
 }
-
 function generateWeatherAlerts(weatherData) {
     const alerts = [];
     if (weatherData.temp > 35) alerts.push({ type: 'danger', icon: '🔥', title: 'Extreme Heat Warning', description: `Temperature ${weatherData.temp}°C. Stay hydrated and avoid prolonged sun exposure.` });
@@ -215,7 +201,6 @@ function generateWeatherAlerts(weatherData) {
     if (weatherData.wind_speed > 50) alerts.push({ type: 'warning', icon: '💨', title: 'Strong Wind Advisory', description: `Wind speed ${weatherData.wind_speed} km/h. Secure loose objects.` });
     if (alerts.length > 0) displayWeatherAlerts(alerts);
 }
-
 function displayWeatherAlerts(alerts) {
     const container = document.getElementById('weather-alerts');
     if (!container) return;
@@ -237,6 +222,5 @@ function displayWeatherAlerts(alerts) {
         container.appendChild(el);
     });
 }
-
 window.fetchWeather = fetchWeather;
-window.generateWeatherAnalysis = generateWeatherAnalysis;
+window.generateWeatherAnalysis = generateWeatherAnalysis;

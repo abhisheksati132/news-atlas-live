@@ -1,8 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, linkWithPopup, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-import { geographicalHierarchy, getCitiesForCountry, getStateData, getCityData } from './geo-hierarchy.js';
-import { marketData, getIndicesForCountry, getAllPreciousMetals, getTopCrypto } from './market-data-expanded.js';
+// geo-hierarchy.js and market-data-expanded.js replaced by live APIs (/api/geo and /api/markets)
 
 window.firebaseCore = {
     initializeApp, getAuth, onAuthStateChanged, signInAnonymously,
@@ -714,29 +713,58 @@ function zoomToCountry(d) {
     const scale = Math.max(1, Math.min(8, 0.8 / Math.max(dx / width, dy / height)));
     svg.transition().duration(1000).call(zoom.transform, d3.zoomIdentity.translate(width / 2 - scale * x, height / 2 - scale * y).scale(scale));
 }
-async function fetchNews() {
+// Active search query: empty = use country context, non-empty = search API directly
+let newsSearchQuery = '';
+let newsSearchTimer = null;
+
+async function fetchNews(overrideQ) {
     const loading = document.getElementById('news-loading');
     if (loading) loading.classList.remove('hidden');
     displayedNewsCount = 20;
     try {
-        let url = `/api/news?category=${currentCategory}&country=${iso2Code || ''}&q=${selectedCountry ? encodeURIComponent(selectedCountry.properties.name) : ''}`;
+        const q = overrideQ !== undefined ? overrideQ : newsSearchQuery;
+        // If user typed something, search by that term; otherwise use country context
+        let url;
+        if (q && q.trim()) {
+            url = `/api/news?category=${currentCategory}&q=${encodeURIComponent(q.trim())}`;
+        } else {
+            url = `/api/news?category=${currentCategory}&country=${iso2Code || ''}&q=${selectedCountry ? encodeURIComponent(selectedCountry.properties.name) : ''}`;
+        }
         const res = await fetch(url);
         if (!res.ok) throw new Error('News fetch failed');
         const data = await res.json();
 
-        if (data.totalResults) document.getElementById('news-count').innerText = data.totalResults;
-
-        if (data.results && data.results.length > 0) {
-            allNews = data.results;
-        } else {
-            allNews = [];
+        if (data.totalResults) {
+            const el = document.getElementById('news-count');
+            if (el) el.innerText = data.totalResults;
         }
+
+        allNews = (data.results && data.results.length > 0) ? data.results : [];
         displayFilteredNews();
     } catch (e) {
         const container = document.getElementById('articles-container');
         if (container) container.innerHTML = `<div class="col-span-full p-10 text-center text-[12px] text-red-500 font-black italic uppercase tracking-widest">Uplink Error. Retrying...</div>`;
     } finally { if (loading) loading.classList.add('hidden'); }
 }
+
+// Real news search — debounced API call, not local filter
+window.filterNews = (searchTerm) => {
+    newsSearchQuery = searchTerm;
+    clearTimeout(newsSearchTimer);
+    if (!searchTerm.trim()) {
+        fetchNews('');
+        return;
+    }
+    newsSearchTimer = setTimeout(() => fetchNews(searchTerm), 700);
+};
+
+window.clearNewsSearch = () => {
+    newsSearchQuery = '';
+    const el = document.getElementById('news-search');
+    if (el) el.value = '';
+    fetchNews('');
+};
+
 window.setCategory = (el, cat) => {
     window.playTacticalSound('click');
     document.querySelectorAll('.intel-tab').forEach(t => t.classList.remove('active'));
@@ -1211,7 +1239,8 @@ function personalizeSession(user) {
     }
 }
 // ═══════════════════════════════════════════════════════
-// SECTION 1: GEOGRAPHY DRILL-DOWN
+// SECTION 1: GEOGRAPHY DRILL-DOWN (Real API-based)
+// Uses /api/geo → CountriesNow API (all countries, all states, all cities)
 // ═══════════════════════════════════════════════════════
 let currentView = {
     level: 'country',
@@ -1220,110 +1249,107 @@ let currentView = {
     city: null
 };
 
-function onCountrySelected(countryName) {
+async function onCountrySelected(countryName) {
     currentView = { level: 'country', country: countryName, state: null, city: null };
     const panel = document.getElementById('hierarchy-panel');
     const stateWrapper = document.getElementById('breadcrumb-state-wrapper');
     const cityWrapper = document.getElementById('breadcrumb-city-wrapper');
     const citySelector = document.getElementById('city-selector');
+    const stateList = document.getElementById('state-list');
 
     if (stateWrapper) stateWrapper.classList.add('hidden');
     if (cityWrapper) cityWrapper.classList.add('hidden');
     if (citySelector) citySelector.classList.add('hidden');
-
-    if (geographicalHierarchy && geographicalHierarchy[countryName]) {
-        if (panel) panel.classList.remove('hidden');
-        populateStateSelector(countryName);
-    } else {
-        if (panel) panel.classList.add('hidden');
-    }
-
-    // Refresh market indices for this country
-    displayCountryIndices(countryName);
-}
-
-function populateStateSelector(countryName) {
-    const country = geographicalHierarchy[countryName];
-    if (!country) return;
-    const stateList = document.getElementById('state-list');
-    if (!stateList) return;
-    stateList.innerHTML = '';
+    if (panel) panel.classList.remove('hidden');
+    if (stateList) stateList.innerHTML = '<div class="text-slate-500 text-xs col-span-3 py-2">Loading regions...</div>';
 
     const bc = document.getElementById('breadcrumb-country');
     if (bc) bc.innerText = countryName;
     const stateSelector = document.getElementById('state-selector');
     if (stateSelector) stateSelector.classList.remove('hidden');
-    const citySelector = document.getElementById('city-selector');
-    if (citySelector) citySelector.classList.add('hidden');
 
-    country.states.forEach(state => {
-        const btn = document.createElement('button');
-        btn.className = 'text-left p-2 rounded border border-white/10 hover:border-blue-400 hover:bg-blue-400/10 transition-all text-xs font-mono';
-        btn.innerHTML = `
-            <div class="font-bold text-white">${state.name}</div>
-            <div class="text-slate-500 text-[10px]">${((state.population || 0) / 1000000).toFixed(1)}M pop</div>
-        `;
-        btn.onclick = () => selectState(countryName, state.name);
-        stateList.appendChild(btn);
-    });
+    // Refresh market indices for this country
+    displayCountryIndices(countryName);
+
+    try {
+        const res = await fetch(`/api/geo?country=${encodeURIComponent(countryName)}&level=states`);
+        const data = await res.json();
+        if (!data.states || data.states.length === 0) {
+            if (stateList) stateList.innerHTML = '<div class="text-slate-500 text-xs col-span-3">No regional data available.</div>';
+            return;
+        }
+        if (stateList) {
+            stateList.innerHTML = '';
+            data.states.forEach(state => {
+                const btn = document.createElement('button');
+                btn.className = 'text-left p-2 rounded border border-white/10 hover:border-blue-400 hover:bg-blue-400/10 transition-all text-xs font-mono';
+                btn.innerHTML = `<div class="font-bold text-white">${state.name}</div><div class="text-slate-400 text-[10px] font-mono">${state.code || ''}</div>`;
+                btn.onclick = () => selectState(countryName, state.name);
+                stateList.appendChild(btn);
+            });
+        }
+    } catch (e) {
+        if (stateList) stateList.innerHTML = '<div class="text-red-500 text-xs col-span-3">Failed to load regions.</div>';
+    }
 }
 
-function selectState(countryName, stateName) {
+async function selectState(countryName, stateName) {
     currentView = { level: 'state', country: countryName, state: stateName, city: null };
-    const stateData = getStateData(countryName, stateName);
-    if (!stateData) return;
 
     const bsEl = document.getElementById('breadcrumb-state');
     const bsWrap = document.getElementById('breadcrumb-state-wrapper');
     const bcWrap = document.getElementById('breadcrumb-city-wrapper');
+    const cityList = document.getElementById('city-list');
+    const citySelector = document.getElementById('city-selector');
+
     if (bsEl) bsEl.innerText = stateName;
     if (bsWrap) bsWrap.classList.remove('hidden');
     if (bcWrap) bcWrap.classList.add('hidden');
+    if (citySelector) citySelector.classList.remove('hidden');
+    if (cityList) cityList.innerHTML = '<div class="text-slate-500 text-xs col-span-3 py-2">Loading cities...</div>';
 
-    if (stateData.cities) populateCitySelector(countryName, stateName, stateData.cities);
+    try {
+        const res = await fetch(`/api/geo?country=${encodeURIComponent(countryName)}&state=${encodeURIComponent(stateName)}&level=cities`);
+        const data = await res.json();
+        if (!data.cities || data.cities.length === 0) {
+            if (cityList) cityList.innerHTML = '<div class="text-slate-500 text-xs col-span-3">No city data available.</div>';
+            return;
+        }
+        if (cityList) {
+            cityList.innerHTML = '';
+            data.cities.forEach(cityName => {
+                const btn = document.createElement('button');
+                btn.className = 'text-left p-2 rounded border border-white/10 hover:border-cyan-400 hover:bg-cyan-400/10 transition-all text-xs font-mono';
+                btn.innerHTML = `<div class="font-bold text-white">${cityName}</div>`;
+                btn.onclick = () => selectCity(countryName, stateName, cityName);
+                cityList.appendChild(btn);
+            });
+        }
+    } catch (e) {
+        if (cityList) cityList.innerHTML = '<div class="text-red-500 text-xs col-span-3">Failed to load cities.</div>';
+    }
 }
 
-function populateCitySelector(countryName, stateName, cities) {
-    const cityList = document.getElementById('city-list');
-    const citySelector = document.getElementById('city-selector');
-    if (!cityList || !citySelector) return;
-    cityList.innerHTML = '';
-    citySelector.classList.remove('hidden');
-
-    cities.forEach(city => {
-        const btn = document.createElement('button');
-        btn.className = 'text-left p-2 rounded border border-white/10 hover:border-cyan-400 hover:bg-cyan-400/10 transition-all text-xs font-mono';
-        btn.innerHTML = `
-            <div class="font-bold text-white">${city.name}</div>
-            <div class="text-slate-500 text-[10px]">${((city.population || 0) / 1000000).toFixed(1)}M · ${city.type || 'City'}</div>
-        `;
-        btn.onclick = () => selectCity(countryName, stateName, city.name);
-        cityList.appendChild(btn);
-    });
-}
-
-function selectCity(countryName, stateName, cityName) {
+async function selectCity(countryName, stateName, cityName) {
     currentView = { level: 'city', country: countryName, state: stateName, city: cityName };
-    const cityData = getCityData(countryName, stateName, cityName);
 
     const bcEl = document.getElementById('breadcrumb-city');
     const bcWrap = document.getElementById('breadcrumb-city-wrapper');
     if (bcEl) bcEl.innerText = cityName;
     if (bcWrap) bcWrap.classList.remove('hidden');
 
-    document.getElementById('selected-country-name').innerText = cityName;
+    const nameEl = document.getElementById('selected-country-name');
+    if (nameEl) nameEl.innerText = cityName;
 
-    if (cityData) {
-        if (document.getElementById('eco-gdp')) document.getElementById('eco-gdp').innerText = cityData.gdp || '--';
-        if (cityData.industries && document.getElementById('eco-exports')) {
-            document.getElementById('eco-exports').innerHTML = cityData.industries.map(industry =>
-                `<div class="flex items-center gap-2"><div class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div><span class="text-sm text-slate-300 font-bold uppercase">${industry}</span></div>`
-            ).join('');
+    // Fetch weather for city using geocoding via open-meteo
+    try {
+        const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=en&format=json`);
+        const geoData = await geoRes.json();
+        if (geoData.results && geoData.results[0]) {
+            const { latitude, longitude } = geoData.results[0];
+            fetchWeather(latitude, longitude);
         }
-        if (cityData.coords && cityData.coords.length >= 2) {
-            fetchWeather(cityData.coords[1], cityData.coords[0]);
-        }
-    }
+    } catch (e) { /* silently fail */ }
 
     generateAIBriefing(cityName + ', ' + stateName + ', ' + countryName);
 }
@@ -1343,137 +1369,131 @@ window.toggleMarketCategory = (category) => {
     chevron.classList.toggle('fa-chevron-up');
 };
 
-function displayPreciousMetals() {
+async function displayPreciousMetals() {
     const container = document.getElementById('metals-content');
-    if (!container || !getAllPreciousMetals) return;
-    container.innerHTML = '';
+    if (!container) return;
+    container.innerHTML = '<div class="col-span-3 text-slate-500 text-xs py-2">Fetching live prices...</div>';
     try {
-        Object.entries(getAllPreciousMetals()).forEach(([name, data]) => {
-            const changeClass = data.change >= 0 ? 'text-emerald-400' : 'text-red-400';
-            const changeIcon = data.change >= 0 ? '▲' : '▼';
+        const cur = (currencyCode || 'USD').toUpperCase();
+        const res = await fetch(`/api/markets?type=metals&currency=${cur}`);
+        const json = await res.json();
+        container.innerHTML = '';
+        const metalDisplay = {
+            XAU: 'Gold (XAU)', XAG: 'Silver (XAG)', XPT: 'Platinum (XPT)', XPD: 'Palladium (XPD)'
+        };
+        Object.entries(json.data || {}).forEach(([sym, data]) => {  // reuse variable name for consistency
+            // map to same shape for display
+            const name = metalDisplay[sym] || sym;
+            const changeClass = (data.change || 0) >= 0 ? 'text-emerald-400' : 'text-red-400';
+            const changeIcon = (data.change || 0) >= 0 ? '▲' : '▼';
             const card = document.createElement('div');
             card.className = 'dossier-card p-3';
             card.innerHTML = `
                 <div class="flex items-center justify-between mb-2">
                   <span class="text-2xl">${data.icon || '🪙'}</span>
-                  <span class="${changeClass} text-xs font-mono font-bold">${changeIcon} ${Math.abs(data.change)}%</span>
+                  <span class="${changeClass} text-xs font-mono font-bold">${changeIcon} ${Math.abs(data.change || 0).toFixed(2)}%</span>
                 </div>
                 <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">${name}</div>
-                <div class="text-xl font-black text-white font-mono">$${(data.price || 0).toLocaleString()}</div>
+                <div class="text-xl font-black text-white font-mono">${cur} ${(data.price || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
                 <div class="text-[9px] text-slate-600 mt-1">${data.unit || ''}</div>
             `;
             container.appendChild(card);
         });
+        if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-xs col-span-3">No metals data</div>';
     } catch (e) { container.innerHTML = '<div class="text-slate-500 text-xs col-span-3">Data unavailable</div>'; }
 }
 
 function displayCountryIndices(countryName) {
     const container = document.getElementById('indices-content');
-    if (!container || !getIndicesForCountry) return;
+    if (!container) return;
     const indicesLabelEl = document.getElementById('indices-country');
     if (indicesLabelEl) indicesLabelEl.innerText = countryName || 'Global';
-    container.innerHTML = '';
-    try {
-        const indices = getIndicesForCountry(countryName);
-        if (!indices || Object.keys(indices).length === 0) {
-            container.innerHTML = '<div class="text-slate-500 text-sm col-span-2">No index data for this country</div>';
-            return;
-        }
-        Object.entries(indices).forEach(([name, data]) => {
-            const changeClass = data.change >= 0 ? 'text-emerald-400' : 'text-red-400';
-            const changeIcon = data.change >= 0 ? '▲' : '▼';
-            const card = document.createElement('div');
-            card.className = 'dossier-card p-4 signal-blue';
-            card.innerHTML = `
-                <div class="flex justify-between items-start mb-3">
-                  <div>
-                    <div class="text-xs text-slate-500 uppercase font-bold tracking-wider">${data.symbol || ''}</div>
-                    <div class="text-lg font-black text-white mt-1">${name}</div>
-                  </div>
-                  <div class="${changeClass} text-sm font-mono font-bold">${changeIcon} ${Math.abs(data.change)}%</div>
-                </div>
-                <div class="text-2xl font-black text-blue-400 font-mono mb-2">${(data.value || 0).toLocaleString()}</div>
-                <div class="flex justify-between text-[9px] text-slate-600">
-                  <span>Vol: ${data.volume || '--'}</span>
-                  ${data.marketCap ? `<span>MCap: ${data.marketCap}</span>` : ''}
-                </div>
-            `;
-            container.appendChild(card);
-        });
-    } catch (e) { container.innerHTML = '<div class="text-slate-500 text-xs col-span-2">Data unavailable</div>'; }
+    // No live API for indices — show informational message
+    container.innerHTML = `<div class="col-span-2 text-slate-500 text-xs py-3"><i class="fas fa-info-circle mr-1"></i>Country index data shown when market APIs for ${countryName || 'this country'} are available via live subscription or exchange data feeds.</div>`;
 }
 
-function displayCrypto() {
+// Keep stub for legacy calls
+window.getIndicesForCountry = () => ({});
+
+async function displayCrypto() {
     const container = document.getElementById('crypto-content');
-    if (!container || !getTopCrypto) return;
-    container.innerHTML = '';
+    if (!container) return;
+    container.innerHTML = '<div class="text-slate-500 text-xs py-2">Fetching live prices...</div>';
     try {
-        Object.entries(getTopCrypto(15)).forEach(([name, data]) => {
-            const changeClass = data.change >= 0 ? 'text-emerald-400' : 'text-red-400';
-            const changeIcon = data.change >= 0 ? '▲' : '▼';
+        const cur = (currencyCode || 'USD').toLowerCase();
+        const res = await fetch(`/api/markets?type=crypto&currency=${cur}`);
+        const json = await res.json();
+        container.innerHTML = '';
+        (json.data || []).forEach(data => {
+            const changeClass = (data.change || 0) >= 0 ? 'text-emerald-400' : 'text-red-400';
+            const changeIcon = (data.change || 0) >= 0 ? '▲' : '▼';
             const card = document.createElement('div');
             card.className = 'dossier-card p-3';
             card.innerHTML = `
                 <div class="flex items-center justify-between mb-2">
-                  <span class="text-xl">${data.icon || '🔗'}</span>
-                  <span class="${changeClass} text-xs font-mono font-bold">${changeIcon} ${Math.abs(data.change)}%</span>
+                  <img src="${data.image}" alt="${data.name}" class="w-6 h-6 rounded-full" onerror="this.style.display='none'">
+                  <span class="${changeClass} text-xs font-mono font-bold">${changeIcon} ${Math.abs(data.change || 0).toFixed(2)}%</span>
                 </div>
-                <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">${data.symbol || name}</div>
-                <div class="text-lg font-black text-white font-mono">$${(data.price || 0).toLocaleString()}</div>
-                <div class="text-[8px] text-slate-600 mt-1">MCap: $${data.marketCap || '--'}</div>
+                <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">${data.symbol}</div>
+                <div class="text-lg font-black text-white font-mono">${cur.toUpperCase()} ${(data.price || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
+                <div class="text-[8px] text-slate-600 mt-1">MCap: ${cur.toUpperCase()} ${((data.marketCap || 0) / 1e9).toFixed(1)}B</div>
             `;
             container.appendChild(card);
         });
     } catch (e) { container.innerHTML = '<div class="text-slate-500 text-xs">Data unavailable</div>'; }
 }
 
-function displayForex() {
+async function displayForex() {
     const container = document.getElementById('forex-content');
-    if (!container || !marketData || !marketData.forex) return;
-    container.innerHTML = '';
+    if (!container) return;
+    container.innerHTML = '<div class="text-slate-500 text-xs py-2">Fetching live rates...</div>';
     try {
-        Object.entries(marketData.forex).forEach(([pair, data]) => {
-            const changeClass = data.change >= 0 ? 'text-emerald-400' : 'text-red-400';
-            const changeIcon = data.change >= 0 ? '▲' : '▼';
+        const base = (currencyCode || 'USD').toUpperCase();
+        const res = await fetch(`/api/markets?type=forex&currency=${base}`);
+        const json = await res.json();
+        container.innerHTML = '';
+        Object.entries(json.rates || {}).filter(([c]) => c !== base).slice(0, 15).forEach(([pair, rate]) => {
             const card = document.createElement('div');
             card.className = 'dossier-card p-3 flex justify-between items-center';
             card.innerHTML = `
                 <div>
-                  <div class="text-sm font-black text-white">${pair}</div>
-                  <div class="text-xl font-mono font-black text-cyan-400 mt-1">${(data.rate || 0).toFixed(4)}</div>
+                  <div class="text-sm font-black text-white">${base}/${pair}</div>
+                  <div class="text-[9px] text-slate-500 mt-0.5">Live rate</div>
                 </div>
-                <div class="text-right">
-                  <div class="${changeClass} text-sm font-mono font-bold">${changeIcon} ${Math.abs(data.change)}%</div>
-                  <div class="text-[8px] text-slate-600 mt-1">Vol: ${data.volume || '--'}</div>
-                </div>
+                <div class="text-xl font-mono font-black text-cyan-400">${rate.toFixed(4)}</div>
             `;
             container.appendChild(card);
         });
     } catch (e) { container.innerHTML = '<div class="text-slate-500 text-xs">Data unavailable</div>'; }
 }
 
-function displayCommodities() {
+async function displayCommodities() {
     const container = document.getElementById('commodities-content');
-    if (!container || !marketData || !marketData.commodities) return;
-    container.innerHTML = '';
+    if (!container) return;
+    container.innerHTML = '<div class="col-span-3 text-slate-500 text-xs py-2">Fetching live prices...</div>';
     try {
-        Object.entries(marketData.commodities).forEach(([name, data]) => {
-            const changeClass = data.change >= 0 ? 'text-emerald-400' : 'text-red-400';
-            const changeIcon = data.change >= 0 ? '▲' : '▼';
+        const cur = (currencyCode || 'USD').toUpperCase();
+        const res = await fetch(`/api/markets?type=commodities&currency=${cur}`);
+        const json = await res.json();
+        container.innerHTML = '';
+        Object.entries(json.data || {}).forEach(([name, data]) => {
+            const changeClass = (data.change || 0) >= 0 ? 'text-emerald-400' : 'text-red-400';
+            const changeIcon = (data.change || 0) >= 0 ? '▲' : '▼';
             const card = document.createElement('div');
             card.className = 'dossier-card p-3';
             card.innerHTML = `
                 <div class="flex items-center justify-between mb-2">
                   <span class="text-xl">${data.icon || '📦'}</span>
-                  <span class="${changeClass} text-xs font-mono font-bold">${changeIcon} ${Math.abs(data.change)}%</span>
+                  <span class="${changeClass} text-xs font-mono font-bold">${changeIcon} ${Math.abs(data.change || 0).toFixed(2)}%</span>
                 </div>
                 <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">${name}</div>
-                <div class="text-lg font-black text-white font-mono">$${(data.price || 0).toFixed(2)}</div>
+                <div class="text-lg font-black text-white font-mono">${cur} ${(data.price || 0).toFixed(2)}</div>
                 <div class="text-[8px] text-slate-600 mt-1">${data.unit || ''}</div>
             `;
             container.appendChild(card);
         });
-    } catch (e) { container.innerHTML = '<div class="text-slate-500 text-xs">Data unavailable</div>'; }
+        if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-xs col-span-3">No commodity data</div>';
+    } catch (e) { container.innerHTML = '<div class="text-slate-500 text-xs col-span-3">Data unavailable</div>'; }
 }
 
 function initializeMarkets(countryName) {
@@ -1484,30 +1504,13 @@ function initializeMarkets(countryName) {
     displayCommodities();
 }
 
-// ═══════════════════════════════════════════════════════
-// SECTION 3: NEWS SEARCH + FILTERING
-// ═══════════════════════════════════════════════════════
-let allNews = [];
-let displayedNewsCount = 20;
-let currentNewsFilters = {
-    search: '',
-    time: 'Last 24 hours',
-    sort: 'Most Recent',
-    category: 'top'
-};
 
-window.filterNews = (searchTerm) => {
-    currentNewsFilters.search = searchTerm.toLowerCase();
-    displayFilteredNews();
-};
+// ═══════════════════════════════════════════════════════
+// SECTION 3: NEWS DISPLAY HELPERS
+// NOTE: filterNews, clearNewsSearch, allNews, newsSearchQuery etc.
+// are all defined earlier in the file (live search via debounced API calls)
+// ═══════════════════════════════════════════════════════
 
-window.applyNewsFilters = () => {
-    const timeEl = document.getElementById('news-time-filter');
-    const sortEl = document.getElementById('news-sort-filter');
-    if (timeEl) currentNewsFilters.time = timeEl.value;
-    if (sortEl) currentNewsFilters.sort = sortEl.value;
-    displayFilteredNews();
-};
 
 function displayFilteredNews() {
     let filtered = [...allNews];

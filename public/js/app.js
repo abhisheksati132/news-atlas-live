@@ -1,285 +1,17 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, linkWithPopup, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-// geo-hierarchy.js and market-data-expanded.js replaced by live APIs (/api/geo and /api/markets)
-
-window.firebaseCore = {
-    initializeApp, getAuth, onAuthStateChanged, signInAnonymously,
-    getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp,
-    GoogleAuthProvider, linkWithPopup, signInWithPopup, signOut
-};
-
-window.upgradeToGoogle = async () => {
-    const btn = document.querySelector('button[title="Verify Identity"]');
-    const auth = window.firebaseCore.getAuth();
-
-    if (auth.currentUser && !auth.currentUser.isAnonymous) {
-        const confirmLogout = confirm("⚠️ COMMANDER: Do you want to terminate this session?");
-        if (confirmLogout) {
-            window.playTacticalSound('click');
-            await window.firebaseCore.signOut(auth);
-            window.location.reload();
-        }
-        return;
-    }
-
-    const originalContent = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin text-2xl text-yellow-500"></i>';
-    const provider = new window.firebaseCore.GoogleAuthProvider();
-
-    try {
-        const result = await window.firebaseCore.signInWithPopup(auth, provider);
-        const user = result.user;
-
-        const idEl = document.getElementById('neural-id');
-        let safeName = user.displayName || user.email.split('@')[0];
-        if (idEl) {
-            idEl.innerText = `ID: ${safeName.toUpperCase()}`;
-            idEl.classList.remove('text-slate-500');
-            idEl.classList.add('text-emerald-400', 'drop-shadow-glow');
-        }
-
-        if (user.photoURL) {
-            btn.innerHTML = `<img src="${user.photoURL}" class="w-8 h-8 rounded-full border-2 border-emerald-500 shadow-[0_0_10px_#10b981] hover:border-red-500 transition-colors" title="Click to Logout">`;
-        } else {
-            btn.innerHTML = `<i class="fas fa-user-check text-2xl text-emerald-500"></i>`;
-        }
-
-        window.playTacticalSound('success');
-
-        personalizeSession(user);
-
-        if (window.showToast) {
-            window.showToast(`WELCOME COMMANDER ${user.displayName.split(' ')[0].toUpperCase()}`, 'success');
-        }
-
-    } catch (error) {
-        console.error("Login Error:", error);
-        btn.innerHTML = originalContent;
-        if (error.code === 'auth/popup-closed-by-user') return;
-        if (error.code === 'auth/popup-blocked') {
-            alert("Security Warning: Popup Blocked. Please allow popups for this site.");
-            return;
-        }
-        alert("LOGIN ERROR: " + error.message);
-    }
-};
-
-const apiKey = "";
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'news-atlas-v7';
-
-let auth, db, user, selectedCountry;
-let currentCategory = 'top';
+let selectedCountry = null;
+let currencyCode = null;
+let iso2Code = null;
+let countryUTCOffset = null;
+let projectionType = '2d';
+let currentProjection, svg, g, zoom;
 let worldFeatures = [];
-let countryUTCOffset, iso2Code, currencyCode, projectionType = '2d', currentProjection, svg, g, zoom;
 let globalSearchData = [];
-let aboutStatsInterval;
-let audioCtx;
-let ambienceOscillators = [];
-let ambienceGain = null;
-let isAmbiencePlaying = false;
+let currentCategory = 'top';
 
-function initAudio() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-}
-
-window.toggleAmbience = () => {
-    initAudio();
-    if (isAmbiencePlaying) {
-        ambienceOscillators.forEach(osc => osc.stop());
-        ambienceOscillators = [];
-        isAmbiencePlaying = false;
-        if (document.getElementById('ambience-text')) {
-            document.getElementById('ambience-text').innerText = "OFF";
-            document.getElementById('ambience-text').classList.remove('text-blue-400');
-        }
-    } else {
-        ambienceGain = audioCtx.createGain();
-        ambienceGain.gain.value = 0.05;
-        ambienceGain.connect(audioCtx.destination);
-        const freqs = [55, 110, 112, 54];
-        freqs.forEach(f => {
-            const osc = audioCtx.createOscillator();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(f, audioCtx.currentTime);
-            osc.connect(ambienceGain);
-            osc.start();
-            ambienceOscillators.push(osc);
-        });
-        isAmbiencePlaying = true;
-        if (document.getElementById('ambience-text')) {
-            document.getElementById('ambience-text').innerText = "ON";
-            document.getElementById('ambience-text').classList.add('text-blue-400');
-        }
-    }
-};
-
-window.playTacticalSound = (type) => {
-    initAudio();
-    try {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        if (type === 'tab') {
-            osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-        } else if (type === 'click') {
-            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.05);
-        } else if (type === 'hover') {
-            osc.frequency.setValueAtTime(1400, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.006, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.02);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.02);
-        } else if (type === 'success') {
-            osc.frequency.setValueAtTime(500, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(1100, audioCtx.currentTime + 0.25);
-            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-        }
-    } catch (e) { }
-}
-
-window.downloadDossier = () => {
-    window.playTacticalSound('success');
-    const cName = selectedCountry ? selectedCountry.properties.name : "GLOBAL_CONTEXT";
-    const date = new Date().toISOString().split('T')[0];
-    const intelText = document.getElementById('ai-briefing-text') ? document.getElementById('ai-briefing-text').innerText : "No Intel Loaded";
-    const content = `
-████████████████████████████████████████████████████████████
-CLASSIFIED INTELLIGENCE DOSSIER
-SECTOR: ${cName.toUpperCase()}
-DATE: ${date}
-GENERATED BY: NEWSATLAS TERMINAL v9.7
-████████████████████████████████████████████████████████████
-
-[TACTICAL BRIEFING]
-${intelText}
-
-[ECONOMIC TELEMETRY]
-Population: ${document.getElementById('fact-pop').innerText}
-Currency: ${document.getElementById('fact-currency').innerText}
-Capital: ${document.getElementById('fact-cap').innerText}
-
-[MARKET DATA]
-Gold: ${document.getElementById('price-gold').innerText}
-Silver: ${document.getElementById('price-silver').innerText}
-
-[ATMOSPHERIC CONDITIONS]
-Temp: ${document.getElementById('atmo-temp').innerText}
-Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
-
--- END OF TRANSMISSION --
-    `;
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `INTEL_${cName.toUpperCase()}_${date}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-};
-
-function initTrafficCanvas() {
-    const canvas = document.getElementById('traffic-canvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const w = canvas.width = canvas.offsetWidth;
-    const h = canvas.height = canvas.offsetHeight;
-    let offset = 0;
-    function draw() {
-        ctx.clearRect(0, 0, w, h);
-        ctx.beginPath();
-        ctx.strokeStyle = '#3b82f6';
-        ctx.lineWidth = 2;
-        for (let x = 0; x < w; x++) {
-            const y = h / 2 + Math.sin((x + offset) * 0.05) * 20 * Math.sin(x * 0.01);
-            ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-        offset += 2;
-        requestAnimationFrame(draw);
-    }
-    draw();
-}
-
-const cliInput = document.getElementById('cli-input');
-const cliOutput = document.getElementById('cli-output');
-if (cliInput) {
-    cliInput.addEventListener('keypress', async (e) => {
-        if (e.key === 'Enter') {
-            const query = cliInput.value.trim();
-            if (!query) return;
-            window.playTacticalSound('click');
-            appendLog(`> ${query}`, 'text-white');
-            cliInput.value = '';
-            const countryName = selectedCountry ? selectedCountry.properties.name : "Global Context";
-            appendLog(`> Processing query for sector: [${countryName.toUpperCase()}]...`, 'text-blue-400 animate-pulse');
-            try {
-                const res = await fetch('/api/ai', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        prompt: `Context: The user is looking at a dashboard for ${countryName}. 
-                        User Query: "${query}". 
-                        Task: Answer as a tactical AI computer (concise, data-driven, no fluff). 
-                        Limit response to 2 sentences.`
-                    })
-                });
-                const data = await res.json();
-                const answer = data.candidates?.[0]?.content?.parts?.[0]?.text || "DATA CORRUPTION. RETRY.";
-                appendLog(`> ${answer}`, 'text-emerald-400');
-                window.playTacticalSound('success');
-            } catch (err) {
-                appendLog(`> ERROR: UPLINK FAILED.`, 'text-red-500');
-            }
-        }
-    });
-}
-
-function appendLog(text, colorClass) {
-    const div = document.createElement('div');
-    div.className = `log-entry ${colorClass} leading-relaxed`;
-    div.innerText = text;
-    cliOutput.appendChild(div);
-    cliOutput.scrollTop = cliOutput.scrollHeight;
-}
-
-function startAboutStats() {
-    const bioText = "Engineering high-fidelity command terminals that synchronize high-frequency global data with real-time geospatial telemetry.";
-    const bioEl = document.getElementById('bio-text');
-    bioEl.innerText = "";
-    let i = 0;
-    const type = setInterval(() => {
-        if (i < bioText.length) { bioEl.innerText += bioText.charAt(i); i++; }
-        else clearInterval(type);
-    }, 30);
-    if (aboutStatsInterval) clearInterval(aboutStatsInterval);
-    let sec = 0;
-    const uptimeEl = document.getElementById('uptime-counter');
-    aboutStatsInterval = setInterval(() => {
-        const cpu = Math.floor(Math.random() * 40) + 10;
-        const mem = (Math.random() * 4 + 4).toFixed(1);
-        document.getElementById('cpu-bar').style.width = cpu + '%';
-        document.getElementById('cpu-val').innerText = cpu + '%';
-        document.getElementById('mem-bar').style.width = (mem / 16 * 100) + '%';
-        document.getElementById('mem-val').innerText = mem + 'GB';
-        document.getElementById('net-down').innerText = (Math.random() * 50 + 10).toFixed(1);
-        document.getElementById('net-up').innerText = (Math.random() * 20 + 2).toFixed(1);
-        sec++;
-        const h = Math.floor(sec / 3600).toString().padStart(2, '0');
-        const m = Math.floor((sec % 3600) / 60).toString().padStart(2, '0');
-        const s = (sec % 60).toString().padStart(2, '0');
-        if (uptimeEl) uptimeEl.innerText = `${h}:${m}:${s}`;
-    }, 1000);
-}
+window.selectedCountry = selectedCountry;
+window.currencyCode = currencyCode;
+window.iso2Code = iso2Code;
+window.currentCategory = currentCategory;
 
 async function runBootSequence() {
     const logs = ["SYSTEM_INIT...", "CONNECTING_SAT_UPLINK...", "DECRYPTING_GLOBAL_FEED...", "HANDSHAKE_VERIFIED", "ACCESS_GRANTED"];
@@ -309,13 +41,12 @@ async function initTerminal() {
     };
     try {
         const firebaseApp = window.firebaseCore.initializeApp(config);
-        auth = window.firebaseCore.getAuth(firebaseApp);
-        db = window.firebaseCore.getFirestore(firebaseApp);
+        const auth = window.firebaseCore.getAuth(firebaseApp);
+        const db = window.firebaseCore.getFirestore(firebaseApp);
 
         await window.firebaseCore.signInAnonymously(auth);
 
         window.firebaseCore.onAuthStateChanged(auth, (u) => {
-            user = u;
             if (u) {
                 const idEl = document.getElementById('neural-id');
                 if (idEl && !u.isAnonymous && u.displayName) {
@@ -324,101 +55,28 @@ async function initTerminal() {
                 } else if (idEl && u.isAnonymous) {
                     idEl.innerText = `ID: ${u.uid.substring(0, 8).toUpperCase()}`;
                 }
-
                 try {
                     const userRef = window.firebaseCore.doc(db, "visitors", u.uid);
-                    window.firebaseCore.setDoc(userRef, {
-                        last_login: window.firebaseCore.serverTimestamp(),
-                        device: navigator.userAgent
-                    }, { merge: true });
-                } catch (e) { console.log("DB Log error (harmless)"); }
+                    window.firebaseCore.setDoc(userRef, { last_login: window.firebaseCore.serverTimestamp(), device: navigator.userAgent }, { merge: true });
+                } catch (e) { }
             }
         });
     } catch (e) {
         console.warn("Firebase Auth failed:", e);
         document.getElementById('neural-id').innerText = "LOCAL MODE (OFFLINE)";
     }
+
     try {
         const res = await fetch('https://restcountries.com/v3.1/all?fields=name,flags,cca2,latlng,currencies,population,capital,capitalInfo');
         globalSearchData = await res.json();
+        window.globalSearchData = globalSearchData;
     } catch (e) { }
-    fetchWeather(20.5937, 78.9629);
-    fetchNews();
+
+    window.fetchWeather(20.5937, 78.9629);
+    window.fetchNews();
     startStockTicker();
-    initializeMarkets('Global');
+    window.initializeMarkets('Global');
 }
-
-window.toggleAbout = (show) => {
-    window.playTacticalSound(show ? 'success' : 'click');
-    const overlay = document.getElementById('about-overlay');
-    overlay.classList.toggle('hidden', !show);
-    if (show) {
-        initTrafficCanvas();
-        startAboutStats();
-    } else {
-        if (aboutStatsInterval) clearInterval(aboutStatsInterval);
-    }
-};
-
-window.toggleSearch = () => {
-    window.playTacticalSound('click');
-    const overlay = document.getElementById('search-overlay');
-    overlay.classList.toggle('hidden');
-    if (!overlay.classList.contains('hidden')) {
-        document.getElementById('country-search').focus();
-        renderTrending();
-    }
-};
-
-window.toggleSatellite = () => {
-    window.playTacticalSound('click');
-    const mapBox = document.getElementById('map-box-id');
-    const btn = document.querySelector('button[title="Toggle Satellite Layer"]') || document.querySelector('button[title="Toggle Satellite"]');
-    const svgEl = document.getElementById('world-map');
-
-    let overlay = document.getElementById('satellite-overlay');
-
-    if (overlay) {
-        const isVisible = overlay.style.opacity !== '0';
-        overlay.style.opacity = isVisible ? '0' : '1';
-        mapBox.classList.toggle('satellite-mode', !isVisible);
-        if (btn) {
-            btn.classList.toggle('text-emerald-400', isVisible);
-            btn.classList.toggle('text-white', !isVisible);
-            btn.classList.toggle('bg-emerald-600/50', !isVisible);
-        }
-        return;
-    }
-
-    const gibsUrl = 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?' +
-        'SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0' +
-        '&LAYERS=BlueMarble_NextGeneration' +
-        '&FORMAT=image/jpeg&TRANSPARENT=FALSE' +
-        '&WIDTH=2048&HEIGHT=1024' +
-        '&CRS=CRS:84&BBOX=-180,-90,180,90';
-
-    overlay = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-    overlay.id = 'satellite-overlay';
-    overlay.setAttribute('href', gibsUrl);
-    overlay.setAttribute('x', '-180');
-    overlay.setAttribute('y', '-90');
-    overlay.setAttribute('width', '360');
-    overlay.setAttribute('height', '180');
-    overlay.setAttribute('preserveAspectRatio', 'none');
-    overlay.style.cssText = 'opacity:1;pointer-events:none;transition:opacity 0.6s ease;';
-
-    if (svgEl && svgEl.querySelector('g')) {
-        svgEl.querySelector('g').insertBefore(overlay, svgEl.querySelector('g').firstChild);
-    } else if (svgEl) {
-        svgEl.insertBefore(overlay, svgEl.firstChild);
-    }
-
-    mapBox.classList.add('satellite-mode');
-    if (btn) {
-        btn.classList.remove('text-emerald-400');
-        btn.classList.add('text-white', 'bg-emerald-600/50');
-    }
-};
 
 function startStockTicker() {
     const tickerContent = document.getElementById('stock-ticker-content');
@@ -429,83 +87,83 @@ function startStockTicker() {
         { s: "ETH-USD", p: 3550.00 }, { s: "GOLD", p: 2320.10 },
         { s: "CRUDE OIL", p: 82.40 }, { s: "EUR/USD", p: 1.085 }
     ];
-
     function renderTicker() {
         let html = "";
         stocks.forEach(stock => {
             const change = (Math.random() * 2 - 1).toFixed(2);
             const color = change >= 0 ? "text-emerald-400" : "text-red-400";
             const arrow = change >= 0 ? "▲" : "▼";
-            html += `
-                <div class="ticker-item text-slate-300">
-                    ${stock.s} <span class="text-white">${stock.p.toLocaleString()}</span> 
-                    <span class="${color} ml-2">${arrow} ${Math.abs(change)}%</span>
-                </div>
-            `;
+            html += `<div class="ticker-item text-slate-300">${stock.s} <span class="text-white">${stock.p.toLocaleString()}</span> <span class="${color} ml-2">${arrow} ${Math.abs(change)}%</span></div>`;
         });
         tickerContent.innerHTML = html;
     }
     renderTicker();
-
     setInterval(() => {
-        stocks.forEach(stock => {
-            const fluctuation = stock.p * (Math.random() * 0.002 - 0.001);
-            stock.p = parseFloat((stock.p + fluctuation).toFixed(2));
-        });
+        stocks.forEach(stock => { stock.p = parseFloat((stock.p + stock.p * (Math.random() * 0.002 - 0.001)).toFixed(2)); });
         renderTicker();
     }, 3000);
 }
 
-function renderTrending() {
-    const resContainer = document.getElementById('search-results');
-    if (!globalSearchData || globalSearchData.length === 0) {
-        resContainer.innerHTML = `
-            <div class="p-8 text-center flex flex-col items-center gap-3 animate-pulse">
-                <i class="fas fa-satellite-dish text-blue-500 text-xl"></i>
-                <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Downloading Global Index...</span>
-            </div>`;
-        return;
-    }
-    const trending = ["India", "United States", "United Kingdom", "Japan", "Germany", "France", "Russia", "China"];
-    resContainer.innerHTML = '<div class="p-4 text-[10px] font-black text-slate-600 uppercase tracking-widest sticky top-0 bg-[#020617]/95 backdrop-blur z-10 border-b border-white/5">High Traffic Sectors</div>' +
-        trending.map(name => {
-            const c = globalSearchData.find(curr =>
-                curr.name.common === name ||
-                (name === "United States" && curr.name.common === "United States of America") ||
-                (name === "Russia" && curr.name.common.includes("Russian"))
-            );
-            if (!c) return '';
-            return `
-            <div class="p-4 hover:bg-blue-600/10 cursor-pointer flex items-center gap-4 border-b border-white/5 transition-all group" onclick="window.selectFromSearch('${name}')">
-                <div class="w-8 h-5 rounded shadow-sm overflow-hidden relative border border-white/10 group-hover:border-blue-400/50">
-                    <img src="${c.flags.svg}" class="w-full h-full object-cover">
-                </div>
-                <span class="font-bold text-white text-sm tracking-tight group-hover:text-blue-300 transition-colors">${name}</span>
-                <i class="fas fa-chevron-right ml-auto text-[10px] text-slate-600 group-hover:text-blue-400"></i>
-            </div>`;
-        }).join('');
+async function fetchAllData(name) {
+    try {
+        const res = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fullText=true`);
+        const data = await res.json();
+        if (data && data[0]) {
+            const c = data[0];
+            iso2Code = c.cca2.toLowerCase();
+            currencyCode = c.currencies ? Object.keys(c.currencies)[0] : null;
+            window._isoAlpha3 = c.cca3 || '';
+            window.iso2Code = iso2Code;
+            window.currencyCode = currencyCode;
+
+            document.getElementById('fact-pop').innerText = (c.population / 1000000).toFixed(1) + 'M';
+            document.getElementById('fact-cap').innerText = c.capital ? c.capital[0] : 'N/A';
+            document.getElementById('fact-region').innerText = c.region || '--';
+            document.getElementById('fact-area').innerText = c.area.toLocaleString();
+            document.getElementById('fact-code').innerText = c.idd.root + (c.idd.suffixes ? c.idd.suffixes[0] : '');
+            document.getElementById('fact-demonym').innerText = c.demonyms?.eng?.m || '--';
+            document.getElementById('fact-gini').innerText = c.gini ? Object.values(c.gini)[0] : 'N/A';
+            document.getElementById('fact-drive').innerText = c.car ? c.car.side.toUpperCase() : '--';
+
+            const flagEl = document.getElementById('sector-flag');
+            const nameEl = document.getElementById('sector-name');
+            const box = document.getElementById('active-sector-display');
+            if (flagEl && nameEl && box) { flagEl.src = c.flags.svg; nameEl.innerText = c.name.common; box.classList.remove('hidden'); }
+
+            countryUTCOffset = c.timezones ? c.timezones[0] : "UTC+00:00";
+
+            let lat = 0, lon = 0;
+            if (c.latlng && c.latlng.length === 2) { [lat, lon] = c.latlng; }
+            else if (c.capitalInfo && c.capitalInfo.latlng && c.capitalInfo.latlng.length === 2) { [lat, lon] = c.capitalInfo.latlng; }
+            if (lat || lon) window.fetchWeather(lat, lon);
+
+            document.getElementById('fact-pop-2').innerText = (c.population / 1000000).toFixed(1) + 'M';
+            document.getElementById('fact-gini-2').innerText = c.gini ? Object.values(c.gini)[0] : 'N/A';
+            document.getElementById('fact-demonym-2').innerText = c.demonyms?.eng?.m || '--';
+            document.getElementById('fact-area-2').innerText = c.area.toLocaleString() + ' km²';
+
+            window.fetchCurrency();
+            window.fetchDetailedEconomics(c.name.common);
+            window.fetchNews();
+        }
+    } catch (e) { console.error("Data Fetch Error", e); }
 }
+
 async function generateAIBriefing(loc) {
     const box = document.getElementById('ai-briefing-box');
     const text = document.getElementById('ai-briefing-text');
     if (box) box.classList.remove('hidden');
     if (text) text.innerText = "Initializing deep-scan protocols...";
-
     try {
         const res = await fetch('/api/ai', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                prompt: `
-                    Target Sector: ${loc}. 
+                prompt: `Target Sector: ${loc}.
                     Generate a high-density Intelligence Dossier with exactly 10 numbered strategic metrics.
-                    Format:
-                    1. [METRIC_NAME]: Value/Status - Brief Context.
-                    ...
-                    10. [METRIC_NAME]: Value/Status - Brief Context.
-                    Include metrics like Political Stability, Border Integrity, Cyber Threat, Civil Unrest, Military Readiness, Energy Reserves, Supply Chain, Inflation, Foreign Relations, and Infrastructure.
-                    Tone: Strict military/intelligence.
-                `
+                    Format: 1. [METRIC_NAME]: Value/Status - Brief Context. ... 10. [METRIC_NAME]: Value/Status - Brief Context.
+                    Include: Political Stability, Border Integrity, Cyber Threat, Civil Unrest, Military Readiness, Energy Reserves, Supply Chain, Inflation, Foreign Relations, Infrastructure.
+                    Tone: Strict military/intelligence.`
             })
         });
         const result = await res.json();
@@ -516,224 +174,7 @@ async function generateAIBriefing(loc) {
         window.playTacticalSound('success');
     } catch (e) { if (text) text.innerText = "Briefing handshake failed."; }
 }
-async function fetchDetailedEconomics(country) {
-    document.getElementById('eco-gdp').innerText = "--";
-    document.getElementById('eco-growth').innerText = "--%";
-    document.getElementById('eco-inflation').innerText = "--%";
-    document.getElementById('eco-unemployment').innerText = "--%";
-    document.getElementById('eco-exports').innerHTML = '<div class="h-4 bg-white/10 rounded w-3/4 animate-pulse"></div>';
 
-    try {
-        const prompt = `
-            Analyze the economy of ${country}. 
-            Return ONLY a valid JSON object with these keys (use 'N/A' if unknown, estimate if necessary based on 2024/2025 data):
-            {
-                "gdp_billions": "number only",
-                "gdp_growth_percent": "number only",
-                "gdp_per_capita": "number only",
-                "inflation_rate": "number only",
-                "unemployment_rate": "number only",
-                "interest_rate": "number only",
-                "debt_to_gdp": "number only",
-                "major_exports": ["item1", "item2", "item3"],
-                "market_summary": "1 short sentence on current market status"
-            }
-            Do not add markdown formatting. Just the raw JSON string.
-        `;
-
-        const res = await fetch('/api/ai', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: prompt })
-        });
-
-        const data = await res.json();
-        if (!data.candidates) throw new Error("AI Busy");
-
-        let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-        text = text.replace(/```json/g, '').replace(/```/g, '').trim();
-        const eco = JSON.parse(text);
-
-        if (eco.gdp_billions) document.getElementById('eco-gdp').innerText = eco.gdp_billions;
-        if (eco.gdp_growth_percent) document.getElementById('eco-growth').innerText = (eco.gdp_growth_percent > 0 ? '+' : '') + eco.gdp_growth_percent + '%';
-        if (eco.gdp_per_capita) document.getElementById('eco-capita').innerText = '$' + eco.gdp_per_capita;
-
-        if (eco.inflation_rate) document.getElementById('eco-inflation').innerText = eco.inflation_rate + '%';
-        if (eco.unemployment_rate) document.getElementById('eco-unemployment').innerText = eco.unemployment_rate + '%';
-        if (eco.interest_rate) document.getElementById('eco-interest').innerText = eco.interest_rate + '%';
-        if (eco.debt_to_gdp) document.getElementById('eco-debt').innerText = eco.debt_to_gdp + '%';
-
-        if (eco.major_exports && Array.isArray(eco.major_exports)) {
-            document.getElementById('eco-exports').innerHTML = eco.major_exports.map(item =>
-                `<div class="flex items-center gap-2"><div class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div><span class="text-sm text-slate-300 font-bold uppercase">${item}</span></div>`
-            ).join('');
-        }
-
-        if (eco.market_summary) {
-            const ticker = document.getElementById('eco-market-ticker');
-            ticker.innerText = eco.market_summary.toUpperCase();
-        }
-
-        window.playTacticalSound('success');
-        drawGDPTrend(country);
-    } catch (e) {
-        document.getElementById('eco-market-ticker').innerText = "ECONOMIC DATALINK SEVERED. RETRYING...";
-        drawGDPTrend(country);
-    }
-}
-
-async function drawGDPTrend(country) {
-    const canvas = document.getElementById('gdp-trend-chart');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    canvas.width = canvas.parentElement.offsetWidth || 600;
-    canvas.height = 150;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const iso = window._isoAlpha3 || '';
-    if (!iso) {
-        drawGDPFallback(ctx, canvas, country);
-        return;
-    }
-
-    try {
-        const r = await fetch(`https://api.worldbank.org/v2/country/${iso}/indicator/NY.GDP.MKTP.CD?format=json&mrv=6&per_page=6`);
-        const json = await r.json();
-        const raw = (json[1] || []).filter(d => d.value !== null).sort((a, b) => a.date - b.date);
-        if (!raw.length) { drawGDPFallback(ctx, canvas, country); return; }
-
-        const values = raw.map(d => d.value / 1e9);
-        const years = raw.map(d => d.date);
-        renderGDPCanvas(ctx, canvas, values, years);
-    } catch (_) {
-        drawGDPFallback(ctx, canvas, country);
-    }
-}
-
-function drawGDPFallback(ctx, canvas, country) {
-    const seed = (country || 'X').charCodeAt(0);
-    const values = Array.from({ length: 5 }, (_, i) => 800 + Math.sin(seed + i) * 300 + i * 120);
-    const year = new Date().getFullYear();
-    const years = Array.from({ length: 5 }, (_, i) => String(year - 4 + i));
-    renderGDPCanvas(ctx, canvas, values, years);
-}
-
-function renderGDPCanvas(ctx, canvas, values, years) {
-    const W = canvas.width, H = canvas.height;
-    const pad = { top: 20, right: 16, bottom: 30, left: 52 };
-    const chartW = W - pad.left - pad.right;
-    const chartH = H - pad.top - pad.bottom;
-    const minV = Math.min(...values) * 0.92;
-    const maxV = Math.max(...values) * 1.08;
-    const xScale = i => pad.left + (i / (values.length - 1)) * chartW;
-    const yScale = v => pad.top + chartH - ((v - minV) / (maxV - minV)) * chartH;
-
-    ctx.fillStyle = 'rgba(255,255,255,0.03)';
-    ctx.fillRect(0, 0, W, H);
-
-    const grad = ctx.createLinearGradient(0, pad.top, 0, H - pad.bottom);
-    grad.addColorStop(0, 'rgba(59,130,246,0.35)');
-    grad.addColorStop(1, 'rgba(59,130,246,0.01)');
-
-    ctx.beginPath();
-    values.forEach((v, i) => {
-        const x = xScale(i), y = yScale(v);
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
-    ctx.lineTo(xScale(values.length - 1), H - pad.bottom);
-    ctx.lineTo(xScale(0), H - pad.bottom);
-    ctx.closePath();
-    ctx.fillStyle = grad;
-    ctx.fill();
-
-    ctx.beginPath();
-    values.forEach((v, i) => {
-        const x = xScale(i), y = yScale(v);
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
-    ctx.strokeStyle = '#3b82f6';
-    ctx.lineWidth = 2.5;
-    ctx.lineJoin = 'round';
-    ctx.stroke();
-
-    values.forEach((v, i) => {
-        const x = xScale(i), y = yScale(v);
-        ctx.beginPath();
-        ctx.arc(x, y, 4, 0, Math.PI * 2);
-        ctx.fillStyle = '#60a5fa';
-        ctx.fill();
-        ctx.strokeStyle = '#1e3a5f';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-
-        ctx.fillStyle = 'rgba(148,163,184,0.9)';
-        ctx.font = 'bold 9px JetBrains Mono, monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(years[i], x, H - pad.bottom + 14);
-
-        const label = v >= 1000 ? `$${(v / 1000).toFixed(1)}T` : `$${v.toFixed(0)}B`;
-        ctx.fillStyle = 'rgba(96,165,250,0.95)';
-        ctx.font = 'bold 9px JetBrains Mono, monospace';
-        ctx.fillText(label, x, y - 8);
-    });
-
-    ctx.fillStyle = 'rgba(148,163,184,0.5)';
-    ctx.font = '8px JetBrains Mono, monospace';
-    ctx.textAlign = 'right';
-    ctx.fillText('GDP (USD)', pad.left - 4, pad.top + 6);
-}
-async function fetchMarketIntel(country, currency) {
-    const textEl = document.getElementById('market-ai-analysis');
-    if (textEl) textEl.innerHTML = '<span class="animate-pulse text-slate-500">Scanning global exchanges...</span>';
-    try {
-        const prompt = `Analyze current financial markets for ${country} and global context.
-        Return a detailed intel report in this EXACT format:
-        [GLOBAL INDICES]
-        • Index: Value (Change%) - Context
-        • Index: Value (Change%) - Context
-        [COMMODITIES & FOREX]
-        • GOLD_PRICE: 2345.67 (Example)
-        • SILVER_PRICE: 28.90 (Example)
-        • Asset: Price (Context)
-        [STRATEGIC ANALYSIS]
-        3-4 detailed sentences on market sentiment, sector performance, and risk factors.`;
-
-        const res = await fetch('/api/ai', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: prompt })
-        });
-        const result = await res.json();
-        const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Market data unavailable.";
-        if (textEl) textEl.innerText = responseText;
-
-        const goldMatch = responseText.match(/GOLD_PRICE:\s*([\d,.]+)/i);
-        const silverMatch = responseText.match(/SILVER_PRICE:\s*([\d,.]+)/i);
-
-        const goldEl = document.getElementById('price-gold');
-        const silverEl = document.getElementById('price-silver');
-        if (goldEl && goldMatch) goldEl.innerText = goldMatch[1];
-        if (silverEl && silverMatch) silverEl.innerText = silverMatch[1];
-
-        window.playTacticalSound('success');
-    } catch (e) {
-        if (textEl) textEl.innerText = "Financial uplink failed.";
-    }
-}
-window.activateMapInteraction = () => {
-    const overlay = document.getElementById('map-overlay-guard');
-    if (overlay) {
-        overlay.classList.add('active');
-        window.playTacticalSound('click');
-    }
-};
-
-window.deactivateMapInteraction = () => {
-    const overlay = document.getElementById('map-overlay-guard');
-    if (overlay) {
-        overlay.classList.remove('active');
-    }
-};
 function initMap(type) {
     projectionType = type;
     const container = document.getElementById('map-container');
@@ -759,25 +200,16 @@ function initMap(type) {
         zoom = d3.zoom().scaleExtent([1, 15]).on("zoom", (e) => g.attr("transform", e.transform));
         svg.call(zoom);
     } else {
-        const drag = d3.drag()
-            .on("drag", (event) => {
-                const rotate = currentProjection.rotate();
-                const k = 75 / currentProjection.scale();
-                currentProjection.rotate([
-                    rotate[0] + event.dx * k,
-                    rotate[1] - event.dy * k
-                ]);
-                g.selectAll("path").attr("d", path);
-            });
-        svg.call(drag);
+        svg.call(d3.drag().on("drag", (event) => {
+            const rotate = currentProjection.rotate();
+            const k = 75 / currentProjection.scale();
+            currentProjection.rotate([rotate[0] + event.dx * k, rotate[1] - event.dy * k]);
+            g.selectAll("path").attr("d", path);
+        }));
     }
     d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(data => {
         worldFeatures = topojson.feature(data, data.objects.countries).features;
-        const palette = [
-            "#1d4ed8", "#2563eb", "#3b82f6",
-            "#4f46e5", "#6366f1", "#0ea5e9",
-            "#334155", "#475569", "#0f766e"
-        ];
+        const palette = ["#1d4ed8", "#2563eb", "#3b82f6", "#4f46e5", "#6366f1", "#0ea5e9", "#334155", "#475569", "#0f766e"];
         g.selectAll("path").data(worldFeatures).enter().append("path")
             .attr("class", "country")
             .attr("d", path)
@@ -785,61 +217,47 @@ function initMap(type) {
             .on("mouseenter", function (e, d) {
                 window.playTacticalSound('hover');
                 const t = document.getElementById('map-tooltip');
-                t.style.left = (e.pageX + 15) + 'px';
-                t.style.top = (e.pageY - 15) + 'px';
+                t.style.left = (e.pageX + 15) + 'px'; t.style.top = (e.pageY - 15) + 'px';
                 t.classList.remove('hidden');
                 document.getElementById('tooltip-text').innerText = d.properties.name;
             })
             .on("mousemove", function (e) {
                 const t = document.getElementById('map-tooltip');
-                t.style.left = (e.pageX + 15) + 'px';
-                t.style.top = (e.pageY - 15) + 'px';
+                t.style.left = (e.pageX + 15) + 'px'; t.style.top = (e.pageY - 15) + 'px';
             })
-            .on("mouseleave", function () {
-                document.getElementById('map-tooltip').classList.add('hidden');
-            })
-            .on("click", function (event, d) {
-                handleCountryClick(event, d);
-            });
+            .on("mouseleave", function () { document.getElementById('map-tooltip').classList.add('hidden'); })
+            .on("click", function (event, d) { handleCountryClick(event, d); });
     });
 }
+
 async function handleCountryClick(event, d) {
     window.playTacticalSound('click');
     d3.selectAll(".country").classed("active", false);
-    if (d && g) {
-        g.selectAll("path").filter(p => p.properties.name === d.properties.name).classed("active", true);
-    }
+    if (d && g) g.selectAll("path").filter(p => p.properties.name === d.properties.name).classed("active", true);
     selectedCountry = d;
+    window.selectedCountry = d;
     window.switchTab('intel');
-
     document.getElementById('sidebar').scrollIntoView({ behavior: 'smooth' });
-
     if (d && d.properties) {
         document.getElementById('selected-country-name').innerText = d.properties.name;
         iso2Code = null;
         fetchAllData(d.properties.name);
-        onCountrySelected(d.properties.name);
-        if (projectionType === '2d') {
-            zoomToCountry(d);
-        } else {
-            rotateToCountry(d);
-        }
+        window.onCountrySelected(d.properties.name);
+        if (projectionType === '2d') zoomToCountry(d);
+        else rotateToCountry(d);
         generateAIBriefing(d.properties.name);
-        fetchMarketIntel(d.properties.name, currencyCode);
+        window.fetchMarketIntel(d.properties.name, currencyCode);
     }
 }
+
 function rotateToCountry(d) {
     const centroid = d3.geoCentroid(d);
-    d3.transition()
-        .duration(1200)
-        .tween("rotate", () => {
-            const r = d3.interpolate(currentProjection.rotate(), [-centroid[0], -centroid[1]]);
-            return (t) => {
-                currentProjection.rotate(r(t));
-                g.selectAll("path").attr("d", d3.geoPath().projection(currentProjection));
-            };
-        });
+    d3.transition().duration(1200).tween("rotate", () => {
+        const r = d3.interpolate(currentProjection.rotate(), [-centroid[0], -centroid[1]]);
+        return (t) => { currentProjection.rotate(r(t)); g.selectAll("path").attr("d", d3.geoPath().projection(currentProjection)); };
+    });
 }
+
 function zoomToCountry(d) {
     const container = document.getElementById('map-container');
     const width = container.clientWidth, height = container.clientHeight;
@@ -850,374 +268,34 @@ function zoomToCountry(d) {
     const scale = Math.max(1, Math.min(8, 0.8 / Math.max(dx / width, dy / height)));
     svg.transition().duration(1000).call(zoom.transform, d3.zoomIdentity.translate(width / 2 - scale * x, height / 2 - scale * y).scale(scale));
 }
-// Active search query: empty = use country context, non-empty = search API directly
-let newsSearchQuery = '';
-let newsSearchTimer = null;
 
-async function fetchNews(overrideQ) {
-    const loading = document.getElementById('news-loading');
-    if (loading) loading.classList.remove('hidden');
-    displayedNewsCount = 20;
-    try {
-        const q = overrideQ !== undefined ? overrideQ : newsSearchQuery;
-        // If user typed something, search by that term; otherwise use country context
-        let url;
-        if (q && q.trim()) {
-            url = `/api/news?category=${currentCategory}&q=${encodeURIComponent(q.trim())}`;
-        } else {
-            url = `/api/news?category=${currentCategory}&country=${iso2Code || ''}&q=${selectedCountry ? encodeURIComponent(selectedCountry.properties.name) : ''}`;
-        }
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('News fetch failed');
-        const data = await res.json();
-
-        if (data.totalResults) {
-            const el = document.getElementById('news-count');
-            if (el) el.innerText = data.totalResults;
-        }
-
-        allNews = (data.results && data.results.length > 0) ? data.results : [];
-        displayFilteredNews();
-    } catch (e) {
-        const container = document.getElementById('articles-container');
-        if (container) container.innerHTML = `<div class="col-span-full p-10 text-center text-[12px] text-red-500 font-black italic uppercase tracking-widest">Uplink Error. Retrying...</div>`;
-    } finally { if (loading) loading.classList.add('hidden'); }
-}
-
-// Real news search — debounced API call, not local filter
-window.filterNews = (searchTerm) => {
-    newsSearchQuery = searchTerm;
-    clearTimeout(newsSearchTimer);
-    if (!searchTerm.trim()) {
-        fetchNews('');
-        return;
-    }
-    newsSearchTimer = setTimeout(() => fetchNews(searchTerm), 700);
-};
-
-window.clearNewsSearch = () => {
-    newsSearchQuery = '';
-    const el = document.getElementById('news-search');
-    if (el) el.value = '';
-    fetchNews('');
-};
-
-window.setCategory = (el, cat) => {
+window.toggleSatellite = () => {
     window.playTacticalSound('click');
-    document.querySelectorAll('.intel-tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    currentCategory = cat;
-    fetchNews();
+    const mapBox = document.getElementById('map-box-id');
+    const btn = document.querySelector('button[title="Toggle Satellite Layer"]') || document.querySelector('button[title="Toggle Satellite"]');
+    const svgEl = document.getElementById('world-map');
+    let overlay = document.getElementById('satellite-overlay');
+    if (overlay) {
+        const isVisible = overlay.style.opacity !== '0';
+        overlay.style.opacity = isVisible ? '0' : '1';
+        mapBox.classList.toggle('satellite-mode', !isVisible);
+        if (btn) { btn.classList.toggle('text-emerald-400', isVisible); btn.classList.toggle('bg-emerald-600/50', !isVisible); }
+        return;
+    }
+    const gibsUrl = 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=BlueMarble_NextGeneration&FORMAT=image/jpeg&TRANSPARENT=FALSE&WIDTH=2048&HEIGHT=1024&CRS=CRS:84&BBOX=-180,-90,180,90';
+    overlay = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+    overlay.id = 'satellite-overlay';
+    overlay.setAttribute('href', gibsUrl);
+    overlay.setAttribute('x', '-180'); overlay.setAttribute('y', '-90');
+    overlay.setAttribute('width', '360'); overlay.setAttribute('height', '180');
+    overlay.setAttribute('preserveAspectRatio', 'none');
+    overlay.style.cssText = 'opacity:1;pointer-events:none;transition:opacity 0.6s ease;';
+    if (svgEl && svgEl.querySelector('g')) svgEl.querySelector('g').insertBefore(overlay, svgEl.querySelector('g').firstChild);
+    else if (svgEl) svgEl.insertBefore(overlay, svgEl.firstChild);
+    mapBox.classList.add('satellite-mode');
+    if (btn) { btn.classList.remove('text-emerald-400'); btn.classList.add('bg-emerald-600/50'); }
 };
-async function fetchAllData(name) {
-    try {
-        const res = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fullText=true`);
-        const data = await res.json();
-        if (data && data[0]) {
-            const c = data[0];
-            iso2Code = c.cca2.toLowerCase(); currencyCode = c.currencies ? Object.keys(c.currencies)[0] : null;
-            window._isoAlpha3 = c.cca3 || '';
-            document.getElementById('fact-pop').innerText = (c.population / 1000000).toFixed(1) + 'M';
-            document.getElementById('fact-cap').innerText = c.capital ? c.capital[0] : 'N/A';
-            document.getElementById('fact-region').innerText = c.region || '--';
-            document.getElementById('fact-area').innerText = c.area.toLocaleString();
-            document.getElementById('fact-code').innerText = c.idd.root + (c.idd.suffixes ? c.idd.suffixes[0] : '');
-            document.getElementById('fact-demonym').innerText = c.demonyms?.eng?.m || '--';
-            document.getElementById('fact-gini').innerText = c.gini ? Object.values(c.gini)[0] : 'N/A';
-            document.getElementById('fact-drive').innerText = c.car ? c.car.side.toUpperCase() : '--';
-            const flagEl = document.getElementById('sector-flag');
-            const nameEl = document.getElementById('sector-name');
-            const box = document.getElementById('active-sector-display');
-            if (flagEl && nameEl && box) {
-                flagEl.src = c.flags.svg;
-                nameEl.innerText = c.name.common;
-                box.classList.remove('hidden');
-            }
-            countryUTCOffset = c.timezones ? c.timezones[0] : "UTC+00:00";
 
-            let lat = 0, lon = 0;
-            if (c.latlng && c.latlng.length === 2) {
-                [lat, lon] = c.latlng;
-            } else if (c.capitalInfo && c.capitalInfo.latlng && c.capitalInfo.latlng.length === 2) {
-                [lat, lon] = c.capitalInfo.latlng;
-            }
-
-            if (lat || lon) {
-                fetchWeather(lat, lon);
-            }
-
-            document.getElementById('fact-pop-2').innerText = (c.population / 1000000).toFixed(1) + 'M';
-            document.getElementById('fact-gini-2').innerText = c.gini ? Object.values(c.gini)[0] : 'N/A';
-            document.getElementById('fact-demonym-2').innerText = c.demonyms?.eng?.m || '--';
-            document.getElementById('fact-area-2').innerText = c.area.toLocaleString() + ' km²';
-
-            fetchCurrency();
-            fetchDetailedEconomics(c.name.common);
-            fetchNews();
-        }
-    } catch (e) { console.error("Data Fetch Error", e); }
-}
-async function fetchCurrency() {
-    const el = document.getElementById('fact-currency');
-    const elCode = document.getElementById('eco-currency-code');
-    const elRate = document.getElementById('eco-rate');
-
-    if (!currencyCode || currencyCode === 'USD') {
-        if (el) el.innerText = "1.00 USD";
-        if (elCode) elCode.innerText = "USD";
-        if (elRate) elRate.innerText = "1.00";
-        return;
-    }
-    if (elCode) elCode.innerText = currencyCode;
-    if (elRate) elRate.innerText = "Scanning...";
-
-    try {
-        const res = await fetch(`https://open.er-api.com/v6/latest/USD`);
-        const data = await res.json();
-        if (data && data.rates && data.rates[currencyCode]) {
-            const rate = data.rates[currencyCode];
-            if (el) el.innerText = `${rate.toFixed(2)} ${currencyCode}`;
-            if (elRate) elRate.innerText = rate.toFixed(2);
-        } else {
-            if (el) el.innerText = "Data Unavailable";
-            if (elRate) elRate.innerText = "---";
-        }
-    } catch (e) {
-        console.error("Currency Error:", e);
-        if (el) el.innerText = "Offline";
-        if (elRate) elRate.innerText = "ERR";
-    }
-}
-function getWeatherMeta(code, isDay = 1) {
-    const timeClass = isDay ? 'text-amber-400' : 'text-blue-300';
-    const codes = {
-        0: { text: "Clear Sky", icon: isDay ? "fa-sun" : "fa-moon", color: timeClass },
-        1: { text: "Mainly Clear", icon: isDay ? "fa-cloud-sun" : "fa-cloud-moon", color: "text-blue-200" },
-        2: { text: "Partly Cloudy", icon: "fa-cloud", color: "text-slate-300" },
-        3: { text: "Overcast", icon: "fa-cloud", color: "text-slate-400" },
-        45: { text: "Fog", icon: "fa-smog", color: "text-slate-400" },
-        48: { text: "Depositing Rime Fog", icon: "fa-smog", color: "text-slate-400" },
-        51: { text: "Light Drizzle", icon: "fa-cloud-rain", color: "text-blue-400" },
-        53: { text: "Moderate Drizzle", icon: "fa-cloud-rain", color: "text-blue-400" },
-        55: { text: "Dense Drizzle", icon: "fa-cloud-showers-heavy", color: "text-blue-400" },
-        61: { text: "Slight Rain", icon: "fa-cloud-rain", color: "text-blue-500" },
-        63: { text: "Moderate Rain", icon: "fa-cloud-showers-heavy", color: "text-blue-500" },
-        65: { text: "Heavy Rain", icon: "fa-cloud-showers-water", color: "text-blue-600" },
-        71: { text: "Slight Snow", icon: "fa-snowflake", color: "text-white" },
-        73: { text: "Moderate Snow", icon: "fa-snowflake", color: "text-white" },
-        75: { text: "Heavy Snow", icon: "fa-snowflake", color: "text-white" },
-        95: { text: "Thunderstorm", icon: "fa-bolt", color: "text-yellow-400" },
-        96: { text: "Thunderstorm/Hail", icon: "fa-poo-storm", color: "text-yellow-400" }
-    };
-    return codes[code] || { text: "Unknown", icon: "fa-meteor", color: "text-slate-500" };
-}
-function getMoonPhase() {
-    const date = new Date();
-    let year = date.getFullYear();
-    let month = date.getMonth() + 1;
-    const day = date.getDate();
-    let c = 0, e = 0, jd = 0, b = 0;
-
-    if (month < 3) { year--; month += 12; }
-
-    ++month;
-    c = 365.25 * year;
-    e = 30.6 * month;
-    jd = c + e + day - 694039.09;
-    jd /= 29.5305882;
-    b = parseInt(jd);
-    jd -= b;
-    b = Math.round(jd * 8);
-    if (b >= 8) b = 0;
-    const phases = [
-        { t: "New Moon", i: "fa-circle" },
-        { t: "Waxing Crescent", i: "fa-moon" },
-        { t: "First Quarter", i: "fa-adjust" },
-        { t: "Waxing Gibbous", i: "fa-moon" },
-        { t: "Full Moon", i: "fa-circle text-white" },
-        { t: "Waning Gibbous", i: "fa-moon" },
-        { t: "Last Quarter", i: "fa-adjust" },
-        { t: "Waning Crescent", i: "fa-moon" }
-    ];
-    return phases[b];
-}
-async function fetchWeather(lat, lon) {
-    if (isNaN(lat) || isNaN(lon)) {
-        console.error("Invalid coordinates passed to weather module.");
-        return;
-    }
-
-    const url = `/api/weather?lat=${lat}&lon=${lon}`;
-
-    try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`Weather fetch failed: ${res.status}`);
-        const data = await res.json();
-
-        if (data.current) {
-            const curr = data.current;
-            const meta = getWeatherMeta(curr.weather_code, curr.is_day);
-
-            document.getElementById('atmo-temp').innerText = `${Math.round(curr.temperature_2m)}°`;
-            document.getElementById('atmo-condition').innerText = meta.text;
-
-            const iconEl = document.getElementById('atmo-main-icon');
-            if (iconEl) iconEl.className = `fas ${meta.icon} text-9xl ${meta.color} opacity-80`;
-
-            if (document.getElementById('atmo-feels'))
-                document.getElementById('atmo-feels').innerText = `${Math.round(curr.apparent_temperature)}°`;
-
-            if (document.getElementById('atmo-wind-speed'))
-                document.getElementById('atmo-wind-speed').innerText = Math.round(curr.wind_speed_10m);
-
-            if (document.getElementById('atmo-wind-arrow'))
-                document.getElementById('atmo-wind-arrow').style.transform = `rotate(${curr.wind_direction_10m}deg)`;
-
-            if (document.getElementById('atmo-humidity'))
-                document.getElementById('atmo-humidity').innerText = `${curr.relative_humidity_2m}%`;
-
-            if (document.getElementById('atmo-pressure'))
-                document.getElementById('atmo-pressure').innerText = Math.round(curr.pressure_msl || curr.surface_pressure);
-
-            let estimatedCeiling = 8.0;
-            const code = curr.weather_code;
-
-            if (code === 0 || code === 1) estimatedCeiling = 12.0;
-            else if (code === 2) estimatedCeiling = 4.5;
-            else if (code === 3) estimatedCeiling = 1.8;
-            else if (code >= 45 && code <= 48) estimatedCeiling = 0.2;
-            else if (code >= 51 && code <= 67) estimatedCeiling = 1.2;
-            else if (code >= 71) estimatedCeiling = 0.9;
-            else if (code >= 95) estimatedCeiling = 1.0;
-
-            estimatedCeiling += (Math.random() * 0.4 - 0.2);
-
-            if (document.getElementById('atmo-cloud-base'))
-                document.getElementById('atmo-cloud-base').innerText = estimatedCeiling.toFixed(1);
-        }
-
-        if (data.daily) {
-            const todayHigh = data.daily.temperature_2m_max[0];
-            const todayLow = data.daily.temperature_2m_min[0];
-            document.getElementById('atmo-hl').innerText = `${Math.round(todayLow)}° / ${Math.round(todayHigh)}°`;
-
-            const sunrise = new Date(data.daily.sunrise[0]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-            const sunset = new Date(data.daily.sunset[0]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-            document.getElementById('atmo-sunrise').innerText = sunrise;
-            document.getElementById('atmo-sunset').innerText = sunset;
-
-            const uvMax = data.daily.uv_index_max[0];
-            const uvPercent = Math.min((uvMax / 11) * 100, 100);
-            document.getElementById('atmo-uv-val').innerText = uvMax;
-            document.getElementById('atmo-uv-bar').style.width = `${uvPercent}%`;
-
-            let uvText = "Low";
-            if (uvMax > 2) uvText = "Moderate";
-            if (uvMax > 5) uvText = "High";
-            if (uvMax > 7) uvText = "Very High";
-            if (uvMax > 10) uvText = "Extreme";
-            document.getElementById('atmo-uv-text').innerText = uvText;
-        }
-
-        if (data.hourly) {
-            const hourlyContainer = document.getElementById('atmo-hourly-container');
-            if (hourlyContainer) {
-                hourlyContainer.innerHTML = '';
-                const currentHour = new Date().getHours();
-                try {
-                    for (let i = currentHour; i < currentHour + 24; i++) {
-                        if (!data.hourly.time[i]) break;
-                        const timeStr = new Date(data.hourly.time[i]).toLocaleTimeString([], { hour: 'numeric', hour12: true }).replace(' ', '');
-                        const hTemp = Math.round(data.hourly.temperature_2m[i]);
-                        const hCode = data.hourly.weather_code[i];
-                        const hIsDay = (i % 24) > 6 && (i % 24) < 18 ? 1 : 0;
-                        const hMeta = getWeatherMeta(hCode, hIsDay);
-                        const hRain = data.hourly.precipitation_probability ? data.hourly.precipitation_probability[i] : 0;
-
-                        const hDiv = document.createElement('div');
-                        hDiv.className = "flex flex-col items-center gap-2 min-w-[3.5rem] p-2 rounded-xl hover:bg-white/5 transition-colors cursor-default border border-transparent hover:border-white/5";
-                        hDiv.innerHTML = `
-                            <span class="text-[10px] text-slate-400 font-bold tracking-tight">${i === currentHour ? 'Now' : timeStr}</span>
-                            <i class="fas ${hMeta.icon} text-lg ${hMeta.color}"></i>
-                            <span class="text-[12px] font-bold text-white">${hTemp}°</span>
-                            ${hRain > 20 ? `<span class="text-[9px] text-blue-400 font-bold">${hRain}%</span>` : ''}
-                        `;
-                        hourlyContainer.appendChild(hDiv);
-                    }
-                } catch (err) { console.log("Hourly data incomplete"); }
-            }
-
-            const visKm = data.hourly.visibility ? data.hourly.visibility[new Date().getHours()] / 1000 : 10;
-            if (document.getElementById('atmo-visibility'))
-                document.getElementById('atmo-visibility').innerText = visKm.toFixed(1);
-        }
-
-        const moon = getMoonPhase();
-        if (document.getElementById('atmo-moon-text')) {
-            document.getElementById('atmo-moon-text').innerText = moon.t;
-            document.getElementById('atmo-moon-icon').className = `fas ${moon.i} text-2xl text-indigo-300`;
-        }
-
-        const precipTotal = data.daily && data.daily.precipitation_sum ? data.daily.precipitation_sum[0] : 0;
-        document.getElementById('atmo-precip-total').innerText = precipTotal.toFixed(1);
-
-        const dailyContainer = document.getElementById('atmo-daily-container');
-        if (dailyContainer && data.daily) {
-            dailyContainer.innerHTML = '';
-            for (let i = 1; i < 7; i++) {
-                if (!data.daily.time[i]) break;
-                const dateObj = new Date(data.daily.time[i]);
-                const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
-                const dMax = Math.round(data.daily.temperature_2m_max[i]);
-                const dMin = Math.round(data.daily.temperature_2m_min[i]);
-                const dCode = data.daily.weather_code[i];
-                const dMeta = getWeatherMeta(dCode, 1);
-                const dPrecipSum = data.daily.precipitation_sum ? data.daily.precipitation_sum[i] : 0;
-
-                const dRow = document.createElement('div');
-                dRow.className = "px-6 py-3 flex items-center justify-between hover:bg-white/5 transition-colors group";
-                dRow.innerHTML = `
-                    <span class="text-[12px] text-slate-300 font-bold w-24">${dayName}</span>
-                    <div class="flex items-center gap-3 w-32">
-                        <i class="fas ${dMeta.icon} ${dMeta.color} w-6 text-center"></i>
-                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider group-hover:text-blue-400 transition-colors">${dMeta.text}</span>
-                    </div>
-                    <div class="flex items-center gap-4 text-right flex-1 justify-end">
-                        ${dPrecipSum > 0 ? `<div class="flex items-center gap-1 text-[10px] text-blue-400 font-bold"><i class="fas fa-umbrella"></i> ${Math.round(dPrecipSum)}mm</div>` : ''}
-                        <div class="font-mono text-xs font-bold text-white">
-                            <span class="text-slate-500">${dMin}°</span> / ${dMax}°
-                        </div>
-                    </div>
-                `;
-                dailyContainer.appendChild(dRow);
-            }
-        }
-
-        window.playTacticalSound('success');
-
-        // AI Weather Analysis
-        try {
-            const weatherSummary = {
-                temp: data.current ? Math.round(data.current.temperature_2m) : '--',
-                feels_like: data.current ? Math.round(data.current.apparent_temperature) : '--',
-                condition: data.current ? getWeatherMeta(data.current.weather_code, data.current.is_day).text : '--',
-                humidity: data.current ? data.current.relative_humidity_2m : '--',
-                wind_speed: data.current ? Math.round(data.current.wind_speed_10m) : '--',
-                uv_index: data.daily ? data.daily.uv_index_max[0] : 0,
-                visibility: data.hourly && data.hourly.visibility ? (data.hourly.visibility[new Date().getHours()] / 1000).toFixed(1) : '--',
-                forecast: data.daily ? data.daily.time.slice(1, 8).map((t, i) => ({
-                    date: new Date(t).toLocaleDateString('en-US', { weekday: 'short' }),
-                    temp: Math.round(data.daily.temperature_2m_max[i + 1]),
-                    condition: getWeatherMeta(data.daily.weather_code[i + 1], 1).text
-                })) : []
-            };
-            generateWeatherAnalysis(weatherSummary, selectedCountry ? selectedCountry.properties.name : 'this location');
-        } catch (err) { console.log('Weather AI skip:', err); }
-
-    } catch (e) {
-        console.error("Atmosphere Error:", e);
-    }
-}
 window.switchTab = (id) => {
     window.playTacticalSound('tab');
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -1227,6 +305,7 @@ window.switchTab = (id) => {
     const targetContent = document.getElementById(`tab-${id}`);
     if (targetContent) targetContent.classList.add('active');
 };
+
 window.toggleProjection = () => { window.playTacticalSound('tab'); initMap(projectionType === '2d' ? '3d' : '2d'); };
 window.selectFromSearch = (name) => {
     const country = worldFeatures.find(f => f.properties.name.toLowerCase().includes(name.toLowerCase()));
@@ -1240,19 +319,28 @@ window.zoomMap = (f) => {
     else { currentProjection.scale(currentProjection.scale() * f); g.selectAll("path").attr("d", d3.geoPath().projection(currentProjection)); }
 };
 window.resetToGlobalCenter = () => {
-    selectedCountry = null; countryUTCOffset = null;
+    selectedCountry = null; window.selectedCountry = null; countryUTCOffset = null;
     d3.selectAll(".country").classed("active", false);
     document.getElementById('selected-country-name').innerText = "Global Surveillance";
     document.getElementById('ai-briefing-box').classList.add('hidden');
     const flagBox = document.getElementById('active-sector-display');
     if (flagBox) flagBox.classList.add('hidden');
     if (projectionType === '2d') svg.transition().duration(1200).call(zoom.transform, d3.zoomIdentity);
-    fetchNews();
+    window.fetchNews();
 };
 window.goToIndiaHome = () => {
     const india = worldFeatures.find(f => f.properties.name === "India");
     if (india) handleCountryClick(null, india);
 };
+window.activateMapInteraction = () => {
+    const overlay = document.getElementById('map-overlay-guard');
+    if (overlay) { overlay.classList.add('active'); window.playTacticalSound('click'); }
+};
+window.deactivateMapInteraction = () => {
+    const overlay = document.getElementById('map-overlay-guard');
+    if (overlay) overlay.classList.remove('active');
+};
+
 function setupEventListeners() {
     document.querySelectorAll('.category-pill').forEach(pill => {
         pill.onmouseenter = () => window.playTacticalSound('hover');
@@ -1260,27 +348,21 @@ function setupEventListeners() {
             window.playTacticalSound('click');
             document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
             pill.classList.add('active');
-            currentCategory = pill.dataset.cat;
-            fetchNews();
+            window.currentCategory = pill.dataset.cat;
+            window.fetchNews();
         };
     });
     const input = document.getElementById('country-search');
     input.oninput = (e) => {
         const query = e.target.value.toLowerCase().trim();
         const resContainer = document.getElementById('search-results');
-        if (!query) {
-            renderTrending();
-            return;
-        }
+        if (!query) { window.renderTrending(); return; }
         if (!globalSearchData || globalSearchData.length === 0) {
             resContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 font-bold uppercase tracking-widest animate-pulse">Initializing Search Index...</div>`;
             return;
         }
         const matched = globalSearchData.filter(c => c.name.common.toLowerCase().includes(query)).slice(0, 8);
-        if (matched.length === 0) {
-            resContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 font-bold uppercase tracking-widest">Sector Not Found</div>`;
-            return;
-        }
+        if (matched.length === 0) { resContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 font-bold uppercase tracking-widest">Sector Not Found</div>`; return; }
         resContainer.innerHTML = matched.map(c => `
             <div class="p-4 hover:bg-blue-600/10 cursor-pointer flex items-center gap-4 border-b border-white/5 transition-all group" onclick="window.selectFromSearch('${c.name.common.replace(/'/g, "\\'")}')">
                 <div class="w-8 h-5 rounded shadow-sm overflow-hidden relative border border-white/10 group-hover:border-blue-400/50">
@@ -1292,29 +374,31 @@ function setupEventListeners() {
         `).join('');
     };
     window.onkeydown = (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); toggleSearch(); }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); window.toggleSearch(); }
         if (e.key === 'Escape') {
             document.getElementById('search-overlay').classList.add('hidden');
             document.getElementById('about-overlay').classList.add('hidden');
         }
     };
 }
+
 function updateSystemTime() {
     const now = new Date();
     document.getElementById('system-time').innerText = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
     if (countryUTCOffset) {
         const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-        let off = 0; const match = countryUTCOffset.match(/UTC([+-]\d+):?(\d+)?/);
+        let off = 0;
+        const match = countryUTCOffset.match(/UTC([+-]\d+):?(\d+)?/);
         if (match) off = (parseInt(match[1]) * 60) + (match[2] ? parseInt(match[2]) : 0);
         const localDate = new Date(utc + (60000 * off));
         const localEl = document.getElementById('local-time');
         if (localEl) localEl.innerText = localDate.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
         const hr = localDate.getHours();
-        const isNight = hr < 6 || hr > 18;
-        document.body.classList.toggle('night-mode', isNight);
-        document.body.classList.toggle('day-mode', !isNight);
+        document.body.classList.toggle('night-mode', hr < 6 || hr > 18);
+        document.body.classList.toggle('day-mode', hr >= 6 && hr <= 18);
     }
 }
+
 window.activateVoice = () => {
     window.playTacticalSound('click');
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1326,562 +410,43 @@ window.activateVoice = () => {
     btn.classList.add('text-red-500', 'animate-pulse');
     recognition.onresult = (event) => {
         const command = event.results[0][0].transcript.toLowerCase().replace('.', '');
-        console.log("Voice Command:", command);
         btn.classList.remove('text-red-500', 'animate-pulse');
-        if (command.includes("go to")) {
-            const country = command.replace("go to ", "").trim();
-            window.selectFromSearch(country);
-            appendLog(`> VOICE COMMAND: VECTORING TO [${country.toUpperCase()}]`, 'text-red-400');
-        } else if (command.includes("analyze")) {
-            window.switchTab('intel');
-            appendLog(`> VOICE COMMAND: INITIATING ANALYSIS`, 'text-red-400');
-        } else if (command.includes("news")) {
-            window.switchTab('news');
-        }
+        if (command.includes("go to")) window.selectFromSearch(command.replace("go to ", "").trim());
+        else if (command.includes("analyze")) window.switchTab('intel');
+        else if (command.includes("news")) window.switchTab('news');
     };
-    recognition.onerror = () => {
-        btn.classList.remove('text-red-500', 'animate-pulse');
-    };
+    recognition.onerror = () => btn.classList.remove('text-red-500', 'animate-pulse');
 };
 
-function personalizeSession(user) {
-    let safeName = user.displayName || user.email.split('@')[0];
+window.personalizeSession = (user) => {
+    const safeName = user.displayName || user.email.split('@')[0];
     const shortName = safeName.split(' ')[0];
-
     setTimeout(() => {
-        const text = `Identity confirmed. Welcome back, Commander ${shortName}`;
-        const speech = new SpeechSynthesisUtterance(text);
-        speech.pitch = 0.8;
-        speech.rate = 0.9;
-        speech.volume = 1.0;
-
+        const speech = new SpeechSynthesisUtterance(`Identity confirmed. Welcome back, Commander ${shortName}`);
+        speech.pitch = 0.8; speech.rate = 0.9; speech.volume = 1.0;
         const voices = window.speechSynthesis.getVoices();
         const googleVoice = voices.find(v => v.name.includes('Google US English'));
         if (googleVoice) speech.voice = googleVoice;
-
         window.speechSynthesis.speak(speech);
     }, 1000);
-
-    const aboutOverlay = document.getElementById('about-overlay');
-    if (aboutOverlay) {
-        const nameEl = aboutOverlay.querySelector('h2');
-        const roleEl = aboutOverlay.querySelector('p.text-blue-400');
-        const levelEl = aboutOverlay.querySelector('.text-emerald-500');
-
-        if (nameEl) {
-            nameEl.innerText = safeName.toUpperCase();
-            nameEl.classList.add('text-blue-200');
-        }
-        if (roleEl) roleEl.innerText = "AUTHENTICATED FIELD OPERATOR";
-        if (levelEl) levelEl.innerText = "CLEARANCE: OMEGA-LEVEL (VERIFIED)";
-    }
-}
-// ═══════════════════════════════════════════════════════
-// SECTION 1: GEOGRAPHY DRILL-DOWN (Real API-based)
-// Uses /api/geo → CountriesNow API (all countries, all states, all cities)
-// ═══════════════════════════════════════════════════════
-let currentView = {
-    level: 'country',
-    country: null,
-    state: null,
-    city: null
+    const nameEl = document.querySelector('#about-overlay h2');
+    const roleEl = document.querySelector('#about-overlay p.text-blue-400');
+    const levelEl = document.querySelector('#about-overlay .text-emerald-500');
+    if (nameEl) { nameEl.innerText = safeName.toUpperCase(); nameEl.classList.add('text-blue-200'); }
+    if (roleEl) roleEl.innerText = "AUTHENTICATED FIELD OPERATOR";
+    if (levelEl) levelEl.innerText = "CLEARANCE: OMEGA-LEVEL (VERIFIED)";
 };
 
-async function onCountrySelected(countryName) {
-    currentView = { level: 'country', country: countryName, state: null, city: null };
-    const panel = document.getElementById('hierarchy-panel');
-    const stateWrapper = document.getElementById('breadcrumb-state-wrapper');
-    const cityWrapper = document.getElementById('breadcrumb-city-wrapper');
-    const citySelector = document.getElementById('city-selector');
-    const stateList = document.getElementById('state-list');
-
-    if (stateWrapper) stateWrapper.classList.add('hidden');
-    if (cityWrapper) cityWrapper.classList.add('hidden');
-    if (citySelector) citySelector.classList.add('hidden');
-    if (panel) panel.classList.remove('hidden');
-    if (stateList) stateList.innerHTML = '<div class="text-slate-500 text-xs col-span-3 py-2">Loading regions...</div>';
-
-    const bc = document.getElementById('breadcrumb-country');
-    if (bc) bc.innerText = countryName;
-    const stateSelector = document.getElementById('state-selector');
-    if (stateSelector) stateSelector.classList.remove('hidden');
-
-    // Refresh market indices for this country
-    displayCountryIndices(countryName);
-
-    try {
-        const res = await fetch(`/api/geo?country=${encodeURIComponent(countryName)}&level=states`);
-        const data = await res.json();
-        if (!data.states || data.states.length === 0) {
-            if (stateList) stateList.innerHTML = '<div class="text-slate-500 text-xs col-span-3">No regional data available.</div>';
-            return;
-        }
-        if (stateList) {
-            stateList.innerHTML = '';
-            data.states.forEach(state => {
-                const btn = document.createElement('button');
-                btn.className = 'text-left p-2 rounded border border-white/10 hover:border-blue-400 hover:bg-blue-400/10 transition-all text-xs font-mono';
-                btn.innerHTML = `<div class="font-bold text-white">${state.name}</div><div class="text-slate-400 text-[10px] font-mono">${state.code || ''}</div>`;
-                btn.onclick = () => selectState(countryName, state.name);
-                stateList.appendChild(btn);
-            });
-        }
-    } catch (e) {
-        if (stateList) stateList.innerHTML = '<div class="text-red-500 text-xs col-span-3">Failed to load regions.</div>';
-    }
-}
-
-async function selectState(countryName, stateName) {
-    currentView = { level: 'state', country: countryName, state: stateName, city: null };
-
-    const bsEl = document.getElementById('breadcrumb-state');
-    const bsWrap = document.getElementById('breadcrumb-state-wrapper');
-    const bcWrap = document.getElementById('breadcrumb-city-wrapper');
-    const cityList = document.getElementById('city-list');
-    const citySelector = document.getElementById('city-selector');
-
-    if (bsEl) bsEl.innerText = stateName;
-    if (bsWrap) bsWrap.classList.remove('hidden');
-    if (bcWrap) bcWrap.classList.add('hidden');
-    if (citySelector) citySelector.classList.remove('hidden');
-    if (cityList) cityList.innerHTML = '<div class="text-slate-500 text-xs col-span-3 py-2">Loading cities...</div>';
-
-    try {
-        const res = await fetch(`/api/geo?country=${encodeURIComponent(countryName)}&state=${encodeURIComponent(stateName)}&level=cities`);
-        const data = await res.json();
-        if (!data.cities || data.cities.length === 0) {
-            if (cityList) cityList.innerHTML = '<div class="text-slate-500 text-xs col-span-3">No city data available.</div>';
-            return;
-        }
-        if (cityList) {
-            cityList.innerHTML = '';
-            data.cities.forEach(cityName => {
-                const btn = document.createElement('button');
-                btn.className = 'text-left p-2 rounded border border-white/10 hover:border-cyan-400 hover:bg-cyan-400/10 transition-all text-xs font-mono';
-                btn.innerHTML = `<div class="font-bold text-white">${cityName}</div>`;
-                btn.onclick = () => selectCity(countryName, stateName, cityName);
-                cityList.appendChild(btn);
-            });
-        }
-    } catch (e) {
-        if (cityList) cityList.innerHTML = '<div class="text-red-500 text-xs col-span-3">Failed to load cities.</div>';
-    }
-}
-
-async function selectCity(countryName, stateName, cityName) {
-    currentView = { level: 'city', country: countryName, state: stateName, city: cityName };
-
-    const bcEl = document.getElementById('breadcrumb-city');
-    const bcWrap = document.getElementById('breadcrumb-city-wrapper');
-    if (bcEl) bcEl.innerText = cityName;
-    if (bcWrap) bcWrap.classList.remove('hidden');
-
-    const nameEl = document.getElementById('selected-country-name');
-    if (nameEl) nameEl.innerText = cityName;
-
-    // Fetch weather for city using geocoding via open-meteo
-    try {
-        const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=en&format=json`);
-        const geoData = await geoRes.json();
-        if (geoData.results && geoData.results[0]) {
-            const { latitude, longitude } = geoData.results[0];
-            fetchWeather(latitude, longitude);
-        }
-    } catch (e) { /* silently fail */ }
-
-    generateAIBriefing(cityName + ', ' + stateName + ', ' + countryName);
-}
-
-window.resetToCountry = () => { if (currentView.country) onCountrySelected(currentView.country); };
-window.resetToState = () => { if (currentView.country && currentView.state) selectState(currentView.country, currentView.state); };
-
-window.filterStateList = (query) => {
-    const q = query.toLowerCase().trim();
-    document.querySelectorAll('#state-list button').forEach(btn => {
-        const name = btn.querySelector('.font-bold')?.textContent?.toLowerCase() || '';
-        btn.style.display = (!q || name.includes(q)) ? '' : 'none';
-    });
-};
-
-window.filterCityList = (query) => {
-    const q = query.toLowerCase().trim();
-    document.querySelectorAll('#city-list button').forEach(btn => {
-        const name = btn.querySelector('.font-bold')?.textContent?.toLowerCase() || '';
-        btn.style.display = (!q || name.includes(q)) ? '' : 'none';
-    });
-};
-
-// ═══════════════════════════════════════════════════════
-// SECTION 2: EXPANDED MARKETS
-// ═══════════════════════════════════════════════════════
-window.toggleMarketCategory = (category) => {
-    const content = document.getElementById(`${category}-content`);
-    const chevron = document.getElementById(`${category}-chevron`);
-    if (!content || !chevron) return;
-    content.classList.toggle('hidden');
-    chevron.classList.toggle('fa-chevron-down');
-    chevron.classList.toggle('fa-chevron-up');
-};
-
-async function displayPreciousMetals() {
-    const container = document.getElementById('metals-content');
-    if (!container) return;
-    container.innerHTML = '<div class="col-span-3 text-slate-500 text-xs py-2">Fetching live prices...</div>';
-    try {
-        const cur = (currencyCode || 'USD').toUpperCase();
-        const res = await fetch(`/api/markets?type=metals&currency=${cur}`);
-        const json = await res.json();
-        container.innerHTML = '';
-        const metalDisplay = {
-            XAU: 'Gold (XAU)', XAG: 'Silver (XAG)', XPT: 'Platinum (XPT)', XPD: 'Palladium (XPD)'
-        };
-        Object.entries(json.data || {}).forEach(([sym, data]) => {  // reuse variable name for consistency
-            // map to same shape for display
-            const name = metalDisplay[sym] || sym;
-            const changeClass = (data.change || 0) >= 0 ? 'text-emerald-400' : 'text-red-400';
-            const changeIcon = (data.change || 0) >= 0 ? '▲' : '▼';
-            const card = document.createElement('div');
-            card.className = 'dossier-card p-3';
-            card.innerHTML = `
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-2xl">${data.icon || '🪙'}</span>
-                  <span class="${changeClass} text-xs font-mono font-bold">${changeIcon} ${Math.abs(data.change || 0).toFixed(2)}%</span>
-                </div>
-                <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">${name}</div>
-                <div class="text-xl font-black text-white font-mono">${cur} ${(data.price || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
-                <div class="text-[9px] text-slate-600 mt-1">${data.unit || ''}</div>
-            `;
-            container.appendChild(card);
-        });
-        if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-xs col-span-3">No metals data</div>';
-    } catch (e) { container.innerHTML = '<div class="text-slate-500 text-xs col-span-3">Data unavailable</div>'; }
-}
-
-function displayCountryIndices(countryName) {
-    const container = document.getElementById('indices-content');
-    if (!container) return;
-    const indicesLabelEl = document.getElementById('indices-country');
-    if (indicesLabelEl) indicesLabelEl.innerText = countryName || 'Global';
-    // No live API for indices — show informational message
-    container.innerHTML = `<div class="col-span-2 text-slate-500 text-xs py-3"><i class="fas fa-info-circle mr-1"></i>Country index data shown when market APIs for ${countryName || 'this country'} are available via live subscription or exchange data feeds.</div>`;
-}
-
-// Keep stub for legacy calls
-window.getIndicesForCountry = () => ({});
-
-async function displayCrypto() {
-    const container = document.getElementById('crypto-content');
-    if (!container) return;
-    container.innerHTML = '<div class="text-slate-500 text-xs py-2">Fetching live prices...</div>';
-    try {
-        const cur = (currencyCode || 'USD').toLowerCase();
-        const res = await fetch(`/api/markets?type=crypto&currency=${cur}`);
-        const json = await res.json();
-        container.innerHTML = '';
-        (json.data || []).forEach(data => {
-            const changeClass = (data.change || 0) >= 0 ? 'text-emerald-400' : 'text-red-400';
-            const changeIcon = (data.change || 0) >= 0 ? '▲' : '▼';
-            const card = document.createElement('div');
-            card.className = 'dossier-card p-3';
-            card.innerHTML = `
-                <div class="flex items-center justify-between mb-2">
-                  <img src="${data.image}" alt="${data.name}" class="w-6 h-6 rounded-full" onerror="this.style.display='none'">
-                  <span class="${changeClass} text-xs font-mono font-bold">${changeIcon} ${Math.abs(data.change || 0).toFixed(2)}%</span>
-                </div>
-                <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">${data.symbol}</div>
-                <div class="text-lg font-black text-white font-mono">${cur.toUpperCase()} ${(data.price || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
-                <div class="text-[8px] text-slate-600 mt-1">MCap: ${cur.toUpperCase()} ${((data.marketCap || 0) / 1e9).toFixed(1)}B</div>
-            `;
-            container.appendChild(card);
-        });
-    } catch (e) { container.innerHTML = '<div class="text-slate-500 text-xs">Data unavailable</div>'; }
-}
-
-async function displayForex() {
-    const container = document.getElementById('forex-content');
-    if (!container) return;
-    container.innerHTML = '<div class="text-slate-500 text-xs py-2">Fetching live rates...</div>';
-    try {
-        const base = (currencyCode || 'USD').toUpperCase();
-        const res = await fetch(`/api/markets?type=forex&currency=${base}`);
-        const json = await res.json();
-        container.innerHTML = '';
-        Object.entries(json.rates || {}).filter(([c]) => c !== base).slice(0, 15).forEach(([pair, rate]) => {
-            const card = document.createElement('div');
-            card.className = 'dossier-card p-3 flex justify-between items-center';
-            card.innerHTML = `
-                <div>
-                  <div class="text-sm font-black text-white">${base}/${pair}</div>
-                  <div class="text-[9px] text-slate-500 mt-0.5">Live rate</div>
-                </div>
-                <div class="text-xl font-mono font-black text-cyan-400">${rate.toFixed(4)}</div>
-            `;
-            container.appendChild(card);
-        });
-    } catch (e) { container.innerHTML = '<div class="text-slate-500 text-xs">Data unavailable</div>'; }
-}
-
-async function displayCommodities() {
-    const container = document.getElementById('commodities-content');
-    if (!container) return;
-    container.innerHTML = '<div class="col-span-3 text-slate-500 text-xs py-2">Fetching live prices...</div>';
-    try {
-        const cur = (currencyCode || 'USD').toUpperCase();
-        const res = await fetch(`/api/markets?type=commodities&currency=${cur}`);
-        const json = await res.json();
-        container.innerHTML = '';
-        Object.entries(json.data || {}).forEach(([name, data]) => {
-            const changeClass = (data.change || 0) >= 0 ? 'text-emerald-400' : 'text-red-400';
-            const changeIcon = (data.change || 0) >= 0 ? '▲' : '▼';
-            const card = document.createElement('div');
-            card.className = 'dossier-card p-3';
-            card.innerHTML = `
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-xl">${data.icon || '📦'}</span>
-                  <span class="${changeClass} text-xs font-mono font-bold">${changeIcon} ${Math.abs(data.change || 0).toFixed(2)}%</span>
-                </div>
-                <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">${name}</div>
-                <div class="text-lg font-black text-white font-mono">${cur} ${(data.price || 0).toFixed(2)}</div>
-                <div class="text-[8px] text-slate-600 mt-1">${data.unit || ''}</div>
-            `;
-            container.appendChild(card);
-        });
-        if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-xs col-span-3">No commodity data</div>';
-    } catch (e) { container.innerHTML = '<div class="text-slate-500 text-xs col-span-3">Data unavailable</div>'; }
-}
-
-function initializeMarkets(countryName) {
-    displayPreciousMetals();
-    displayCountryIndices(countryName || 'Global');
-    displayCrypto();
-    displayForex();
-    displayCommodities();
-}
-
-
-// ═══════════════════════════════════════════════════════
-// SECTION 3: NEWS DISPLAY HELPERS
-// NOTE: filterNews, clearNewsSearch, allNews, newsSearchQuery etc.
-// are all defined earlier in the file (live search via debounced API calls)
-// ═══════════════════════════════════════════════════════
-
-
-function displayFilteredNews() {
-    let filtered = [...allNews];
-
-    if (currentNewsFilters.search) {
-        filtered = filtered.filter(article =>
-            (article.title && article.title.toLowerCase().includes(currentNewsFilters.search)) ||
-            (article.description && article.description.toLowerCase().includes(currentNewsFilters.search))
-        );
-    }
-
-    const now = new Date();
-    if (currentNewsFilters.time === 'Last 24 hours') {
-        filtered = filtered.filter(a => {
-            const d = new Date(a.pubDate);
-            return !isNaN(d) && (now - d) < 24 * 3600000;
-        });
-    } else if (currentNewsFilters.time === 'Last 7 days') {
-        filtered = filtered.filter(a => {
-            const d = new Date(a.pubDate);
-            return !isNaN(d) && (now - d) < 7 * 24 * 3600000;
-        });
-    }
-
-    if (currentNewsFilters.sort === 'Most Recent') {
-        filtered.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-    } else if (currentNewsFilters.sort === 'Alphabetical') {
-        filtered.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
-    }
-
-    displayNewsArticles(filtered.slice(0, displayedNewsCount));
-
-    const loadMoreEl = document.getElementById('news-load-more');
-    if (loadMoreEl) {
-        if (filtered.length > displayedNewsCount) {
-            loadMoreEl.classList.remove('hidden');
-        } else {
-            loadMoreEl.classList.add('hidden');
-        }
-    }
-}
-
-function displayNewsArticles(articles) {
-    const container = document.getElementById('articles-container');
-    if (!container) return;
-    container.innerHTML = '';
-    if (!articles || articles.length === 0) {
-        container.innerHTML = '<div class="col-span-full p-10 text-center text-[12px] text-slate-500 font-black italic uppercase tracking-widest">Zero news fragments matching filters.</div>';
-        return;
-    }
-    articles.forEach((art, i) => {
-        const card = document.createElement('div');
-        const sents = ['signal-blue', 'signal-emerald', 'signal-red'];
-        const sent = sents[i % 3];
-        const img = art.image_url ? `<div class="h-32 w-full mb-3 rounded bg-cover bg-center border border-white/10" style="background-image: url('${art.image_url}')"></div>` : '';
-        card.className = `dossier-card shadow-md mb-4 ${sent}`;
-        card.onmouseenter = () => window.playTacticalSound('hover');
-        card.innerHTML = `
-            <div class="flex justify-between items-center mb-4">
-                <div class="text-[10px] font-black text-white/70 uppercase tracking-widest bg-white/5 px-2.5 py-0.5 rounded-lg truncate max-w-[100px]">${art.source_id || 'UPLINK'}</div>
-                <button class="text-slate-400 hover:text-white transition-all tactical-btn"><i class="fas fa-link text-[13px]"></i></button>
-            </div>
-            ${img} <h3 class="font-bold text-[16px] text-white leading-tight mb-3 cursor-pointer hover:text-blue-300 transition-colors pr-4" onclick="window.open('${art.link}', '_blank')">${art.title}</h3>
-        `;
-        container.appendChild(card);
-    });
-}
-
-window.loadMoreNews = () => {
-    displayedNewsCount += 20;
-    displayFilteredNews();
-};
-
-window.checkNewsScroll = () => {
-    const container = document.getElementById('news-scroll-container');
-    if (!container) return;
-    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 100) {
-        window.loadMoreNews();
-    }
-};
-
-window.clearNewsSearch = () => {
-    const input = document.getElementById('news-search');
-    if (input) input.value = '';
-    currentNewsFilters.search = '';
-    displayFilteredNews();
-};
-
-// ═══════════════════════════════════════════════════════
-// SECTION 4: WEATHER AI + ALERTS
-// ═══════════════════════════════════════════════════════
-async function generateWeatherAnalysis(weatherData, cityName) {
-    const el = document.getElementById('weather-ai-analysis');
-    if (!el) return;
-    el.innerHTML = '<span class="animate-pulse text-slate-500">Analyzing atmospheric conditions...</span>';
-    try {
-        const forecastStr = (weatherData.forecast || []).map(d => `${d.date}: ${d.temp}°C, ${d.condition}`).join('\n');
-        const prompt = `Provide a tactical weather assessment for ${cityName}:
-  Current: ${weatherData.temp}°C (feels like ${weatherData.feels_like}°C), ${weatherData.condition}
-  Humidity: ${weatherData.humidity}%, Wind: ${weatherData.wind_speed} km/h, UV: ${weatherData.uv_index}, Visibility: ${weatherData.visibility} km
-  7-Day: ${forecastStr}
-  In 150 words cover: Overall assessment, travel advisories, health warnings (UV/air), outdoor impact, recommended actions.`;
-
-        const res = await fetch('/api/ai', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt })
-        });
-        const data = await res.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Weather analysis unavailable.';
-        el.innerText = text;
-    } catch (e) {
-        el.innerText = 'Weather analysis link failed.';
-    }
-    generateWeatherAlerts(weatherData);
-}
-
-function generateWeatherAlerts(weatherData) {
-    const alerts = [];
-    if (weatherData.temp > 35) {
-        alerts.push({ type: 'danger', icon: '🔥', title: 'Extreme Heat Warning', description: `Temperature ${weatherData.temp}°C. Stay hydrated and avoid prolonged sun exposure.` });
-    }
-    if (weatherData.uv_index >= 8) {
-        alerts.push({ type: 'warning', icon: '☀️', title: 'High UV Index', description: `UV Index ${weatherData.uv_index}. Wear sunscreen and protective clothing.` });
-    }
-    if (weatherData.wind_speed > 50) {
-        alerts.push({ type: 'warning', icon: '💨', title: 'Strong Wind Advisory', description: `Wind speed ${weatherData.wind_speed} km/h. Secure loose objects.` });
-    }
-    if (alerts.length > 0) displayWeatherAlerts(alerts);
-}
-
-function displayWeatherAlerts(alerts) {
-    const container = document.getElementById('weather-alerts');
-    if (!container) return;
-    container.innerHTML = '';
-    container.classList.remove('hidden');
-    const colors = { danger: 'border-red-500/30 bg-red-500/10', warning: 'border-amber-500/30 bg-amber-500/10' };
-    alerts.forEach(alert => {
-        const el = document.createElement('div');
-        el.className = `dossier-card p-3 border-l-4 ${colors[alert.type] || colors.warning}`;
-        el.innerHTML = `
-            <div class="flex items-start gap-3">
-              <span class="text-2xl">${alert.icon}</span>
-              <div class="flex-1">
-                <div class="font-bold text-white text-sm mb-1">${alert.title}</div>
-                <div class="text-xs text-slate-300">${alert.description}</div>
-              </div>
-            </div>
-        `;
-        container.appendChild(el);
-    });
-}
-
-// ═══════════════════════════════════════════════════════
-// SECTION 5: ENHANCED AI BRIEFING (structured)
-// ═══════════════════════════════════════════════════════
-async function fetchEnhancedAIBriefing(locationName, locationType) {
-    const categories = [
-        'Political Overview', 'Economic Outlook', 'Security Assessment',
-        'Infrastructure Status', 'Social Indicators', 'Diplomatic Relations',
-        'Military Readiness', 'Environmental Risks', 'Cyber Threat Level', 'Trade & Commerce'
-    ];
-    const prompt = `Generate a comprehensive intelligence briefing for ${locationName} (${locationType}).
-  Provide 2-3 sentences for each category:
-  ${categories.map((cat, i) => `${i + 1}. ${cat}`).join('\n')}
-  Total: 500-600 words. Use tactical, professional language.`;
-    const res = await fetch('/api/ai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, country: locationName })
-    });
-    const data = await res.json();
-    const briefingText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    displayStructuredBriefing(briefingText, categories);
-}
-
-function displayStructuredBriefing(briefingText, categories) {
-    const container = document.getElementById('ai-briefing-box');
-    if (!container || !briefingText) return;
-    const sections = briefingText.replace(/\*\*/g, '').split(/\d+\.\s+/).filter(Boolean);
-    let html = `
-        <div class="flex justify-between items-center mb-5 border-b border-white/5 pb-4">
-            <span class="text-[9px] text-blue-400 uppercase font-black tracking-widest flex items-center gap-2" style="font-family:'JetBrains Mono',monospace">
-                <i class="fas fa-brain text-base"></i> Neural Synthesis
-            </span>
-            <div class="flex items-center gap-2">
-                <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
-                <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">Live Link</span>
-            </div>
-        </div>
-        <div class="space-y-4">
-    `;
-    categories.forEach((cat, i) => {
-        html += `
-            <div class="border-l-2 border-blue-500/30 pl-4">
-                <h4 class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">${cat}</h4>
-                <p class="text-slate-300 text-sm leading-relaxed">${sections[i] ? sections[i].trim() : 'Data unavailable'}</p>
-            </div>
-        `;
-    });
-    html += '</div>';
-    container.innerHTML = html;
-}
+window.generateAIBriefing = generateAIBriefing;
 
 initTerminal();
 initMap('2d');
 setupEventListeners();
 setInterval(updateSystemTime, 1000);
 document.addEventListener('click', function () {
-    if (!isAmbiencePlaying) {
-        toggleAmbience();
-    }
+    if (!window._ambienceStarted) { window._ambienceStarted = true; window.toggleAmbience(); }
 }, { once: true });
 window.addEventListener('resize', () => {
     const c = document.getElementById('map-container');
-    if (c) {
-        d3.select("#world-map").attr("viewBox", `0 0 ${c.clientWidth} ${c.clientHeight}`);
-        initMap(projectionType);
-    }
+    if (c) { d3.select("#world-map").attr("viewBox", `0 0 ${c.clientWidth} ${c.clientHeight}`); initMap(projectionType); }
 });

@@ -17,75 +17,9 @@
   <meta name="theme-color" content="#020617" />
   <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2072/2072130.png" type="image/x-icon" />
 
-  <!-- Firebase Module -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, GoogleAuthProvider, linkWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  <!-- Firebase Logic moved to js/core/firebase.js -->
 
-    window.firebaseCore = {
-      initializeApp, getAuth, onAuthStateChanged, signInAnonymously,
-      signInWithCustomToken, getFirestore, doc, collection,
-      onSnapshot, setDoc, deleteDoc, serverTimestamp,
-      GoogleAuthProvider, linkWithPopup
-    };
-
-    window.upgradeToGoogle = async () => {
-      const auth = window.firebaseCore.getAuth();
-      const provider = new window.firebaseCore.GoogleAuthProvider();
-      if (auth.currentUser) {
-        try {
-          const result = await window.firebaseCore.linkWithPopup(auth.currentUser, provider);
-          const user = result.user;
-          const idEl = document.getElementById('neural-id');
-          if (idEl) {
-            idEl.innerText = `ID: ${user.displayName.toUpperCase()}`;
-            idEl.classList.add('text-emerald-400');
-          }
-          if (window.playTacticalSound) window.playTacticalSound('success');
-        } catch (error) {
-          console.error("Auth Error:", error.code);
-          if (error.code === 'auth/popup-blocked') {
-            alert("Security block detected. Please allow popups.");
-          }
-        }
-      }
-    };
-  </script>
-
-  <!-- Boot Animation -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const bar = document.getElementById('boot-bar');
-      const screen = document.getElementById('boot-screen');
-      const logs = document.getElementById('boot-log');
-      const messages = ["SYSTEM_INIT...", "CONNECTING_SAT_UPLINK...", "DECRYPTING_GLOBAL_FEED...", "HANDSHAKE_VERIFIED", "ACCESS_GRANTED"];
-
-      let progress = 0, msgIndex = 0;
-
-      const interval = setInterval(() => {
-        progress += Math.random() * 15;
-        if (progress > 100) progress = 100;
-        if (bar) bar.style.width = progress + '%';
-
-        if (progress > (msgIndex + 1) * 20 && msgIndex < messages.length && logs) {
-          const p = document.createElement('div');
-          p.innerText = "> " + messages[msgIndex++];
-          logs.appendChild(p);
-        }
-
-        if (progress === 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            if (screen) {
-              screen.style.opacity = '0';
-              setTimeout(() => screen.remove(), 800);
-            }
-          }, 500);
-        }
-      }, 200);
-    });
-  </script>
+  <!-- Boot Animation Logic moved to js/app.js -->
 
   <style>
     :root {
@@ -1992,8 +1926,20 @@
     </div>
   </div>
 
+  <!-- Core Modules -->
+  <script src="js/core/audio.js"></script>
+  <script src="js/modules/map-engine.js"></script>
+  <script src="js/modules/geography.js"></script>
+  <script src="js/modules/markets.js"></script>
+  <script src="js/modules/economics.js"></script>
+  <script src="js/modules/news.js"></script>
+  <script src="js/modules/weather.js"></script>
+  <script src="js/ui/search.js"></script>
+  <script src="js/ui/about.js"></script>
+
+  <!-- App Entry Point -->
+  <script type="module" src="js/core/firebase.js"></script>
   <script type="module" src="js/app.js"></script>
-  <script src="js/map-godtier.js"></script>
 
   <script>
     // Keyboard shortcuts handler

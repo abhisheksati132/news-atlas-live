@@ -551,20 +551,23 @@ class GodTierMap {
     this.isInitialized = false;
   }
 }
-window.godTierMap = new GodTierMap();
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => window.godTierMap.init());
-} else {
-  window.godTierMap.init();
-}
-const originalSelectCountry = window.selectCountry;
-if (originalSelectCountry) {
-  window.selectCountry = function (event, d) {
-    originalSelectCountry.call(this, event, d);
-    const centroid = d3.geoCentroid(d);
-    window.godTierMap.showDataFlows(centroid);
-  };
-}
+/*
+// Auto-init disabled during refactor to modular architecture. Core map logic is now in app.js
+// window.godTierMap = new GodTierMap();
+// if (document.readyState === 'loading') {
+//   document.addEventListener('DOMContentLoaded', () => window.godTierMap.init());
+// } else {
+//   window.godTierMap.init();
+// }
+// const originalSelectCountry = window.selectCountry;
+// if (originalSelectCountry) {
+//   window.selectCountry = function (event, d) {
+//     originalSelectCountry.call(this, event, d);
+//     const centroid = d3.geoCentroid(d);
+//     window.godTierMap.showDataFlows(centroid);
+//   };
+// }
+*/
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     GodTierMap,

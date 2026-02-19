@@ -122,26 +122,7 @@
       box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.04), 0 0 60px rgba(59, 130, 246, 0.04);
     }
 
-    .map-box.satellite-mode {
-      background: radial-gradient(circle at 50% 50%, #0c1a30 0%, #020617 100%)
-    }
 
-    .satellite-mode .country {
-      fill: #1e293b;
-      stroke: #334155;
-      stroke-width: .5px
-    }
-
-    .satellite-mode .country:hover {
-      fill: #334155;
-      stroke: #cbd5e1
-    }
-
-    .satellite-mode .country.active {
-      fill: #059669;
-      stroke: #34d399;
-      filter: drop-shadow(0 0 15px rgba(16, 185, 129, .4))
-    }
 
     .map-interaction-overlay {
       position: absolute;
@@ -603,44 +584,7 @@
         0 0 60px rgba(59, 130, 246, 0.05);
     }
 
-    .map-box.satellite-mode {
-      background:
-        radial-gradient(ellipse at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 100%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 50% 50%, #0c1a30 0%, #020617 100%);
-      position: relative;
-    }
 
-    .map-box.satellite-mode::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        radial-gradient(2px 2px at 20% 30%, white, transparent),
-        radial-gradient(2px 2px at 60% 70%, white, transparent),
-        radial-gradient(1px 1px at 50% 50%, white, transparent),
-        radial-gradient(1px 1px at 80% 10%, white, transparent),
-        radial-gradient(2px 2px at 90% 60%, white, transparent),
-        radial-gradient(1px 1px at 33% 80%, white, transparent);
-      background-size: 200% 200%, 200% 200%, 300% 300%, 400% 400%, 250% 250%, 350% 350%;
-      background-position: 0% 0%, 40% 60%, 50% 50%, 80% 10%, 90% 60%, 33% 80%;
-      opacity: 0.3;
-      animation: stars-twinkle 8s ease-in-out infinite;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    @keyframes stars-twinkle {
-
-      0%,
-      100% {
-        opacity: 0.3;
-      }
-
-      50% {
-        opacity: 0.6;
-      }
-    }
 
     .heat-map-legend {
       position: absolute;
@@ -790,7 +734,7 @@
 
   <div id="about-overlay" class="fixed inset-0 hidden flex items-center justify-center p-6">
     <div
-      class="glass-panel max-w-4xl w-full p-0 border-blue-500/20 relative overflow-hidden flex flex-col z-20 h-[85vh]"
+      class="glass-panel max-w-5xl w-full p-0 border-blue-500/20 relative overflow-hidden flex flex-col z-20 h-[85vh]"
       style="border-radius:1.25rem">
       <div class="p-7 border-b border-white/5 relative overflow-hidden flex-shrink-0"
         style="background:rgba(59,130,246,0.06)">
@@ -821,8 +765,8 @@
         </div>
       </div>
       <div class="flex-1 overflow-y-auto p-7" style="background:rgba(2,6,23,.92)">
-        <div class="grid grid-cols-12 gap-6 h-full">
-          <div class="col-span-4 flex flex-col gap-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
+          <div class="flex flex-col gap-5 h-full">
             <div class="dossier-card min-h-[120px]"
               style="background:rgba(255,255,255,.015);border-color:rgba(255,255,255,.05)">
               <h3 class="text-[9px] font-black text-slate-500 uppercase tracking-[.2em] mb-3"
@@ -865,7 +809,7 @@
                 </span>
               </div>
             </div>
-            <div class="dossier-card flex-1 flex flex-col justify-center"
+            <div class="dossier-card flex-1 flex flex-col"
               style="background:rgba(16,185,129,.03);border-color:rgba(16,185,129,.12)">
               <h3 class="text-[9px] font-black text-emerald-400 uppercase tracking-[.2em] mb-3"
                 style="font-family:'JetBrains Mono',monospace">Active Intel Feeds</h3>
@@ -912,13 +856,7 @@
                   </div>
                   <span class="text-slate-500">Atmosphere</span>
                 </div>
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-2">
-                    <div class="w-1.5 h-1.5 bg-purple-400 rounded-full"></div><span class="text-slate-300">NASA
-                      GIBS</span>
-                  </div>
-                  <span class="text-slate-500">Sat Imagery</span>
-                </div>
+
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-2">
                     <div class="w-1.5 h-1.5 bg-purple-400 rounded-full"></div><span
@@ -942,7 +880,7 @@
               </div>
             </div>
           </div>
-          <div class="col-span-8 flex flex-col gap-5">
+          <div class="flex flex-col gap-5 h-full">
             <div class="grid grid-cols-3 gap-3">
               <div class="dossier-card p-4" style="background:rgba(59,130,246,.04);border-color:rgba(59,130,246,.15)">
                 <div class="flex justify-between items-end mb-1">
@@ -996,8 +934,7 @@
                     DB</div>
                   <div class="flex items-center gap-2"><i class="fas fa-brain text-emerald-400 text-xs"></i>Groq Llama 3
                     AI Core</div>
-                  <div class="flex items-center gap-2"><i class="fas fa-satellite text-cyan-400 text-xs"></i>NASA GIBS
-                    Satellite WMS</div>
+
                   <div class="flex items-center gap-2"><i class="fas fa-wave-square text-pink-400 text-xs"></i>Web Audio
                     API Engine</div>
                 </div>
@@ -1014,14 +951,13 @@
                     Vector Zoom</div>
                   <div class="flex items-center gap-2"><i class="fas fa-globe text-purple-400 text-xs"></i>Dual 2D/3D
                     Projection</div>
-                  <div class="flex items-center gap-2"><i class="fas fa-satellite text-cyan-400 text-xs"></i>Real-time
-                    Orbital Layer</div>
+
                   <div class="flex items-center gap-2"><i class="fas fa-chart-area text-pink-400 text-xs"></i>Live
                     Telemetry Ticker</div>
                 </div>
               </div>
             </div>
-            <div class="dossier-card p-0 font-mono text-[10px] h-36 overflow-hidden flex flex-col relative"
+            <div class="dossier-card p-0 font-mono text-[10px] flex-1 min-h-0 flex flex-col relative"
               style="background:rgba(0,0,0,.75);border-color:rgba(255,255,255,.08)">
               <div class="px-3 py-2 border-b border-white/5 flex justify-between items-center"
                 style="background:rgba(59,130,246,.05)">
@@ -1152,9 +1088,7 @@
           </div>
         </div>
         <div class="flex gap-2">
-          <button onclick="toggleSatellite()"
-            class="map-ctrl-btn text-emerald-400 font-black text-[9px] tracking-widest" title="Toggle Satellite"
-            style="font-family:'JetBrains Mono',monospace">SAT</button>
+
           <button onclick="zoomMap(1.6)" class="map-ctrl-btn" title="Zoom In"><i
               class="fas fa-plus text-xs"></i></button>
           <button onclick="zoomMap(0.6)" class="map-ctrl-btn" title="Zoom Out"><i
@@ -1932,14 +1866,12 @@
   <script type="module" src="js/app.js"></script>
 
   <script>
-    // Keyboard shortcuts handler
     window.toggleShortcuts = () => {
       const overlay = document.getElementById('shortcuts-overlay');
       overlay.classList.toggle('active');
     };
 
     window.addEventListener('keydown', (e) => {
-      // Don't trigger if typing in input
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
       switch (e.key) {
@@ -1977,7 +1909,6 @@
       }
     });
 
-    // Show shortcuts hint on first load
     setTimeout(() => {
       if (!localStorage.getItem('shortcuts-seen')) {
         const hint = document.createElement('div');

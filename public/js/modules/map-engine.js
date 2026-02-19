@@ -353,12 +353,7 @@ function enhanceCountryStyles() {
           drop-shadow(0 0 60px rgba(16, 185, 129, 0.4));
       }
     }
-    .satellite-mode .country.active {
-      filter:
-        drop-shadow(0 0 12px rgba(16, 185, 129, 0.9))
-        drop-shadow(0 0 24px rgba(16, 185, 129, 0.6))
-        drop-shadow(0 0 36px rgba(16, 185, 129, 0.3)) !important;
-    }
+
   `;
   document.head.appendChild(style);
 }

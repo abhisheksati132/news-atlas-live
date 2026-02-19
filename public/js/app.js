@@ -248,54 +248,7 @@ function zoomToCountry(d) {
     const scale = Math.max(1, Math.min(8, 0.8 / Math.max(dx / width, dy / height)));
     svg.transition().duration(1000).call(zoom.transform, d3.zoomIdentity.translate(width / 2 - scale * x, height / 2 - scale * y).scale(scale));
 }
-window.toggleSatellite = () => {
-    window.playTacticalSound('click');
-    const mapBox = document.getElementById('map-box-id');
-    const btn = document.querySelector('button[title="Toggle Satellite Layer"]') || document.querySelector('button[title="Toggle Satellite"]');
-    const overlay = document.getElementById('satellite-overlay');
-    const container = document.getElementById('map-container');
-    const w = container.clientWidth;
-    const h = container.clientHeight;
-    if (overlay) {
-        overlay.remove();
-        mapBox.classList.remove('satellite-mode');
-        if (btn) { btn.classList.remove('text-emerald-400'); btn.classList.add('bg-emerald-600/50'); }
-        initMap(projectionType);
-    } else {
-        const scale = w / (2 * Math.PI);
-        currentProjection = d3.geoEquirectangular()
-            .scale(scale)
-            .translate([w / 2, h / 2]);
-        const path = d3.geoPath().projection(currentProjection);
-        g.selectAll("path")
-            .transition().duration(750)
-            .attr("d", path)
-            .attr("fill", "none")
-            .attr("stroke", "rgba(255,255,255,0.3)")
-            .style("pointer-events", "none");
-        const pTL = currentProjection([-180, 90]);
-        const pBR = currentProjection([180, -90]);
-        const gibsUrl = 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=BlueMarble_NextGeneration&FORMAT=image/jpeg&TRANSPARENT=FALSE&WIDTH=2048&HEIGHT=1024&CRS=CRS:84&BBOX=-180,-90,180,90';
-        const newOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-        newOverlay.id = 'satellite-overlay';
-        newOverlay.setAttribute('href', gibsUrl);
-        newOverlay.setAttribute('x', pTL[0]);
-        newOverlay.setAttribute('y', pTL[1]);
-        newOverlay.setAttribute('width', pBR[0] - pTL[0]);
-        newOverlay.setAttribute('height', pBR[1] - pTL[1]);
-        newOverlay.setAttribute('preserveAspectRatio', 'none');
-        newOverlay.style.cssText = 'opacity:0; transition:opacity 1s ease; mix-blend-mode: normal;';
-        if (g.node().firstChild) {
-            g.node().insertBefore(newOverlay, g.node().firstChild);
-        } else {
-            g.node().appendChild(newOverlay);
-        }
-        svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
-        requestAnimationFrame(() => newOverlay.style.opacity = '1');
-        mapBox.classList.add('satellite-mode');
-        if (btn) { btn.classList.add('text-emerald-400'); btn.classList.remove('bg-emerald-600/50'); }
-    }
-};
+
 window.switchTab = (id) => {
     window.playTacticalSound('tab');
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));

@@ -106,4 +106,4 @@ window.filterCityList = (query) => {
         const name = btn.querySelector('.font-bold')?.textContent?.toLowerCase() || '';
         btn.style.display = (!q || name.includes(q)) ? '' : 'none';
     });
-};
+};

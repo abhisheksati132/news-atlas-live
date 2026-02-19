@@ -134,4 +134,4 @@ window.displayCountryIndices = displayCountryIndices;
 window.displayCrypto = displayCrypto;
 window.displayForex = displayForex;
 window.displayCommodities = displayCommodities;
-window.initializeMarkets = initializeMarkets;
+window.initializeMarkets = initializeMarkets;

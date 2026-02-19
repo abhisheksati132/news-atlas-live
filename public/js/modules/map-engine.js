@@ -1,4 +1,4 @@
-﻿class ParticleNetwork {
+class ParticleNetwork {
   constructor(containerId) {
     this.container = document.getElementById(containerId);
     this.canvas = document.createElement('canvas');
@@ -259,7 +259,7 @@ class DataFlows {
     toCoordsList.forEach((toCoords, i) => {
       const to = this.projection(toCoords);
       const midX = (from[0] + to[0]) / 2;
-      const midY = (from[1] + to[1]) / 2 - 100; 
+      const midY = (from[1] + to[1]) / 2 - 100;
       const path = this.group.append('path')
         .attr('d', `M ${from[0]} ${from[1]} Q ${midX} ${midY} ${to[0]} ${to[1]}`)
         .attr('stroke', 'url(#flow-gradient)')
@@ -325,7 +325,7 @@ function enhanceCountryStyles() {
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .country:hover {
-      filter: 
+      filter:
         drop-shadow(0 0 8px rgba(59, 130, 246, 0.6))
         drop-shadow(0 0 16px rgba(59, 130, 246, 0.4))
         drop-shadow(0 0 24px rgba(59, 130, 246, 0.2));
@@ -334,27 +334,27 @@ function enhanceCountryStyles() {
       transform: translateY(-2px);
     }
     .country.active {
-      filter: 
+      filter:
         drop-shadow(0 0 12px rgba(16, 185, 129, 0.9))
         drop-shadow(0 0 24px rgba(16, 185, 129, 0.6))
         drop-shadow(0 0 36px rgba(16, 185, 129, 0.3)) !important;
       animation: pulse-glow 2s ease-in-out infinite;
     }
     @keyframes pulse-glow {
-      0%, 100% { 
-        filter: 
+      0%, 100% {
+        filter:
           drop-shadow(0 0 12px rgba(16, 185, 129, 0.9))
           drop-shadow(0 0 24px rgba(16, 185, 129, 0.6));
       }
-      50% { 
-        filter: 
+      50% {
+        filter:
           drop-shadow(0 0 20px rgba(16, 185, 129, 1))
           drop-shadow(0 0 40px rgba(16, 185, 129, 0.8))
           drop-shadow(0 0 60px rgba(16, 185, 129, 0.4));
       }
     }
     .satellite-mode .country.active {
-      filter: 
+      filter:
         drop-shadow(0 0 12px rgba(16, 185, 129, 0.9))
         drop-shadow(0 0 24px rgba(16, 185, 129, 0.6))
         drop-shadow(0 0 36px rgba(16, 185, 129, 0.3)) !important;
@@ -536,10 +536,10 @@ class GodTierMap {
   showDataFlows(fromCountry) {
     if (!this.effects.dataFlows) return;
     const majorHubs = [
-      [-74.006, 40.7128],  
-      [-0.1276, 51.5074],  
-      [139.6917, 35.6895], 
-      [103.8198, 1.3521]   
+      [-74.006, 40.7128],
+      [-0.1276, 51.5074],
+      [139.6917, 35.6895],
+      [103.8198, 1.3521]
     ];
     this.effects.dataFlows.showFlows(fromCountry, majorHubs);
   }
@@ -559,4 +559,4 @@ if (typeof module !== 'undefined' && module.exports) {
     LiveStatsTicker,
     SmoothCamera
   };
-}
+}

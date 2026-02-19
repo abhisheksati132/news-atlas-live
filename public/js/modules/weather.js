@@ -223,4 +223,4 @@ function displayWeatherAlerts(alerts) {
     });
 }
 window.fetchWeather = fetchWeather;
-window.generateWeatherAnalysis = generateWeatherAnalysis;
+window.generateWeatherAnalysis = generateWeatherAnalysis;

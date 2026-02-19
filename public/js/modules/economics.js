@@ -192,4 +192,4 @@ async function fetchMarketIntel(country, currency) {
 window.fetchDetailedEconomics = fetchDetailedEconomics;
 window.drawGDPTrend = drawGDPTrend;
 window.fetchCurrency = fetchCurrency;
-window.fetchMarketIntel = fetchMarketIntel;
+window.fetchMarketIntel = fetchMarketIntel;

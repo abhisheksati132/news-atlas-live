@@ -104,4 +104,4 @@ window.checkNewsScroll = () => {
     if (container.scrollTop + container.clientHeight >= container.scrollHeight - 100) window.loadMoreNews();
 };
 window.fetchNews = fetchNews;
-window.displayFilteredNews = displayFilteredNews;
+window.displayFilteredNews = displayFilteredNews;

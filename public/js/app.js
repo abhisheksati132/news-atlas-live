@@ -262,7 +262,7 @@ window.toggleSatellite = () => {
         if (btn) { btn.classList.remove('text-emerald-400'); btn.classList.add('bg-emerald-600/50'); }
         initMap(projectionType);
     } else {
-        const scale = w / (2 * Math.PI); 
+        const scale = w / (2 * Math.PI);
         currentProjection = d3.geoEquirectangular()
             .scale(scale)
             .translate([w / 2, h / 2]);

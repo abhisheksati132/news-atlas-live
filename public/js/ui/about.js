@@ -96,4 +96,4 @@ if (cliInput) {
         }
     });
 }
-window.appendLog = appendLog;
+window.appendLog = appendLog;

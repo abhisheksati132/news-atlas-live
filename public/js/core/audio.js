@@ -96,4 +96,4 @@ Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-};
+};

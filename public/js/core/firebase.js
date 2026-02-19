@@ -49,4 +49,4 @@ window.upgradeToGoogle = async () => {
         }
         alert("LOGIN ERROR: " + error.message);
     }
-};
+};

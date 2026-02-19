@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     8. [INFLATION_PRESSURE]: RISING - CPI projections adjusted upward to 4.5%.
     9. [FOREIGN_RELATIONS]: STRAINED - Diplomatic channels with trade partners are tense.
     10. [INFRASTRUCTURE]: NOMINAL - Power and logistics networks operating at 98% efficiency.`;
-        } 
+        }
         else if (prompt.includes("stock market") || prompt.includes("indices") || prompt.includes("market")) {
             responseText = `[GLOBAL INDICES]
     • S&P 500: 5,203.45 (+0.5%) - Tech & Semis Leading
@@ -42,7 +42,7 @@ export default async function handler(req, res) {
     • EUR/USD: 1.085 (Neutral)
     [STRATEGIC ANALYSIS]
     Global equity markets are exhibiting high variance due to shifting interest rate expectations. The technology sector remains the primary driver of liquidity, obscuring weaknesses in traditional manufacturing. Geopolitical friction in energy-producing regions is creating upward pressure on crude futures, signaling potential inflationary headwinds next quarter.`;
-        } 
+        }
         else {
             const jsonResponse = {
                 gdp_billions: "2900",
@@ -79,7 +79,7 @@ export default async function handler(req, res) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: "llama-3.3-70b-versatile", 
+                model: "llama-3.3-70b-versatile",
                 messages: [
                     { role: "system", content: systemInstruction },
                     { role: "user", content: body.prompt }

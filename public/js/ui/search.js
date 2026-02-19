@@ -36,4 +36,4 @@ window.toggleSearch = () => {
         renderTrending();
     }
 };
-window.renderTrending = renderTrending;
+window.renderTrending = renderTrending;

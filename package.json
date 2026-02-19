@@ -5,8 +5,14 @@
   "engines": {
     "node": ">=20.x"
   },
+  "scripts": {
+    "dev": "node server.js"
+  },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
-    "node-fetch": "^3.3.2"
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "node-fetch": "^3.3.2",
+    "rss-parser": "^3.13.0"
   }
 }

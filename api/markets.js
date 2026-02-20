@@ -70,7 +70,9 @@ export default async function handler(req, res) {
                 { sym: 'XAU', name: 'Gold', ticker: 'GC=F', icon: '🥇', unit: 'per troy oz' },
                 { sym: 'XAG', name: 'Silver', ticker: 'SI=F', icon: '🥈', unit: 'per troy oz' },
                 { sym: 'XPT', name: 'Platinum', ticker: 'PL=F', icon: '⚪', unit: 'per troy oz' },
-                { sym: 'XPD', name: 'Palladium', ticker: 'PA=F', icon: '⚫', unit: 'per troy oz' }
+                { sym: 'XPD', name: 'Palladium', ticker: 'PA=F', icon: '⚫', unit: 'per troy oz' },
+                { sym: 'ALI', name: 'Aluminum', ticker: 'ALI=F', icon: '🔩', unit: 'per tonne' },
+                { sym: 'ZNC', name: 'Zinc', ticker: 'ZNC=F', icon: '🔋', unit: 'per tonne' }
             ];
 
             let rate = 1;

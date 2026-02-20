@@ -41,21 +41,12 @@ window.filterNews = (searchTerm) => {
     clearTimeout(newsSearchTimer);
     if (!searchTerm.trim()) {
         currentNewsFilters.search = '';
-        displayFilteredNews();
+        fetchNews('');
         return;
     }
-    // First filter locally, then fallback to live if nothing found
+    // Debate 500ms before making network request to prevent spam
     newsSearchTimer = setTimeout(() => {
-        const localMatches = allNews.filter(a =>
-            (a.title && a.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (a.description && a.description.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
-        if (localMatches.length === 0) {
-            // No local results — trigger live RSS fetch
-            liveSearchFallback(searchTerm);
-        } else {
-            displayFilteredNews();
-        }
+        liveSearchFallback(searchTerm);
     }, 500);
 };
 
@@ -94,23 +85,6 @@ window.setCategory = (el, cat) => {
 };
 function displayFilteredNews() {
     let filtered = [...allNews];
-    if (currentNewsFilters.search) {
-        filtered = filtered.filter(article =>
-            (article.title && article.title.toLowerCase().includes(currentNewsFilters.search)) ||
-            (article.description && article.description.toLowerCase().includes(currentNewsFilters.search))
-        );
-    }
-    const now = new Date();
-    if (currentNewsFilters.time === 'Last 24 hours') {
-        filtered = filtered.filter(a => { const d = new Date(a.pubDate); return !isNaN(d) && (now - d) < 24 * 3600000; });
-    } else if (currentNewsFilters.time === 'Last 7 days') {
-        filtered = filtered.filter(a => { const d = new Date(a.pubDate); return !isNaN(d) && (now - d) < 7 * 24 * 3600000; });
-    }
-    if (currentNewsFilters.sort === 'Most Recent') {
-        filtered.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-    } else if (currentNewsFilters.sort === 'Alphabetical') {
-        filtered.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
-    }
     displayNewsArticles(filtered.slice(0, displayedNewsCount));
     const loadMoreEl = document.getElementById('news-load-more');
     if (loadMoreEl) {
@@ -133,7 +107,7 @@ function displayNewsArticles(articles) {
         card.onmouseenter = () => window.playTacticalSound('hover');
         card.innerHTML = `
             <div class="flex justify-between items-center mb-4">
-                <div class="text-[10px] font-black text-white/70 uppercase tracking-widest bg-white/5 px-2.5 py-0.5 rounded-lg truncate max-w-[100px]">${art.source_id || 'UPLINK'}</div>
+                <div class="text-[10px] font-black text-white/70 uppercase tracking-widest bg-white/5 px-2.5 py-0.5 rounded-xl truncate max-w-[100px]">${art.source_id || 'UPLINK'}</div>
                 <button class="text-slate-400 hover:text-white transition-all tactical-btn"><i class="fas fa-link text-[13px]"></i></button>
             </div>
             ${img}<h3 class="font-bold text-[16px] text-white leading-tight mb-3 cursor-pointer hover:text-blue-300 transition-colors pr-4" onclick="window.open('${art.link}', '_blank')">${art.title}</h3>
@@ -147,13 +121,7 @@ window.checkNewsScroll = () => {
     if (!container) return;
     if (container.scrollTop + container.clientHeight >= container.scrollHeight - 100) window.loadMoreNews();
 };
-window.applyNewsFilters = () => {
-    const timeEl = document.getElementById('news-time-filter');
-    const sortEl = document.getElementById('news-sort-filter');
-    if (timeEl) currentNewsFilters.time = timeEl.value;
-    if (sortEl) currentNewsFilters.sort = sortEl.value;
-    displayFilteredNews();
-};
+
 window.fetchNews = fetchNews;
 window.displayFilteredNews = displayFilteredNews;
 

@@ -16,10 +16,11 @@ NewsAtlas is a cutting-edge Single Page Application (SPA) that transforms global
 - **Database/Auth:** Google Firebase (Firestore & Authentication with Google OAuth/Anonymous)
 - **AI Core:** **Groq Cloud** (Llama 3-70b-versatile) for ultra-fast, high-density intelligence synthesis
 - **Data Streams:**
-  - **News:** NewsData.io / GNews (Live Filtering)
+  - **News & Events:** NewsData.io / Live RSS Feeds (Global Server-Side Search), GDELT Project (Event Matrix)
   - **Weather:** Open-Meteo High-Precision API with tactical estimation algorithms
-  - **Finance:** CoinGecko (Crypto), GoldAPI (Metals), Open Exchange Rates (Forex), World Bank API (GDP)
-  - **Geo:** REST Countries API v3.1 + CountriesNow API (Drill-down)
+  - **Finance:** CoinGecko (Crypto), Yahoo Finance (Metals, Forex, Global Indices, Commodities), World Bank API (GDP)
+  - **Geo & Seismology:** REST Countries API v3.1, USGS (Real-time Earthquakes)
+  - **Aviation:** OpenSky Network (Live Flight Telemetry)
   - **Satellite:** NASA GIBS (Real-time WMS Overlay)
 
 ---
@@ -27,17 +28,18 @@ NewsAtlas is a cutting-edge Single Page Application (SPA) that transforms global
 ## ⚡ Key Features
 
 ### 1. 🛰️ Orbital Map Interface
-* **Dual Projection:** Seamless switching between **Tactical Blueprint (2D)** and **Orthographic Globe (3D)** modes
-* **NASA Satellite Layer:** Real-time WMS overlay using NASA's GIBS Blue Marble data
-* **Vector Tooltips:** Interactive hover states displaying sector sovereignty data
-* **Holographic Country Glow:** Triple-layer neon glow effects on hover with pulsing animations
+* **Dual Projection Engine:** Seamlessly transitions between **Tactical Blueprint (2D)** and **Orthographic Globe (3D)** modes. Custom spherical math ensures interactive markers (earthquakes, flights) synchronize across projections with accurate geometric occlusion routing behind the 3D globe.
+* **NASA Satellite Layer:** Real-time WMS overlay using NASA's GIBS Blue Marble data.
+* **Contextual Data Vectors:** Dynamic interactive tooltips instantly adapt labels (e.g., displaying "Capital/Pop" for regions vs "Altitude/Velocity" for aviation vs "Depth/Time" for seismic data) on hover.
+* **Holographic Country Glow:** Triple-layer neon glow effects on hover with pulsing animations, restoring default cyclical color mappings when thematic overlays (GDP/AQI) are deactivated.
 
 ### 2. 🗺️ Deep-Dive Geography Engine
 * **Hierarchical Navigation:** Drill down from **Country** → **State/Province** → **City** level
 * **Smart Breadcrumbs:** Real-time tracking of current geographical context
 * **Location Intelligence:** Auto-fetches weather and news for specific grid coordinates of selected cities
 
-### 3. 🎨 Visual Effects
+### 3. 🎨 Visual Effects & UI Architecture
+* **Global Typography Scaling:** Carefully calibrated variable text scaling ensuring high accessibility and legibility without compromising the dense, glassmorphic Flexbox/Grid dossier matrix structures.
 * **Particle Network Overlay:** 50+ floating nodes with dynamic connections that follow mouse movement using Canvas API
 * **Traffic Pattern Canvas:** Real-time network traffic visualization in the About section
 * **Smooth Camera Controls:** Buttery 60fps zoom/pan with cubic-bezier easing
@@ -52,12 +54,16 @@ NewsAtlas is a cutting-edge Single Page Application (SPA) that transforms global
 * **Context-Aware Fallbacks:** Robust simulation engine ensures the terminal provides immersive "Cached Intelligence" even when offline or API limits are hit
 
 ### 5. 📉 Real-Time Market Telemetry
-* **Crypto Command:** Live prices for BTC, ETH with market cap and 24h change
-* **Forex Uplink:** Real-time currency exchange rates against base currency (USD)
-* **Precious Metals:** Live Spot Gold (XAU), Silver (XAG), Platinum (XPT), Palladium (XPD)
-* **Commodities:** Oil, Gas, and Agricultural spot prices
+* **Global Indices Hub:** Live-tracking grids monitoring primary exchanges (S&P 500, NASDAQ, Dow Jones, FTSE 100, NIKKEI 225).
+* **Crypto Command:** Live prices for top 100 assets via CoinGecko, featuring an expandable dense-grid view of trending tokens.
+* **Expanded Forex Uplink:** Continuous polling of over 16+ currency exchange rates dynamically baselined against USD.
+* **Precious Metals & Commodities:** Live Spot Gold (XAU), Silver (XAG), Platinum (XPT), Palladium (XPD), Aluminum (ALI), Zinc (ZNC), alongside Copper, Crude Oil, and Natural Gas tracking.
 
-### 6. 📊 Economic Intelligence Dashboard
+### 6. 📰 Global Signal Intelligence (News)
+* **Real-time Server-Side Search:** Instantaneously fetches and cross-references active news events across the backend feed network based on query strings without artificial dropdown limits.
+* **GDELT Integration:** Monitors the Global Database of Events, Language, and Tone tracking granular conflict and political data point mutations over the last 24h.
+
+### 7. 📊 Economic Intelligence Dashboard
 * **GDP Trend Analysis:** 5-Year historical GDP visualization using World Bank API data (Canvas rendered)
 * **Macro Indicators:** Inflation (CPI), Unemployment, Central Bank Rate, Government Debt (% of GDP)
 * **Major Exports:** AI-generated list of primary export commodities

@@ -1323,41 +1323,40 @@
                 <div id="city-list" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto"></div>
               </div>
 
-              <div class="mt-4 border-t border-white/5 pt-4">
-                <!-- GDELT: Global Event Intelligence Matrix -->
-                <div class="dossier-card mb-3"
-                  style="background:rgba(16,185,129,0.04);border-color:rgba(16,185,129,0.15)">
-                  <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3">
-                    <span class="text-[10px] text-emerald-400 uppercase font-black tracking-widest"
-                      style="font-family:'JetBrains Mono',monospace">
-                      <i class="fas fa-microchip mr-2"></i>GDELT Event Matrix
-                    </span>
-                    <span class="text-[8px] text-slate-600 font-mono" id="gdelt-timestamp">GDELT · Live Scan</span>
-                  </div>
-                  <div id="gdelt-events-content" class="space-y-0">
-                    <div class="text-slate-500 text-xs animate-pulse py-2">Scanning GDELT intelligence matrix...</div>
-                  </div>
-                </div>
+            </div>
 
-                <div id="ai-briefing-box" class="dossier-card"
-                  style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.2)">
-                  <div class="flex justify-between items-center mb-5 border-b border-white/5 pb-4">
-                    <span class="text-[9px] text-blue-400 uppercase font-black tracking-widest flex items-center gap-2"
-                      style="font-family:'JetBrains Mono',monospace">
-                      <i class="fas fa-brain text-base"></i> Neural Synthesis
-                    </span>
-                    <div class="flex items-center gap-2">
-                      <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
-                      <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest"
-                        style="font-family:'JetBrains Mono',monospace">Live Link</span>
-                    </div>
-                  </div>
-                  <p id="ai-briefing-text" class="text-slate-300">
-                    <span class="animate-pulse text-slate-500">Awaiting target selection...</span>
-                  </p>
+            <div class="px-5 py-4 flex flex-col gap-3">
+              <!-- GDELT: Global Event Intelligence Matrix -->
+              <div class="dossier-card" style="background:rgba(16,185,129,0.04);border-color:rgba(16,185,129,0.15)">
+                <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3">
+                  <span class="text-[10px] text-emerald-400 uppercase font-black tracking-widest"
+                    style="font-family:'JetBrains Mono',monospace">
+                    <i class="fas fa-microchip mr-2"></i>GDELT Event Matrix
+                  </span>
+                  <span class="text-[8px] text-slate-600 font-mono" id="gdelt-timestamp">GDELT · Live Scan</span>
+                </div>
+                <div id="gdelt-events-content" class="space-y-0">
+                  <div class="text-slate-500 text-xs animate-pulse py-2">Scanning GDELT intelligence matrix...</div>
                 </div>
               </div>
 
+              <div id="ai-briefing-box" class="dossier-card"
+                style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.2)">
+                <div class="flex justify-between items-center mb-5 border-b border-white/5 pb-4">
+                  <span class="text-[9px] text-blue-400 uppercase font-black tracking-widest flex items-center gap-2"
+                    style="font-family:'JetBrains Mono',monospace">
+                    <i class="fas fa-brain text-base"></i> Neural Synthesis
+                  </span>
+                  <div class="flex items-center gap-2">
+                    <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+                    <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest"
+                      style="font-family:'JetBrains Mono',monospace">Live Link</span>
+                  </div>
+                </div>
+                <p id="ai-briefing-text" class="text-slate-300">
+                  <span class="animate-pulse text-slate-500">Awaiting target selection...</span>
+                </p>
+              </div>
             </div>
           </div>
         </div>

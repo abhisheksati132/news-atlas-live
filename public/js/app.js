@@ -67,6 +67,8 @@ async function initTerminal() {
     } catch (e) { }
     // No default weather on load — weather loads when a country/city is selected
     window.fetchNews();
+    if (window.generateAIBriefing) window.generateAIBriefing("Global Context");
+    if (window.fetchGDELTEvents) window.fetchGDELTEvents("");
     startStockTicker();
     window.initializeMarkets('Global');
 }
@@ -432,7 +434,8 @@ window.resetToGlobalCenter = () => {
     selectedCountry = null; window.selectedCountry = null; countryUTCOffset = null;
     d3.selectAll(".country").classed("active", false);
     document.getElementById('selected-country-name').innerText = "GLOBAL SURVEILLANCE";
-    document.getElementById('ai-briefing-box').classList.add('hidden');
+    if (window.generateAIBriefing) window.generateAIBriefing("Global Context");
+    if (window.fetchGDELTEvents) window.fetchGDELTEvents("");
     const flagBox = document.getElementById('active-sector-display');
     if (flagBox) flagBox.classList.add('hidden');
     if (projectionType === '2d') svg.transition().duration(1200).call(zoom.transform, d3.zoomIdentity);

@@ -441,6 +441,17 @@ window.resetToGlobalCenter = () => {
     if (projectionType === '2d') svg.transition().duration(1200).call(zoom.transform, d3.zoomIdentity);
     window.fetchNews();
     if (window.resetWeatherData) window.resetWeatherData();
+
+    // Explicit tab resets
+    const hp = document.getElementById('hierarchy-panel');
+    if (hp) hp.classList.add('hidden');
+    const stateEl = document.getElementById('state-selector');
+    if (stateEl) stateEl.classList.add('hidden');
+    const cityEl = document.getElementById('city-selector');
+    if (cityEl) cityEl.classList.add('hidden');
+
+    if (window.initializeMarkets) window.initializeMarkets('Global');
+    if (window.fetchDetailedEconomics) window.fetchDetailedEconomics('Global Macro Economy');
 };
 window.goToIndiaHome = () => {
     const india = worldFeatures.find(f => f.properties.name === "India");

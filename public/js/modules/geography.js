@@ -16,6 +16,7 @@ async function onCountrySelected(countryName) {
     const stateSelector = document.getElementById('state-selector');
     if (stateSelector) stateSelector.classList.remove('hidden');
     if (window.displayCountryIndices) window.displayCountryIndices(countryName);
+    if (window.fetchGDELTEvents) window.fetchGDELTEvents(countryName);
     try {
         const res = await fetch(`/api/geo?country=${encodeURIComponent(countryName)}&level=states`);
         const data = await res.json();
@@ -83,6 +84,8 @@ async function selectCity(countryName, stateName, cityName) {
         const geoData = await geoRes.json();
         if (geoData.results && geoData.results[0]) {
             const { latitude, longitude } = geoData.results[0];
+            // Feature 4: update location label before fetching weather
+            window._currentWeatherLocation = `${cityName}, ${countryName}`;
             if (window.fetchWeather) window.fetchWeather(latitude, longitude);
         }
     } catch (e) { }

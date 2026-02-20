@@ -48,7 +48,16 @@ async function fetchWeather(lat, lon) {
         const res = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
         if (!res.ok) throw new Error(`Weather fetch failed: ${res.status}`);
         const data = await res.json();
+
+        // Feature 4: Show location label
+        const locationLabel = document.getElementById('atmo-location-label');
+        if (locationLabel && window._currentWeatherLocation) {
+            locationLabel.innerHTML = `<i class="fas fa-map-marker-alt mr-1 text-blue-400"></i>${window._currentWeatherLocation}`;
+            locationLabel.classList.remove('hidden');
+        }
+
         if (data.current) {
+
             const curr = data.current;
             const meta = getWeatherMeta(curr.weather_code, curr.is_day);
             document.getElementById('atmo-temp').innerText = `${Math.round(curr.temperature_2m)}°`;

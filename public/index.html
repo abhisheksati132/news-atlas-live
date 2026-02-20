@@ -47,16 +47,21 @@
             class="text-sm font-mono text-slate-400 hover:text-blue-400 transition-colors tracking-wider">FEATURES</a>
           <a href="#terminal"
             class="text-sm font-mono text-slate-400 hover:text-blue-400 transition-colors tracking-wider">TERMINAL</a>
+          <a href="#intel"
+            class="text-sm font-mono text-slate-400 hover:text-emerald-400 transition-colors tracking-wider">INTEL</a>
+          <a href="#changelog"
+            class="text-sm font-mono text-slate-400 hover:text-cyan-400 transition-colors tracking-wider">CHANGELOG</a>
           <a href="#status"
             class="text-sm font-mono text-slate-400 hover:text-blue-400 transition-colors tracking-wider">STATUS</a>
         </div>
 
         <div class="flex items-center gap-3">
-
+          <a href="#terminal"
+            class="sec-btn text-sm font-mono text-slate-300 font-semibold px-4 py-2 rounded tracking-widest inline-block hidden sm:inline-block">DEMO
+            ↓</a>
           <a href="terminal.html"
-            class="cta-btn text-sm font-mono text-blue-300 font-semibold px-5 py-2 rounded tracking-widest inline-block">
-            LAUNCH →
-          </a>
+            class="cta-btn text-sm font-mono text-blue-300 font-semibold px-5 py-2 rounded tracking-widest inline-block">LAUNCH
+            →</a>
           <button id="nav-toggle" class="md:hidden text-slate-400 hover:text-white p-2" onclick="
                 document.getElementById('mobile-menu').classList.toggle('open')
               ">
@@ -74,6 +79,10 @@
         class="block text-sm font-mono text-slate-400 hover:text-blue-400 py-2 tracking-wider">FEATURES</a>
       <a href="#terminal"
         class="block text-sm font-mono text-slate-400 hover:text-blue-400 py-2 tracking-wider">TERMINAL</a>
+      <a href="#intel"
+        class="block text-sm font-mono text-slate-400 hover:text-emerald-400 py-2 tracking-wider">INTEL</a>
+      <a href="#changelog"
+        class="block text-sm font-mono text-slate-400 hover:text-cyan-400 py-2 tracking-wider">CHANGELOG</a>
       <a href="#status"
         class="block text-sm font-mono text-slate-400 hover:text-blue-400 py-2 tracking-wider">STATUS</a>
     </div>
@@ -518,6 +527,66 @@
           </div>
         </div>
       </div>
+
+      <!-- Tech Stack Row -->
+      <div class="mt-10 pt-8 border-t border-white/5">
+        <div class="text-center text-xs font-mono text-slate-600 tracking-widest uppercase mb-6">Powered By</div>
+        <div class="flex flex-wrap items-center justify-center gap-6">
+          <div class="flex items-center gap-2 px-4 py-2 glass rounded-full border border-white/5">
+            <span class="text-blue-400 font-mono text-xs font-bold">D3.js</span>
+            <span class="text-slate-600 text-xs">Geo Engine</span>
+          </div>
+          <div class="flex items-center gap-2 px-4 py-2 glass rounded-full border border-white/5">
+            <span class="text-amber-400 font-mono text-xs font-bold">Firebase</span>
+            <span class="text-slate-600 text-xs">Auth + DB</span>
+          </div>
+          <div class="flex items-center gap-2 px-4 py-2 glass rounded-full border border-white/5">
+            <span class="text-emerald-400 font-mono text-xs font-bold">Groq Llama 3</span>
+            <span class="text-slate-600 text-xs">AI Core</span>
+          </div>
+          <div class="flex items-center gap-2 px-4 py-2 glass rounded-full border border-white/5">
+            <span class="text-cyan-400 font-mono text-xs font-bold">Yahoo Finance</span>
+            <span class="text-slate-600 text-xs">Live Markets</span>
+          </div>
+          <div class="flex items-center gap-2 px-4 py-2 glass rounded-full border border-white/5">
+            <span class="text-purple-400 font-mono text-xs font-bold">Open-Meteo</span>
+            <span class="text-slate-600 text-xs">Weather</span>
+          </div>
+          <div class="flex items-center gap-2 px-4 py-2 glass rounded-full border border-white/5">
+            <span class="text-rose-400 font-mono text-xs font-bold">World Bank</span>
+            <span class="text-slate-600 text-xs">Economics</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Animated Stats Bar -->
+  <section class="py-12 px-4 sm:px-6 border-y border-white/5" style="background: rgba(1, 4, 14, 0.7)">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
+        <div class="fade-up delay-1">
+          <div class="text-3xl sm:text-4xl font-black font-mono text-blue-400 glow-blue stat-val" id="stat-nations">0
+          </div>
+          <div class="text-xs font-mono text-slate-500 tracking-widest uppercase mt-1">Nations Tracked</div>
+        </div>
+        <div class="fade-up delay-2">
+          <div class="text-3xl sm:text-4xl font-black font-mono text-emerald-400 glow-green stat-val" id="stat-sources">
+            0</div>
+          <div class="text-xs font-mono text-slate-500 tracking-widest uppercase mt-1">Live Sources</div>
+        </div>
+        <div class="fade-up delay-3">
+          <div class="text-3xl sm:text-4xl font-black font-mono text-cyan-400 glow-cyan stat-val" id="stat-markets">0
+          </div>
+          <div class="text-xs font-mono text-slate-500 tracking-widest uppercase mt-1">Markets Monitored</div>
+        </div>
+        <div class="fade-up delay-4">
+          <div class="text-3xl sm:text-4xl font-black font-mono text-amber-400 stat-val" id="stat-latency">&lt;50ms
+          </div>
+          <div class="text-xs font-mono text-slate-500 tracking-widest uppercase mt-1">Data Latency</div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -705,7 +774,156 @@
     </div>
   </section>
 
+  <!-- INTEL: Live Intelligence Feed Section -->
+  <section id="intel" class="relative py-24 px-4 sm:px-6 overflow-hidden">
+    <div class="absolute inset-0 radial-green opacity-20 pointer-events-none"></div>
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-4"
+          style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25)">
+          <div class="w-2 h-2 rounded-full bg-emerald-400 status-dot"></div>
+          <span class="text-xs font-mono text-emerald-400 tracking-widest">LIVE INTELLIGENCE FEED</span>
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">
+          Real-Time <span class="text-emerald-400">Intel</span> Stream
+        </h2>
+        <p class="text-slate-400 font-mono text-sm max-w-xl mx-auto">
+          Breaking dispatches, classified-tier analysis, and geopolitical signals — decoded as they emerge.
+        </p>
+      </div>
 
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8" id="intel-cards">
+        <!-- Card 1 -->
+        <div class="feat-card glass corner-bracket rounded-lg p-5 border border-white/5 flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-mono text-red-400 font-bold tracking-widest uppercase px-2 py-0.5 rounded"
+              style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2)">⬤ HIGH PRIORITY</span>
+            <span class="text-[10px] font-mono text-slate-600">2 MIN AGO</span>
+          </div>
+          <h3 class="text-sm font-bold text-white leading-snug">Central Banks Signal Coordinated Rate Policy Shift Amid
+            Inflation Divergence</h3>
+          <p class="text-xs font-mono text-slate-500 leading-relaxed">ECB and Fed diverge on timeline as CPI data
+            contradicts consensus models across G7 economies.</p>
+          <div class="flex items-center gap-2 pt-1 border-t border-white/5">
+            <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+            <span class="text-[10px] font-mono text-slate-500">ECONOMIC · REUTERS</span>
+          </div>
+        </div>
+        <!-- Card 2 -->
+        <div class="feat-card glass corner-bracket rounded-lg p-5 border border-white/5 flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-mono text-amber-400 font-bold tracking-widest uppercase px-2 py-0.5 rounded"
+              style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2)">⬤ GEOINT ALERT</span>
+            <span class="text-[10px] font-mono text-slate-600">11 MIN AGO</span>
+          </div>
+          <h3 class="text-sm font-bold text-white leading-snug">Pacific Shipping Lane Activity Surges — Naval
+            Repositioning Detected</h3>
+          <p class="text-xs font-mono text-slate-500 leading-relaxed">AIS transponder data shows 34% increase in naval
+            vessel movement across contested South China Sea corridors.</p>
+          <div class="flex items-center gap-2 pt-1 border-t border-white/5">
+            <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+            <span class="text-[10px] font-mono text-slate-500">GEOINT · AP WIRE</span>
+          </div>
+        </div>
+        <!-- Card 3 -->
+        <div class="feat-card glass corner-bracket rounded-lg p-5 border border-white/5 flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-mono text-emerald-400 font-bold tracking-widest uppercase px-2 py-0.5 rounded"
+              style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2)">⬤ MARKET SIGNAL</span>
+            <span class="text-[10px] font-mono text-slate-600">28 MIN AGO</span>
+          </div>
+          <h3 class="text-sm font-bold text-white leading-snug">Gold Hits Multi-Year High as Dollar Weakens on Fed Pivot
+            Expectations</h3>
+          <p class="text-xs font-mono text-slate-500 leading-relaxed">XAU/USD breaches $2,400 resistance. Options flow
+            suggests institutional accumulation ahead of FOMC.</p>
+          <div class="flex items-center gap-2 pt-1 border-t border-white/5">
+            <div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+            <span class="text-[10px] font-mono text-slate-500">MARKETS · BLOOMBERG</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <a href="terminal.html"
+          class="cta-btn text-sm font-mono text-emerald-300 font-semibold px-8 py-3 rounded tracking-widest inline-block">ACCESS
+          FULL INTEL FEED →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHANGELOG: System Version History -->
+  <section id="changelog" class="relative py-24 px-4 sm:px-6 overflow-hidden" style="background: rgba(1, 4, 14, 0.6)">
+    <div class="absolute inset-0 radial-cyan opacity-20 pointer-events-none"></div>
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-4"
+          style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.25)">
+          <span class="text-xs font-mono text-cyan-400 tracking-widest">// SYSTEM CHANGELOG</span>
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">
+          Mission <span class="text-cyan-400">Log</span>
+        </h2>
+        <p class="text-slate-400 font-mono text-sm max-w-xl mx-auto">Continuous deployment. Every commit is a force
+          multiplier.</p>
+      </div>
+
+      <div class="glass rounded-lg border border-cyan-500/15 overflow-hidden box-glow-cyan">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-white/5"
+          style="background:rgba(6,182,212,0.04)">
+          <div class="flex items-center gap-2">
+            <div class="w-3 h-3 rounded-full bg-red-500 opacity-80"></div>
+            <div class="w-3 h-3 rounded-full bg-yellow-500 opacity-80"></div>
+            <div class="w-3 h-3 rounded-full bg-emerald-500 opacity-80"></div>
+          </div>
+          <span class="text-xs font-mono text-cyan-400/50 tracking-widest">NEWSATLAS://CHANGELOG/main</span>
+          <div class="flex items-center gap-1.5">
+            <div class="w-2 h-2 rounded-full bg-emerald-400 status-dot"></div><span
+              class="text-xs font-mono text-emerald-400">AUTO-DEPLOY</span>
+          </div>
+        </div>
+        <div class="p-5 space-y-0 font-mono text-xs" style="background:rgba(1,4,14,0.8)">
+          <div class="log-line flex gap-4 py-3 border-b border-white/5">
+            <span class="text-cyan-400/50 shrink-0 w-20">2026-02-20</span>
+            <span class="text-emerald-400 shrink-0">v3.7.1</span>
+            <span class="text-slate-300">Live Yahoo Finance ticker · GDP heat overlay · Flight arc animations · Rich
+              hover tooltips</span>
+          </div>
+          <div class="log-line flex gap-4 py-3 border-b border-white/5">
+            <span class="text-cyan-400/50 shrink-0 w-20">2026-02-18</span>
+            <span class="text-emerald-400 shrink-0">v3.6.0</span>
+            <span class="text-slate-300">Per-tab AI chat widgets · Country-specific news feeds · Weather location
+              labels</span>
+          </div>
+          <div class="log-line flex gap-4 py-3 border-b border-white/5">
+            <span class="text-cyan-400/50 shrink-0 w-20">2026-02-10</span>
+            <span class="text-blue-400 shrink-0">v3.5.0</span>
+            <span class="text-slate-300">Groq Llama 3 AI briefing engine · Voice command system · Tactical sound
+              engine</span>
+          </div>
+          <div class="log-line flex gap-4 py-3 border-b border-white/5">
+            <span class="text-cyan-400/50 shrink-0 w-20">2026-01-28</span>
+            <span class="text-blue-400 shrink-0">v3.4.0</span>
+            <span class="text-slate-300">3D globe projection · DataFlows arc system · Particle network overlay</span>
+          </div>
+          <div class="log-line flex gap-4 py-3 border-b border-white/5">
+            <span class="text-cyan-400/50 shrink-0 w-20">2026-01-14</span>
+            <span class="text-purple-400 shrink-0">v3.3.0</span>
+            <span class="text-slate-300">Firebase Auth integration · Economic dashboard · World Bank API pipeline</span>
+          </div>
+          <div class="log-line flex gap-4 py-3">
+            <span class="text-cyan-400/50 shrink-0 w-20">2025-12-01</span>
+            <span class="text-slate-500 shrink-0">v3.0.0</span>
+            <span class="text-slate-500">Initial public release · D3 world map · RSS news aggregation · Currency
+              API</span>
+          </div>
+          <div class="flex items-center gap-3 pt-4 border-t border-white/5">
+            <span class="text-emerald-400">atlas@changelog:~$</span>
+            <span class="text-slate-400 cursor">█</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <footer id="status" class="border-t border-white/5 py-10 px-4 sm:px-6" style="background: rgba(1, 4, 14, 0.9)">
     <div class="max-w-7xl mx-auto">

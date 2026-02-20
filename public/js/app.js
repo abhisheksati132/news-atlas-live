@@ -65,36 +65,55 @@ async function initTerminal() {
         globalSearchData = await res.json();
         window.globalSearchData = globalSearchData;
     } catch (e) { }
-    window.fetchWeather(20.5937, 78.9629);
+    // No default weather on load — weather loads when a country/city is selected
     window.fetchNews();
     startStockTicker();
     window.initializeMarkets('Global');
 }
-function startStockTicker() {
+async function startStockTicker() {
     const tickerContent = document.getElementById('stock-ticker-content');
-    const stocks = [
-        { s: "S&P 500", p: 5203.45 }, { s: "NASDAQ", p: 16420.10 },
-        { s: "DOW JONES", p: 39150.80 }, { s: "FTSE 100", p: 7950.30 },
-        { s: "NIKKEI 225", p: 40100.20 }, { s: "BTC-USD", p: 68500.00 },
-        { s: "ETH-USD", p: 3550.00 }, { s: "GOLD", p: 2320.10 },
-        { s: "CRUDE OIL", p: 82.40 }, { s: "EUR/USD", p: 1.085 }
-    ];
-    function renderTicker() {
-        let html = "";
+    if (!tickerContent) return;
+
+    function renderTicker(stocks) {
+        let html = '';
         stocks.forEach(stock => {
-            const change = (Math.random() * 2 - 1).toFixed(2);
-            const color = change >= 0 ? "text-emerald-400" : "text-red-400";
-            const arrow = change >= 0 ? "▲" : "▼";
-            html += `<div class="ticker-item text-slate-300">${stock.s} <span class="text-white">${stock.p.toLocaleString()}</span> <span class="${color} ml-2">${arrow} ${Math.abs(change)}%</span></div>`;
+            const up = stock.change >= 0;
+            const color = up ? 'text-emerald-400' : 'text-red-400';
+            const arrow = up ? '▲' : '▼';
+            const priceStr = stock.price >= 1000
+                ? stock.price.toLocaleString(undefined, { maximumFractionDigits: 2 })
+                : stock.price.toFixed(stock.price < 10 ? 4 : 2);
+            const dot = `<span style="color:rgba(255,255,255,.12);margin:0 .25rem">│</span>`;
+            html += `<div class="ticker-item">${dot}<span class="text-slate-400">${stock.label}</span> <span class="text-white font-black">${priceStr}</span> <span class="${color} ml-1">${arrow} ${Math.abs(stock.change).toFixed(2)}%</span></div>`;
         });
-        tickerContent.innerHTML = html;
+        // Duplicate for seamless loop
+        tickerContent.innerHTML = html + html;
     }
-    renderTicker();
-    setInterval(() => {
-        stocks.forEach(stock => { stock.p = parseFloat((stock.p + stock.p * (Math.random() * 0.002 - 0.001)).toFixed(2)); });
-        renderTicker();
-    }, 3000);
+
+    async function fetchAndRender() {
+        try {
+            const res = await fetch('/api/markets?type=ticker');
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            if (data.data && data.data.length > 0) {
+                renderTicker(data.data);
+                // Update the live dot to green once real data loads
+                const dot = document.querySelector('.ticker-wrap')?.previousElementSibling?.querySelector('.bg-red-400');
+                if (dot) { dot.classList.replace('bg-red-400', 'bg-emerald-400'); }
+            }
+        } catch (_) {
+            // On failure, show placeholder dashes
+            if (!tickerContent.innerHTML) {
+                tickerContent.innerHTML = '<div class="ticker-item text-slate-500">FETCHING LIVE DATA...</div>';
+            }
+        }
+    }
+
+    // Initial fetch, then refresh every 60s (Yahoo Finance rate-limits aggressively)
+    fetchAndRender();
+    setInterval(fetchAndRender, 60000);
 }
+
 async function fetchAllData(name) {
     try {
         const res = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fullText=true`);
@@ -122,6 +141,9 @@ async function fetchAllData(name) {
             let lat = 0, lon = 0;
             if (c.latlng && c.latlng.length === 2) { [lat, lon] = c.latlng; }
             else if (c.capitalInfo && c.capitalInfo.latlng && c.capitalInfo.latlng.length === 2) { [lat, lon] = c.capitalInfo.latlng; }
+            // Store location label for weather tab (Feature 4)
+            const capitalName = c.capital ? c.capital[0] : c.name.common;
+            window._currentWeatherLocation = `${capitalName}, ${c.name.common}`;
             if (lat || lon) window.fetchWeather(lat, lon);
             document.getElementById('fact-pop-2').innerText = (c.population / 1000000).toFixed(1) + 'M';
             document.getElementById('fact-gini-2').innerText = c.gini ? Object.values(c.gini)[0] : 'N/A';
@@ -190,8 +212,16 @@ function initMap(type) {
             g.selectAll("path").attr("d", path);
         }));
     }
+    // Build DataFlows instance for arc animations (Enhancement 3)
+    if (!window._dataFlows) {
+        window._dataFlows = new DataFlows('world-map', currentProjection);
+    }
+    // Build HeatMap instance for overlay (Enhancement 4)
+    if (!window._heatMap) window._heatMap = new HeatMap();
+
     d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(data => {
         worldFeatures = topojson.feature(data, data.objects.countries).features;
+        window.worldFeatures = worldFeatures; // expose for heat overlay
         const palette = ["#1d4ed8", "#2563eb", "#3b82f6", "#4f46e5", "#6366f1", "#0ea5e9", "#334155", "#475569", "#0f766e"];
         g.selectAll("path").data(worldFeatures).enter().append("path")
             .attr("class", "country")
@@ -199,18 +229,60 @@ function initMap(type) {
             .attr("fill", (d, i) => palette[i % palette.length])
             .on("mouseenter", function (e, d) {
                 window.playTacticalSound('hover');
-                const t = document.getElementById('map-tooltip');
-                t.style.left = (e.pageX + 15) + 'px'; t.style.top = (e.pageY - 15) + 'px';
-                t.classList.remove('hidden');
-                document.getElementById('tooltip-text').innerText = d.properties.name;
+                showRichTooltip(e, d);
             })
             .on("mousemove", function (e) {
                 const t = document.getElementById('map-tooltip');
-                t.style.left = (e.pageX + 15) + 'px'; t.style.top = (e.pageY - 15) + 'px';
+                t.style.left = (e.pageX + 15) + 'px';
+                t.style.top = (e.pageY - 15) + 'px';
             })
             .on("mouseleave", function () { document.getElementById('map-tooltip').classList.add('hidden'); })
             .on("click", function (event, d) { handleCountryClick(event, d); });
     });
+}
+
+// Cache for tooltip data (Enhancement 1)
+const _tooltipCache = {};
+async function showRichTooltip(e, d) {
+    const t = document.getElementById('map-tooltip');
+    t.style.left = (e.pageX + 15) + 'px';
+    t.style.top = (e.pageY - 15) + 'px';
+    t.classList.remove('hidden');
+    const name = d.properties.name;
+    // Show name instantly, enrich async
+    document.getElementById('tooltip-name').innerText = name;
+    document.getElementById('tooltip-flag').src = '';
+    document.getElementById('tooltip-flag').classList.add('hidden');
+    document.getElementById('tooltip-capital').innerText = '...';
+    document.getElementById('tooltip-pop').innerText = '...';
+    if (_tooltipCache[name]) {
+        const c = _tooltipCache[name];
+        document.getElementById('tooltip-flag').src = c.flag;
+        document.getElementById('tooltip-flag').classList.remove('hidden');
+        document.getElementById('tooltip-capital').innerText = c.capital;
+        document.getElementById('tooltip-pop').innerText = c.pop;
+        return;
+    }
+    try {
+        const res = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fullText=true&fields=name,flags,capital,population`);
+        const [c] = await res.json();
+        const entry = {
+            flag: c.flags?.svg || c.flags?.png || '',
+            capital: c.capital?.[0] || '—',
+            pop: c.population >= 1e6 ? (c.population / 1e6).toFixed(1) + 'M' : c.population?.toLocaleString() || '—'
+        };
+        _tooltipCache[name] = entry;
+        // Only update if tooltip is still visible for the same country
+        if (!t.classList.contains('hidden') && document.getElementById('tooltip-name').innerText === name) {
+            document.getElementById('tooltip-flag').src = entry.flag;
+            document.getElementById('tooltip-flag').classList.remove('hidden');
+            document.getElementById('tooltip-capital').innerText = entry.capital;
+            document.getElementById('tooltip-pop').innerText = entry.pop;
+        }
+    } catch (_) {
+        document.getElementById('tooltip-capital').innerText = '—';
+        document.getElementById('tooltip-pop').innerText = '—';
+    }
 }
 async function handleCountryClick(event, d) {
     window.playTacticalSound('click');
@@ -229,8 +301,91 @@ async function handleCountryClick(event, d) {
         else rotateToCountry(d);
         generateAIBriefing(d.properties.name);
         window.fetchMarketIntel(d.properties.name, currencyCode);
+
+        // Enhancement 2: Pulse ring at country centroid
+        spawnPulseRings(d);
+
+        // Enhancement 3: Flight arcs to major global hubs
+        if (window._dataFlows) {
+            const centroid = d3.geoCentroid(d);
+            const hubs = [[-74.006, 40.7128], [-0.1276, 51.5074], [139.6917, 35.6895], [103.8198, 1.3521], [55.2708, 25.2048]];
+            window._dataFlows.showFlows(centroid, hubs.filter(h => {
+                const dx = h[0] - centroid[0], dy = h[1] - centroid[1];
+                return Math.sqrt(dx * dx + dy * dy) > 10; // skip if hub is inside same country
+            }));
+        }
     }
 }
+
+// Enhancement 2: Animated pulse rings on country click
+function spawnPulseRings(d) {
+    try {
+        const centroidGeo = d3.geoCentroid(d);
+        const proj = currentProjection(centroidGeo);
+        if (!proj) return;
+        const [cx, cy] = proj;
+        const svgEl = d3.select('#world-map');
+        const rings = [0, 300, 600];
+        rings.forEach(delay => {
+            svgEl.append('circle')
+                .attr('cx', cx).attr('cy', cy)
+                .attr('r', 4)
+                .attr('fill', 'none')
+                .attr('stroke', '#10b981')
+                .attr('stroke-width', 2)
+                .attr('opacity', 0.9)
+                .attr('pointer-events', 'none')
+                .transition().delay(delay).duration(1400)
+                .attr('r', 60)
+                .attr('opacity', 0)
+                .attr('stroke-width', 0.5)
+                .remove();
+        });
+    } catch (_) { }
+}
+
+// Enhancement 4: Heat overlay toggle
+let _heatActive = false;
+let _gdpNormalized = null;
+window.toggleHeatOverlay = async function () {
+    const btn = document.getElementById('heat-toggle-btn');
+    const countries = d3.selectAll('.country');
+    if (_heatActive) {
+        _heatActive = false;
+        if (window._heatMap) window._heatMap.remove(countries);
+        if (btn) { btn.classList.remove('text-amber-400'); btn.classList.add('text-slate-400'); btn.title = 'GDP Heat Overlay: OFF'; }
+        return;
+    }
+    _heatActive = true;
+    if (btn) { btn.classList.add('text-amber-400'); btn.classList.remove('text-slate-400'); btn.title = 'GDP Heat Overlay: ON'; }
+
+    if (!_gdpNormalized) {
+        try {
+            const res = await fetch('https://api.worldbank.org/v2/country/all/indicator/NY.GDP.PCAP.CD?format=json&per_page=300&mrv=1');
+            const [, items] = await res.json();
+            // Build lookup by WB country name (lowercase) → value
+            const raw = {};
+            items.forEach(item => {
+                if (item.country?.value && item.value) raw[item.country.value.toLowerCase()] = item.value;
+            });
+            // Map to topojson country names used in worldFeatures
+            _gdpNormalized = {};
+            if (window.worldFeatures) {
+                window.worldFeatures.forEach(f => {
+                    const topoName = f.properties.name;
+                    const lc = topoName.toLowerCase();
+                    // Direct match first
+                    if (raw[lc]) { _gdpNormalized[topoName] = raw[lc]; return; }
+                    // Try partial match (e.g. "united states of america" → "united states")
+                    const key = Object.keys(raw).find(k => lc.includes(k) || k.includes(lc));
+                    if (key) _gdpNormalized[topoName] = raw[key];
+                });
+            }
+        } catch (_) { }
+    }
+    if (window._heatMap && _gdpNormalized) window._heatMap.apply(countries, _gdpNormalized, 'gdp');
+};
+
 function rotateToCountry(d) {
     const centroid = d3.geoCentroid(d);
     d3.transition().duration(1200).tween("rotate", () => {
@@ -257,6 +412,17 @@ window.switchTab = (id) => {
     if (tabBtn) tabBtn.classList.add('active');
     const targetContent = document.getElementById(`tab-${id}`);
     if (targetContent) targetContent.classList.add('active');
+
+    // Trigger specific API updates on tab switch
+    if (id === 'intel') {
+        if (window.fetchGDELTEvents) window.fetchGDELTEvents(window.selectedCountry);
+        if (window.fetchSeismicStatus) window.fetchSeismicStatus();
+    } else if (id === 'markets') {
+        if (window.displayCoinGeckoTrending) window.displayCoinGeckoTrending();
+        if (window.displayCoinGeckoTop10) window.displayCoinGeckoTop10();
+    } else if (id === 'economic' || id === 'economics') {
+        if (window.fetchECBRates) window.fetchECBRates();
+    }
 };
 window.toggleProjection = () => { window.playTacticalSound('tab'); initMap(projectionType === '2d' ? '3d' : '2d'); };
 window.selectFromSearch = (name) => {
@@ -397,3 +563,174 @@ window.addEventListener('resize', () => {
     const c = document.getElementById('map-container');
     if (c) { d3.select("#world-map").attr("viewBox", `0 0 ${c.clientWidth} ${c.clientHeight}`); initMap(projectionType); }
 });
+
+// ─── USGS EARTHQUAKE LAYER ──────────────────────────────────────────────────
+let _quakeActive = false, _quakeGroup = null;
+window.toggleEarthquakeLayer = async function () {
+    _quakeActive = !_quakeActive;
+    const btn = document.getElementById('quake-toggle-btn');
+    const svg = d3.select('#world-map');
+    if (!_quakeActive) {
+        if (_quakeGroup) _quakeGroup.remove();
+        _quakeGroup = null;
+        if (btn) { btn.classList.remove('text-amber-400'); btn.title = 'Earthquake Layer: OFF'; }
+        return;
+    }
+    if (btn) { btn.classList.add('text-amber-400'); btn.title = 'Earthquake Layer: ON'; }
+    if (_quakeGroup) _quakeGroup.remove();
+    _quakeGroup = svg.append('g').attr('id', 'quake-layer').attr('pointer-events', 'all');
+    try {
+        const res = await fetch('https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=4&limit=80&orderby=time');
+        const data = await res.json();
+        const features = data.features || [];
+        const magColor = m => m >= 7 ? '#ef4444' : m >= 6 ? '#f97316' : m >= 5 ? '#eab308' : '#10b981';
+        features.forEach(f => {
+            const [lon, lat] = f.geometry.coordinates;
+            const mag = f.properties.mag;
+            const place = f.properties.place;
+            const proj = currentProjection([lon, lat]);
+            if (!proj) return;
+            const [cx, cy] = proj;
+            const r = Math.max(4, (mag - 3) * 3);
+            // pulse ring
+            for (let d = 0; d <= 600; d += 300) {
+                _quakeGroup.append('circle')
+                    .attr('cx', cx).attr('cy', cy).attr('r', r)
+                    .attr('fill', 'none').attr('stroke', magColor(mag)).attr('stroke-width', 1.5)
+                    .attr('opacity', 0.7).attr('pointer-events', 'none')
+                    .transition().delay(d).duration(1800)
+                    .attr('r', r + 18).attr('opacity', 0).attr('stroke-width', 0.3)
+                    .on('end', function repeat() {
+                        if (!_quakeActive) return;
+                        d3.select(this).attr('r', r).attr('opacity', 0.7).attr('stroke-width', 1.5)
+                            .transition().delay(d).duration(1800)
+                            .attr('r', r + 18).attr('opacity', 0).on('end', repeat);
+                    });
+            }
+            // dot
+            _quakeGroup.append('circle')
+                .attr('cx', cx).attr('cy', cy).attr('r', r)
+                .attr('fill', magColor(mag)).attr('fill-opacity', 0.35)
+                .attr('stroke', magColor(mag)).attr('stroke-width', 1.5)
+                .style('cursor', 'pointer')
+                .on('mouseover', function (event) {
+                    const t = document.getElementById('map-tooltip');
+                    if (t) {
+                        document.getElementById('tooltip-name').innerText = `M${mag.toFixed(1)} — ${place}`;
+                        document.getElementById('tooltip-flag').classList.add('hidden');
+                        document.getElementById('tooltip-capital').innerText = `Depth: ${f.geometry.coordinates[2]?.toFixed(0) ?? '?'} km`;
+                        document.getElementById('tooltip-pop').innerText = new Date(f.properties.time).toUTCString().slice(0, 22);
+                        t.style.left = (event.pageX + 15) + 'px'; t.style.top = (event.pageY - 15) + 'px';
+                        t.classList.remove('hidden');
+                    }
+                })
+                .on('mouseleave', () => { const t = document.getElementById('map-tooltip'); if (t) t.classList.add('hidden'); });
+        });
+    } catch (e) { console.error('USGS fetch failed', e); }
+};
+
+// ─── OPENSKY LIVE AIRCRAFT LAYER ─────────────────────────────────────────────
+let _aircraftActive = false, _aircraftGroup = null, _aircraftInterval = null;
+async function renderAircraft() {
+    const svg = d3.select('#world-map');
+    if (_aircraftGroup) _aircraftGroup.remove();
+    _aircraftGroup = svg.append('g').attr('id', 'aircraft-layer').attr('pointer-events', 'all');
+    try {
+        // Use anonymous OpenSky endpoint — returns sample of all transponders
+        const res = await fetch('https://opensky-network.org/api/states/all?lamin=-60&lomin=-180&lamax=80&lomax=180');
+        const data = await res.json();
+        const states = (data.states || []).filter(s => s[5] && s[6]); // need lon, lat
+        // Render max 400 to avoid overload
+        states.slice(0, 400).forEach(s => {
+            const lon = s[5], lat = s[6], track = s[10] || 0, callsign = (s[1] || '').trim();
+            const proj = currentProjection([lon, lat]);
+            if (!proj) return;
+            const [cx, cy] = proj;
+            const g = _aircraftGroup.append('g')
+                .attr('transform', `translate(${cx},${cy}) rotate(${track - 90})`)
+                .style('cursor', 'pointer');
+            g.append('text')
+                .attr('text-anchor', 'middle').attr('dominant-baseline', 'middle')
+                .attr('font-size', '7px').attr('fill', '#60a5fa').attr('opacity', 0.8)
+                .text('✈');
+            g.on('mouseover', function (event) {
+                const t = document.getElementById('map-tooltip');
+                if (t) {
+                    document.getElementById('tooltip-name').innerText = callsign || 'UNKNOWN';
+                    document.getElementById('tooltip-flag').classList.add('hidden');
+                    document.getElementById('tooltip-capital').innerText = `Alt: ${s[13] ? (s[13] / 304.8).toFixed(0) + ' ft' : '?'}`;
+                    document.getElementById('tooltip-pop').innerText = `Speed: ${s[9] ? (s[9] * 1.944).toFixed(0) + ' kts' : '?'}`;
+                    t.style.left = (event.pageX + 15) + 'px'; t.style.top = (event.pageY - 15) + 'px';
+                    t.classList.remove('hidden');
+                }
+            }).on('mouseleave', () => { const t = document.getElementById('map-tooltip'); if (t) t.classList.add('hidden'); });
+        });
+    } catch (e) { console.warn('OpenSky fetch failed (rate limit or offline)', e); }
+}
+window.toggleAircraftLayer = function () {
+    _aircraftActive = !_aircraftActive;
+    const btn = document.getElementById('aircraft-toggle-btn');
+    if (!_aircraftActive) {
+        if (_aircraftGroup) _aircraftGroup.remove();
+        _aircraftGroup = null;
+        clearInterval(_aircraftInterval); _aircraftInterval = null;
+        if (btn) { btn.classList.remove('text-blue-400'); btn.title = 'Live Aircraft: OFF'; }
+        return;
+    }
+    if (btn) { btn.classList.add('text-blue-400'); btn.title = 'Live Aircraft: ON (30s refresh)'; }
+    renderAircraft();
+    _aircraftInterval = setInterval(() => { if (_aircraftActive) renderAircraft(); }, 30000);
+};
+
+// ─── OPENAQ AIR QUALITY LAYER ────────────────────────────────────────────────
+let _aqActive = false, _aqGroup = null;
+window.toggleAQLayer = async function () {
+    _aqActive = !_aqActive;
+    const btn = document.getElementById('aq-toggle-btn');
+    const svg = d3.select('#world-map');
+    if (!_aqActive) {
+        if (_aqGroup) _aqGroup.remove();
+        _aqGroup = null;
+        if (btn) { btn.classList.remove('text-emerald-400'); btn.title = 'Air Quality Layer: OFF'; }
+        // Restore original country fill
+        d3.selectAll('#world-map path.country').transition().duration(600).attr('fill', '#0f172a');
+        return;
+    }
+    if (btn) { btn.classList.add('text-emerald-400'); btn.title = 'Air Quality Layer: ON'; }
+    try {
+        // Fetch latest PM2.5 readings aggregated by country
+        const res = await fetch('https://api.openaq.org/v2/averages?parameter=pm25&spatial=country&temporal=day&limit=120&date_from=' + new Date(Date.now() - 86400000).toISOString().slice(0, 10));
+        const data = await res.json();
+        const aqByCountry = {};
+        (data.results || []).forEach(r => { if (r.country && r.average) aqByCountry[r.country] = r.average; });
+        // Color scale: green (0) → yellow (50) → red (150+)
+        const aqColor = d3.scaleLinear()
+            .domain([0, 25, 75, 150])
+            .range(['#10b981', '#eab308', '#ef4444', '#7c3aed'])
+            .clamp(true);
+        // Map country ISO2 to the countries
+        if (window.worldFeatures) {
+            const countryPaths = d3.selectAll('#world-map path.country');
+            countryPaths.transition().duration(1000).attr('fill', function () {
+                const name = d3.select(this).datum()?.properties?.name;
+                if (!name) return '#0f172a';
+                // Try to match by country name → ISO2 via a small lookup
+                const iso2 = Object.keys(aqByCountry).find(k => name.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(name.toLowerCase().slice(0, 4)));
+                const val = iso2 ? aqByCountry[iso2] : null;
+                return val ? aqColor(val) : '#1e293b';
+            });
+        }
+        // Add legend
+        if (_aqGroup) _aqGroup.remove();
+        _aqGroup = svg.append('g').attr('transform', 'translate(12,50)');
+        const legendData = [{ c: '#10b981', l: 'Good (<25 μg)' }, { c: '#eab308', l: 'Moderate (<75)' }, { c: '#ef4444', l: 'Unhealthy (75+)' }, { c: '#7c3aed', l: 'Hazardous (150+)' }];
+        legendData.forEach((d, i) => {
+            _aqGroup.append('rect').attr('x', 0).attr('y', i * 16).attr('width', 10).attr('height', 10).attr('fill', d.c).attr('rx', 2);
+            _aqGroup.append('text').attr('x', 14).attr('y', i * 16 + 9).text(d.l)
+                .attr('fill', '#94a3b8').attr('font-size', '8px').attr('font-family', 'JetBrains Mono, monospace');
+        });
+        _aqGroup.append('text').attr('x', 0).attr('y', -4).text('PM2.5 AQI · OpenAQ')
+            .attr('fill', '#10b981').attr('font-size', '7px').attr('font-family', 'JetBrains Mono, monospace').attr('font-weight', 'bold');
+    } catch (e) { console.error('OpenAQ fetch failed', e); }
+};
+

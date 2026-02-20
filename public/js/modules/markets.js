@@ -128,6 +128,8 @@ function initializeMarkets(countryName) {
     displayCrypto();
     displayForex();
     displayCommodities();
+    displayCoinGeckoTrending();
+    displayCoinGeckoTop10();
 }
 window.displayPreciousMetals = displayPreciousMetals;
 window.displayCountryIndices = displayCountryIndices;
@@ -135,3 +137,63 @@ window.displayCrypto = displayCrypto;
 window.displayForex = displayForex;
 window.displayCommodities = displayCommodities;
 window.initializeMarkets = initializeMarkets;
+
+// ─── COINGECKO: TRENDING COINS (no key) ──────────────────────────────────────
+async function displayCoinGeckoTrending() {
+    const container = document.getElementById('trending-crypto-content');
+    if (!container) return;
+    container.innerHTML = '<div class="text-slate-500 text-xs py-2">Fetching trending...</div>';
+    try {
+        const res = await fetch('https://api.coingecko.com/api/v3/search/trending');
+        const data = await res.json();
+        const coins = (data.coins || []).slice(0, 7);
+        container.innerHTML = '';
+        coins.forEach(({ item: c }) => {
+            const change = c.data?.price_change_percentage_24h?.usd ?? 0;
+            const changeClass = change >= 0 ? 'text-emerald-400' : 'text-red-400';
+            const changeIcon = change >= 0 ? '▲' : '▼';
+            const card = document.createElement('div');
+            card.className = 'dossier-card p-3 flex items-center gap-3';
+            card.innerHTML = `
+                <img src="${c.large}" class="w-7 h-7 rounded-full" onerror="this.style.display='none'">
+                <div class="flex-1 min-w-0">
+                    <div class="text-xs font-black text-white uppercase truncate">${c.symbol}</div>
+                    <div class="text-[9px] text-slate-500 truncate">${c.name}</div>
+                </div>
+                <div class="text-right shrink-0">
+                    <div class="${changeClass} text-xs font-mono font-bold">${changeIcon} ${Math.abs(change).toFixed(2)}%</div>
+                    <div class="text-[8px] text-slate-600">#${c.market_cap_rank || '?'}</div>
+                </div>`;
+            container.appendChild(card);
+        });
+    } catch (e) { container.innerHTML = '<div class="text-slate-500 text-xs">Unavailable</div>'; }
+}
+window.displayCoinGeckoTrending = displayCoinGeckoTrending;
+
+// ─── COINGECKO: TOP 10 BY MARKET CAP (no key) ────────────────────────────────
+async function displayCoinGeckoTop10() {
+    const container = document.getElementById('top10-crypto-content');
+    if (!container) return;
+    container.innerHTML = '<div class="text-slate-500 text-xs py-2 col-span-2">Loading top 10...</div>';
+    try {
+        const cur = (window.currencyCode || 'usd').toLowerCase();
+        const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${cur}&order=market_cap_desc&per_page=10&page=1&sparkline=false&price_change_percentage=24h`);
+        const coins = await res.json();
+        container.innerHTML = '';
+        coins.forEach((c, i) => {
+            const change = c.price_change_percentage_24h ?? 0;
+            const changeClass = change >= 0 ? 'text-emerald-400' : 'text-red-400';
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2 py-1.5 border-b border-white/5';
+            row.innerHTML = `
+                <span class="text-[9px] text-slate-600 font-mono w-4">${i + 1}</span>
+                <img src="${c.image}" class="w-4 h-4 rounded-full" onerror="this.style.display='none'">
+                <span class="text-[10px] font-black text-white uppercase flex-1">${c.symbol.toUpperCase()}</span>
+                <span class="text-[10px] font-mono text-white">${cur.toUpperCase()} ${c.current_price?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+                <span class="${changeClass} text-[9px] font-mono font-bold w-14 text-right">${change >= 0 ? '▲' : '▼'} ${Math.abs(change).toFixed(2)}%</span>`;
+            container.appendChild(row);
+        });
+    } catch (e) { container.innerHTML = '<div class="text-slate-500 text-xs col-span-2">Unavailable</div>'; }
+}
+window.displayCoinGeckoTop10 = displayCoinGeckoTop10;
+

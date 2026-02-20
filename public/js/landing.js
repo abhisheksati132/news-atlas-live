@@ -94,17 +94,43 @@ document.querySelectorAll(".feat-card, .glass").forEach((el) => {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-
     const viewBriefingBtn = document.getElementById('view-briefing-btn');
     if (viewBriefingBtn) {
         viewBriefingBtn.addEventListener('click', () => {
             const target = document.getElementById('ai-briefing');
             if (target) {
                 target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                // Add a temporary glow effect to highlight the section
                 target.classList.add('box-glow-cyan');
                 setTimeout(() => target.classList.remove('box-glow-cyan'), 2000);
             }
         });
+    }
+
+    // Animated counters for stats bar
+    function animateCounter(el, target, suffix = '', duration = 1800) {
+        let start = null;
+        const step = (ts) => {
+            if (!start) start = ts;
+            const progress = Math.min((ts - start) / duration, 1);
+            // ease-out cubic
+            const eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.floor(eased * target).toLocaleString() + suffix;
+            if (progress < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+    }
+
+    const statsEl = document.getElementById('stat-nations');
+    if (statsEl) {
+        const statsObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                statsObserver.disconnect();
+                const delay = (ms) => new Promise(r => setTimeout(r, ms));
+                delay(200).then(() => animateCounter(document.getElementById('stat-nations'), 192, ''));
+                delay(400).then(() => animateCounter(document.getElementById('stat-sources'), 4700, '+'));
+                delay(600).then(() => animateCounter(document.getElementById('stat-markets'), 47, ''));
+            }
+        }, { threshold: 0.3 });
+        statsObserver.observe(statsEl.closest('section') || statsEl);
     }
 });

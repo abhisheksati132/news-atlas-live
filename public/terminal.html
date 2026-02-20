@@ -39,6 +39,7 @@
 
     body {
       font-family: 'Syne', 'Segoe UI', sans-serif;
+      font-size: 16.5px;
       background-color: var(--bg);
       background-image:
         radial-gradient(ellipse at 0% 0%, rgba(59, 130, 246, 0.09) 0, transparent 55%),
@@ -91,11 +92,17 @@
       flex-shrink: 0;
       position: fixed;
       top: 0;
-      width: 100%;
+      left: 0;
+      right: 0;
       z-index: 50;
       background: rgba(2, 6, 23, 0.97);
       border-bottom: 1px solid rgba(59, 130, 246, 0.1);
       box-shadow: 0 1px 40px rgba(0, 0, 0, 0.6);
+      max-width: 100%;
+    }
+
+    header>* {
+      flex-shrink: 0;
     }
 
     .main-content {
@@ -320,15 +327,16 @@
     .ticker {
       display: inline-block;
       padding-left: 100%;
-      animation: ticker-anim 32s linear infinite
+      animation: ticker-anim 45s linear infinite
     }
 
     .ticker-item {
       display: inline-block;
-      padding: 0 1.5rem;
-      font-size: 12px;
+      padding: 0 1rem;
+      font-size: 11px;
       font-family: 'JetBrains Mono', monospace;
-      font-weight: 700
+      font-weight: 600;
+      letter-spacing: 0.02em;
     }
 
     @keyframes ticker-anim {
@@ -699,6 +707,113 @@
       font-weight: 700;
       color: #60a5fa;
     }
+
+    /* Feature 1: Per-tab AI Chat Widget */
+    .tab-ai-chat {
+      background: rgba(59, 130, 246, 0.04);
+      border: 1px solid rgba(59, 130, 246, 0.15);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 4px;
+      flex-shrink: 0;
+    }
+
+    .tab-ai-chat-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .tab-ai-chat-response {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      line-height: 1.7;
+      color: #94a3b8;
+      min-height: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.3s ease;
+    }
+
+    .tab-ai-chat-response.open {
+      max-height: 280px;
+      overflow-y: auto;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      margin-top: 8px;
+    }
+
+    .tab-ai-thinking {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .tab-ai-thinking span {
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #3b82f6;
+      animation: ai-pulse 1.2s ease-in-out infinite;
+    }
+
+    .tab-ai-thinking span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .tab-ai-thinking span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes ai-pulse {
+
+      0%,
+      100% {
+        opacity: 0.2;
+        transform: scale(0.8);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.2);
+      }
+    }
+
+    .tab-ai-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #e2e8f0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+    }
+
+    .tab-ai-input::placeholder {
+      color: rgba(100, 116, 139, 0.5);
+    }
+
+    .tab-ai-send-btn {
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #60a5fa;
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .tab-ai-send-btn:hover {
+      background: rgba(59, 130, 246, 0.3);
+      border-color: rgba(59, 130, 246, 0.6);
+    }
   </style>
 </head>
 
@@ -727,9 +842,27 @@
   </div>
 
   <div id="map-tooltip"
-    class="fixed hidden text-white px-3 py-1.5 rounded-lg text-xs shadow-xl border-l-4 border-l-blue-500"
-    style="background:rgba(2,6,23,.95);border:1px solid rgba(59,130,246,.3)">
-    <span id="tooltip-text"></span>
+    class="fixed hidden text-white rounded-xl shadow-2xl border-l-4 border-l-emerald-500 overflow-hidden"
+    style="background:rgba(2,6,23,.97);border:1px solid rgba(16,185,129,.25);min-width:160px;backdrop-filter:blur(12px)">
+    <div class="flex items-center gap-2.5 px-3 pt-2.5 pb-2 border-b border-white/5">
+      <img id="tooltip-flag" src="" alt="" class="hidden w-8 h-5 object-cover rounded shadow" />
+      <span id="tooltip-name" class="text-[11px] font-black text-white uppercase tracking-wider"
+        style="font-family:'JetBrains Mono',monospace"></span>
+    </div>
+    <div class="px-3 py-2 flex flex-col gap-1">
+      <div class="flex items-center gap-1.5">
+        <span class="text-[9px] text-slate-500 uppercase font-bold tracking-widest"
+          style="font-family:'JetBrains Mono',monospace">Capital</span>
+        <span id="tooltip-capital" class="text-[10px] text-cyan-400 font-bold"
+          style="font-family:'JetBrains Mono',monospace"></span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="text-[9px] text-slate-500 uppercase font-bold tracking-widest"
+          style="font-family:'JetBrains Mono',monospace">Pop.</span>
+        <span id="tooltip-pop" class="text-[10px] text-emerald-400 font-bold"
+          style="font-family:'JetBrains Mono',monospace"></span>
+      </div>
+    </div>
   </div>
 
   <div id="about-overlay" class="fixed inset-0 hidden flex items-center justify-center p-6">
@@ -1030,38 +1163,47 @@
       </div>
     </div>
 
-    <div class="hidden lg:flex items-center gap-7 px-7 py-2.5 rounded-xl"
+    <div class="hidden lg:flex items-center gap-5 px-6 py-2 rounded-xl"
       style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06)">
-      <div class="flex flex-col min-w-[160px]">
+      <div class="flex flex-col min-w-[150px]">
         <span id="selected-country-name"
-          class="font-black text-white text-lg uppercase truncate tracking-tight leading-tight">GLOBAL
+          class="font-black text-white text-base uppercase truncate tracking-tight leading-tight">GLOBAL
           SURVEILLANCE</span>
-        <span id="neural-id" class="text-[9px] font-bold text-slate-500 uppercase tracking-[.2em] mt-0.5 leading-none"
+        <span id="neural-id" class="text-[10px] font-bold text-slate-500 uppercase tracking-[.2em] mt-0.5 leading-none"
           style="font-family:'JetBrains Mono',monospace">handshake verified</span>
       </div>
       <div class="h-8 w-px bg-slate-800"></div>
-      <div class="flex flex-col items-center">
-        <span id="system-time" class="text-2xl font-black text-blue-400 tabular-nums leading-none"
-          style="font-family:'JetBrains Mono',monospace">00:00:00</span>
-        <span class="text-[8px] font-bold text-slate-600 uppercase mt-0.5 tracking-[.2em]"
-          style="font-family:'JetBrains Mono',monospace">UTC · <span id="local-time"
-            class="text-slate-500">--:--:--</span></span>
+      <div class="flex flex-col">
+        <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-none">Seismic Status</span>
+        <div class="flex items-center gap-2 mt-1">
+          <div class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse"></div>
+          <span id="seismic-count" class="text-xs font-black text-amber-400 font-mono leading-none">--</span>
+          <span class="text-[8px] text-slate-600 font-bold uppercase tracking-tighter">Events/Hr</span>
+        </div>
       </div>
-      <div class="h-8 w-px bg-slate-800"></div>
-      <div class="flex gap-5">
-        <button onclick="upgradeToGoogle()" class="text-slate-500 hover:text-white transition-all tactical-btn"
-          title="Verify Identity"><i class="fas fa-user-shield text-lg"></i></button>
-        <button onclick="downloadDossier()" class="text-slate-500 hover:text-white transition-all tactical-btn"
-          title="Download Intel Dossier"><i class="fas fa-file-download text-lg"></i></button>
-        <button onclick="toggleProjection()" class="text-slate-500 hover:text-blue-400 transition-all tactical-btn"
-          title="Toggle Projection"><i class="fas fa-globe-asia text-lg"></i></button>
-        <button onclick="toggleSearch()" class="text-slate-500 hover:text-blue-400 transition-all tactical-btn"
-          title="Search"><i class="fas fa-search text-lg"></i></button>
-        <button onclick="activateVoice()" class="text-slate-500 hover:text-red-400 transition-all tactical-btn"
-          title="Voice Command"><i class="fas fa-microphone text-lg"></i></button>
-        <button onclick="toggleAbout(true)" class="text-slate-500 hover:text-emerald-400 transition-all tactical-btn"
-          title="About"><i class="fas fa-info-circle text-lg"></i></button>
-      </div>
+    </div>
+    <div class="flex flex-col items-center">
+      <span id="system-time" class="text-xl font-black text-blue-400 tabular-nums leading-none"
+        style="font-family:'JetBrains Mono',monospace">00:00:00</span>
+      <span class="text-[9px] font-bold text-slate-600 uppercase mt-0.5 tracking-[.2em]"
+        style="font-family:'JetBrains Mono',monospace">UTC · <span id="local-time"
+          class="text-slate-500">--:--:--</span></span>
+    </div>
+    <div class="h-8 w-px bg-slate-800"></div>
+    <div class="flex gap-4">
+      <button onclick="upgradeToGoogle()" class="text-slate-500 hover:text-white transition-all tactical-btn"
+        title="Verify Identity"><i class="fas fa-user-shield text-base"></i></button>
+      <button onclick="downloadDossier()" class="text-slate-500 hover:text-white transition-all tactical-btn"
+        title="Download Intel Dossier"><i class="fas fa-file-download text-base"></i></button>
+      <button onclick="toggleProjection()" class="text-slate-500 hover:text-blue-400 transition-all tactical-btn"
+        title="Toggle Projection"><i class="fas fa-globe-asia text-base"></i></button>
+      <button onclick="toggleSearch()" class="text-slate-500 hover:text-blue-400 transition-all tactical-btn"
+        title="Search"><i class="fas fa-search text-base"></i></button>
+      <button onclick="activateVoice()" class="text-slate-500 hover:text-red-400 transition-all tactical-btn"
+        title="Voice Command"><i class="fas fa-microphone text-base"></i></button>
+      <button onclick="toggleAbout(true)" class="text-slate-500 hover:text-emerald-400 transition-all tactical-btn"
+        title="About"><i class="fas fa-info-circle text-base"></i></button>
+    </div>
     </div>
 
     <button onclick="goToIndiaHome()"
@@ -1090,7 +1232,26 @@
           </div>
         </div>
         <div class="flex gap-2">
-
+          <!-- Enhancement 4: GDP Heat Overlay Toggle -->
+          <button id="heat-toggle-btn" onclick="toggleHeatOverlay()" class="map-ctrl-btn text-slate-400"
+            title="GDP Heat Overlay: OFF">
+            <i class="fas fa-fire text-xs"></i>
+          </button>
+          <!-- USGS Earthquake Layer -->
+          <button id="quake-toggle-btn" onclick="toggleEarthquakeLayer()" class="map-ctrl-btn text-slate-400"
+            title="Earthquake Layer: OFF">
+            <i class="fas fa-radiation text-xs"></i>
+          </button>
+          <!-- OpenSky Live Aircraft Layer -->
+          <button id="aircraft-toggle-btn" onclick="toggleAircraftLayer()" class="map-ctrl-btn text-slate-400"
+            title="Live Aircraft: OFF">
+            <i class="fas fa-plane text-xs"></i>
+          </button>
+          <!-- OpenAQ Air Quality Layer -->
+          <button id="aq-toggle-btn" onclick="toggleAQLayer()" class="map-ctrl-btn text-slate-400"
+            title="Air Quality Layer: OFF">
+            <i class="fas fa-leaf text-xs"></i>
+          </button>
           <button onclick="zoomMap(1.6)" class="map-ctrl-btn" title="Zoom In"><i
               class="fas fa-plus text-xs"></i></button>
           <button onclick="zoomMap(0.6)" class="map-ctrl-btn" title="Zoom Out"><i
@@ -1127,10 +1288,29 @@
       <div id="sidebar-content" class="flex-1 overflow-hidden relative">
 
         <div id="tab-intel" class="tab-content active">
-          <div class="content-scroll-area">
+          <div class="content-scroll-area space-y-4">
+
+            <!-- Feature 1: AI Chat Widget - Intel Tab -->
+            <div class="tab-ai-chat">
+              <div class="tab-ai-chat-header">
+                <i class="fas fa-brain text-blue-400 text-xs"></i>
+                <span class="text-[9px] font-black text-blue-400 uppercase tracking-widest"
+                  style="font-family:'JetBrains Mono',monospace">Intel AI · Ask Anything</span>
+                <div class="flex-1"></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
+              </div>
+              <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2"
+                style="border:1px solid rgba(255,255,255,0.06)">
+                <input type="text" class="tab-ai-input" id="ai-chat-input-intel"
+                  placeholder="Ask about geopolitics, threats, stability..."
+                  onkeydown="if(event.key==='Enter') sendTabAI('intel')" autocomplete="off">
+                <button class="tab-ai-send-btn" onclick="sendTabAI('intel')">ASK</button>
+              </div>
+              <div class="tab-ai-chat-response" id="ai-chat-response-intel"></div>
+            </div>
+
             <h2 class="text-[11px] font-black text-white uppercase tracking-[.3em]"
               style="font-family:'JetBrains Mono',monospace">Tactical Briefing</h2>
-
             <div id="hierarchy-panel" class="hidden">
 
               <div class="flex items-center gap-2 text-xs font-mono mb-3">
@@ -1174,6 +1354,20 @@
               </div>
             </div>
 
+            <!-- GDELT: Global Event Intelligence Matrix -->
+            <div class="dossier-card" style="background:rgba(16,185,129,0.04);border-color:rgba(16,185,129,0.15)">
+              <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3">
+                <span class="text-[10px] text-emerald-400 uppercase font-black tracking-widest"
+                  style="font-family:'JetBrains Mono',monospace">
+                  <i class="fas fa-microchip mr-2"></i>GDELT Event Matrix
+                </span>
+                <span class="text-[8px] text-slate-600 font-mono" id="gdelt-timestamp">GDELT · Live Scan</span>
+              </div>
+              <div id="gdelt-events-content" class="space-y-0">
+                <div class="text-slate-500 text-xs animate-pulse py-2">Scanning GDELT intelligence matrix...</div>
+              </div>
+            </div>
+
             <div id="ai-briefing-box" class="dossier-card"
               style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.2)">
               <div class="flex justify-between items-center mb-5 border-b border-white/5 pb-4">
@@ -1195,6 +1389,24 @@
         </div>
 
         <div id="tab-news" class="tab-content">
+          <!-- Feature 1: AI Chat Widget - News Tab -->
+          <div class="tab-ai-chat" style="margin:1.25rem">
+            <div class="tab-ai-chat-header">
+              <i class="fas fa-newspaper text-cyan-400 text-xs"></i>
+              <span class="text-[9px] font-black text-cyan-400 uppercase tracking-widest"
+                style="font-family:'JetBrains Mono',monospace">News AI · Ask Anything</span>
+              <div class="flex-1"></div>
+              <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
+            </div>
+            <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2"
+              style="border:1px solid rgba(255,255,255,0.06)">
+              <input type="text" class="tab-ai-input" id="ai-chat-input-news"
+                placeholder="Summarize today's news, explain an event..."
+                onkeydown="if(event.key==='Enter') sendTabAI('news')" autocomplete="off">
+              <button class="tab-ai-send-btn" onclick="sendTabAI('news')">ASK</button>
+            </div>
+            <div class="tab-ai-chat-response" id="ai-chat-response-news"></div>
+          </div>
           <div class="px-5 py-4 flex flex-col gap-3 border-b border-white/5" style="background:rgba(59,130,246,.02)">
             <div class="flex justify-between items-end">
               <h2 class="text-[11px] font-black text-white uppercase tracking-[.3em]"
@@ -1264,6 +1476,25 @@
         <div id="tab-markets" class="tab-content">
           <div class="content-scroll-area">
 
+            <!-- Feature 1: AI Chat Widget - Markets Tab -->
+            <div class="tab-ai-chat">
+              <div class="tab-ai-chat-header">
+                <i class="fas fa-chart-line text-emerald-400 text-xs"></i>
+                <span class="text-[9px] font-black text-emerald-400 uppercase tracking-widest"
+                  style="font-family:'JetBrains Mono',monospace">Markets AI · Ask Anything</span>
+                <div class="flex-1"></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
+              </div>
+              <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2"
+                style="border:1px solid rgba(255,255,255,0.06)">
+                <input type="text" class="tab-ai-input" id="ai-chat-input-markets"
+                  placeholder="Analyze BTC trend, explain forex moves, gold outlook..."
+                  onkeydown="if(event.key==='Enter') sendTabAI('markets')" autocomplete="off">
+                <button class="tab-ai-send-btn" onclick="sendTabAI('markets')">ASK</button>
+              </div>
+              <div class="tab-ai-chat-response" id="ai-chat-response-markets"></div>
+            </div>
+
             <div class="dossier-card p-0 overflow-hidden"
               style="background:rgba(0,0,0,.5);border-color:rgba(255,255,255,.05)">
               <div class="px-4 py-2 border-b border-white/5 flex justify-between items-center"
@@ -1272,7 +1503,7 @@
                   style="font-family:'JetBrains Mono',monospace">LIVE EXCHANGE DATA</span>
                 <div class="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
               </div>
-              <div class="ticker-wrap py-2.5 bg-black/30">
+              <div class="ticker-wrap py-2">
                 <div class="ticker" id="stock-ticker-content"></div>
               </div>
             </div>
@@ -1337,6 +1568,50 @@
               <div id="commodities-content" class="p-4 grid grid-cols-2 md:grid-cols-3 gap-3 hidden"></div>
             </div>
 
+            <!-- CoinGecko: Trending Coins -->
+            <div class="dossier-card" style="background:rgba(245,158,11,0.04);border-color:rgba(245,158,11,0.15)">
+              <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer"
+                onclick="window.toggleMarketCategory('trending-crypto')">
+                <span class="text-[10px] text-amber-400 uppercase font-black tracking-widest"
+                  style="font-family:'JetBrains Mono',monospace">
+                  <i class="fas fa-fire-alt mr-2"></i>Trending · CoinGecko
+                </span>
+                <i class="fas fa-chevron-down text-slate-500" id="trending-crypto-chevron"></i>
+              </div>
+              <div id="trending-crypto-content" class="grid grid-cols-1 gap-2">
+                <div class="text-slate-500 text-xs py-2 animate-pulse">Fetching trending coins...</div>
+              </div>
+            </div>
+
+            <!-- CoinGecko: Top 10 by Market Cap -->
+            <div class="dossier-card" style="background:rgba(99,102,241,0.04);border-color:rgba(99,102,241,0.15)">
+              <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer"
+                onclick="window.toggleMarketCategory('top10-crypto')">
+                <span class="text-[10px] text-indigo-400 uppercase font-black tracking-widest"
+                  style="font-family:'JetBrains Mono',monospace">
+                  <i class="fas fa-trophy mr-2"></i>Top 10 by Mkt Cap · CoinGecko
+                </span>
+                <i class="fas fa-chevron-down text-slate-500" id="top10-crypto-chevron"></i>
+              </div>
+              <div id="top10-crypto-content" class="space-y-0">
+                <div class="text-slate-500 text-xs py-2 animate-pulse">Loading top 10...</div>
+              </div>
+            </div>
+
+            <!-- ECB: Live EUR Reference Rates -->
+            <div class="dossier-card" style="background:rgba(6,182,212,0.04);border-color:rgba(6,182,212,0.15)">
+              <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3">
+                <span class="text-[10px] text-cyan-400 uppercase font-black tracking-widest"
+                  style="font-family:'JetBrains Mono',monospace">
+                  <i class="fas fa-university mr-2"></i>ECB Live EUR Rates
+                </span>
+                <span class="text-[8px] text-slate-600 font-mono" id="ecb-timestamp">ECB · Live</span>
+              </div>
+              <div id="ecb-rates-content" class="space-y-0">
+                <div class="text-slate-500 text-xs animate-pulse">Fetching ECB rates...</div>
+              </div>
+            </div>
+
             <div class="dossier-card" style="background:rgba(99,102,241,.04);border-color:rgba(99,102,241,.15)">
               <div class="flex justify-between items-center mb-4 border-b border-white/5 pb-3">
                 <span class="text-[10px] text-indigo-400 uppercase font-black tracking-widest"
@@ -1362,6 +1637,29 @@
 
         <div id="tab-atmosphere" class="tab-content">
           <div class="content-scroll-area space-y-4">
+
+            <!-- Feature 1: AI Chat Widget - Atmosphere Tab -->
+            <div class="tab-ai-chat">
+              <div class="tab-ai-chat-header">
+                <i class="fas fa-cloud-sun text-blue-300 text-xs"></i>
+                <span class="text-[9px] font-black text-blue-300 uppercase tracking-widest"
+                  style="font-family:'JetBrains Mono',monospace">Weather AI · Ask Anything</span>
+                <!-- Feature 4: Location Label -->
+                <div class="flex-1"></div>
+                <span id="atmo-location-label"
+                  class="hidden text-[9px] font-bold text-slate-400 uppercase tracking-wider"
+                  style="font-family:'JetBrains Mono',monospace"></span>
+                <div class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse ml-2"></div>
+              </div>
+              <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2"
+                style="border:1px solid rgba(255,255,255,0.06)">
+                <input type="text" class="tab-ai-input" id="ai-chat-input-atmosphere"
+                  placeholder="What does this weather mean? Best time to visit?"
+                  onkeydown="if(event.key==='Enter') sendTabAI('atmosphere')" autocomplete="off">
+                <button class="tab-ai-send-btn" onclick="sendTabAI('atmosphere')">ASK</button>
+              </div>
+              <div class="tab-ai-chat-response" id="ai-chat-response-atmosphere"></div>
+            </div>
 
             <div class="dossier-card" style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.2)">
               <div class="flex justify-between items-center mb-4 border-b border-white/5 pb-3">
@@ -1563,6 +1861,26 @@
 
         <div id="tab-economic" class="tab-content">
           <div class="content-scroll-area space-y-4">
+
+            <!-- Feature 1: AI Chat Widget - Economic Tab -->
+            <div class="tab-ai-chat">
+              <div class="tab-ai-chat-header">
+                <i class="fas fa-coins text-amber-400 text-xs"></i>
+                <span class="text-[9px] font-black text-amber-400 uppercase tracking-widest"
+                  style="font-family:'JetBrains Mono',monospace">Economic AI · Ask Anything</span>
+                <div class="flex-1"></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
+              </div>
+              <div class="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2"
+                style="border:1px solid rgba(255,255,255,0.06)">
+                <input type="text" class="tab-ai-input" id="ai-chat-input-economic"
+                  placeholder="Explain GDP trends, inflation impact, trade balance..."
+                  onkeydown="if(event.key==='Enter') sendTabAI('economic')" autocomplete="off">
+                <button class="tab-ai-send-btn" onclick="sendTabAI('economic')">ASK</button>
+              </div>
+              <div class="tab-ai-chat-response" id="ai-chat-response-economic"></div>
+            </div>
+
             <div class="flex flex-col md:flex-row gap-4">
               <div class="flex-1 dossier-card relative overflow-hidden"
                 style="background:rgba(16,185,129,.04);border-color:rgba(16,185,129,.15)">
@@ -1866,6 +2184,51 @@
 
   <script type="module" src="js/core/firebase.js"></script>
   <script type="module" src="js/app.js"></script>
+
+  <!-- Feature 1: Per-Tab AI Chat Logic -->
+  <script>
+    window.sendTabAI = async function (tabId) {
+      const input = document.getElementById(`ai-chat-input-${tabId}`);
+      const responseEl = document.getElementById(`ai-chat-response-${tabId}`);
+      if (!input || !responseEl) return;
+      const query = input.value.trim();
+      if (!query) return;
+      input.disabled = true;
+
+      // Build context-aware system prompt
+      const country = window.selectedCountry?.properties?.name || 'Global';
+      const contextMap = {
+        intel: `You are a military intelligence analyst. The user is viewing intel on ${country}. Answer concisely in under 120 words with a tactical, authoritative tone.`,
+        news: `You are a senior news analyst. The user is reading news about ${country}. Summarize or explain in under 120 words.`,
+        markets: `You are a financial market analyst. The user is viewing market data. Answer the query in under 120 words with data-driven insight.`,
+        atmosphere: `You are a meteorologist. The user is viewing weather data for ${window._currentWeatherLocation || country}. Answer in under 120 words.`,
+        economic: `You are a macroeconomist. The user is viewing economic data for ${country}. Answer the query in under 120 words with key metrics.`,
+      };
+      const systemContext = contextMap[tabId] || `Answer the question about ${country} in under 120 words.`;
+
+      responseEl.classList.add('open');
+      responseEl.innerHTML = `<div class="tab-ai-thinking"><span></span><span></span><span></span> <span style="color:#94a3b8;font-size:10px;margin-left:4px">Analyzing...</span></div>`;
+
+      try {
+        const res = await fetch('/api/ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: `${systemContext}\n\nUser question: ${query}` })
+        });
+        const result = await res.json();
+        let text = result.candidates?.[0]?.content?.parts?.[0]?.text || result.response || result.text || 'No response received.';
+        text = text.replace(/\*\*/g, '').trim();
+        responseEl.innerHTML = `<span style="color:#60a5fa;font-size:9px;letter-spacing:.1em;font-weight:900;text-transform:uppercase">AI ›</span> ${text}`;
+        input.value = '';
+        if (window.playTacticalSound) window.playTacticalSound('success');
+      } catch (e) {
+        responseEl.innerHTML = `<span style="color:#ef4444">Connection failed. Retry.</span>`;
+      } finally {
+        input.disabled = false;
+        input.focus();
+      }
+    };
+  </script>
 
   <script>
     window.toggleShortcuts = () => {

@@ -4,6 +4,36 @@ export default async function handler(req, res) {
     if (req.method === "OPTIONS") return res.status(200).end();
     const { type, currency = 'usd' } = req.query;
     try {
+        if (type === 'ticker') {
+            const symbols = [
+                { label: 'S&P 500', ticker: '^GSPC' },
+                { label: 'NASDAQ', ticker: '^IXIC' },
+                { label: 'DOW JONES', ticker: '^DJI' },
+                { label: 'FTSE 100', ticker: '^FTSE' },
+                { label: 'NIKKEI 225', ticker: '^N225' },
+                { label: 'BTC-USD', ticker: 'BTC-USD' },
+                { label: 'ETH-USD', ticker: 'ETH-USD' },
+                { label: 'GOLD', ticker: 'GC=F' },
+                { label: 'CRUDE OIL', ticker: 'CL=F' },
+                { label: 'EUR/USD', ticker: 'EURUSD=X' },
+            ];
+            const fetchTicker = async ({ label, ticker }) => {
+                try {
+                    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=2d`;
+                    const r = await fetch(url, { headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' } });
+                    const d = await r.json();
+                    const meta = d?.chart?.result?.[0]?.meta;
+                    if (!meta) return null;
+                    const price = meta.regularMarketPrice || 0;
+                    const prev = meta.chartPreviousClose || meta.previousClose || price;
+                    const change = prev ? +((price - prev) / prev * 100).toFixed(2) : 0;
+                    return { label, price: +price.toFixed(2), change };
+                } catch (_) { return null; }
+            };
+            const results = await Promise.all(symbols.map(fetchTicker));
+            return res.status(200).json({ type: 'ticker', data: results.filter(Boolean) });
+        }
+
         if (type === 'crypto') {
             const cur = (currency || 'usd').toLowerCase();
             const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${cur}&order=market_cap_desc&per_page=20&page=1&sparkline=false&price_change_percentage=24h`;

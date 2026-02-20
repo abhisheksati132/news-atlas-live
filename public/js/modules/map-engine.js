@@ -1,17 +1,18 @@
 class ParticleNetwork {
   constructor(containerId) {
     this.container = document.getElementById(containerId);
-    this.canvas = document.createElement('canvas');
-    this.canvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;opacity:0.6';
+    this.canvas = document.createElement("canvas");
+    this.canvas.style.cssText =
+      "position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;opacity:0.6";
     this.container.appendChild(this.canvas);
-    this.ctx = this.canvas.getContext('2d');
+    this.ctx = this.canvas.getContext("2d");
     this.particles = [];
     this.mouse = { x: null, y: null, radius: 150 };
     this.resize();
     this.init();
     this.animate();
-    window.addEventListener('resize', () => this.resize());
-    this.canvas.addEventListener('mousemove', (e) => {
+    window.addEventListener("resize", () => this.resize());
+    this.canvas.addEventListener("mousemove", (e) => {
       const rect = this.canvas.getBoundingClientRect();
       this.mouse.x = e.clientX - rect.left;
       this.mouse.y = e.clientY - rect.top;
@@ -23,14 +24,16 @@ class ParticleNetwork {
   }
   init() {
     this.particles = [];
-    const particleCount = Math.floor((this.canvas.width * this.canvas.height) / 15000);
+    const particleCount = Math.floor(
+      (this.canvas.width * this.canvas.height) / 15000,
+    );
     for (let i = 0; i < particleCount; i++) {
       this.particles.push({
         x: Math.random() * this.canvas.width,
         y: Math.random() * this.canvas.height,
         vx: (Math.random() - 0.5) * 0.5,
         vy: (Math.random() - 0.5) * 0.5,
-        radius: Math.random() * 2 + 1
+        radius: Math.random() * 2 + 1,
       });
     }
   }
@@ -53,9 +56,9 @@ class ParticleNetwork {
       }
       this.ctx.beginPath();
       this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      this.ctx.fillStyle = 'rgba(59, 130, 246, 0.8)';
+      this.ctx.fillStyle = "rgba(59, 130, 246, 0.8)";
       this.ctx.fill();
-      this.particles.slice(i + 1).forEach(p2 => {
+      this.particles.slice(i + 1).forEach((p2) => {
         const dx = p.x - p2.x;
         const dy = p.y - p2.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -78,16 +81,18 @@ class ParticleNetwork {
 class MatrixRain {
   constructor(containerId) {
     this.container = document.getElementById(containerId);
-    this.canvas = document.createElement('canvas');
-    this.canvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;opacity:0.15';
+    this.canvas = document.createElement("canvas");
+    this.canvas.style.cssText =
+      "position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;opacity:0.15";
     this.container.appendChild(this.canvas);
-    this.ctx = this.canvas.getContext('2d');
-    this.chars = '01ã‚¢ã‚¤ã‚¦ã‚¨ã‚ªã‚«ã‚­ã‚¯ã‚±ã‚³ã‚µã‚·ã‚¹ã‚»ã‚½ã‚¿ãƒãƒ„ãƒ†ãƒˆãƒŠãƒ‹ãƒŒãƒãƒŽãƒãƒ’ãƒ•ãƒ˜ãƒ›';
+    this.ctx = this.canvas.getContext("2d");
+    this.chars =
+      "01ã‚¢ã‚¤ã‚¦ã‚¨ã‚ªã‚«ã‚­ã‚¯ã‚±ã‚³ã‚µã‚·ã‚¹ã‚»ã‚½ã‚¿ãƒãƒ„ãƒ†ãƒˆãƒŠãƒ‹ãƒŒãƒãƒŽãƒãƒ’ãƒ•ãƒ˜ãƒ›";
     this.fontSize = 14;
     this.resize();
     this.init();
     this.animate();
-    window.addEventListener('resize', () => this.resize());
+    window.addEventListener("resize", () => this.resize());
   }
   resize() {
     this.canvas.width = this.container.offsetWidth;
@@ -96,13 +101,15 @@ class MatrixRain {
     this.init();
   }
   init() {
-    this.drops = Array(this.columns).fill(0).map(() => Math.random() * -100);
+    this.drops = Array(this.columns)
+      .fill(0)
+      .map(() => Math.random() * -100);
   }
   animate() {
-    this.ctx.fillStyle = 'rgba(2, 6, 23, 0.05)';
+    this.ctx.fillStyle = "rgba(2, 6, 23, 0.05)";
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.fillStyle = '#0f7';
-    this.ctx.font = this.fontSize + 'px monospace';
+    this.ctx.fillStyle = "#0f7";
+    this.ctx.font = this.fontSize + "px monospace";
     this.drops.forEach((y, i) => {
       const text = this.chars[Math.floor(Math.random() * this.chars.length)];
       const x = i * this.fontSize;
@@ -121,14 +128,15 @@ class MatrixRain {
 class HexGrid {
   constructor(svgId) {
     this.svg = d3.select(`#${svgId}`);
-    this.group = this.svg.insert('g', ':first-child')
-      .attr('class', 'hex-grid')
-      .attr('opacity', 0.08);
+    this.group = this.svg
+      .insert("g", ":first-child")
+      .attr("class", "hex-grid")
+      .attr("opacity", 0.08);
     this.draw();
   }
   draw() {
-    const width = parseInt(this.svg.style('width'));
-    const height = parseInt(this.svg.style('height'));
+    const width = parseInt(this.svg.style("width"));
+    const height = parseInt(this.svg.style("height"));
     const hexRadius = 35;
     const hexHeight = hexRadius * 2;
     const hexWidth = Math.sqrt(3) * hexRadius;
@@ -136,12 +144,13 @@ class HexGrid {
       for (let col = 0; col < width / hexWidth + 1; col++) {
         const x = col * hexWidth + (row % 2 === 0 ? 0 : hexWidth / 2);
         const y = row * hexHeight * 0.75;
-        this.group.append('polygon')
-          .attr('points', this.getHexPoints(x, y, hexRadius))
-          .attr('stroke', '#3b82f6')
-          .attr('stroke-width', 0.5)
-          .attr('fill', 'none')
-          .attr('class', 'hex-cell');
+        this.group
+          .append("polygon")
+          .attr("points", this.getHexPoints(x, y, hexRadius))
+          .attr("stroke", "#3b82f6")
+          .attr("stroke-width", 0.5)
+          .attr("fill", "none")
+          .attr("class", "hex-cell");
       }
     }
   }
@@ -151,10 +160,10 @@ class HexGrid {
       const angle = (Math.PI / 3) * i - Math.PI / 6;
       points.push([
         cx + radius * Math.cos(angle),
-        cy + radius * Math.sin(angle)
+        cy + radius * Math.sin(angle),
       ]);
     }
-    return points.map(p => p.join(',')).join(' ');
+    return points.map((p) => p.join(",")).join(" ");
   }
   destroy() {
     this.group.remove();
@@ -164,67 +173,73 @@ class DataNodes {
   constructor(svgId, projection) {
     this.svg = d3.select(`#${svgId}`);
     this.projection = projection;
-    this.group = this.svg.append('g').attr('class', 'data-nodes');
+    this.group = this.svg.append("g").attr("class", "data-nodes");
     this.cities = [
-      { name: 'New York', coords: [-74.006, 40.7128] },
-      { name: 'London', coords: [-0.1276, 51.5074] },
-      { name: 'Tokyo', coords: [139.6917, 35.6895] },
-      { name: 'Singapore', coords: [103.8198, 1.3521] },
-      { name: 'Dubai', coords: [55.2708, 25.2048] },
-      { name: 'Hong Kong', coords: [114.1694, 22.3193] },
-      { name: 'San Francisco', coords: [-122.4194, 37.7749] },
-      { name: 'Berlin', coords: [13.4050, 52.5200] },
-      { name: 'Sydney', coords: [151.2093, -33.8688] },
-      { name: 'Mumbai', coords: [72.8777, 19.0760] }
+      { name: "New York", coords: [-74.006, 40.7128] },
+      { name: "London", coords: [-0.1276, 51.5074] },
+      { name: "Tokyo", coords: [139.6917, 35.6895] },
+      { name: "Singapore", coords: [103.8198, 1.3521] },
+      { name: "Dubai", coords: [55.2708, 25.2048] },
+      { name: "Hong Kong", coords: [114.1694, 22.3193] },
+      { name: "San Francisco", coords: [-122.4194, 37.7749] },
+      { name: "Berlin", coords: [13.405, 52.52] },
+      { name: "Sydney", coords: [151.2093, -33.8688] },
+      { name: "Mumbai", coords: [72.8777, 19.076] },
     ];
     this.draw();
   }
   draw() {
-    const nodes = this.group.selectAll('.node')
+    const nodes = this.group
+      .selectAll(".node")
       .data(this.cities)
       .enter()
-      .append('g')
-      .attr('class', 'node')
-      .attr('transform', d => {
+      .append("g")
+      .attr("class", "node")
+      .attr("transform", (d) => {
         const [x, y] = this.projection(d.coords);
         return `translate(${x},${y})`;
       });
-    nodes.append('circle')
-      .attr('class', 'pulse-ring')
-      .attr('r', 0)
-      .attr('fill', 'none')
-      .attr('stroke', '#10b981')
-      .attr('stroke-width', 2)
-      .attr('opacity', 0.8)
+    nodes
+      .append("circle")
+      .attr("class", "pulse-ring")
+      .attr("r", 0)
+      .attr("fill", "none")
+      .attr("stroke", "#10b981")
+      .attr("stroke-width", 2)
+      .attr("opacity", 0.8)
       .call(this.pulsate);
-    nodes.append('circle')
-      .attr('r', 4)
-      .attr('fill', '#10b981')
-      .attr('filter', 'drop-shadow(0 0 6px rgba(16, 185, 129, 0.8))');
-    nodes.append('text')
-      .attr('x', 0)
-      .attr('y', -12)
-      .attr('text-anchor', 'middle')
-      .attr('fill', '#10b981')
-      .attr('font-size', '9px')
-      .attr('font-family', 'JetBrains Mono, monospace')
-      .attr('font-weight', 'bold')
-      .attr('opacity', 0.7)
-      .text(d => d.name);
+    nodes
+      .append("circle")
+      .attr("r", 4)
+      .attr("fill", "#10b981")
+      .attr("filter", "drop-shadow(0 0 6px rgba(16, 185, 129, 0.8))");
+    nodes
+      .append("text")
+      .attr("x", 0)
+      .attr("y", -12)
+      .attr("text-anchor", "middle")
+      .attr("fill", "#10b981")
+      .attr("font-size", "9px")
+      .attr("font-family", "JetBrains Mono, monospace")
+      .attr("font-weight", "bold")
+      .attr("opacity", 0.7)
+      .text((d) => d.name);
   }
   pulsate(selection) {
     selection
       .transition()
       .duration(2000)
-      .attr('r', 20)
-      .attr('opacity', 0)
-      .on('end', function () {
+      .attr("r", 20)
+      .attr("opacity", 0)
+      .on("end", function () {
         d3.select(this)
-          .attr('r', 0)
-          .attr('opacity', 0.8)
-          .call(function (s) {
-            DataNodes.prototype.pulsate.call(this, s);
-          }.bind(this));
+          .attr("r", 0)
+          .attr("opacity", 0.8)
+          .call(
+            function (s) {
+              DataNodes.prototype.pulsate.call(this, s);
+            }.bind(this),
+          );
       });
   }
   destroy() {
@@ -235,49 +250,57 @@ class DataFlows {
   constructor(svgId, projection) {
     this.svg = d3.select(`#${svgId}`);
     this.projection = projection;
-    this.group = this.svg.append('g').attr('class', 'data-flows');
-    const defs = this.svg.append('defs');
-    const gradient = defs.append('linearGradient')
-      .attr('id', 'flow-gradient')
-      .attr('gradientUnits', 'userSpaceOnUse');
-    gradient.append('stop')
-      .attr('offset', '0%')
-      .attr('stop-color', '#3b82f6')
-      .attr('stop-opacity', 0);
-    gradient.append('stop')
-      .attr('offset', '50%')
-      .attr('stop-color', '#06b6d4')
-      .attr('stop-opacity', 1);
-    gradient.append('stop')
-      .attr('offset', '100%')
-      .attr('stop-color', '#10b981')
-      .attr('stop-opacity', 0);
+    this.group = this.svg.append("g").attr("class", "data-flows");
+    const defs = this.svg.append("defs");
+    const gradient = defs
+      .append("linearGradient")
+      .attr("id", "flow-gradient")
+      .attr("gradientUnits", "userSpaceOnUse");
+    gradient
+      .append("stop")
+      .attr("offset", "0%")
+      .attr("stop-color", "#3b82f6")
+      .attr("stop-opacity", 0);
+    gradient
+      .append("stop")
+      .attr("offset", "50%")
+      .attr("stop-color", "#06b6d4")
+      .attr("stop-opacity", 1);
+    gradient
+      .append("stop")
+      .attr("offset", "100%")
+      .attr("stop-color", "#10b981")
+      .attr("stop-opacity", 0);
   }
   showFlows(fromCoords, toCoordsList) {
-    this.group.selectAll('*').remove();
+    this.group.selectAll("*").remove();
     const from = this.projection(fromCoords);
     toCoordsList.forEach((toCoords, i) => {
       const to = this.projection(toCoords);
       const midX = (from[0] + to[0]) / 2;
       const midY = (from[1] + to[1]) / 2 - 100;
-      const path = this.group.append('path')
-        .attr('d', `M ${from[0]} ${from[1]} Q ${midX} ${midY} ${to[0]} ${to[1]}`)
-        .attr('stroke', 'url(#flow-gradient)')
-        .attr('stroke-width', 2)
-        .attr('fill', 'none')
-        .attr('opacity', 0)
-        .attr('stroke-dasharray', '8,4');
+      const path = this.group
+        .append("path")
+        .attr(
+          "d",
+          `M ${from[0]} ${from[1]} Q ${midX} ${midY} ${to[0]} ${to[1]}`,
+        )
+        .attr("stroke", "url(#flow-gradient)")
+        .attr("stroke-width", 2)
+        .attr("fill", "none")
+        .attr("opacity", 0)
+        .attr("stroke-dasharray", "8,4");
       const length = path.node().getTotalLength();
       path
-        .attr('stroke-dashoffset', length)
+        .attr("stroke-dashoffset", length)
         .transition()
         .delay(i * 150)
         .duration(2000)
-        .attr('opacity', 0.7)
-        .attr('stroke-dashoffset', 0)
+        .attr("opacity", 0.7)
+        .attr("stroke-dashoffset", 0)
         .transition()
         .duration(1000)
-        .attr('opacity', 0)
+        .attr("opacity", 0)
         .remove();
     });
   }
@@ -291,35 +314,50 @@ class HeatMap {
     this.currentMetric = null;
     this.colorScale = null;
   }
-  apply(countries, data, metric = 'gdp') {
+  apply(countries, data, metric = "gdp") {
     this.active = true;
     this.currentMetric = metric;
     const scales = {
       gdp: d3.scaleSequential(d3.interpolateViridis),
       population: d3.scaleSequential(d3.interpolatePlasma),
-      temperature: d3.scaleDiverging(d3.interpolateRdBu).domain([-20, 15, 50])
+      temperature: d3.scaleDiverging(d3.interpolateRdBu).domain([-20, 15, 50]),
     };
     this.colorScale = scales[metric] || scales.gdp;
-    const values = Object.values(data).filter(v => v !== null);
+    const values = Object.values(data).filter((v) => v !== null);
     this.colorScale.domain(d3.extent(values));
-    countries.transition()
+    countries
+      .transition()
       .duration(1500)
-      .attr('fill', function () {
-        const countryName = d3.select(this).datum().properties.name;
-        const value = data[countryName];
-        return value ? this.colorScale(value) : '#1e293b';
-      }.bind(this));
+      .attr(
+        "fill",
+        function () {
+          const countryName = d3.select(this).datum().properties.name;
+          const value = data[countryName];
+          return value ? this.colorScale(value) : "#1e293b";
+        }.bind(this),
+      );
   }
   remove(countries) {
     this.active = false;
-    const palette = ["#1d4ed8", "#2563eb", "#3b82f6", "#4f46e5", "#6366f1", "#0ea5e9", "#334155", "#475569", "#0f766e"];
-    countries.transition()
+    const palette = [
+      "#1d4ed8",
+      "#2563eb",
+      "#3b82f6",
+      "#4f46e5",
+      "#6366f1",
+      "#0ea5e9",
+      "#334155",
+      "#475569",
+      "#0f766e",
+    ];
+    countries
+      .transition()
       .duration(1000)
-      .attr('fill', (d, i) => palette[i % palette.length]);
+      .attr("fill", (d, i) => palette[i % palette.length]);
   }
 }
 function enhanceCountryStyles() {
-  const style = document.createElement('style');
+  const style = document.createElement("style");
   style.textContent = `
     .country {
       filter: drop-shadow(0 0 0 transparent);
@@ -365,8 +403,8 @@ class LiveStatsTicker {
     setInterval(() => this.update(), 5000);
   }
   createTicker() {
-    const ticker = document.createElement('div');
-    ticker.id = 'live-stats-ticker';
+    const ticker = document.createElement("div");
+    ticker.id = "live-stats-ticker";
     ticker.style.cssText = `
       position: absolute;
       top: 0;
@@ -418,7 +456,7 @@ class LiveStatsTicker {
         </span>
       </div>
     `;
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
       @keyframes ticker-scroll {
         0% { transform: translateX(0); }
@@ -426,14 +464,14 @@ class LiveStatsTicker {
       }
     `;
     document.head.appendChild(style);
-    document.getElementById('map-container').appendChild(ticker);
+    document.getElementById("map-container").appendChild(ticker);
   }
   update() {
     const gdp = (96 + Math.random() * 0.5).toFixed(1);
     const markets = Math.floor(125 + Math.random() * 5);
     const crypto = (2.0 + Math.random() * 0.3).toFixed(1);
     const temp = (1.2 + Math.random() * 0.1).toFixed(1);
-    ['', '-2'].forEach(suffix => {
+    ["", "-2"].forEach((suffix) => {
       const gdpEl = document.getElementById(`stat-gdp${suffix}`);
       const marketsEl = document.getElementById(`stat-markets${suffix}`);
       const cryptoEl = document.getElementById(`stat-crypto${suffix}`);
@@ -460,7 +498,8 @@ class SmoothCamera {
     this.current.zoom += (this.target.zoom - this.current.zoom) * this.easing;
     this.current.x += (this.target.x - this.current.x) * this.easing;
     this.current.y += (this.target.y - this.current.y) * this.easing;
-    this.current.rotation += (this.target.rotation - this.current.rotation) * this.easing;
+    this.current.rotation +=
+      (this.target.rotation - this.current.rotation) * this.easing;
     this.element.style.transform = `
       translate(${this.current.x}px, ${this.current.y}px)
       scale(${this.current.zoom})
@@ -476,26 +515,29 @@ class GodTierMap {
   }
   init() {
     if (this.isInitialized) return;
-    console.log('ðŸš€ Initializing God-Tier Map Effects...');
+    console.log("ðŸš€ Initializing God-Tier Map Effects...");
     enhanceCountryStyles();
     setTimeout(() => {
       try {
-        this.effects.particles = new ParticleNetwork('map-container');
+        this.effects.particles = new ParticleNetwork("map-container");
         this.effects.ticker = new LiveStatsTicker();
         if (window.projection) {
-          this.effects.dataNodes = new DataNodes('world-map', window.projection);
+          this.effects.dataNodes = new DataNodes(
+            "world-map",
+            window.projection,
+          );
         }
         this.isInitialized = true;
-        console.log('âœ… God-Tier Map Effects Active');
+        console.log("âœ… God-Tier Map Effects Active");
         this.addControls();
       } catch (err) {
-        console.error('Error initializing god-tier effects:', err);
+        console.error("Error initializing god-tier effects:", err);
       }
     }, 2000);
   }
   addControls() {
-    const controlPanel = document.createElement('div');
-    controlPanel.id = 'godtier-controls';
+    const controlPanel = document.createElement("div");
+    controlPanel.id = "godtier-controls";
     controlPanel.style.cssText = `
       position: absolute;
       bottom: 1rem;
@@ -505,28 +547,32 @@ class GodTierMap {
       z-index: 100;
     `;
     const controls = [
-      { id: 'toggle-particles', icon: 'fa-circle-nodes', title: 'Toggle Particles' },
+      {
+        id: "toggle-particles",
+        icon: "fa-circle-nodes",
+        title: "Toggle Particles",
+      },
     ];
-    controls.forEach(ctrl => {
-      const btn = document.createElement('button');
-      btn.className = 'map-ctrl-btn';
+    controls.forEach((ctrl) => {
+      const btn = document.createElement("button");
+      btn.className = "map-ctrl-btn";
       btn.title = ctrl.title;
       btn.innerHTML = `<i class="fas ${ctrl.icon} text-xs"></i>`;
       btn.onclick = () => this.toggleEffect(ctrl.id);
       controlPanel.appendChild(btn);
     });
-    document.getElementById('map-container').appendChild(controlPanel);
+    document.getElementById("map-container").appendChild(controlPanel);
   }
   toggleEffect(effectId) {
     const effectMap = {
-      'toggle-particles': 'particles',
+      "toggle-particles": "particles",
     };
     const effect = this.effects[effectMap[effectId]];
     if (!effect) return;
     if (effect.canvas || effect.group) {
       const element = effect.canvas || effect.group.node();
-      const isVisible = element.style.opacity !== '0';
-      element.style.opacity = isVisible ? '0' : '0.6';
+      const isVisible = element.style.opacity !== "0";
+      element.style.opacity = isVisible ? "0" : "0.6";
     }
   }
   showDataFlows(fromCountry) {
@@ -535,24 +581,24 @@ class GodTierMap {
       [-74.006, 40.7128],
       [-0.1276, 51.5074],
       [139.6917, 35.6895],
-      [103.8198, 1.3521]
+      [103.8198, 1.3521],
     ];
     this.effects.dataFlows.showFlows(fromCountry, majorHubs);
   }
   destroy() {
-    Object.values(this.effects).forEach(effect => {
+    Object.values(this.effects).forEach((effect) => {
       if (effect.destroy) effect.destroy();
     });
     this.effects = {};
     this.isInitialized = false;
   }
 }
-if (typeof module !== 'undefined' && module.exports) {
+if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     GodTierMap,
     ParticleNetwork,
     DataNodes,
     LiveStatsTicker,
-    SmoothCamera
+    SmoothCamera,
   };
 }

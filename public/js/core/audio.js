@@ -3,71 +3,95 @@ let ambienceOscillators = [];
 let ambienceGain = null;
 let isAmbiencePlaying = false;
 function initAudio() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (!audioCtx)
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === "suspended") audioCtx.resume();
 }
 window.toggleAmbience = () => {
-    initAudio();
-    if (isAmbiencePlaying) {
-        ambienceOscillators.forEach(osc => osc.stop());
-        ambienceOscillators = [];
-        isAmbiencePlaying = false;
-        const el = document.getElementById('ambience-text');
-        if (el) { el.innerText = "OFF"; el.classList.remove('text-blue-400'); }
-    } else {
-        ambienceGain = audioCtx.createGain();
-        ambienceGain.gain.value = 0.05;
-        ambienceGain.connect(audioCtx.destination);
-        [55, 110, 112, 54].forEach(f => {
-            const osc = audioCtx.createOscillator();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(f, audioCtx.currentTime);
-            osc.connect(ambienceGain);
-            osc.start();
-            ambienceOscillators.push(osc);
-        });
-        isAmbiencePlaying = true;
-        const el = document.getElementById('ambience-text');
-        if (el) { el.innerText = "ON"; el.classList.add('text-blue-400'); }
+  initAudio();
+  if (isAmbiencePlaying) {
+    ambienceOscillators.forEach((osc) => osc.stop());
+    ambienceOscillators = [];
+    isAmbiencePlaying = false;
+    const el = document.getElementById("ambience-text");
+    if (el) {
+      el.innerText = "OFF";
+      el.classList.remove("text-blue-400");
     }
+  } else {
+    ambienceGain = audioCtx.createGain();
+    ambienceGain.gain.value = 0.05;
+    ambienceGain.connect(audioCtx.destination);
+    [55, 110, 112, 54].forEach((f) => {
+      const osc = audioCtx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(f, audioCtx.currentTime);
+      osc.connect(ambienceGain);
+      osc.start();
+      ambienceOscillators.push(osc);
+    });
+    isAmbiencePlaying = true;
+    const el = document.getElementById("ambience-text");
+    if (el) {
+      el.innerText = "ON";
+      el.classList.add("text-blue-400");
+    }
+  }
 };
 window.playTacticalSound = (type) => {
-    initAudio();
-    try {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        if (type === 'tab') {
-            osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-        } else if (type === 'click') {
-            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.05);
-        } else if (type === 'hover') {
-            osc.frequency.setValueAtTime(1400, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.006, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.02);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.02);
-        } else if (type === 'success') {
-            osc.frequency.setValueAtTime(500, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(1100, audioCtx.currentTime + 0.25);
-            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-        }
-    } catch (e) { }
+  initAudio();
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    if (type === "tab") {
+      osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.1);
+    } else if (type === "click") {
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        audioCtx.currentTime + 0.05,
+      );
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.05);
+    } else if (type === "hover") {
+      osc.frequency.setValueAtTime(1400, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.006, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        audioCtx.currentTime + 0.02,
+      );
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.02);
+    } else if (type === "success") {
+      osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(
+        1100,
+        audioCtx.currentTime + 0.25,
+      );
+      gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.3);
+    }
+  } catch (e) {}
 };
 window.downloadDossier = () => {
-    window.playTacticalSound('success');
-    const cName = window.selectedCountry ? window.selectedCountry.properties.name : "GLOBAL_CONTEXT";
-    const date = new Date().toISOString().split('T')[0];
-    const intelText = document.getElementById('ai-briefing-text') ? document.getElementById('ai-briefing-text').innerText : "No Intel Loaded";
-    const content = `
+  window.playTacticalSound("success");
+  const cName = window.selectedCountry
+    ? window.selectedCountry.properties.name
+    : "GLOBAL_CONTEXT";
+  const date = new Date().toISOString().split("T")[0];
+  const intelText = document.getElementById("ai-briefing-text")
+    ? document.getElementById("ai-briefing-text").innerText
+    : "No Intel Loaded";
+  const content = `
 ████████████████████████████████████████████████████████████
 CLASSIFIED INTELLIGENCE DOSSIER
 SECTOR: ${cName.toUpperCase()}
@@ -77,23 +101,23 @@ GENERATED BY: NEWSATLAS TERMINAL v9.7
 [TACTICAL BRIEFING]
 ${intelText}
 [ECONOMIC TELEMETRY]
-Population: ${document.getElementById('fact-pop').innerText}
-Currency: ${document.getElementById('fact-currency').innerText}
-Capital: ${document.getElementById('fact-cap').innerText}
+Population: ${document.getElementById("fact-pop").innerText}
+Currency: ${document.getElementById("fact-currency").innerText}
+Capital: ${document.getElementById("fact-cap").innerText}
 [MARKET DATA]
-Gold: ${document.getElementById('price-gold').innerText}
-Silver: ${document.getElementById('price-silver').innerText}
+Gold: ${document.getElementById("price-gold").innerText}
+Silver: ${document.getElementById("price-silver").innerText}
 [ATMOSPHERIC CONDITIONS]
-Temp: ${document.getElementById('atmo-temp').innerText}
-Wind: ${document.getElementById('atmo-wind-speed').innerText} KM/H
+Temp: ${document.getElementById("atmo-temp").innerText}
+Wind: ${document.getElementById("atmo-wind-speed").innerText} KM/H
 -- END OF TRANSMISSION --
     `;
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `INTEL_${cName.toUpperCase()}_${date}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  const blob = new Blob([content], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `INTEL_${cName.toUpperCase()}_${date}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 };

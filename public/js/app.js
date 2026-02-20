@@ -373,48 +373,6 @@ function spawnPulseRings(d) {
     } catch (_) { }
 }
 
-// Enhancement 4: Heat overlay toggle
-let _heatActive = false;
-let _gdpNormalized = null;
-window.toggleHeatOverlay = async function () {
-    const btn = document.getElementById('heat-toggle-btn');
-    const countries = d3.selectAll('.country');
-    if (_heatActive) {
-        _heatActive = false;
-        if (window._heatMap) window._heatMap.remove(countries);
-        if (btn) { btn.classList.remove('text-amber-400'); btn.classList.add('text-slate-400'); btn.title = 'GDP Heat Overlay: OFF'; }
-        return;
-    }
-    _heatActive = true;
-    if (btn) { btn.classList.add('text-amber-400'); btn.classList.remove('text-slate-400'); btn.title = 'GDP Heat Overlay: ON'; }
-
-    if (!_gdpNormalized) {
-        try {
-            const res = await fetch('https://api.worldbank.org/v2/country/all/indicator/NY.GDP.PCAP.CD?format=json&per_page=300&mrv=1');
-            const [, items] = await res.json();
-            // Build lookup by WB country name (lowercase) → value
-            const raw = {};
-            items.forEach(item => {
-                if (item.country?.value && item.value) raw[item.country.value.toLowerCase()] = item.value;
-            });
-            // Map to topojson country names used in worldFeatures
-            _gdpNormalized = {};
-            if (window.worldFeatures) {
-                window.worldFeatures.forEach(f => {
-                    const topoName = f.properties.name;
-                    const lc = topoName.toLowerCase();
-                    // Direct match first
-                    if (raw[lc]) { _gdpNormalized[topoName] = raw[lc]; return; }
-                    // Try partial match (e.g. "united states of america" → "united states")
-                    const key = Object.keys(raw).find(k => lc.includes(k) || k.includes(lc));
-                    if (key) _gdpNormalized[topoName] = raw[key];
-                });
-            }
-        } catch (_) { }
-    }
-    if (window._heatMap && _gdpNormalized) window._heatMap.apply(countries, _gdpNormalized, 'gdp');
-};
-
 function rotateToCountry(d) {
     const centroid = d3.geoCentroid(d);
     d3.transition().duration(1200).tween("rotate", () => {
@@ -722,58 +680,5 @@ window.toggleAircraftLayer = function () {
     if (btn) { btn.classList.add('text-blue-400'); btn.title = 'Live Aircraft: ON (30s refresh)'; }
     renderAircraft();
     _aircraftInterval = setInterval(() => { if (_aircraftActive) renderAircraft(); }, 30000);
-};
-
-// ─── OPENAQ AIR QUALITY LAYER ────────────────────────────────────────────────
-let _aqActive = false, _aqGroup = null;
-window.toggleAQLayer = async function () {
-    _aqActive = !_aqActive;
-    const btn = document.getElementById('aq-toggle-btn');
-    const svg = d3.select('#world-map');
-    if (!_aqActive) {
-        if (_aqGroup) _aqGroup.remove();
-        _aqGroup = null;
-        if (btn) { btn.classList.remove('text-emerald-400'); btn.title = 'Air Quality Layer: OFF'; }
-        // Restore original country fill
-        const palette = ["#1d4ed8", "#2563eb", "#3b82f6", "#4f46e5", "#6366f1", "#0ea5e9", "#334155", "#475569", "#0f766e"];
-        d3.selectAll('#world-map path.country').transition().duration(600).attr('fill', (d, i) => palette[i % palette.length]);
-        return;
-    }
-    if (btn) { btn.classList.add('text-emerald-400'); btn.title = 'Air Quality Layer: ON'; }
-    try {
-        // Fetch latest PM2.5 readings aggregated by country
-        const res = await fetch('https://api.openaq.org/v2/averages?parameter=pm25&spatial=country&temporal=day&limit=120&date_from=' + new Date(Date.now() - 86400000).toISOString().slice(0, 10));
-        const data = await res.json();
-        const aqByCountry = {};
-        (data.results || []).forEach(r => { if (r.country && r.average) aqByCountry[r.country] = r.average; });
-        // Color scale: green (0) → yellow (50) → red (150+)
-        const aqColor = d3.scaleLinear()
-            .domain([0, 25, 75, 150])
-            .range(['#10b981', '#eab308', '#ef4444', '#7c3aed'])
-            .clamp(true);
-        // Map country ISO2 to the countries
-        if (window.worldFeatures) {
-            const countryPaths = d3.selectAll('#world-map path.country');
-            countryPaths.transition().duration(1000).attr('fill', function () {
-                const name = d3.select(this).datum()?.properties?.name;
-                if (!name) return '#0f172a';
-                // Try to match by country name → ISO2 via a small lookup
-                const iso2 = Object.keys(aqByCountry).find(k => name.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(name.toLowerCase().slice(0, 4)));
-                const val = iso2 ? aqByCountry[iso2] : null;
-                return val ? aqColor(val) : '#1e293b';
-            });
-        }
-        // Add legend
-        if (_aqGroup) _aqGroup.remove();
-        _aqGroup = svg.append('g').attr('transform', 'translate(12,50)');
-        const legendData = [{ c: '#10b981', l: 'Good (<25 μg)' }, { c: '#eab308', l: 'Moderate (<75)' }, { c: '#ef4444', l: 'Unhealthy (75+)' }, { c: '#7c3aed', l: 'Hazardous (150+)' }];
-        legendData.forEach((d, i) => {
-            _aqGroup.append('rect').attr('x', 0).attr('y', i * 16).attr('width', 10).attr('height', 10).attr('fill', d.c).attr('rx', 2);
-            _aqGroup.append('text').attr('x', 14).attr('y', i * 16 + 9).text(d.l)
-                .attr('fill', '#94a3b8').attr('font-size', '8px').attr('font-family', 'JetBrains Mono, monospace');
-        });
-        _aqGroup.append('text').attr('x', 0).attr('y', -4).text('PM2.5 AQI · OpenAQ')
-            .attr('fill', '#10b981').attr('font-size', '7px').attr('font-family', 'JetBrains Mono, monospace').attr('font-weight', 'bold');
-    } catch (e) { console.error('OpenAQ fetch failed', e); }
 };
 

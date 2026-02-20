@@ -592,37 +592,6 @@
         0 0 60px rgba(59, 130, 246, 0.05);
     }
 
-
-
-    .heat-map-legend {
-      position: absolute;
-      bottom: 4rem;
-      left: 1rem;
-      background: rgba(2, 6, 23, 0.9);
-      backdrop-filter: blur(10px);
-      padding: 1rem;
-      border-radius: 12px;
-      border: 1px solid rgba(59, 130, 246, 0.2);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      z-index: 50;
-      display: none;
-    }
-
-    .heat-map-legend.active {
-      display: block;
-    }
-
-    .heat-map-legend .gradient-bar {
-      width: 200px;
-      height: 12px;
-      border-radius: 6px;
-      margin: 8px 0;
-      background: linear-gradient(90deg,
-          #440154, #482878, #3e4989, #31688e,
-          #26828e, #1f9e89, #35b779, #6ece58, #b5de2b, #fde724);
-    }
-
     .loading-pulse {
       animation: loading-pulse 2s ease-in-out infinite;
     }
@@ -999,7 +968,7 @@
                 </div>
               </div>
             </div>
-            <div class="dossier-card" style="background:rgba(255,255,255,.015);border-color:rgba(255,255,255,.05)">
+            <div class="dossier-card mb-6" style="background:rgba(255,255,255,.015);border-color:rgba(255,255,255,.05)">
               <div class="flex gap-5 justify-center">
                 <a href="https://github.com/abhisheksati132" target="_blank"
                   class="text-slate-500 hover:text-white transition-colors tactical-btn"><i
@@ -1236,11 +1205,7 @@
           </div>
         </div>
         <div class="flex gap-2">
-          <!-- Enhancement 4: GDP Heat Overlay Toggle -->
-          <button id="heat-toggle-btn" onclick="toggleHeatOverlay()" class="map-ctrl-btn text-slate-400"
-            title="GDP Heat Overlay: OFF">
-            <i class="fas fa-fire text-xs"></i>
-          </button>
+
           <!-- USGS Earthquake Layer -->
           <button id="quake-toggle-btn" onclick="toggleEarthquakeLayer()" class="map-ctrl-btn text-slate-400"
             title="Earthquake Layer: OFF">
@@ -1251,11 +1216,7 @@
             title="Live Aircraft: OFF">
             <i class="fas fa-plane text-xs"></i>
           </button>
-          <!-- OpenAQ Air Quality Layer -->
-          <button id="aq-toggle-btn" onclick="toggleAQLayer()" class="map-ctrl-btn text-slate-400"
-            title="Air Quality Layer: OFF">
-            <i class="fas fa-leaf text-xs"></i>
-          </button>
+
           <button onclick="zoomMap(1.6)" class="map-ctrl-btn" title="Zoom In"><i
               class="fas fa-plus text-xs"></i></button>
           <button onclick="zoomMap(0.6)" class="map-ctrl-btn" title="Zoom Out"><i
@@ -1313,9 +1274,14 @@
               <div class="tab-ai-chat-response" id="ai-chat-response-intel"></div>
             </div>
 
-            <h2 class="text-[11px] font-black text-white uppercase tracking-[.3em]"
-              style="font-family:'JetBrains Mono',monospace">Tactical Briefing</h2>
-            <div id="hierarchy-panel" class="hidden">
+            <div class="px-5 py-4 flex flex-col gap-3 border-b border-white/5" style="background:rgba(59,130,246,.02)">
+              <div class="flex justify-between items-end">
+                <h2 class="text-[11px] font-black text-white uppercase tracking-[.3em]"
+                  style="font-family:'JetBrains Mono',monospace">Tactical Briefing</h2>
+              </div>
+            </div>
+
+            <div id="hierarchy-panel" class="hidden px-5 py-4">
 
               <div class="flex items-center gap-2 text-xs font-mono mb-3">
                 <span class="text-blue-400 cursor-pointer" onclick="resetToCountry()">
@@ -1358,36 +1324,38 @@
               </div>
             </div>
 
-            <!-- GDELT: Global Event Intelligence Matrix -->
-            <div class="dossier-card" style="background:rgba(16,185,129,0.04);border-color:rgba(16,185,129,0.15)">
-              <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3">
-                <span class="text-[10px] text-emerald-400 uppercase font-black tracking-widest"
-                  style="font-family:'JetBrains Mono',monospace">
-                  <i class="fas fa-microchip mr-2"></i>GDELT Event Matrix
-                </span>
-                <span class="text-[8px] text-slate-600 font-mono" id="gdelt-timestamp">GDELT · Live Scan</span>
-              </div>
-              <div id="gdelt-events-content" class="space-y-0">
-                <div class="text-slate-500 text-xs animate-pulse py-2">Scanning GDELT intelligence matrix...</div>
-              </div>
-            </div>
-
-            <div id="ai-briefing-box" class="dossier-card"
-              style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.2)">
-              <div class="flex justify-between items-center mb-5 border-b border-white/5 pb-4">
-                <span class="text-[9px] text-blue-400 uppercase font-black tracking-widest flex items-center gap-2"
-                  style="font-family:'JetBrains Mono',monospace">
-                  <i class="fas fa-brain text-base"></i> Neural Synthesis
-                </span>
-                <div class="flex items-center gap-2">
-                  <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
-                  <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest"
-                    style="font-family:'JetBrains Mono',monospace">Live Link</span>
+            <div class="px-5 py-2">
+              <!-- GDELT: Global Event Intelligence Matrix -->
+              <div class="dossier-card" style="background:rgba(16,185,129,0.04);border-color:rgba(16,185,129,0.15)">
+                <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3">
+                  <span class="text-[10px] text-emerald-400 uppercase font-black tracking-widest"
+                    style="font-family:'JetBrains Mono',monospace">
+                    <i class="fas fa-microchip mr-2"></i>GDELT Event Matrix
+                  </span>
+                  <span class="text-[8px] text-slate-600 font-mono" id="gdelt-timestamp">GDELT · Live Scan</span>
+                </div>
+                <div id="gdelt-events-content" class="space-y-0">
+                  <div class="text-slate-500 text-xs animate-pulse py-2">Scanning GDELT intelligence matrix...</div>
                 </div>
               </div>
-              <p id="ai-briefing-text" class="text-slate-300">
-                <span class="animate-pulse text-slate-500">Awaiting target selection...</span>
-              </p>
+
+              <div id="ai-briefing-box" class="dossier-card"
+                style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.2)">
+                <div class="flex justify-between items-center mb-5 border-b border-white/5 pb-4">
+                  <span class="text-[9px] text-blue-400 uppercase font-black tracking-widest flex items-center gap-2"
+                    style="font-family:'JetBrains Mono',monospace">
+                    <i class="fas fa-brain text-base"></i> Neural Synthesis
+                  </span>
+                  <div class="flex items-center gap-2">
+                    <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+                    <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest"
+                      style="font-family:'JetBrains Mono',monospace">Live Link</span>
+                  </div>
+                </div>
+                <p id="ai-briefing-text" class="text-slate-300">
+                  <span class="animate-pulse text-slate-500">Awaiting target selection...</span>
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -2131,16 +2099,6 @@
         <span class="text-slate-400">Escape / Close</span>
         <span class="shortcut-key">Esc</span>
       </div>
-    </div>
-  </div>
-
-  <div id="heat-map-legend" class="heat-map-legend">
-    <div class="text-blue-400 font-bold uppercase tracking-widest mb-2 text-xs">Heat Map: <span
-        id="heat-metric">GDP</span></div>
-    <div class="gradient-bar"></div>
-    <div class="flex justify-between text-slate-400 text-[9px] mt-1">
-      <span id="heat-min">Low</span>
-      <span id="heat-max">High</span>
     </div>
   </div>
 

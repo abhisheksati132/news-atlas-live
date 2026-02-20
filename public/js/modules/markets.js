@@ -21,7 +21,7 @@ async function displayPreciousMetals() {
             const changeClass = (data.change || 0) >= 0 ? 'text-emerald-400' : 'text-red-400';
             const changeIcon = (data.change || 0) >= 0 ? '▲' : '▼';
             const card = document.createElement('div');
-            card.className = 'dossier-card p-3';
+            card.className = 'bg-black/20 rounded-lg p-3 border border-white/5 relative overflow-hidden group';
             card.innerHTML = `
                 <div class="flex items-center justify-between mb-2">
                   <span class="text-2xl">${data.icon || '🪙'}</span>
@@ -36,12 +36,35 @@ async function displayPreciousMetals() {
         if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-xs col-span-3">No metals data</div>';
     } catch (e) { container.innerHTML = '<div class="text-slate-500 text-xs col-span-3">Data unavailable</div>'; }
 }
-function displayCountryIndices(countryName) {
+async function displayCountryIndices(countryName) {
     const container = document.getElementById('indices-content');
     if (!container) return;
     const indicesLabelEl = document.getElementById('indices-country');
     if (indicesLabelEl) indicesLabelEl.innerText = countryName || 'Global';
-    container.innerHTML = `<div class="col-span-2 text-slate-500 text-xs py-3"><i class="fas fa-info-circle mr-1"></i>Country index data shown when market APIs for ${countryName || 'this country'} are available via live subscription or exchange data feeds.</div>`;
+
+    container.innerHTML = '<div class="col-span-2 text-slate-500 text-xs py-2">Fetching live indices...</div>';
+    try {
+        const res = await fetch('/api/markets?type=ticker');
+        const json = await res.json();
+        container.innerHTML = '';
+        const indices = (json.data || []).filter(d => !['BTC-USD', 'ETH-USD', 'GOLD', 'CRUDE OIL', 'EUR/USD'].includes(d.label));
+        indices.forEach(data => {
+            const changeClass = (data.change || 0) >= 0 ? 'text-emerald-400' : 'text-red-400';
+            const changeIcon = (data.change || 0) >= 0 ? '▲' : '▼';
+            const card = document.createElement('div');
+            card.className = 'bg-black/20 rounded-lg p-3 border border-white/5 relative overflow-hidden group';
+            card.innerHTML = `
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xl">📈</span>
+                  <span class="${changeClass} text-xs font-mono font-bold">${changeIcon} ${Math.abs(data.change || 0).toFixed(2)}%</span>
+                </div>
+                <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">${data.label}</div>
+                <div class="text-lg font-black text-white font-mono">${(data.price || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
+            `;
+            container.appendChild(card);
+        });
+        if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-xs col-span-2">No indices data</div>';
+    } catch (e) { container.innerHTML = '<div class="text-slate-500 text-xs col-span-2">Data unavailable</div>'; }
 }
 window.getIndicesForCountry = () => ({});
 async function displayCrypto() {
@@ -57,7 +80,7 @@ async function displayCrypto() {
             const changeClass = (data.change || 0) >= 0 ? 'text-emerald-400' : 'text-red-400';
             const changeIcon = (data.change || 0) >= 0 ? '▲' : '▼';
             const card = document.createElement('div');
-            card.className = 'dossier-card p-3';
+            card.className = 'bg-black/20 rounded-lg p-3 border border-white/5 relative overflow-hidden group';
             card.innerHTML = `
                 <div class="flex items-center justify-between mb-2">
                   <img src="${data.image}" alt="${data.name}" class="w-6 h-6 rounded-full" onerror="this.style.display='none'">
@@ -80,9 +103,9 @@ async function displayForex() {
         const res = await fetch(`/api/markets?type=forex&currency=${base}`);
         const json = await res.json();
         container.innerHTML = '';
-        Object.entries(json.rates || {}).filter(([c]) => c !== base).slice(0, 15).forEach(([pair, rate]) => {
+        Object.entries(json.rates || {}).filter(([c]) => c !== base).slice(0, 16).forEach(([pair, rate]) => {
             const card = document.createElement('div');
-            card.className = 'dossier-card p-3 flex justify-between items-center';
+            card.className = 'bg-black/20 rounded-lg p-3 border border-white/5 flex justify-between items-center';
             card.innerHTML = `
                 <div>
                   <div class="text-sm font-black text-white">${base}/${pair}</div>
@@ -107,7 +130,7 @@ async function displayCommodities() {
             const changeClass = (data.change || 0) >= 0 ? 'text-emerald-400' : 'text-red-400';
             const changeIcon = (data.change || 0) >= 0 ? '▲' : '▼';
             const card = document.createElement('div');
-            card.className = 'dossier-card p-3';
+            card.className = 'bg-black/20 rounded-lg p-3 border border-white/5 relative overflow-hidden group';
             card.innerHTML = `
                 <div class="flex items-center justify-between mb-2">
                   <span class="text-xl">${data.icon || '📦'}</span>
@@ -146,14 +169,14 @@ async function displayCoinGeckoTrending() {
     try {
         const res = await fetch('https://api.coingecko.com/api/v3/search/trending');
         const data = await res.json();
-        const coins = (data.coins || []).slice(0, 7);
+        const coins = (data.coins || []).slice(0, 8);
         container.innerHTML = '';
         coins.forEach(({ item: c }) => {
             const change = c.data?.price_change_percentage_24h?.usd ?? 0;
             const changeClass = change >= 0 ? 'text-emerald-400' : 'text-red-400';
             const changeIcon = change >= 0 ? '▲' : '▼';
             const card = document.createElement('div');
-            card.className = 'dossier-card p-3 flex items-center gap-3';
+            card.className = 'bg-black/20 rounded-lg p-3 border border-white/5 relative overflow-hidden group';
             card.innerHTML = `
                 <img src="${c.large}" class="w-7 h-7 rounded-full" onerror="this.style.display='none'">
                 <div class="flex-1 min-w-0">

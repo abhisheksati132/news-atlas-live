@@ -210,8 +210,35 @@ function initMap(type) {
             const k = 75 / currentProjection.scale();
             currentProjection.rotate([rotate[0] + event.dx * k, rotate[1] - event.dy * k]);
             g.selectAll("path").attr("d", path);
+            if (window.syncMapOverlays) window.syncMapOverlays();
         }));
     }
+
+    window.syncMapOverlays = function () {
+        if (typeof _quakeActive !== 'undefined' && _quakeActive && typeof _quakeGroup !== 'undefined' && _quakeGroup) {
+            _quakeGroup.selectAll('circle').each(function (d) {
+                if (!d || !Array.isArray(d)) return;
+                const proj = currentProjection(d);
+                if (proj) {
+                    d3.select(this).attr('cx', proj[0]).attr('cy', proj[1]).style('display', null);
+                } else {
+                    d3.select(this).style('display', 'none');
+                }
+            });
+        }
+        if (typeof _aircraftActive !== 'undefined' && _aircraftActive && typeof _aircraftGroup !== 'undefined' && _aircraftGroup) {
+            _aircraftGroup.selectAll('g').each(function (d) {
+                if (!d || !d.lon) return;
+                const proj = currentProjection([d.lon, d.lat]);
+                if (proj) {
+                    d3.select(this).attr('transform', `translate(${proj[0]},${proj[1]}) rotate(${d.track - 90})`).style('display', null);
+                } else {
+                    d3.select(this).style('display', 'none');
+                }
+            });
+        }
+    };
+
     // Build DataFlows instance for arc animations (Enhancement 3)
     if (!window._dataFlows) {
         window._dataFlows = new DataFlows('world-map', currentProjection);
@@ -253,6 +280,8 @@ async function showRichTooltip(e, d) {
     document.getElementById('tooltip-name').innerText = name;
     document.getElementById('tooltip-flag').src = '';
     document.getElementById('tooltip-flag').classList.add('hidden');
+    document.getElementById('tooltip-label-1').innerText = 'Capital';
+    document.getElementById('tooltip-label-2').innerText = 'Pop.';
     document.getElementById('tooltip-capital').innerText = '...';
     document.getElementById('tooltip-pop').innerText = '...';
     if (_tooltipCache[name]) {
@@ -433,8 +462,13 @@ window.selectFromSearch = (name) => {
 };
 window.zoomMap = (f) => {
     window.playTacticalSound('click');
-    if (projectionType === '2d') svg.transition().duration(400).call(zoom.scaleBy, f);
-    else { currentProjection.scale(currentProjection.scale() * f); g.selectAll("path").attr("d", d3.geoPath().projection(currentProjection)); }
+    if (projectionType === '2d') {
+        svg.transition().duration(400).call(zoom.scaleBy, f);
+    } else {
+        currentProjection.scale(currentProjection.scale() * f);
+        g.selectAll("path").attr("d", d3.geoPath().projection(currentProjection));
+        if (window.syncMapOverlays) window.syncMapOverlays();
+    }
 };
 window.resetToGlobalCenter = () => {
     selectedCountry = null; window.selectedCountry = null; countryUTCOffset = null;
@@ -578,7 +612,7 @@ window.toggleEarthquakeLayer = async function () {
     }
     if (btn) { btn.classList.add('text-amber-400'); btn.title = 'Earthquake Layer: ON'; }
     if (_quakeGroup) _quakeGroup.remove();
-    _quakeGroup = svg.append('g').attr('id', 'quake-layer').attr('pointer-events', 'all');
+    _quakeGroup = svg.select('g').append('g').attr('id', 'quake-layer').attr('pointer-events', 'all');
     try {
         const res = await fetch('https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=4&limit=80&orderby=time');
         const data = await res.json();
@@ -595,6 +629,7 @@ window.toggleEarthquakeLayer = async function () {
             // pulse ring
             for (let d = 0; d <= 600; d += 300) {
                 _quakeGroup.append('circle')
+                    .datum([lon, lat])
                     .attr('cx', cx).attr('cy', cy).attr('r', r)
                     .attr('fill', 'none').attr('stroke', magColor(mag)).attr('stroke-width', 1.5)
                     .attr('opacity', 0.7).attr('pointer-events', 'none')
@@ -609,6 +644,7 @@ window.toggleEarthquakeLayer = async function () {
             }
             // dot
             _quakeGroup.append('circle')
+                .datum([lon, lat])
                 .attr('cx', cx).attr('cy', cy).attr('r', r)
                 .attr('fill', magColor(mag)).attr('fill-opacity', 0.35)
                 .attr('stroke', magColor(mag)).attr('stroke-width', 1.5)
@@ -618,7 +654,9 @@ window.toggleEarthquakeLayer = async function () {
                     if (t) {
                         document.getElementById('tooltip-name').innerText = `M${mag.toFixed(1)} — ${place}`;
                         document.getElementById('tooltip-flag').classList.add('hidden');
-                        document.getElementById('tooltip-capital').innerText = `Depth: ${f.geometry.coordinates[2]?.toFixed(0) ?? '?'} km`;
+                        document.getElementById('tooltip-label-1').innerText = 'Depth';
+                        document.getElementById('tooltip-label-2').innerText = 'Time';
+                        document.getElementById('tooltip-capital').innerText = `${f.geometry.coordinates[2]?.toFixed(0) ?? '?'} km`;
                         document.getElementById('tooltip-pop').innerText = new Date(f.properties.time).toUTCString().slice(0, 22);
                         t.style.left = (event.pageX + 15) + 'px'; t.style.top = (event.pageY - 15) + 'px';
                         t.classList.remove('hidden');
@@ -634,7 +672,7 @@ let _aircraftActive = false, _aircraftGroup = null, _aircraftInterval = null;
 async function renderAircraft() {
     const svg = d3.select('#world-map');
     if (_aircraftGroup) _aircraftGroup.remove();
-    _aircraftGroup = svg.append('g').attr('id', 'aircraft-layer').attr('pointer-events', 'all');
+    _aircraftGroup = svg.select('g').append('g').attr('id', 'aircraft-layer').attr('pointer-events', 'all');
     try {
         // Use anonymous OpenSky endpoint — returns sample of all transponders
         const res = await fetch('https://opensky-network.org/api/states/all?lamin=-60&lomin=-180&lamax=80&lomax=180');
@@ -646,20 +684,24 @@ async function renderAircraft() {
             const proj = currentProjection([lon, lat]);
             if (!proj) return;
             const [cx, cy] = proj;
-            const g = _aircraftGroup.append('g')
+            const gItem = _aircraftGroup.append('g')
+                .datum({ lon, lat, track })
                 .attr('transform', `translate(${cx},${cy}) rotate(${track - 90})`)
                 .style('cursor', 'pointer');
-            g.append('text')
+            gItem.append('text')
                 .attr('text-anchor', 'middle').attr('dominant-baseline', 'middle')
                 .attr('font-size', '7px').attr('fill', '#60a5fa').attr('opacity', 0.8)
                 .text('✈');
-            g.on('mouseover', function (event) {
+            gItem.on('mouseover', function (event) {
                 const t = document.getElementById('map-tooltip');
                 if (t) {
+                    const data = d3.select(this).datum(); // Retrieve datum
                     document.getElementById('tooltip-name').innerText = callsign || 'UNKNOWN';
                     document.getElementById('tooltip-flag').classList.add('hidden');
-                    document.getElementById('tooltip-capital').innerText = `Alt: ${s[13] ? (s[13] / 304.8).toFixed(0) + ' ft' : '?'}`;
-                    document.getElementById('tooltip-pop').innerText = `Speed: ${s[9] ? (s[9] * 1.944).toFixed(0) + ' kts' : '?'}`;
+                    document.getElementById('tooltip-label-1').innerText = 'Altitude';
+                    document.getElementById('tooltip-label-2').innerText = 'Velocity';
+                    document.getElementById('tooltip-capital').innerText = `${data.alt ? (data.alt / 0.3048).toFixed(0) : 'N/A'} ft`; // Convert m to ft
+                    document.getElementById('tooltip-pop').innerText = `${data.vel ? (data.vel * 1.944).toFixed(0) : 'N/A'} kts`; // Convert m/s to kts
                     t.style.left = (event.pageX + 15) + 'px'; t.style.top = (event.pageY - 15) + 'px';
                     t.classList.remove('hidden');
                 }
@@ -693,7 +735,8 @@ window.toggleAQLayer = async function () {
         _aqGroup = null;
         if (btn) { btn.classList.remove('text-emerald-400'); btn.title = 'Air Quality Layer: OFF'; }
         // Restore original country fill
-        d3.selectAll('#world-map path.country').transition().duration(600).attr('fill', '#0f172a');
+        const palette = ["#1d4ed8", "#2563eb", "#3b82f6", "#4f46e5", "#6366f1", "#0ea5e9", "#334155", "#475569", "#0f766e"];
+        d3.selectAll('#world-map path.country').transition().duration(600).attr('fill', (d, i) => palette[i % palette.length]);
         return;
     }
     if (btn) { btn.classList.add('text-emerald-400'); btn.title = 'Air Quality Layer: ON'; }

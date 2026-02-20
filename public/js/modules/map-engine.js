@@ -312,9 +312,10 @@ class HeatMap {
   }
   remove(countries) {
     this.active = false;
+    const palette = ["#1d4ed8", "#2563eb", "#3b82f6", "#4f46e5", "#6366f1", "#0ea5e9", "#334155", "#475569", "#0f766e"];
     countries.transition()
       .duration(1000)
-      .attr('fill', '#0f172a');
+      .attr('fill', (d, i) => palette[i % palette.length]);
   }
 }
 function enhanceCountryStyles() {

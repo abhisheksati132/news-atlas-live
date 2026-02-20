@@ -66,13 +66,13 @@ export default async function handler(req, res) {
                 time_last_update_utc: data.time_last_update_utc
             });
         } else if (type === 'metals') {
-            const metals = ['XAU', 'XAG', 'XPT', 'XPD'];
-            const metalNames = { XAU: 'Gold', XAG: 'Silver', XPT: 'Platinum', XPD: 'Palladium' };
-            const metalIcons = { XAU: '🥇', XAG: '🥈', XPT: '⚪', XPD: '⚫' };
-            const metalUnits = { XAU: 'per troy oz', XAG: 'per troy oz', XPT: 'per troy oz', XPD: 'per troy oz' };
-            const results = await Promise.allSettled(
-                metals.map(m => fetch(`https://api.gold-api.com/price/${m}`).then(r => r.json()))
-            );
+            const metalsList = [
+                { sym: 'XAU', name: 'Gold', ticker: 'GC=F', icon: '🥇', unit: 'per troy oz' },
+                { sym: 'XAG', name: 'Silver', ticker: 'SI=F', icon: '🥈', unit: 'per troy oz' },
+                { sym: 'XPT', name: 'Platinum', ticker: 'PL=F', icon: '⚪', unit: 'per troy oz' },
+                { sym: 'XPD', name: 'Palladium', ticker: 'PA=F', icon: '⚫', unit: 'per troy oz' }
+            ];
+
             let rate = 1;
             const cur = (currency || 'USD').toUpperCase();
             if (cur !== 'USD') {
@@ -82,22 +82,36 @@ export default async function handler(req, res) {
                     rate = erData.rates[cur] || 1;
                 } catch (_) { }
             }
+
+            const results = await Promise.all(metalsList.map(async m => {
+                try {
+                    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(m.ticker)}?interval=1d&range=2d`;
+                    const r = await fetch(url, { headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' } });
+                    const d = await r.json();
+                    const meta = d?.chart?.result?.[0]?.meta;
+                    if (!meta) return null;
+                    const priceUSD = meta.regularMarketPrice || 0;
+                    const prev = meta.chartPreviousClose || meta.previousClose || priceUSD;
+                    const change = prev ? +((priceUSD - prev) / prev * 100).toFixed(2) : 0;
+                    return { ...m, priceUSD, change };
+                } catch { return null; }
+            }));
+
             const data = {};
-            metals.forEach((sym, i) => {
-                if (results[i].status === 'fulfilled') {
-                    const d = results[i].value;
-                    const priceUSD = d.price || d.Price || 0;
-                    data[sym] = {
-                        name: metalNames[sym],
-                        symbol: sym,
-                        priceUSD,
-                        price: +(priceUSD * rate).toFixed(2),
-                        change: d.prev_close_price ? +((priceUSD - d.prev_close_price) / d.prev_close_price * 100).toFixed(2) : 0,
-                        unit: metalUnits[sym],
-                        icon: metalIcons[sym]
+            results.forEach(r => {
+                if (r && r.priceUSD) {
+                    data[r.sym] = {
+                        name: r.name,
+                        symbol: r.sym,
+                        priceUSD: r.priceUSD,
+                        price: +(r.priceUSD * rate).toFixed(2),
+                        change: r.change,
+                        unit: r.unit,
+                        icon: r.icon
                     };
                 }
             });
+            return res.status(200).json({ type: 'metals', currency: cur, data });
             return res.status(200).json({ type: 'metals', currency: cur, data });
         } else if (type === 'commodities') {
             const commodityTickers = {
@@ -108,7 +122,8 @@ export default async function handler(req, res) {
                 'Corn': 'ZC=F',
                 'Soybeans': 'ZS=F',
                 'Gold Spot': 'GC=F',
-                'Silver Spot': 'SI=F'
+                'Silver Spot': 'SI=F',
+                'Copper': 'HG=F'
             };
             const fetchCommodity = async (ticker) => {
                 const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=2d`;

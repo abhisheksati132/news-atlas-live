@@ -51,15 +51,13 @@ NewsAtlas is a cutting-edge Single Page Application (SPA) that transforms global
 - **Traffic Pattern Canvas:** Real-time network traffic visualization in the About section
 - **Smooth Camera Controls:** Buttery 60fps zoom/pan with cubic-bezier easing
 
-### 4. 🧠 AI-Powered Intelligence
+### 4. 🧠 Intelligence & AI Synthesis
 
-- **Strategic Metrics Dashboard:** Generates a 10-point high-density dossier for any selected country, analyzing:
-  - _Gov Stability & Border Integrity_
-  - _Cyber Threat Levels_
-  - _Civil Unrest & Military Readiness_
-  - _Energy Reserves & Supply Chain Status_
-- **Structured Briefings:** Neural synthesis of "Political Overview", "Security Assessment", and "Economic Outlook"
-- **Context-Aware Fallbacks:** Robust simulation engine ensures the terminal provides immersive "Cached Intelligence" even when offline or API limits are hit
+- **Strategic Metrics Dashboard:** Generates a high-density, 10-point dossier analyzing global sectors:
+  - _Political Stability & Economic Outlook_
+  - _Cyber Threat Levels & Border Integrity_
+  - _Military Readiness & Global Relations_
+- **Multi-Tab AI Chat Widgets:** Each of the 5 main system tabs (Intel, News, Markets, Atmosphere, Economics) features a dedicated generative AI chat widget capable of contextually analyzing the active data streams.
 
 ### 5. 📉 Real-Time Market Telemetry
 
@@ -70,8 +68,8 @@ NewsAtlas is a cutting-edge Single Page Application (SPA) that transforms global
 
 ### 6. 📰 Global Signal Intelligence (News)
 
-- **Real-time Server-Side Search:** Instantaneously fetches and cross-references active news events across the backend feed network based on query strings without artificial dropdown limits.
-- **GDELT Integration:** Monitors the Global Database of Events, Language, and Tone tracking granular conflict and political data point mutations over the last 24h.
+- **Real-time Server-Side Search:** Instantaneously fetches and cross-references active news events. Dropdown time-limitations have been entirely stripped out for unfiltered global searching.
+- **GDELT Integration:** Monitors the Global Database of Events, Language, and Tone tracking granular conflict and political data point mutations.
 
 ### 7. 📊 Economic Intelligence Dashboard
 
@@ -80,7 +78,7 @@ NewsAtlas is a cutting-edge Single Page Application (SPA) that transforms global
 - **Major Exports:** AI-generated list of primary export commodities
 - **Sovereign Data Grid:** Population, Gini Index, Demonym, Area
 
-### 7. 🎙️ Voice Command Module
+### 8. 🎙️ Voice Command Module
 
 Hands-free navigation using the `SpeechRecognition` API:
 
@@ -88,7 +86,7 @@ Hands-free navigation using the `SpeechRecognition` API:
 - _"Analyze"_ → Triggers AI tactical briefing
 - _"News"_ → Switches display to the signal feed
 
-### 8. ⌨️ Keyboard Shortcuts
+### 9. ⌨️ Keyboard Shortcuts
 
 Power user navigation with full keyboard control:
 
@@ -135,7 +133,7 @@ Power user navigation with full keyboard control:
    │       ├── search.js     -> Global Search Overlay
    │       └── about.js      -> System Stats & CLI
    └── /css
-       └── terminal.css -> Tactical styling with glassmorphism
+       └── landing.css  -> Tactical styling with glassmorphism
 ```
 
 ---

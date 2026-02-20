@@ -85,7 +85,7 @@
 
     header {
       height: 100px;
-      padding: 0 2rem;
+      padding: 0 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -1132,7 +1132,7 @@
       </div>
     </div>
 
-    <div class="hidden lg:flex items-center gap-4 xl:gap-5 px-5 xl:px-8 h-[68px] rounded-xl"
+    <div class="hidden lg:flex items-center gap-3 xl:gap-4 px-4 xl:px-6 h-[68px] rounded-xl"
       style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06)">
       <div class="flex flex-col min-w-[140px] xl:min-w-[170px] justify-center">
         <span id="selected-country-name"
@@ -1151,7 +1151,7 @@
         </div>
       </div>
     </div>
-    <div class="flex items-center gap-4 xl:gap-6 px-5 xl:px-8 h-[68px] rounded-xl"
+    <div class="flex items-center gap-3 xl:gap-5 px-4 xl:px-6 h-[68px] rounded-xl"
       style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06)">
       <div class="flex flex-col items-center justify-center">
         <span id="system-time" class="text-3xl font-black text-blue-400 tabular-nums leading-none"
@@ -1161,7 +1161,7 @@
             class="text-slate-500">--:--:--</span></span>
       </div>
       <div class="h-10 w-px bg-slate-800"></div>
-      <div class="flex items-center gap-3 xl:gap-5">
+      <div class="flex items-center gap-2 xl:gap-4">
         <button onclick="upgradeToGoogle()" class="text-slate-500 hover:text-white transition-all tactical-btn"
           title="Verify Identity"><i class="fas fa-user-shield text-lg"></i></button>
         <button onclick="downloadDossier()" class="text-slate-500 hover:text-white transition-all tactical-btn"
@@ -1179,7 +1179,7 @@
 
     <div class="flex items-center gap-4">
       <button onclick="goToIndiaHome()"
-        class="flex items-center justify-center gap-3 px-5 xl:px-8 h-[68px] rounded-xl tactical-btn group transition-all"
+        class="flex items-center justify-center gap-2 px-4 xl:px-6 h-[68px] rounded-xl tactical-btn group transition-all"
         style="background:rgba(2,6,23,.5);border:1px solid rgba(255,255,255,.06)">
         <i class="fas fa-home text-blue-400 text-lg group-hover:text-white transition-colors"></i>
         <span class="text-sm font-black text-white uppercase tracking-widest"
@@ -1322,40 +1322,42 @@
                   style="font-family:'JetBrains Mono',monospace" />
                 <div id="city-list" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto"></div>
               </div>
-            </div>
 
-            <div class="px-5 py-2">
-              <!-- GDELT: Global Event Intelligence Matrix -->
-              <div class="dossier-card" style="background:rgba(16,185,129,0.04);border-color:rgba(16,185,129,0.15)">
-                <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3">
-                  <span class="text-[10px] text-emerald-400 uppercase font-black tracking-widest"
-                    style="font-family:'JetBrains Mono',monospace">
-                    <i class="fas fa-microchip mr-2"></i>GDELT Event Matrix
-                  </span>
-                  <span class="text-[8px] text-slate-600 font-mono" id="gdelt-timestamp">GDELT · Live Scan</span>
-                </div>
-                <div id="gdelt-events-content" class="space-y-0">
-                  <div class="text-slate-500 text-xs animate-pulse py-2">Scanning GDELT intelligence matrix...</div>
-                </div>
-              </div>
-
-              <div id="ai-briefing-box" class="dossier-card"
-                style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.2)">
-                <div class="flex justify-between items-center mb-5 border-b border-white/5 pb-4">
-                  <span class="text-[9px] text-blue-400 uppercase font-black tracking-widest flex items-center gap-2"
-                    style="font-family:'JetBrains Mono',monospace">
-                    <i class="fas fa-brain text-base"></i> Neural Synthesis
-                  </span>
-                  <div class="flex items-center gap-2">
-                    <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
-                    <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest"
-                      style="font-family:'JetBrains Mono',monospace">Live Link</span>
+              <div class="mt-4 border-t border-white/5 pt-4">
+                <!-- GDELT: Global Event Intelligence Matrix -->
+                <div class="dossier-card mb-3"
+                  style="background:rgba(16,185,129,0.04);border-color:rgba(16,185,129,0.15)">
+                  <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3">
+                    <span class="text-[10px] text-emerald-400 uppercase font-black tracking-widest"
+                      style="font-family:'JetBrains Mono',monospace">
+                      <i class="fas fa-microchip mr-2"></i>GDELT Event Matrix
+                    </span>
+                    <span class="text-[8px] text-slate-600 font-mono" id="gdelt-timestamp">GDELT · Live Scan</span>
+                  </div>
+                  <div id="gdelt-events-content" class="space-y-0">
+                    <div class="text-slate-500 text-xs animate-pulse py-2">Scanning GDELT intelligence matrix...</div>
                   </div>
                 </div>
-                <p id="ai-briefing-text" class="text-slate-300">
-                  <span class="animate-pulse text-slate-500">Awaiting target selection...</span>
-                </p>
+
+                <div id="ai-briefing-box" class="dossier-card"
+                  style="background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.2)">
+                  <div class="flex justify-between items-center mb-5 border-b border-white/5 pb-4">
+                    <span class="text-[9px] text-blue-400 uppercase font-black tracking-widest flex items-center gap-2"
+                      style="font-family:'JetBrains Mono',monospace">
+                      <i class="fas fa-brain text-base"></i> Neural Synthesis
+                    </span>
+                    <div class="flex items-center gap-2">
+                      <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+                      <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest"
+                        style="font-family:'JetBrains Mono',monospace">Live Link</span>
+                    </div>
+                  </div>
+                  <p id="ai-briefing-text" class="text-slate-300">
+                    <span class="animate-pulse text-slate-500">Awaiting target selection...</span>
+                  </p>
+                </div>
               </div>
+
             </div>
           </div>
         </div>

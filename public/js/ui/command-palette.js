@@ -5,7 +5,6 @@ const COMMANDS = [
     { id: "tab-intel", label: "Open Intel Tab", icon: "fa-brain", shortcut: null, run: () => window.switchTab("intel") },
     { id: "tab-news", label: "Open News Tab", icon: "fa-newspaper", shortcut: null, run: () => window.switchTab("news") },
     { id: "tab-markets", label: "Open Markets Tab", icon: "fa-chart-line", shortcut: null, run: () => window.switchTab("markets") },
-    { id: "tab-atmo", label: "Open Atmosphere Tab", icon: "fa-cloud", shortcut: null, run: () => window.switchTab("atmosphere") },
     { id: "tab-eco", label: "Open Economic Tab", icon: "fa-coins", shortcut: null, run: () => window.switchTab("economic") },
     { id: "quake", label: "Toggle Earthquake Layer", icon: "fa-radiation", shortcut: null, run: () => window.toggleEarthquakeLayer && window.toggleEarthquakeLayer() },
     { id: "aircraft", label: "Toggle Aircraft Layer", icon: "fa-plane", shortcut: null, run: () => window.toggleAircraftLayer && window.toggleAircraftLayer() },

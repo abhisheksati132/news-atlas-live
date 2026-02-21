@@ -17,7 +17,7 @@ window.restoreFromURL = function () {
             if (attempts <= 0) return;
             if (window.globalSearchData && window.globalSearchData.length > 0) {
                 const match = window.globalSearchData.find(
-                    (c) => c.name.toLowerCase() === country.toLowerCase()
+                    (c) => c.name.common.toLowerCase() === country.toLowerCase()
                 );
                 if (match && window.handleCountryClickByName) {
                     window.handleCountryClickByName(country);
@@ -165,8 +165,8 @@ function applyChoropleth(mode, values) {
     const minV = Math.min(...allVals);
     const maxV = Math.max(...allVals);
     const colorScale = (v) => {
-        if (!v && mode !== "risk") return "rgba(30,41,59,0.6)"; 
-        if (!v && mode === "risk") v = 50; 
+        if (!v && mode !== "risk") return "rgba(30,41,59,0.6)";
+        if (!v && mode === "risk") v = 50;
         if (mode === "risk") {
             const t = Math.min(1, Math.max(0, v / 100));
             if (t < 0.5) {
@@ -237,7 +237,7 @@ window.animateNumber = function (el, targetStr, duration = 800) {
     const start = performance.now();
     const step = (now) => {
         const p = Math.min(1, (now - start) / duration);
-        const eased = 1 - Math.pow(1 - p, 3); 
+        const eased = 1 - Math.pow(1 - p, 3);
         const val = target * eased;
         const formatted = target >= 1000
             ? val.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")

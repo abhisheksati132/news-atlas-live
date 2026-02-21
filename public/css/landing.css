@@ -22,7 +22,7 @@ body {
   color: #e2e8f0;
   font-family: "Syne", sans-serif;
   overflow-x: hidden;
-  cursor: crosshair;
+  cursor: default;
 }
 
 body::before {

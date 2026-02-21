@@ -494,7 +494,7 @@ class LiveStatsTicker {
     document.getElementById("map-container").appendChild(ticker);
   }
   initWebSocket() {
-    this.ws = new WebSocket("wss:
+    this.ws = new WebSocket("wss://stream.binance.com:9443/ws/btcusdt@aggTrade");
     this.ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);

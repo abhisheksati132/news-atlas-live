@@ -12,6 +12,11 @@ window.selectedCountry = selectedCountry;
 window.currencyCode = currencyCode;
 window.iso2Code = iso2Code;
 window.currentCategory = currentCategory;
+window._hexLayers = { seismic: [], gdelt: [], aq: [] };
+window._timeOffsetHours = 0;
+window._chronosOffset = 0;
+window._chronosActive = false;
+
 function magColor(m) {
   return m >= 7 ? "#ef4444" : m >= 6 ? "#f97316" : m >= 5 ? "#eab308" : "#10b981";
 }
@@ -398,51 +403,7 @@ window.toggleAirQuality = async function () {
   }
   if (window.updateLayerLegend) window.updateLayerLegend();
 };
-window._cloudsActive = false;
-window.toggleClouds = function (retries = 12) {
-  if (!window._cloudMesh) {
-    if (retries <= 0) { if (window.showToast) window.showToast("Cloud layer unavailable (3D only)", "info"); return; }
-    setTimeout(() => window.toggleClouds(retries - 1), 500);
-    return;
-  }
-  window._cloudsActive = !window._cloudsActive;
-  const btn = document.getElementById("clouds-toggle-btn");
-  if (btn) btn.classList.toggle("active", window._cloudsActive);
-  window._cloudMesh.visible = window._cloudsActive;
-  if (window._cloudsActive) {
-    (function animateClouds() {
-      if (!window._cloudMesh || !window._cloudsActive) return;
-      window._cloudMesh.rotation.y += 0.0004;
-      requestAnimationFrame(animateClouds);
-    })();
-  }
-  if (window.showToast) window.showToast(
-    window._cloudsActive ? "Cloud radar on" : "Cloud radar off", "info"
-  );
-};
-window._windActive = false;
-window.toggleWind = function (retries = 12) {
-  if (!window._windParticles) {
-    if (retries <= 0) { if (window.showToast) window.showToast("Wind layer unavailable (3D only)", "info"); return; }
-    setTimeout(() => window.toggleWind(retries - 1), 500);
-    return;
-  }
-  window._windActive = !window._windActive;
-  const btn = document.getElementById("wind-toggle-btn");
-  if (btn) btn.classList.toggle("active", window._windActive);
-  window._windParticles.visible = window._windActive;
-  if (window._windActive) {
-    (function animateWind() {
-      if (!window._windParticles || !window._windActive) return;
-      window._windParticles.rotation.y += 0.001;
-      window._windParticles.rotation.x += 0.0002;
-      requestAnimationFrame(animateWind);
-    })();
-  }
-  if (window.showToast) window.showToast(
-    window._windActive ? "Wind particles on" : "Wind particles off", "info"
-  );
-};
+
 window.myGlobe = null;
 function initMap(type) {
   projectionType = type;
@@ -471,10 +432,6 @@ function initMap(type) {
   if (_rotateBtn) _rotateBtn.classList.toggle("hidden", type !== "3d");
   if (type === "2d") {
     setText("projection-label", "Orbital Interface: 2D Active");
-    const cloudsBtn = safeEl("clouds-toggle-btn");
-    if (cloudsBtn) cloudsBtn.style.display = "none";
-    const windBtn = safeEl("wind-toggle-btn");
-    if (windBtn) windBtn.style.display = "none";
     svg = mapContainer
       .append("svg")
       .attr("id", "world-map")
@@ -578,10 +535,6 @@ function initMap(type) {
     });
   } else {
     setText("projection-label", "Orbital Interface: 3D WebGL");
-    const cloudsBtn = safeEl("clouds-toggle-btn");
-    if (cloudsBtn) cloudsBtn.style.display = "block";
-    const windBtn = safeEl("wind-toggle-btn");
-    if (windBtn) windBtn.style.display = "block";
     currentProjection = () => [0, 0];
     window.syncMapOverlays = function () { };
     window.mouseX = 0;
@@ -689,90 +642,6 @@ function initMap(type) {
     if (window.myGlobe.controls) {
       window.myGlobe.controls().autoRotate = window._autoRotateActive !== false;
       window.myGlobe.controls().autoRotateSpeed = 0.5;
-    }
-    const CLOUDS_IMG_URL = "//unpkg.com/three-globe/example/img/clouds.png";
-    if (window.THREE) {
-      new window.THREE.TextureLoader().load(CLOUDS_IMG_URL, (cloudsTexture) => {
-        const clouds = new window.THREE.Mesh(
-          new window.THREE.SphereGeometry(
-            window.myGlobe.getGlobeRadius() * (1 + 0.005),
-            75,
-            75,
-          ),
-          new window.THREE.MeshPhongMaterial({
-            map: cloudsTexture,
-            transparent: true,
-            opacity: 0.25,
-            blending: window.THREE.AdditiveBlending,
-          }),
-        );
-        window.myGlobe.scene().add(clouds);
-        (function rotateClouds() {
-          if (projectionType !== "3d" || !window.myGlobe) return;
-          clouds.rotation.y += 0.0002;
-          requestAnimationFrame(rotateClouds);
-        })();
-      });
-      const particleCount = 6000;
-      const geometry = new window.THREE.BufferGeometry();
-      const positions = [];
-      const r = window.myGlobe.getGlobeRadius() * 1.015;
-      for (let i = 0; i < particleCount; i++) {
-        const u = Math.random();
-        const v = Math.random();
-        const theta = u * 2.0 * Math.PI;
-        const phi = Math.acos(2.0 * v - 1.0);
-        const x = r * Math.sin(phi) * Math.cos(theta);
-        const y = r * Math.sin(phi) * Math.sin(theta);
-        const z = r * Math.cos(phi);
-        positions.push(x, y, z);
-      }
-      geometry.setAttribute(
-        "position",
-        new window.THREE.Float32BufferAttribute(positions, 3),
-      );
-      const pMaterial = new window.THREE.PointsMaterial({
-        color: 0x38bdf8,
-        size: 0.5,
-        transparent: true,
-        opacity: 0.4,
-        blending: window.THREE.AdditiveBlending,
-      });
-      const windParticles = new window.THREE.Points(geometry, pMaterial);
-      window._windParticles = windParticles;
-      window._windParticles.visible = false;
-      window.myGlobe.scene().add(windParticles);
-      (function animateWind() {
-        if (!window.myGlobe) return;
-        if (window._windActive && window._windParticles) {
-          window._windParticles.rotation.y += 0.001;
-          window._windParticles.rotation.x += 0.0002;
-        }
-        requestAnimationFrame(animateWind);
-      })();
-      const cloudGeom = new window.THREE.SphereGeometry(
-        window.myGlobe.getGlobeRadius() * 1.01,
-        64,
-        64,
-      );
-      const cloudMat = new window.THREE.MeshPhongMaterial({
-        map: new window.THREE.TextureLoader().load(
-          "//unpkg.com/three-globe/example/img/clouds.png"
-        ),
-        transparent: true,
-        opacity: 0.8,
-      });
-      const cloudMesh = new window.THREE.Mesh(cloudGeom, cloudMat);
-      window._cloudMesh = cloudMesh;
-      window._cloudMesh.visible = false;
-      window.myGlobe.scene().add(cloudMesh);
-      (function animateClouds() {
-        if (!window.myGlobe) return;
-        if (window._cloudsActive && window._cloudMesh) {
-          window._cloudMesh.rotation.y += 0.0004;
-        }
-        requestAnimationFrame(animateClouds);
-      })();
     }
   }
 }
@@ -1375,44 +1244,9 @@ window.toggleRiskIndex = function () {
     window.showToast?.("Risk Matrix Disabled", "info");
   }
 };
-window._timeOffsetHours = 0;
-window.toggleChronos = function () {
-  const container = document.getElementById("chronos-slider-container");
-  const btn = document.getElementById("chronos-toggle-btn");
-  if (!container || !btn) return;
-  const isActive = !container.classList.contains("hidden");
-  if (isActive) {
-    container.classList.add("hidden");
-    btn.classList.remove("active");
-    if (window._timeOffsetHours !== 0) {
-      window.updateChronos(0);
-      document.getElementById("chronos-slider").value = 0;
-    }
-    window.showToast?.("Chronos Engine Offline", "info");
-  } else {
-    container.classList.remove("hidden");
-    btn.classList.add("active");
-    window.showToast?.("Chronos Engine Online. Select timeframe.", "warning");
-  }
-};
-window.updateChronos = function (val) {
-  const hours = parseInt(val, 10);
-  window._timeOffsetHours = hours;
-  const display = document.getElementById("chronos-display");
-  if (display) {
-    display.textContent = hours === 0 ? "LIVE / -0H" : `SIMULATION: ${hours}H`;
-    display.style.color = hours === 0 ? "white" : "#f59e0b";
-  }
-  if (window._gdeltActive && window.renderGDELTLayer) {
-    window.renderGDELTLayer(false);
-  }
-  updateSystemTime();
-};
-window.generateAIBriefing = generateAIBriefing;
-initTerminal();
-initMap("2d");
-setupEventListeners();
-setInterval(updateSystemTime, 1000);
+
+// Core initialization sequence moved to end of file to ensure all dependencies load first.
+
 document.addEventListener(
   "click",
   function () {
@@ -2158,3 +1992,12 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
+
+// Global Initialization Sequence
+console.log("NewsAtlas Engine: Launching sequence...");
+window.generateAIBriefing = generateAIBriefing;
+initTerminal();
+initMap("2d");
+setupEventListeners();
+setInterval(updateSystemTime, 1000);
+console.log("NewsAtlas Engine: Initialization calls complete.");

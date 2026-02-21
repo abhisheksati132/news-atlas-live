@@ -1,6 +1,9 @@
 class ParticleNetwork {
   constructor(containerId) {
     this.container = document.getElementById(containerId);
+    this._reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    this._paused = false;
+    this._rafId = null;
     this.canvas = document.createElement("canvas");
     this.canvas.style.cssText =
       "position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;opacity:0.6";
@@ -9,13 +12,19 @@ class ParticleNetwork {
     this.particles = [];
     this.mouse = { x: null, y: null, radius: 150 };
     this.resize();
-    this.init();
-    this.animate();
+    if (!this._reducedMotion) {
+      this.init();
+      this.animate();
+    }
     window.addEventListener("resize", () => this.resize());
     this.canvas.addEventListener("mousemove", (e) => {
       const rect = this.canvas.getBoundingClientRect();
       this.mouse.x = e.clientX - rect.left;
       this.mouse.y = e.clientY - rect.top;
+    });
+    document.addEventListener("visibilitychange", () => {
+      this._paused = document.hidden;
+      if (!document.hidden && !this._reducedMotion && this.particles.length) this.animate();
     });
   }
   resize() {
@@ -38,6 +47,7 @@ class ParticleNetwork {
     }
   }
   animate() {
+    if (this._paused || this._reducedMotion) return;
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.particles.forEach((p, i) => {
       p.x += p.vx;
@@ -72,15 +82,20 @@ class ParticleNetwork {
         }
       });
     });
-    requestAnimationFrame(() => this.animate());
+    this._rafId = requestAnimationFrame(() => this.animate());
   }
   destroy() {
+    this._paused = true;
+    if (this._rafId != null) cancelAnimationFrame(this._rafId);
     this.canvas.remove();
   }
 }
 class MatrixRain {
   constructor(containerId) {
     this.container = document.getElementById(containerId);
+    this._reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    this._paused = false;
+    this._timeoutId = null;
     this.canvas = document.createElement("canvas");
     this.canvas.style.cssText =
       "position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;opacity:0.15";
@@ -91,8 +106,14 @@ class MatrixRain {
     this.fontSize = 14;
     this.resize();
     this.init();
-    this.animate();
+    if (!this._reducedMotion) this.animate();
     window.addEventListener("resize", () => this.resize());
+    document.addEventListener("visibilitychange", () => {
+      this._paused = document.hidden;
+      if (this._timeoutId) clearTimeout(this._timeoutId);
+      this._timeoutId = null;
+      if (!document.hidden && !this._reducedMotion) this.animate();
+    });
   }
   resize() {
     this.canvas.width = this.container.offsetWidth;
@@ -106,6 +127,7 @@ class MatrixRain {
       .map(() => Math.random() * -100);
   }
   animate() {
+    if (this._paused || this._reducedMotion) return;
     this.ctx.fillStyle = "rgba(2, 6, 23, 0.05)";
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.fillStyle = "#0f7";
@@ -119,9 +141,11 @@ class MatrixRain {
       }
       this.drops[i]++;
     });
-    setTimeout(() => requestAnimationFrame(() => this.animate()), 50);
+    this._timeoutId = setTimeout(() => requestAnimationFrame(() => this.animate()), 50);
   }
   destroy() {
+    this._paused = true;
+    if (this._timeoutId) clearTimeout(this._timeoutId);
     this.canvas.remove();
   }
 }

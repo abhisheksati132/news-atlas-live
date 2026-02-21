@@ -1,12 +1,14 @@
 let aboutStatsInterval;
+let trafficRafId = null;
 function initTrafficCanvas() {
   const canvas = document.getElementById("traffic-canvas");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
-  const w = (canvas.width = canvas.offsetWidth);
-  const h = (canvas.height = canvas.offsetHeight);
+  let w = (canvas.width = canvas.offsetWidth);
+  let h = (canvas.height = canvas.offsetHeight);
   let offset = 0;
   function draw() {
+    trafficRafId = requestAnimationFrame(draw);
     ctx.clearRect(0, 0, w, h);
     ctx.beginPath();
     ctx.strokeStyle = "#3b82f6";
@@ -17,9 +19,14 @@ function initTrafficCanvas() {
     }
     ctx.stroke();
     offset += 2;
-    requestAnimationFrame(draw);
   }
   draw();
+}
+function stopTrafficCanvas() {
+  if (trafficRafId != null) {
+    cancelAnimationFrame(trafficRafId);
+    trafficRafId = null;
+  }
 }
 function startAboutStats() {
   const bioText =
@@ -71,6 +78,7 @@ window.toggleAbout = (show) => {
     startAboutStats();
   } else {
     if (aboutStatsInterval) clearInterval(aboutStatsInterval);
+    stopTrafficCanvas();
   }
 };
 const cliInput = document.getElementById("cli-input");

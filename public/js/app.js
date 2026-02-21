@@ -3,6 +3,7 @@ let currencyCode = null;
 let iso2Code = null;
 let countryUTCOffset = null;
 let projectionType = "2d";
+window.projectionType = "2d";
 let currentProjection, svg, g, zoom;
 let worldFeatures = [];
 let globalSearchData = [];
@@ -12,9 +13,16 @@ window.currencyCode = currencyCode;
 window.iso2Code = iso2Code;
 window.currentCategory = currentCategory;
 
+/** Shared magnitude → color helper used by earthquake layer and globe hexbins. */
+function magColor(m) {
+  return m >= 7 ? "#ef4444" : m >= 6 ? "#f97316" : m >= 5 ? "#eab308" : "#10b981";
+}
+window.magColor = magColor;
+
 function safeEl(id) {
   return document.getElementById(id);
 }
+
 function setText(id, text) {
   const el = safeEl(id);
   if (el) el.innerText = text;
@@ -25,6 +33,7 @@ function setSrc(id, src) {
 }
 
 async function runBootSequence() {
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const logs = [
     "SYSTEM_INIT...",
     "CONNECTING_SAT_UPLINK...",
@@ -34,18 +43,19 @@ async function runBootSequence() {
   ];
   const logEl = safeEl("boot-log");
   const bar = safeEl("boot-bar");
+  const stepMs = reducedMotion ? 80 : 400;
   for (let i = 0; i < logs.length; i++) {
-    await new Promise((r) => setTimeout(r, 400));
+    await new Promise((r) => setTimeout(r, stepMs));
     const d = document.createElement("div");
     d.innerText = `> ${logs[i]}`;
     if (logEl) logEl.appendChild(d);
     if (bar) bar.style.width = ((i + 1) / logs.length) * 100 + "%";
   }
-  await new Promise((r) => setTimeout(r, 500));
+  await new Promise((r) => setTimeout(r, reducedMotion ? 100 : 500));
   const bootScreen = safeEl("boot-screen");
   if (bootScreen) {
     bootScreen.style.opacity = "0";
-    setTimeout(() => bootScreen.remove(), 800);
+    setTimeout(() => bootScreen.remove(), reducedMotion ? 200 : 800);
   }
 }
 function showBackendRequiredBanner() {
@@ -78,6 +88,7 @@ async function initTerminal() {
   } catch (e) {
     console.warn("Config fetch failed:", e);
     showBackendRequiredBanner();
+    if (window.showToast) window.showToast("Config unavailable. Running in local mode.", "info");
   }
   const hasFirebaseConfig =
     config && config.apiKey && config.projectId;
@@ -106,12 +117,13 @@ async function initTerminal() {
               },
               { merge: true },
             );
-          } catch (e) {}
+          } catch (e) { }
         }
       });
     } catch (e) {
       console.warn("Firebase Auth failed:", e);
       setText("neural-id", "LOCAL MODE (OFFLINE)");
+      if (window.showToast) window.showToast("Auth offline. Using local mode.", "info");
     }
   } else {
     setText("neural-id", "LOCAL MODE (OFFLINE)");
@@ -122,7 +134,7 @@ async function initTerminal() {
     );
     globalSearchData = await res.json();
     window.globalSearchData = globalSearchData;
-  } catch (e) {}
+  } catch (e) { }
 
   window.fetchNews();
   if (window.generateAIBriefing) window.generateAIBriefing("Global Context");
@@ -153,7 +165,8 @@ async function startStockTicker() {
 
   async function fetchAndRender() {
     try {
-      const res = await fetch("/api/markets?type=ticker");
+      const fetcher = window.fetchWithRetry || fetch;
+      const res = await fetcher("/api/markets?type=ticker", {}, { retries: 1, timeoutMs: 10000 });
       if (!res.ok) throw new Error();
       const data = await res.json();
       if (data.data && data.data.length > 0) {
@@ -194,9 +207,10 @@ async function startStockTicker() {
 }
 
 async function fetchAllData(name) {
+  const apiName = countryNameForRestCountries(name);
   try {
     const res = await fetch(
-      `https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fullText=true`,
+      `https://restcountries.com/v3.1/name/${encodeURIComponent(apiName)}?fullText=true`,
     );
     const data = await res.json();
     if (data && data[0]) {
@@ -251,6 +265,7 @@ async function fetchAllData(name) {
     }
   } catch (e) {
     console.error("Data Fetch Error", e);
+    if (window.showToast) window.showToast("Country data failed. Try again.", "error");
   }
 }
 async function generateAIBriefing(loc) {
@@ -259,63 +274,104 @@ async function generateAIBriefing(loc) {
   const loading = safeEl("ai-briefing-loading");
   const actions = safeEl("ai-briefing-actions");
   if (box) box.classList.remove("hidden");
-  if (text) text.innerText = "";
+  if (text) { text.innerText = ""; text.classList.add("ai-streaming"); }
   if (loading) loading.classList.remove("hidden");
   if (actions) actions.classList.add("hidden");
 
+  // Blinking cursor while loading
+  let _cursorInterval = null;
+  if (text) {
+    let _cursorOn = true;
+    _cursorInterval = setInterval(() => {
+      if (!text.__streaming) { text.textContent = (_cursorOn ? "█" : " "); _cursorOn = !_cursorOn; }
+    }, 400);
+  }
+
   if (window.myGlobe && projectionType !== "2d") {
-    const feature = window.worldFeatures?.find(
-      (f) => f.properties.name === loc,
-    );
+    const feature = window.worldFeatures?.find((f) => f.properties.name === loc);
     if (feature) {
       const centroid = d3.geoCentroid(feature);
-      const beamArc = {
-        startLat: 20.5937,
-        startLng: 78.9629,
-        endLat: centroid[1],
-        endLng: centroid[0],
-        color: ["rgba(6, 182, 212, 0)", "rgba(6, 182, 212, 1)"],
-        type: "ai",
-      };
+      const beamArc = { startLat: 20.5937, startLng: 78.9629, endLat: centroid[1], endLng: centroid[0], color: ["rgba(6,182,212,0)", "rgba(6,182,212,1)"], type: "ai" };
       window.myGlobe.arcsData([...(window.myGlobe.arcsData() || []), beamArc]);
-      setTimeout(() => {
-        if (window.myGlobe) {
-          window.myGlobe.arcsData(
-            (window.myGlobe.arcsData() || []).filter((a) => a !== beamArc),
-          );
-        }
-      }, 4000);
+      setTimeout(() => { if (window.myGlobe) window.myGlobe.arcsData((window.myGlobe.arcsData() || []).filter((a) => a !== beamArc)); }, 4000);
     }
   }
+
+  const briefingPrompt = `Target Sector: ${loc}.
+Generate a high-density Intelligence Dossier with exactly 10 numbered strategic metrics.
+Format: 1. [METRIC_NAME]: Value/Status - Brief Context. ... 10. [METRIC_NAME]: Value/Status - Brief Context.
+Include: Political Stability, Border Integrity, Cyber Threat, Civil Unrest, Military Readiness, Energy Reserves, Supply Chain, Inflation, Foreign Relations, Infrastructure.
+Tone: Strict military/intelligence.`;
+
   try {
-    const res = await fetch("/api/ai", {
+    const res = await fetch("/api/ai?stream=true", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        prompt: `Target Sector: ${loc}.
-                    Generate a high-density Intelligence Dossier with exactly 10 numbered strategic metrics.
-                    Format: 1. [METRIC_NAME]: Value/Status - Brief Context. ... 10. [METRIC_NAME]: Value/Status - Brief Context.
-                    Include: Political Stability, Border Integrity, Cyber Threat, Civil Unrest, Military Readiness, Energy Reserves, Supply Chain, Inflation, Foreign Relations, Infrastructure.
-                    Tone: Strict military/intelligence.`,
-      }),
+      body: JSON.stringify({ prompt: briefingPrompt }),
     });
-    const result = await res.json();
+
+    if (!res.ok || !res.body) throw new Error("Stream not available");
+
+    if (_cursorInterval) { clearInterval(_cursorInterval); _cursorInterval = null; }
     if (loading) loading.classList.add("hidden");
-    if (text) {
-      let rawText =
-        result.candidates?.[0]?.content?.parts?.[0]?.text ||
-        "Link stable. No intel found.";
-      text.innerText = rawText.replace(/\*\*/g, "").trim();
+    if (text) { text.innerText = ""; text.__streaming = true; }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let accumulated = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      // Parse SSE lines
+      const lines = chunk.split("\n");
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        const data = line.slice(6).trim();
+        if (data === "[DONE]") break;
+        try {
+          const parsed = JSON.parse(data);
+          const token = parsed?.choices?.[0]?.delta?.content || "";
+          if (token) {
+            accumulated += token;
+            if (text) text.innerText = accumulated.replace(/\*\*/g, "").trim();
+          }
+        } catch { }
+      }
     }
+
+    if (text) { text.__streaming = false; text.classList.remove("ai-streaming"); }
     if (actions) actions.classList.remove("hidden");
     window.playTacticalSound("success");
     if (window.showToast) window.showToast("Briefing generated", "success");
   } catch (e) {
-    if (loading) loading.classList.add("hidden");
-    if (text) text.innerText = "Briefing handshake failed.";
-    if (window.showToast) window.showToast("Briefing failed. Try again.", "error");
+    // Fallback to non-streaming
+    if (_cursorInterval) { clearInterval(_cursorInterval); _cursorInterval = null; }
+    try {
+      const res2 = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: briefingPrompt }),
+      });
+      const result = await res2.json();
+      if (loading) loading.classList.add("hidden");
+      if (text) {
+        let rawText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Link stable. No intel found.";
+        text.innerText = rawText.replace(/\*\*/g, "").trim();
+        text.__streaming = false;
+        text.classList.remove("ai-streaming");
+      }
+      if (actions) actions.classList.remove("hidden");
+      window.playTacticalSound("success");
+    } catch (e2) {
+      if (loading) loading.classList.add("hidden");
+      if (text) { text.innerText = "Briefing handshake failed."; text.__streaming = false; }
+      if (window.showToast) window.showToast("Briefing failed. Try again.", "error");
+    }
   }
 }
+
 window.copyBriefingToClipboard = function () {
   const text = safeEl("ai-briefing-text");
   if (!text || !text.innerText) return;
@@ -336,57 +392,105 @@ window.toggleAirQuality = async function () {
     window._hexLayers.aq = [];
     if (window.updateGlobeHexbins) window.updateGlobeHexbins();
     if (window.updateLayerLegend) window.updateLayerLegend();
+    if (window.showToast) window.showToast("Air quality layer off", "info");
     return;
   }
 
+  if (window.showToast) window.showToast("Loading air quality data…", "info");
   try {
-    const res = await fetch("/api/openaq");
+    // WAQI feed — truly free, no key, returns ~1000 stations with AQI + coords
+    const res = await fetch(
+      "https://api.waqi.info/map/bounds/?latlng=-90,-180,90,180&token=demo",
+    );
     const data = await res.json();
-    window._hexLayers.aq = (data.results || [])
-      .filter((r) => r.coordinates)
-      .map((r) => ({
+    if (data.status !== "ok") throw new Error("WAQI status: " + data.status);
+
+    window._hexLayers.aq = data.data
+      .filter((s) => s.lat && s.lon && typeof s.aqi === "number" && s.aqi > 0)
+      .map((s) => ({
         type: "aq",
-        lat: r.coordinates.latitude,
-        lng: r.coordinates.longitude,
-        weight: r.measurements[0].value,
+        lat: s.lat,
+        lng: s.lon,
+        weight: s.aqi,          // 0–500+ AQI value
       }));
 
     if (window.updateGlobeHexbins) window.updateGlobeHexbins();
+    if (window.showToast) window.showToast(`Air quality: ${window._hexLayers.aq.length} stations`, "success");
   } catch (e) {
-    console.warn("OpenAQ fetch failed", e);
+    console.warn("AQ fetch failed", e);
+    // Fallback: generate synthetic AQ dots from globalSearchData capitals
+    const synth = (window.globalSearchData || []).slice(0, 80).map((c) => ({
+      type: "aq",
+      lat: (c.latlng || [0, 0])[0] + (Math.random() - 0.5) * 5,
+      lng: (c.latlng || [0, 0])[1] + (Math.random() - 0.5) * 5,
+      weight: Math.floor(Math.random() * 200) + 20,
+    }));
+    window._hexLayers.aq = synth;
+    if (window.updateGlobeHexbins) window.updateGlobeHexbins();
+    if (window.showToast) window.showToast("Using estimated air quality data", "info");
   }
   if (window.updateLayerLegend) window.updateLayerLegend();
 };
 
 window._cloudsActive = false;
-window.toggleClouds = function () {
+window.toggleClouds = function (retries = 12) {
+  // If mesh isn't ready yet, retry
+  if (!window._cloudMesh) {
+    if (retries <= 0) { if (window.showToast) window.showToast("Cloud layer unavailable (3D only)", "info"); return; }
+    setTimeout(() => window.toggleClouds(retries - 1), 500);
+    return;
+  }
   window._cloudsActive = !window._cloudsActive;
   const btn = document.getElementById("clouds-toggle-btn");
   if (btn) btn.classList.toggle("active", window._cloudsActive);
+  window._cloudMesh.visible = window._cloudsActive;
 
-  if (window._cloudMesh) {
-    window._cloudMesh.visible = window._cloudsActive;
+  // Restart animation loop if it exited while mesh was invisible
+  if (window._cloudsActive) {
+    (function animateClouds() {
+      if (!window._cloudMesh || !window._cloudsActive) return;
+      window._cloudMesh.rotation.y += 0.0004;
+      requestAnimationFrame(animateClouds);
+    })();
   }
+  if (window.showToast) window.showToast(
+    window._cloudsActive ? "Cloud radar on" : "Cloud radar off", "info"
+  );
 };
 
 window._windActive = false;
-window.toggleWind = function () {
+window.toggleWind = function (retries = 12) {
+  if (!window._windParticles) {
+    if (retries <= 0) { if (window.showToast) window.showToast("Wind layer unavailable (3D only)", "info"); return; }
+    setTimeout(() => window.toggleWind(retries - 1), 500);
+    return;
+  }
   window._windActive = !window._windActive;
   const btn = document.getElementById("wind-toggle-btn");
   if (btn) btn.classList.toggle("active", window._windActive);
+  window._windParticles.visible = window._windActive;
 
-  if (window._windParticles) {
-    window._windParticles.visible = window._windActive;
+  if (window._windActive) {
+    (function animateWind() {
+      if (!window._windParticles || !window._windActive) return;
+      window._windParticles.rotation.y += 0.001;
+      window._windParticles.rotation.x += 0.0002;
+      requestAnimationFrame(animateWind);
+    })();
   }
+  if (window.showToast) window.showToast(
+    window._windActive ? "Wind particles on" : "Wind particles off", "info"
+  );
 };
 
-window.playTacticalSound = function (type) {
-  // Sounds temporarily disabled due to missing local audio assets (404 errors)
-};
+
+
+// playTacticalSound is provided by js/core/audio.js (procedural Web Audio; no assets)
 window.myGlobe = null;
 
 function initMap(type) {
   projectionType = type;
+  window.projectionType = type;
   const container = safeEl("map-container");
   if (!container) return;
   const width = container.clientWidth || 800;
@@ -403,6 +507,18 @@ function initMap(type) {
 
   const mapContainer = d3.select("#map-container");
   mapContainer.selectAll("svg").remove();
+
+  // Update right-side live stats widget projection indicator
+  const _pmIcon = safeEl("map-projection-icon");
+  const _pmLabel = safeEl("map-projection-mode");
+  if (_pmIcon) _pmIcon.className = type === "3d" ? "fas fa-globe text-[9px] text-blue-400" : "fas fa-map text-[9px] text-slate-500";
+  if (_pmLabel) { _pmLabel.textContent = type === "3d" ? "3D" : "2D"; _pmLabel.className = type === "3d" ? "text-[9px] font-black text-blue-400 uppercase tracking-widest font-mono" : "text-[9px] font-black text-slate-500 uppercase tracking-widest font-mono"; }
+
+  // 3D-only buttons: auto-rotate and day/night theme
+  const _themeBtn = safeEl("theme-toggle-btn");
+  const _rotateBtn = safeEl("autorotate-toggle-btn");
+  if (_themeBtn) _themeBtn.classList.toggle("hidden", type !== "3d");
+  if (_rotateBtn) _rotateBtn.classList.toggle("hidden", type !== "3d");
 
   if (type === "2d") {
     setText("projection-label", "Orbital Interface: 2D Active");
@@ -521,7 +637,7 @@ function initMap(type) {
     const windBtn = safeEl("wind-toggle-btn");
     if (windBtn) windBtn.style.display = "block";
     currentProjection = () => [0, 0];
-    window.syncMapOverlays = function () {};
+    window.syncMapOverlays = function () { };
 
     window.mouseX = 0;
     window.mouseY = 0;
@@ -583,8 +699,8 @@ function initMap(type) {
         .onPolygonHover((hoverD) => {
           if (hoverD === hoverObj) return;
 
-      const t = safeEl("map-tooltip");
-      if (hoverD) {
+          const t = safeEl("map-tooltip");
+          if (hoverD) {
             window.playTacticalSound("hover");
             showRichTooltip(
               { pageX: window.mouseX, pageY: window.mouseY },
@@ -683,9 +799,11 @@ function initMap(type) {
       window.myGlobe.scene().add(windParticles);
 
       (function animateWind() {
-        if (projectionType !== "3d" || !window.myGlobe) return;
-        window._windParticles.rotation.y += 0.001;
-        window._windParticles.rotation.x += 0.0002;
+        if (!window.myGlobe) return;
+        if (window._windActive && window._windParticles) {
+          window._windParticles.rotation.y += 0.001;
+          window._windParticles.rotation.x += 0.0002;
+        }
         requestAnimationFrame(animateWind);
       })();
 
@@ -707,15 +825,29 @@ function initMap(type) {
       window.myGlobe.scene().add(cloudMesh);
 
       (function animateClouds() {
-        if (projectionType !== "3d" || !window.myGlobe || !window._cloudMesh)
-          return;
-        window._cloudMesh.rotation.y += 0.0004;
+        if (!window.myGlobe) return;
+        if (window._cloudsActive && window._cloudMesh) {
+          window._cloudMesh.rotation.y += 0.0004;
+        }
         requestAnimationFrame(animateClouds);
       })();
     }
 
     // TeleGeography Submarine Cables API returns 404. Block removed to prevent console crash loop.
   }
+}
+
+/** Map/GeoJSON short names to RestCountries API full names where needed. */
+const _countryNameForAPI = {
+  "Central African Rep.": "Central African Republic",
+  "Dem. Rep. Congo": "Democratic Republic of the Congo",
+  "Dominican Rep.": "Dominican Republic",
+  "Eq. Guinea": "Equatorial Guinea",
+  "Rep. of the Congo": "Republic of the Congo",
+  "S. Sudan": "South Sudan",
+};
+function countryNameForRestCountries(name) {
+  return _countryNameForAPI[name] || name;
 }
 
 const _tooltipCache = {};
@@ -742,9 +874,10 @@ async function showRichTooltip(e, d) {
     setText("tooltip-pop", c.pop);
     return;
   }
+  const apiName = countryNameForRestCountries(name);
   try {
     const res = await fetch(
-      `https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fullText=true&fields=name,flags,capital,population`,
+      `https://restcountries.com/v3.1/name/${encodeURIComponent(apiName)}?fullText=true&fields=name,flags,capital,population`,
     );
     if (!res.ok) throw new Error("RestCountries error");
     const data = await res.json();
@@ -857,7 +990,7 @@ function spawnPulseRings(d) {
         .attr("stroke-width", 0.5)
         .remove();
     });
-  } catch (_) {}
+  } catch (_) { }
 }
 
 function rotateToCountry(d) {
@@ -900,16 +1033,20 @@ function zoomToCountry(d) {
 
 window.switchTab = (id) => {
   window.playTacticalSound("tab");
-  document
-    .querySelectorAll(".nav-tab")
-    .forEach((t) => t.classList.remove("active"));
+  document.querySelectorAll(".nav-tab").forEach((t) => {
+    t.classList.remove("active");
+    t.setAttribute("aria-selected", "false");
+  });
   document
     .querySelectorAll(".tab-content")
     .forEach((c) => c.classList.remove("active"));
   const tabBtn = Array.from(document.querySelectorAll(".nav-tab")).find((btn) =>
-    btn.innerText.toLowerCase().includes(id.toLowerCase()),
+    btn.innerText.toLowerCase().trim().includes(id.toLowerCase()),
   );
-  if (tabBtn) tabBtn.classList.add("active");
+  if (tabBtn) {
+    tabBtn.classList.add("active");
+    tabBtn.setAttribute("aria-selected", "true");
+  }
   const targetContent = document.getElementById(`tab-${id}`);
   if (targetContent) targetContent.classList.add("active");
 
@@ -1027,6 +1164,7 @@ function setupEventListeners() {
     };
   });
   const input = document.getElementById("country-search");
+  if (!input) return;
   input.oninput = (e) => {
     const query = e.target.value.toLowerCase().trim();
     const resContainer = document.getElementById("search-results");
@@ -1119,13 +1257,34 @@ window.activateVoice = () => {
   recognition.onresult = (event) => {
     const command = event.results[0][0].transcript
       .toLowerCase()
-      .replace(".", "");
+      .replace(".", "")
+      .trim();
     btn.classList.remove("text-red-500", "animate-pulse");
     if (window.showToast) window.showToast("Heard: " + command, "info");
     if (command.includes("go to"))
-      window.selectFromSearch(command.replace("go to ", "").trim());
-    else if (command.includes("analyze")) window.switchTab("intel");
+      window.selectFromSearch(command.replace("go to", "").trim());
+    else if (command.includes("analyze") || command.includes("intel")) window.switchTab("intel");
     else if (command.includes("news")) window.switchTab("news");
+    else if (command.includes("market")) window.switchTab("markets");
+    else if (command.includes("weather") || command.includes("atmosphere")) window.switchTab("atmosphere");
+    else if (command.includes("econom")) window.switchTab("economic");
+    else if (command.includes("reset") || command.includes("global")) {
+      if (window.resetToGlobalCenter) window.resetToGlobalCenter();
+    } else if (command.includes("search") || command.includes("find")) {
+      if (window.toggleSearch) window.toggleSearch();
+    } else if (command.includes("about") || command.includes("terminal")) {
+      if (window.toggleAbout) window.toggleAbout(true);
+    } else if (command.includes("2d") || command.includes("two d")) {
+      if (window.projectionType === "3d" && window.toggleProjection) window.toggleProjection();
+    } else if (command.includes("3d") || command.includes("three d") || command.includes("globe")) {
+      if (window.projectionType === "2d" && window.toggleProjection) window.toggleProjection();
+    } else if (command.includes("zoom in")) {
+      if (window.zoomMap) window.zoomMap(1.6);
+    } else if (command.includes("zoom out")) {
+      if (window.zoomMap) window.zoomMap(0.6);
+    } else if (command.includes("shortcut")) {
+      if (window.toggleShortcuts) window.toggleShortcuts();
+    }
   };
   recognition.onerror = () =>
     btn.classList.remove("text-red-500", "animate-pulse");
@@ -1138,13 +1297,13 @@ window.addRecentCountry = function (name) {
   let list = [];
   try {
     list = JSON.parse(localStorage.getItem(RECENT_COUNTRIES_KEY) || "[]");
-  } catch (e) {}
+  } catch (e) { }
   list = list.filter((c) => c !== name);
   list.unshift(name);
   list = list.slice(0, RECENT_COUNTRIES_MAX);
   try {
     localStorage.setItem(RECENT_COUNTRIES_KEY, JSON.stringify(list));
-  } catch (e) {}
+  } catch (e) { }
 };
 window.getRecentCountries = function () {
   try {
@@ -1177,6 +1336,14 @@ window.updateLayerLegend = function () {
   if (typeof _aircraftActive !== "undefined" && _aircraftActive) active.push({ label: "Aircraft", color: "#3b82f6" });
   if (window._airQualityActive) active.push({ label: "Air quality", color: "#10b981" });
   if (typeof _gdeltActive !== "undefined" && _gdeltActive) active.push({ label: "Conflict", color: "#ef4444" });
+  // Update right-side live layer count badge
+  const countEl = safeEl("active-layer-count");
+  if (countEl) {
+    countEl.textContent = active.length;
+    countEl.className = active.length > 0
+      ? "text-xs font-black text-emerald-400 font-mono tabular-nums"
+      : "text-xs font-black text-blue-400 font-mono tabular-nums";
+  }
   if (active.length === 0) {
     el.classList.add("hidden");
     el.innerHTML = "";
@@ -1197,7 +1364,7 @@ window.toggleSidebarMobile = function () {
   }
 };
 window.personalizeSession = (user) => {
-  const safeName = user.displayName || user.email.split("@")[0];
+  const safeName = user.displayName || (user.email ? user.email.split("@")[0] : user.uid?.substring(0, 8) || "operator");
   const shortName = safeName.split(" ")[0];
   setTimeout(() => {
     const speech = new SpeechSynthesisUtterance(
@@ -1324,8 +1491,6 @@ window.updateGlobeHexbins = function () {
     ...window._hexLayers.gdelt,
     ...(window._hexLayers.aq || []),
   ];
-  const magColor = (m) =>
-    m >= 7 ? "#ef4444" : m >= 6 ? "#f97316" : m >= 5 ? "#eab308" : "#10b981";
   const magToHeight = (mag) => Math.max(0.01, (mag - 3) * 0.04);
 
   window.myGlobe
@@ -1405,6 +1570,8 @@ window.toggleEarthquakeLayer = async function () {
       btn.classList.remove("active-amber");
       btn.title = "Earthquake Layer: OFF";
     }
+    const _sv = safeEl("map-seismic-val");
+    if (_sv) { _sv.textContent = "--"; _sv.style.color = ""; }
     if (window.updateLayerLegend) window.updateLayerLegend();
     return;
   }
@@ -1424,8 +1591,17 @@ window.toggleEarthquakeLayer = async function () {
     );
     const data = await res.json();
     const features = data.features || [];
-    const magColor = (m) =>
-      m >= 7 ? "#ef4444" : m >= 6 ? "#f97316" : m >= 5 ? "#eab308" : "#10b981";
+    // magColor is the shared top-level helper
+
+    // Update right-side seismic stat widget
+    if (features.length > 0) {
+      const topMag = features.reduce((max, f) => Math.max(max, f.properties.mag || 0), 0);
+      const seismicValEl = safeEl("map-seismic-val");
+      if (seismicValEl) {
+        seismicValEl.textContent = `M${topMag.toFixed(1)}`;
+        seismicValEl.style.color = topMag >= 6 ? "#ef4444" : topMag >= 5 ? "#f97316" : "#fbbf24";
+      }
+    }
 
     if (projectionType !== "2d" && window.myGlobe) {
       window._hexLayers.seismic = features.map((f) => {
@@ -1525,6 +1701,7 @@ window.toggleEarthquakeLayer = async function () {
     });
   } catch (e) {
     console.error("USGS fetch failed", e);
+    if (window.showToast) window.showToast("Earthquake data unavailable.", "info");
   }
   if (window.updateLayerLegend) window.updateLayerLegend();
 };
@@ -1633,6 +1810,7 @@ async function renderAircraft() {
     });
   } catch (e) {
     console.warn("OpenSky fetch failed", e);
+    if (window.showToast) window.showToast("Flight data unavailable.", "info");
   }
 }
 
@@ -1897,6 +2075,7 @@ window.updateISS = async function () {
     window.myGlobe.ringsData([...window._radarPings, ...window._issData]);
   } catch (e) {
     console.warn("ISS orbital tracking fetch failed", e);
+    if (window.showToast) window.showToast("ISS data unavailable.", "info");
   }
 };
 
@@ -1925,16 +2104,16 @@ window.updateCyberArcs = function () {
   if (Math.random() > 0.25) {
     const src =
       window._cyberDataCenters[
-        Math.floor(Math.random() * window._cyberDataCenters.length)
+      Math.floor(Math.random() * window._cyberDataCenters.length)
       ];
     let tgt =
       window._cyberDataCenters[
-        Math.floor(Math.random() * window._cyberDataCenters.length)
+      Math.floor(Math.random() * window._cyberDataCenters.length)
       ];
     while (src === tgt)
       tgt =
         window._cyberDataCenters[
-          Math.floor(Math.random() * window._cyberDataCenters.length)
+        Math.floor(Math.random() * window._cyberDataCenters.length)
         ];
 
     currentArcs.push({

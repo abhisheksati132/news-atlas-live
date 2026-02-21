@@ -78,7 +78,17 @@ export default async function handler(req, res) {
       ],
     });
   };
+  const isStream = req.query?.stream === "true";
+
   if (!apiKey) {
+    if (isStream) {
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      const sim = returnSimulation(true);
+      res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: sim } }] })}\n\n`);
+      res.write("data: [DONE]\n\n");
+      return res.end();
+    }
     return returnSimulation();
   }
   const url = "https://api.groq.com/openai/v1/chat/completions";
@@ -103,19 +113,26 @@ export default async function handler(req, res) {
         ],
         temperature: 0.5,
         max_tokens: 800,
+        stream: isStream,
       }),
     });
-    const data = await response.json();
-    if (data.error) {
-      return returnSimulation();
+
+    if (isStream) {
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("X-Accel-Buffering", "no");
+      // Pipe SSE chunks straight through
+      for await (const chunk of response.body) {
+        res.write(chunk);
+      }
+      return res.end();
     }
+
+    const data = await response.json();
+    if (data.error) return returnSimulation();
     const aiText = data.choices[0].message.content;
     res.status(200).json({
-      candidates: [
-        {
-          content: { parts: [{ text: aiText }] },
-        },
-      ],
+      candidates: [{ content: { parts: [{ text: aiText }] } }],
     });
   } catch (error) {
     return returnSimulation();

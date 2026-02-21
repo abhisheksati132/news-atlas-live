@@ -5,10 +5,61 @@ let newsSearchQuery = "";
 let newsSearchTimer = null;
 let isLiveSearching = false;
 
+/** Returns a sentiment object {cls, label} from article title+description */
+function getNewsSentiment(title, desc) {
+  const text = ((title || "") + " " + (desc || "")).toLowerCase();
+  const neg = /\b(war|attack|kill|crisis|conflict|crash|terror|dead|threat|sanction|protest|clash|bomb|missile|coup|unrest|disaster|explosion|violence|strike|riot|collapse|invasion|arrest|death|victim|destruction)\b/;
+  const pos = /\b(record|growth|summit|deal|peace|recover|milestone|rise|launch|success|breakthrough|advance|reform|progress|agreement|invest|surge|rally|relief|restore|historic|sign|victory)\b/;
+  if (neg.test(text)) return { cls: "sentiment-negative", label: "CRITICAL" };
+  if (pos.test(text)) return { cls: "sentiment-positive", label: "POSITIVE" };
+  return { cls: "sentiment-neutral", label: "NEUTRAL" };
+}
+
+/** Returns "2h ago", "3d ago" etc. from a pubDate string */
+function relativeTime(pubDate) {
+  if (!pubDate) return "";
+  const diff = Date.now() - new Date(pubDate).getTime();
+  if (isNaN(diff) || diff < 0) return "";
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
+}
+
+/** Returns favicon URL for a source_url or null */
+function getFavicon(sourceUrl) {
+  if (!sourceUrl) return null;
+  try {
+    const domain = new URL(sourceUrl).hostname;
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+  } catch {
+    return null;
+  }
+}
+
+/** Show skeleton loading cards */
+function showNewsSkeletons(container) {
+  if (!container) return;
+  const skels = Array.from({ length: 3 }, () => `
+    <div class="dossier-card mb-4 skeleton" style="height:140px;">
+      <div class="flex items-center gap-2 mb-4">
+        <div class="w-16 h-3 rounded-full skeleton" style="background:rgba(255,255,255,0.05)"></div>
+        <div class="ml-auto w-10 h-3 rounded-full skeleton" style="background:rgba(255,255,255,0.04)"></div>
+      </div>
+      <div class="w-full h-4 rounded skeleton mb-2" style="background:rgba(255,255,255,0.05)"></div>
+      <div class="w-4/5 h-4 rounded skeleton" style="background:rgba(255,255,255,0.04)"></div>
+    </div>`).join("");
+  container.innerHTML = skels;
+}
+
 async function fetchNews(overrideQ) {
   const loading = document.getElementById("news-loading");
   const container = document.getElementById("articles-container");
   if (loading) loading.classList.remove("hidden");
+  if (container) showNewsSkeletons(container);
   displayedNewsCount = 21;
   isLiveSearching = false;
   const previousNews = allNews.length > 0 ? [...allNews] : null;
@@ -21,7 +72,8 @@ async function fetchNews(overrideQ) {
     } else {
       url = `/api/news?category=${window.currentCategory || "top"}${iso2 ? "&iso2=" + iso2 : ""}`;
     }
-    const res = await fetch(url);
+    const fetcher = window.fetchWithRetry || fetch;
+    const res = await fetcher(url, {}, { retries: 1, timeoutMs: 12000 });
     if (!res.ok) throw new Error("News fetch failed");
     const data = await res.json();
     if (data.totalResults) {
@@ -29,6 +81,8 @@ async function fetchNews(overrideQ) {
       if (el) el.innerText = data.totalResults;
     }
     allNews = data.results && data.results.length > 0 ? data.results : [];
+    // Update headline ticker whenever news loads
+    if (window.updateHeadlineTicker) window.updateHeadlineTicker(allNews);
     displayFilteredNews();
   } catch (e) {
     if (container) {
@@ -40,9 +94,8 @@ async function fetchNews(overrideQ) {
           </button>
         </div>`;
     }
-    if (previousNews && previousNews.length > 0) {
-      allNews = previousNews;
-    }
+    if (previousNews && previousNews.length > 0) allNews = previousNews;
+    if (window.showToast) window.showToast("News feed unavailable. Retry or check connection.", "error");
   } finally {
     if (loading) loading.classList.add("hidden");
   }
@@ -57,10 +110,7 @@ window.filterNews = (searchTerm) => {
     fetchNews("");
     return;
   }
-
-  newsSearchTimer = setTimeout(() => {
-    liveSearchFallback(searchTerm);
-  }, 500);
+  newsSearchTimer = setTimeout(() => liveSearchFallback(searchTerm), 500);
 };
 
 async function liveSearchFallback(query) {
@@ -69,14 +119,14 @@ async function liveSearchFallback(query) {
   const container = document.getElementById("articles-container");
   if (container) {
     container.innerHTML = `
-            <div class="col-span-full p-8 text-center">
-                <div class="inline-flex items-center gap-3 px-5 py-3 rounded-xl" style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2)">
-                    <div class="w-2 h-2 rounded-full bg-blue-400 animate-ping"></div>
-                    <span class="text-[11px] font-black text-blue-400 uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">
-                        Searching live feeds for "<span class="text-white">${query}</span>"...
-                    </span>
-                </div>
-            </div>`;
+      <div class="col-span-full p-8 text-center">
+        <div class="inline-flex items-center gap-3 px-5 py-3 rounded-xl" style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2)">
+          <div class="w-2 h-2 rounded-full bg-blue-400 animate-ping"></div>
+          <span class="text-[11px] font-black text-blue-400 uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">
+            Searching live feeds for "<span class="text-white">${query}</span>"...
+          </span>
+        </div>
+      </div>`;
   }
   await fetchNews(query);
   isLiveSearching = false;
@@ -89,30 +139,25 @@ window.clearNewsSearch = () => {
   newsSearchQuery = "";
   fetchNews("");
 };
+
 window.setCategory = (el, cat) => {
   window.playTacticalSound("click");
-  document
-    .querySelectorAll(".intel-tab")
-    .forEach((t) => t.classList.remove("active"));
+  document.querySelectorAll(".intel-tab").forEach((t) => t.classList.remove("active"));
   el.classList.add("active");
   window.currentCategory = cat;
   fetchNews();
 };
+
 function displayFilteredNews() {
   let filtered = [...allNews];
   let countToDisplay = Math.min(displayedNewsCount, filtered.length);
   const remainder = countToDisplay % 3;
-  if (remainder !== 0 && countToDisplay > remainder) {
-    countToDisplay -= remainder;
-  }
-
+  if (remainder !== 0 && countToDisplay > remainder) countToDisplay -= remainder;
   displayNewsArticles(filtered.slice(0, countToDisplay));
-
   const loadMoreEl = document.getElementById("news-load-more");
-  if (loadMoreEl) {
-    loadMoreEl.classList.toggle("hidden", filtered.length <= countToDisplay);
-  }
+  if (loadMoreEl) loadMoreEl.classList.toggle("hidden", filtered.length <= countToDisplay);
 }
+
 function displayNewsArticles(articles) {
   const container = document.getElementById("articles-container");
   if (!container) return;
@@ -126,24 +171,47 @@ function displayNewsArticles(articles) {
       </div>`;
     return;
   }
+
   articles.forEach((art, i) => {
     const card = document.createElement("div");
-    const sents = ["signal-blue", "signal-emerald", "signal-red"];
-    const img = art.image_url
-      ? `<div class="h-32 w-full mb-3 rounded bg-cover bg-center border border-white/10" style="background-image: url('${art.image_url}')"></div>`
+    const isFeatured = i === 0;
+    const sentiment = getNewsSentiment(art.title, art.description);
+    const timeAgo = relativeTime(art.pubDate);
+    const favicon = getFavicon(art.source_url);
+
+    const faviconHtml = favicon
+      ? `<img src="${favicon}" alt="" class="w-4 h-4 rounded object-cover shrink-0" onerror="this.style.display='none'">`
+      : `<i class="fas fa-newspaper text-[10px] text-slate-500"></i>`;
+
+    const imgHtml = art.image_url && isFeatured
+      ? `<div class="h-40 w-full mb-4 rounded-lg bg-cover bg-center border border-white/8 overflow-hidden" style="background-image:url('${art.image_url}')"></div>`
       : "";
-    card.className = `dossier-card shadow-md mb-4 ${sents[i % 3]}`;
+
+    card.className = `dossier-card news-card-animate mb-4 ${isFeatured ? "news-card-featured" : ""}`;
+    card.style.animationDelay = `${i * 45}ms`;
     card.onmouseenter = () => window.playTacticalSound("hover");
+
     card.innerHTML = `
-            <div class="flex justify-between items-center mb-4">
-                <div class="text-[10px] font-black text-white/70 uppercase tracking-widest bg-white/5 px-2.5 py-0.5 rounded-xl truncate max-w-[100px]">${art.source_id || "UPLINK"}</div>
-                <button class="text-slate-400 hover:text-white transition-all tactical-btn"><i class="fas fa-link text-[13px]"></i></button>
-            </div>
-            ${img}<h3 class="font-bold text-[16px] text-white leading-tight mb-3 cursor-pointer hover:text-blue-300 transition-colors pr-4" onclick="window.open('${art.link}', '_blank')">${art.title}</h3>
-        `;
+      <div class="flex items-center gap-2 mb-3">
+        ${faviconHtml}
+        <span class="text-[10px] font-black text-white/60 uppercase tracking-widest truncate max-w-[120px]">${art.source_id || "UPLINK"}</span>
+        <div class="flex-1"></div>
+        <span class="text-[9px] font-mono text-slate-600">${timeAgo}</span>
+        <span class="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-full ${sentiment.cls}">${sentiment.label}</span>
+      </div>
+      ${imgHtml}
+      <h3 class="font-bold ${isFeatured ? "text-[17px]" : "text-[14px]"} text-white leading-snug mb-3 cursor-pointer hover:text-blue-300 transition-colors" onclick="window.open('${art.link}', '_blank')">${art.title}</h3>
+      <div class="flex items-center gap-3 mt-auto pt-2 border-t border-white/5">
+        <button class="text-[9px] font-mono text-slate-500 hover:text-blue-400 transition-colors flex items-center gap-1" onclick="window.open('${art.link}', '_blank')">
+          <i class="fas fa-external-link-alt"></i> Read
+        </button>
+        ${isFeatured ? `<span class="text-[9px] font-mono text-blue-400/60 ml-auto"><i class="fas fa-star mr-1 text-[8px]"></i>TOP STORY</span>` : ""}
+      </div>
+    `;
     container.appendChild(card);
   });
 }
+
 window.loadMoreNews = () => {
   displayedNewsCount += 21;
   displayFilteredNews();
@@ -151,15 +219,13 @@ window.loadMoreNews = () => {
 window.checkNewsScroll = () => {
   const container = document.getElementById("news-scroll-container");
   if (!container) return;
-  if (
-    container.scrollTop + container.clientHeight >=
-    container.scrollHeight - 100
-  )
+  if (container.scrollTop + container.clientHeight >= container.scrollHeight - 100)
     window.loadMoreNews();
 };
 
 window.fetchNews = fetchNews;
 window.displayFilteredNews = displayFilteredNews;
+
 
 async function fetchGDELTEvents(country) {
   const container = document.getElementById("gdelt-events-content");
@@ -213,7 +279,8 @@ async function fetchGDELTEvents(country) {
     if (stamp) stamp.innerText = `GDELT · ${articles.length} events · Last 24h`;
   } catch (e) {
     container.innerHTML =
-      '<div class="text-slate-500 text-xs">GDELT uplink failed</div>';
+      '<div class="text-slate-500 text-xs py-2">GDELT uplink failed. Events may be temporarily unavailable.</div>';
+    if (window.showToast) window.showToast("GDELT events unavailable.", "info");
   }
 }
 window.fetchGDELTEvents = fetchGDELTEvents;

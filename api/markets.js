@@ -153,7 +153,7 @@ export default async function handler(req, res) {
           const er = await fetch(`https://open.er-api.com/v6/latest/USD`);
           const erData = await er.json();
           rate = erData.rates[cur] || 1;
-        } catch (_) {}
+        } catch (_) { }
       }
 
       const results = await Promise.all(
@@ -197,7 +197,6 @@ export default async function handler(req, res) {
         }
       });
       return res.status(200).json({ type: "metals", currency: cur, data });
-      return res.status(200).json({ type: "metals", currency: cur, data });
     } else if (type === "commodities") {
       const commodityTickers = {
         "Crude Oil (WTI)": "CL=F",
@@ -234,7 +233,7 @@ export default async function handler(req, res) {
           const er = await fetch(`https://open.er-api.com/v6/latest/USD`);
           const erData = await er.json();
           exchangeRate = erData.rates[cur] || 1;
-        } catch (_) {}
+        } catch (_) { }
       }
       const commodityResults = await Promise.allSettled(
         Object.entries(commodityTickers).map(async ([name, ticker]) => {

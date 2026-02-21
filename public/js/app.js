@@ -414,7 +414,11 @@ function initMap(type) {
       .showAtmosphere(true)
       .atmosphereColor("rgba(59, 130, 246, 0.4)")
       .atmosphereAltitude(0.15)
-      .globeImageUrl("//unpkg.com/three-globe/example/img/earth-night.jpg")
+      .globeImageUrl(
+        window._globeTheme === "day"
+          ? "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+          : "//unpkg.com/three-globe/example/img/earth-night.jpg",
+      )
       .bumpImageUrl("//unpkg.com/three-globe/example/img/earth-topology.png")
       .bumpScale(4);
 
@@ -441,9 +445,19 @@ function initMap(type) {
         )
         .onPolygonHover((hoverD) => {
           if (hoverD === hoverObj) return; // Prevent infinite re-render loop locking the main thread
-          if (hoverD) window.playTacticalSound("hover");
+
+          const t = document.getElementById("map-tooltip");
+          if (hoverD) {
+            window.playTacticalSound("hover");
+            showRichTooltip(
+              { pageX: window.mouseX, pageY: window.mouseY },
+              hoverD,
+            );
+          } else {
+            if (t) t.classList.add("hidden");
+          }
+
           hoverObj = hoverD;
-          // Trigger reactivity
           // Trigger reactivity natively without re-injecting the massive polygon array
           window.myGlobe.polygonAltitude(window.myGlobe.polygonAltitude());
           window.myGlobe.polygonCapColor(window.myGlobe.polygonCapColor());
@@ -1662,3 +1676,33 @@ window.updateCyberArcs = function () {
 if (!window._cyberInterval) {
   window._cyberInterval = setInterval(window.updateCyberArcs, 600);
 }
+
+// --- GLOBE THEME TOGGLE ---
+if (typeof window._globeTheme === "undefined") {
+  window._globeTheme = "night";
+}
+
+window.toggleGlobeTheme = function () {
+  window._globeTheme = window._globeTheme === "night" ? "day" : "night";
+
+  const btn = document.getElementById("theme-toggle-btn");
+  if (btn) {
+    if (window._globeTheme === "day") {
+      btn.classList.add("text-yellow-400", "active-amber");
+      btn.innerHTML = '<i class="fas fa-sun text-xs"></i>';
+      btn.title = "Globe Theme: DAY";
+    } else {
+      btn.classList.remove("text-yellow-400", "active-amber");
+      btn.innerHTML = '<i class="fas fa-moon text-xs"></i>';
+      btn.title = "Globe Theme: NIGHT";
+    }
+  }
+
+  if (window.myGlobe) {
+    window.myGlobe.globeImageUrl(
+      window._globeTheme === "day"
+        ? "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+        : "//unpkg.com/three-globe/example/img/earth-night.jpg",
+    );
+  }
+};

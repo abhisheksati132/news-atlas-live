@@ -426,14 +426,18 @@ function initMap(type) {
       window.myGlobe
         .polygonsData(features)
         .polygonAltitude((d) => (d === hoverObj ? 0.06 : 0.01))
-        .polygonCapColor((d) =>
-          d === hoverObj ? "rgba(6, 182, 212, 0.5)" : "rgba(59, 130, 246, 0.1)",
-        )
-        .polygonSideColor((d) =>
-          d === hoverObj
-            ? "rgba(6, 182, 212, 0.15)"
-            : "rgba(59, 130, 246, 0.05)",
-        )
+        .polygonCapColor((d) => {
+          if (d === hoverObj) return "rgba(6, 182, 212, 0.5)";
+          return window._globeTheme === "day"
+            ? "rgba(59, 130, 246, 0.1)"
+            : "rgba(0, 0, 0, 0)";
+        })
+        .polygonSideColor((d) => {
+          if (d === hoverObj) return "rgba(6, 182, 212, 0.15)";
+          return window._globeTheme === "day"
+            ? "rgba(59, 130, 246, 0.05)"
+            : "rgba(0, 0, 0, 0)";
+        })
         .polygonStrokeColor(() => "#3b82f6")
         .polygonLabel(
           ({ properties: d }) => `
@@ -483,7 +487,7 @@ function initMap(type) {
     }
 
     if (window.myGlobe.controls) {
-      window.myGlobe.controls().autoRotate = true;
+      window.myGlobe.controls().autoRotate = window._autoRotateActive !== false;
       window.myGlobe.controls().autoRotateSpeed = 0.5;
     }
 
@@ -1708,6 +1712,25 @@ if (!window._cyberInterval) {
 if (typeof window._globeTheme === "undefined") {
   window._globeTheme = "night";
 }
+
+// --- CLOUD ROTATION & VIEW TOGGLES ---
+window._autoRotateActive = true;
+window.toggleAutoRotate = function () {
+  window._autoRotateActive = !window._autoRotateActive;
+  const btn = document.getElementById("autorotate-toggle-btn");
+  if (btn) {
+    if (window._autoRotateActive) {
+      btn.classList.add("text-blue-400", "active");
+      btn.title = "Auto-Rotate: ON";
+    } else {
+      btn.classList.remove("text-blue-400", "active");
+      btn.title = "Auto-Rotate: OFF";
+    }
+  }
+  if (window.myGlobe && window.myGlobe.controls()) {
+    window.myGlobe.controls().autoRotate = window._autoRotateActive;
+  }
+};
 
 window.toggleGlobeTheme = function () {
   window._globeTheme = window._globeTheme === "night" ? "day" : "night";

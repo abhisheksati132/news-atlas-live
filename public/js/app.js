@@ -1047,6 +1047,34 @@ window.updateChronos = function (val) {
   }
 };
 
+window._chronosActive = false;
+window.toggleChronos = function () {
+  window._chronosActive = !window._chronosActive;
+  const btn = document.getElementById("chronos-toggle-btn");
+  const container = document.getElementById("chronos-slider-container");
+
+  if (!window._chronosActive) {
+    if (container) container.classList.add("hidden");
+    if (btn) {
+      btn.classList.remove("active");
+      btn.title = "Chronos Engine: OFF";
+    }
+    // Automatically reset the timeline to LIVE when closed
+    const slider = document.getElementById("chronos-slider");
+    if (slider) {
+      slider.value = 0;
+      window.updateChronos(0);
+    }
+    return;
+  }
+
+  if (container) container.classList.remove("hidden");
+  if (btn) {
+    btn.classList.add("active");
+    btn.title = "Chronos Engine: ON";
+  }
+};
+
 window._hexLayers = { seismic: [], gdelt: [] };
 window.updateGlobeHexbins = function () {
   if (!window.myGlobe) return;

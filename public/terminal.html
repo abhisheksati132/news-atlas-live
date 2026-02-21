@@ -1728,6 +1728,15 @@
               <i class="fas fa-crosshairs text-xs"></i>
             </button>
 
+            <button
+              id="chronos-toggle-btn"
+              onclick="toggleChronos()"
+              class="map-ctrl-btn text-slate-400"
+              title="Chronos Engine: OFF"
+            >
+              <i class="fas fa-history text-xs"></i>
+            </button>
+
             <button onclick="zoomMap(1.6)" class="map-ctrl-btn" title="Zoom In">
               <i class="fas fa-plus text-xs"></i>
             </button>
@@ -1777,7 +1786,7 @@
           <!-- CHRONOS SLIDER -->
           <div
             id="chronos-slider-container"
-            class="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-3/4 max-w-2xl px-6 py-3 rounded-2xl glass-panel z-10 flex flex-col gap-2 transition-all opacity-90 hover:opacity-100"
+            class="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-3/4 max-w-2xl px-6 py-3 rounded-2xl glass-panel z-10 flex flex-col gap-2 transition-all opacity-90 hover:opacity-100 hidden"
             style="
               background: rgba(2, 6, 23, 0.65);
               border: 1px solid rgba(59, 130, 246, 0.2);

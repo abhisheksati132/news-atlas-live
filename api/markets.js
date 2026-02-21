@@ -11,6 +11,7 @@ export default async function handler(req, res) {
         { label: "DOW JONES", ticker: "^DJI" },
         { label: "FTSE 100", ticker: "^FTSE" },
         { label: "NIKKEI 225", ticker: "^N225" },
+        { label: "NIFTY 50", ticker: "^NSEI" },
         { label: "BTC-USD", ticker: "BTC-USD" },
         { label: "ETH-USD", ticker: "ETH-USD" },
         { label: "GOLD", ticker: "GC=F" },

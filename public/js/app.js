@@ -956,15 +956,26 @@ window.goToIndiaHome = () => {
   if (india) handleCountryClick(null, india);
 };
 window.activateMapInteraction = () => {
-  const overlay = document.getElementById("map-overlay-guard");
+  const overlay = document.getElementById("map-interaction-overlay");
   if (overlay) {
-    overlay.classList.add("active");
+    overlay.style.pointerEvents = "none";
+    overlay.classList.add("opacity-0");
+    setTimeout(() => {
+      overlay.style.display = "none";
+    }, 300);
     window.playTacticalSound("click");
   }
 };
 window.deactivateMapInteraction = () => {
-  const overlay = document.getElementById("map-overlay-guard");
-  if (overlay) overlay.classList.remove("active");
+  const overlay = document.getElementById("map-interaction-overlay");
+  if (overlay) {
+    overlay.style.display = "";
+    // Wait for display block to apply before transitioning opacity
+    requestAnimationFrame(() => {
+      overlay.classList.remove("opacity-0");
+      overlay.style.pointerEvents = "auto";
+    });
+  }
 };
 function setupEventListeners() {
   document.querySelectorAll(".category-pill").forEach((pill) => {

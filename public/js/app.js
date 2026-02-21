@@ -414,7 +414,7 @@ function initMap(type) {
       .showAtmosphere(true)
       .atmosphereColor("rgba(59, 130, 246, 0.4)")
       .atmosphereAltitude(0.15)
-      .globeImageUrl("//unpkg.com/three-globe/example/img/earth-dark.jpg")
+      .globeImageUrl("//unpkg.com/three-globe/example/img/earth-night.jpg")
       .bumpImageUrl("//unpkg.com/three-globe/example/img/earth-topology.png")
       .bumpScale(4);
 
@@ -444,7 +444,10 @@ function initMap(type) {
           if (hoverD) window.playTacticalSound("hover");
           hoverObj = hoverD;
           // Trigger reactivity
-          window.myGlobe.polygonsData([...window.worldFeatures]);
+          // Trigger reactivity natively without re-injecting the massive polygon array
+          window.myGlobe.polygonAltitude(window.myGlobe.polygonAltitude());
+          window.myGlobe.polygonCapColor(window.myGlobe.polygonCapColor());
+          window.myGlobe.polygonSideColor(window.myGlobe.polygonSideColor());
         })
         .onPolygonClick((d) => {
           if (d) handleCountryClick(null, d);
@@ -491,7 +494,7 @@ function initMap(type) {
         window.myGlobe.scene().add(clouds);
 
         (function rotateClouds() {
-          if (projectionType !== "orthographic" || !window.myGlobe) return;
+          if (projectionType !== "3d" || !window.myGlobe) return;
           clouds.rotation.y += 0.0002;
           requestAnimationFrame(rotateClouds);
         })();
@@ -530,7 +533,7 @@ function initMap(type) {
       window.myGlobe.scene().add(windParticles);
 
       (function animateWind() {
-        if (projectionType !== "orthographic" || !window.myGlobe) return;
+        if (projectionType !== "3d" || !window.myGlobe) return;
         windParticles.rotation.y += 0.001;
         windParticles.rotation.x += 0.0002;
         requestAnimationFrame(animateWind);
@@ -1105,13 +1108,13 @@ window.toggleEarthquakeLayer = async function () {
     window._hexLayers.seismic = [];
     window.updateGlobeHexbins();
     if (btn) {
-      btn.classList.remove("text-amber-400", "bg-amber-500/20");
+      btn.classList.remove("active-amber");
       btn.title = "Earthquake Layer: OFF";
     }
     return;
   }
   if (btn) {
-    btn.classList.add("text-amber-400", "bg-amber-500/20");
+    btn.classList.add("active-amber");
     btn.title = "Earthquake Layer: ON";
   }
   if (_quakeGroup) _quakeGroup.remove();
@@ -1346,14 +1349,14 @@ window.toggleGDELTLayer = async function () {
     window._hexLayers.gdelt = [];
     window.updateGlobeHexbins();
     if (btn) {
-      btn.classList.remove("text-red-400", "bg-red-500/20");
+      btn.classList.remove("active-red");
       btn.title = "Global Conflict Hexbins: OFF";
     }
     return;
   }
 
   if (btn) {
-    btn.classList.add("text-red-400", "bg-red-500/20");
+    btn.classList.add("active-red");
     btn.title = "Global Conflict Hexbins: ON";
   }
 
@@ -1479,13 +1482,13 @@ window.toggleAircraftLayer = function () {
     clearInterval(_aircraftInterval);
     _aircraftInterval = null;
     if (btn) {
-      btn.classList.remove("text-blue-400", "bg-blue-500/20");
+      btn.classList.remove("active");
       btn.title = "Live Aircraft: OFF";
     }
     return;
   }
   if (btn) {
-    btn.classList.add("text-blue-400", "bg-blue-500/20");
+    btn.classList.add("active");
     btn.title = "Live Aircraft: ON (30s refresh)";
   }
   renderAircraft();
@@ -1499,11 +1502,7 @@ window._issData = [{ lat: 0, lng: 0, alt: 0.1, name: "ISS" }];
 window._issInitialized = false;
 
 window.updateISS = async function () {
-  if (
-    typeof projectionType !== "undefined" &&
-    projectionType !== "orthographic"
-  )
-    return;
+  if (typeof projectionType !== "undefined" && projectionType !== "3d") return;
   if (!window.myGlobe) return;
 
   try {
@@ -1622,11 +1621,7 @@ window._cyberDataCenters = [
 ];
 
 window.updateCyberArcs = function () {
-  if (
-    typeof projectionType !== "undefined" &&
-    projectionType !== "orthographic"
-  )
-    return;
+  if (typeof projectionType !== "undefined" && projectionType !== "3d") return;
   if (!window.myGlobe || !window.myGlobe.arcsData) return;
 
   let currentArcs = window.myGlobe.arcsData() || [];

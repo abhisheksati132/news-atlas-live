@@ -419,8 +419,7 @@ function initMap(type) {
           ? "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
           : "//unpkg.com/three-globe/example/img/earth-night.jpg",
       )
-      .bumpImageUrl("//unpkg.com/three-globe/example/img/earth-topology.png")
-      .bumpScale(4);
+      .bumpImageUrl("//unpkg.com/three-globe/example/img/earth-topology.png");
 
     const loadGlobeData = (features) => {
       let hoverObj = null;

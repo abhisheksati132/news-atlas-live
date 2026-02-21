@@ -182,6 +182,42 @@
         pointer-events: none;
       }
 
+      /* CUSTOM MAP TOGGLE COLORS & GLOW */
+      #quake-toggle-btn.active {
+        color: #f97316 !important;
+        filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.8));
+      }
+
+      #aircraft-toggle-btn.active {
+        color: #3b82f6 !important;
+        filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8));
+      }
+
+      #airquality-toggle-btn.active {
+        color: #10b981 !important;
+        filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.8));
+      }
+
+      #clouds-toggle-btn.active {
+        color: #bae6fd !important;
+        filter: drop-shadow(0 0 4px rgba(186, 230, 253, 0.8));
+      }
+
+      #wind-toggle-btn.active {
+        color: #22d3ee !important;
+        filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.8));
+      }
+
+      #gdelt-toggle-btn.active {
+        color: #ef4444 !important;
+        filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.8));
+      }
+
+      #chronos-toggle-btn.active {
+        color: #a855f7 !important;
+        filter: drop-shadow(0 0 4px rgba(168, 85, 247, 0.8));
+      }
+
       @keyframes mapscan {
         0% {
           top: -2px;
@@ -1114,7 +1150,7 @@
                       <div
                         class="w-1.5 h-1.5 bg-emerald-400 rounded-full"
                       ></div>
-                      <span class="text-slate-300">Newsdata.io</span>
+                      <span class="text-slate-300">NYT & GDELT</span>
                     </div>
                     <span class="text-slate-500">Global Feed</span>
                   </div>
@@ -1199,6 +1235,50 @@
               </div>
             </div>
             <div class="flex flex-col gap-5 h-full">
+              <div
+                class="dossier-card p-0 font-mono text-[10px] flex-none h-[180px] flex flex-col relative rounded-xl overflow-hidden"
+                style="
+                  background: rgba(0, 0, 0, 0.75);
+                  border-color: rgba(255, 255, 255, 0.08);
+                "
+              >
+                <div
+                  class="px-3 py-2 border-b border-white/5 flex justify-between items-center"
+                  style="background: rgba(59, 130, 246, 0.05)"
+                >
+                  <span
+                    class="text-blue-400 font-bold uppercase tracking-widest text-[9px]"
+                    >Command Line Interface</span
+                  >
+                  <div class="flex gap-1.5">
+                    <div class="w-2 h-2 rounded-full bg-red-500/80"></div>
+                    <div class="w-2 h-2 rounded-full bg-yellow-500/80"></div>
+                    <div class="w-2 h-2 rounded-full bg-emerald-500/80"></div>
+                  </div>
+                </div>
+                <div
+                  id="cli-output"
+                  class="flex-1 overflow-y-auto p-3 space-y-1.5 text-slate-300 no-scrollbar"
+                >
+                  <div class="text-emerald-400/70">
+                    > SYSTEM READY. WAITING FOR INPUT...
+                  </div>
+                </div>
+                <div
+                  class="p-2 border-t border-white/8 flex items-center gap-2"
+                  style="background: rgba(59, 130, 246, 0.03)"
+                >
+                  <span class="text-blue-400 font-bold">›</span>
+                  <input
+                    type="text"
+                    id="cli-input"
+                    class="bg-transparent border-none outline-none w-full text-white placeholder-slate-700 text-[11px]"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace"
+                    placeholder="Enter command (e.g., 'analyze economy')..."
+                    autocomplete="off"
+                  />
+                </div>
+              </div>
               <div class="grid grid-cols-3 gap-3">
                 <div
                   class="dossier-card p-4"
@@ -1389,50 +1469,6 @@
                       >Live Telemetry Ticker
                     </div>
                   </div>
-                </div>
-              </div>
-              <div
-                class="dossier-card mb-6 p-0 font-mono text-[10px] flex-1 min-h-[140px] flex flex-col relative rounded-xl overflow-hidden"
-                style="
-                  background: rgba(0, 0, 0, 0.75);
-                  border-color: rgba(255, 255, 255, 0.08);
-                "
-              >
-                <div
-                  class="px-3 py-2 border-b border-white/5 flex justify-between items-center"
-                  style="background: rgba(59, 130, 246, 0.05)"
-                >
-                  <span
-                    class="text-blue-400 font-bold uppercase tracking-widest text-[9px]"
-                    >Command Line Interface</span
-                  >
-                  <div class="flex gap-1.5">
-                    <div class="w-2 h-2 rounded-full bg-red-500/80"></div>
-                    <div class="w-2 h-2 rounded-full bg-yellow-500/80"></div>
-                    <div class="w-2 h-2 rounded-full bg-emerald-500/80"></div>
-                  </div>
-                </div>
-                <div
-                  id="cli-output"
-                  class="flex-1 overflow-y-auto p-3 space-y-1.5 text-slate-300 no-scrollbar"
-                >
-                  <div class="text-emerald-400/70">
-                    > SYSTEM READY. WAITING FOR INPUT...
-                  </div>
-                </div>
-                <div
-                  class="p-2 border-t border-white/8 flex items-center gap-2"
-                  style="background: rgba(59, 130, 246, 0.03)"
-                >
-                  <span class="text-blue-400 font-bold">›</span>
-                  <input
-                    type="text"
-                    id="cli-input"
-                    class="bg-transparent border-none outline-none w-full text-white placeholder-slate-700 text-[11px]"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace"
-                    placeholder="Enter command (e.g., 'analyze economy')..."
-                    autocomplete="off"
-                  />
                 </div>
               </div>
             </div>

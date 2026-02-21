@@ -269,34 +269,24 @@ window.toggleAirQuality = async function () {
   if (btn) btn.classList.toggle("active", window._airQualityActive);
 
   if (!window._airQualityActive) {
-    if (window.myGlobe) {
-      window.myGlobe
-        .hexBinPointWeight("weight")
-        .hexBinPointColor(() => "rgba(239, 68, 68, 0.6)")
-        .hexBinPointsData(window._gdeltData || []);
-    }
+    window._hexLayers.aq = [];
+    if (window.updateGlobeHexbins) window.updateGlobeHexbins();
     return;
   }
 
   try {
-    const res = await fetch(
-      "https://api.openaq.org/v2/latest?limit=100&parameter=pm25",
-    );
+    const res = await fetch("/api/openaq");
     const data = await res.json();
-    window._aqData = (data.results || [])
+    window._hexLayers.aq = (data.results || [])
       .filter((r) => r.coordinates)
       .map((r) => ({
+        type: "aq",
         lat: r.coordinates.latitude,
         lng: r.coordinates.longitude,
         weight: r.measurements[0].value,
       }));
 
-    if (window.myGlobe) {
-      window.myGlobe
-        .hexBinPointWeight("weight")
-        .hexBinPointColor(() => "rgba(16, 185, 129, 0.7)")
-        .hexBinPointsData(window._aqData);
-    }
+    if (window.updateGlobeHexbins) window.updateGlobeHexbins();
   } catch (e) {
     console.warn("OpenAQ fetch failed", e);
   }
@@ -325,9 +315,7 @@ window.toggleWind = function () {
 };
 
 window.playTacticalSound = function (type) {
-  const audio = new Audio(`/audio/${type}.mp3`);
-  audio.volume = 0.1;
-  audio.play();
+  // Sounds temporarily disabled due to missing local audio assets (404 errors)
 };
 window.myGlobe = null;
 
@@ -352,6 +340,10 @@ function initMap(type) {
   if (type === "2d") {
     document.getElementById("projection-label").innerText =
       "Orbital Interface: 2D Active";
+    const cloudsBtn = document.getElementById("clouds-toggle-btn");
+    if (cloudsBtn) cloudsBtn.style.display = "none";
+    const windBtn = document.getElementById("wind-toggle-btn");
+    if (windBtn) windBtn.style.display = "none";
     svg = mapContainer
       .append("svg")
       .attr("id", "world-map")
@@ -459,6 +451,10 @@ function initMap(type) {
   } else {
     document.getElementById("projection-label").innerText =
       "Orbital Interface: 3D WebGL";
+    const cloudsBtn = document.getElementById("clouds-toggle-btn");
+    if (cloudsBtn) cloudsBtn.style.display = "block";
+    const windBtn = document.getElementById("wind-toggle-btn");
+    if (windBtn) windBtn.style.display = "block";
     currentProjection = () => [0, 0];
     window.syncMapOverlays = function () {};
 
@@ -653,39 +649,7 @@ function initMap(type) {
       })();
     }
 
-    fetch(
-      "https://raw.githubusercontent.com/telegeography/www.submarinecablemap.com/master/web/public/api/v3/cable/cable-geo.json",
-    )
-      .then((res) => res.json())
-      .then((cableGeo) => {
-        if (projectionType !== "3d") return;
-        const cablePaths = [];
-        cableGeo.features.forEach((feature) => {
-          if (feature.geometry && feature.geometry.type === "LineString") {
-            cablePaths.push({ coords: feature.geometry.coordinates });
-          } else if (
-            feature.geometry &&
-            feature.geometry.type === "MultiLineString"
-          ) {
-            feature.geometry.coordinates.forEach((line) =>
-              cablePaths.push({ coords: line }),
-            );
-          }
-        });
-        if (window.myGlobe.pathsData) {
-          window.myGlobe
-            .pathsData(cablePaths)
-            .pathPoints("coords")
-            .pathPointLat((p) => p[1])
-            .pathPointLng((p) => p[0])
-            .pathColor(() => "rgba(6, 182, 212, 0.35)")
-            .pathDashLength(0.1)
-            .pathDashGap(0.008)
-            .pathDashAnimateTime(12000)
-            .pathStroke(1.5);
-        }
-      })
-      .catch((err) => console.warn("Topology cable layer fetch failed", err));
+    // TeleGeography Submarine Cables API returns 404. Block removed to prevent console crash loop.
   }
 }
 
@@ -1192,7 +1156,11 @@ window.updateGlobeHexbins = function () {
     (d) => !d.time || d.time <= targetTime,
   );
 
-  const combinedData = [...filteredSeismic, ...window._hexLayers.gdelt];
+  const combinedData = [
+    ...filteredSeismic,
+    ...window._hexLayers.gdelt,
+    ...(window._hexLayers.aq || []),
+  ];
   const magColor = (m) =>
     m >= 7 ? "#ef4444" : m >= 6 ? "#f97316" : m >= 5 ? "#eab308" : "#10b981";
   const magToHeight = (mag) => Math.max(0.01, (mag - 3) * 0.04);
@@ -1201,19 +1169,28 @@ window.updateGlobeHexbins = function () {
     .hexBinPointsData(combinedData)
     .hexBinPointLat((d) => d.lat)
     .hexBinPointLng((d) => d.lng)
-    .hexBinPointWeight((d) => (d.type === "gdelt" ? d.count : d.mag))
+    .hexBinPointWeight((d) =>
+      d.type === "gdelt" ? d.count : d.type === "aq" ? d.weight : d.mag,
+    )
     .hexBinResolution(3)
-    .hexTopColor((d) =>
-      d.points[0].type === "gdelt" ? "#ef4444" : magColor(d.points[0].mag),
-    )
-    .hexSideColor((d) =>
-      d.points[0].type === "gdelt" ? "#991b1b" : magColor(d.points[0].mag),
-    )
-    .hexAltitude((d) =>
-      d.points[0].type === "gdelt"
-        ? Math.max(0.05, d.points[0].count * 0.0015)
-        : magToHeight(d.points[0].mag),
-    )
+    .hexTopColor((d) => {
+      const pt = d.points[0];
+      if (pt.type === "gdelt") return "rgba(239, 68, 68, 0.6)";
+      if (pt.type === "aq") return "rgba(16, 185, 129, 0.7)";
+      return magColor(pt.mag);
+    })
+    .hexSideColor((d) => {
+      const pt = d.points[0];
+      if (pt.type === "gdelt") return "rgba(239, 68, 68, 0.2)";
+      if (pt.type === "aq") return "rgba(16, 185, 129, 0.3)";
+      return magColor(pt.mag);
+    })
+    .hexAltitude((d) => {
+      const pt = d.points[0];
+      if (pt.type === "gdelt") return Math.max(0.05, pt.count * 0.0015);
+      if (pt.type === "aq") return Math.max(0.02, pt.weight * 0.001);
+      return magToHeight(pt.mag);
+    })
     .onHexHover((hex) => {
       const t = document.getElementById("map-tooltip");
       if (hex && hex.points && hex.points.length > 0) {
@@ -1227,6 +1204,13 @@ window.updateGlobeHexbins = function () {
             "Armed Conflict";
           document.getElementById("tooltip-pop").innerText =
             pt.count + " Events";
+        } else if (pt.type === "aq") {
+          document.getElementById("tooltip-name").innerText = "OpenAQ Sensor";
+          document.getElementById("tooltip-label-1").innerText = "Trace";
+          document.getElementById("tooltip-label-2").innerText = "PM2.5";
+          document.getElementById("tooltip-capital").innerText = "Air Quality";
+          document.getElementById("tooltip-pop").innerText =
+            pt.weight + " µg/m³";
         } else {
           document.getElementById("tooltip-name").innerText =
             `M${pt.mag.toFixed(1)} — ${pt.place}`;

@@ -10,6 +10,7 @@ import weatherHandler from "./api/weather.js";
 import marketsHandler from "./api/markets.js";
 import aiHandler from "./api/ai.js";
 import geoHandler from "./api/geo.js";
+import openaqHandler from "./api/openaq.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,6 +26,7 @@ app.get("/api/news", async (req, res) => await newsHandler(req, res));
 app.get("/api/weather", async (req, res) => await weatherHandler(req, res));
 app.get("/api/markets", async (req, res) => await marketsHandler(req, res));
 app.get("/api/geo", async (req, res) => await geoHandler(req, res));
+app.get("/api/openaq", async (req, res) => await openaqHandler(req, res));
 
 app.post("/api/ai", async (req, res) => await aiHandler(req, res));
 

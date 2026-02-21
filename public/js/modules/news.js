@@ -1,5 +1,5 @@
 let allNews = [];
-let displayedNewsCount = 21; // Multiple of 3
+let displayedNewsCount = 21;
 let currentNewsFilters = { search: "", time: "All Time", sort: "Most Recent" };
 let newsSearchQuery = "";
 let newsSearchTimer = null;
@@ -8,7 +8,7 @@ let isLiveSearching = false;
 async function fetchNews(overrideQ) {
   const loading = document.getElementById("news-loading");
   if (loading) loading.classList.remove("hidden");
-  displayedNewsCount = 21; // Multiple of 3
+  displayedNewsCount = 21;
   isLiveSearching = false;
   try {
     const q = overrideQ !== undefined ? overrideQ : newsSearchQuery;
@@ -89,8 +89,6 @@ window.setCategory = (el, cat) => {
 };
 function displayFilteredNews() {
   let filtered = [...allNews];
-
-  // Ensure we only display multiples of 3 to fill the grid row completely without empty spaces
   let countToDisplay = Math.min(displayedNewsCount, filtered.length);
   const remainder = countToDisplay % 3;
   if (remainder !== 0 && countToDisplay > remainder) {
@@ -132,7 +130,7 @@ function displayNewsArticles(articles) {
   });
 }
 window.loadMoreNews = () => {
-  displayedNewsCount += 21; // Multiple of 3
+  displayedNewsCount += 21;
   displayFilteredNews();
 };
 window.checkNewsScroll = () => {
@@ -211,8 +209,8 @@ async function fetchSeismicStatus() {
   try {
     const res = await fetch(
       "https://earthquake.usgs.gov/fdsnws/event/1/count?format=geojson&starttime=" +
-        new Date(Date.now() - 3600000).toISOString() +
-        "&minmagnitude=2",
+      new Date(Date.now() - 3600000).toISOString() +
+      "&minmagnitude=2",
     );
     const data = await res.json();
     el.innerText = (data.count || 0).toString();

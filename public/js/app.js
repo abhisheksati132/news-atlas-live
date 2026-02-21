@@ -260,7 +260,6 @@ async function generateAIBriefing(loc) {
     if (text) text.innerText = "Briefing handshake failed.";
   }
 }
-// --- AIR QUALITY ENGINE (OPENAQ) ---
 window._airQualityActive = false;
 window._aqData = [];
 
@@ -303,7 +302,6 @@ window.toggleAirQuality = async function () {
   }
 };
 
-// --- CLOUD RADAR ENGINE ---
 window._cloudsActive = false;
 window.toggleClouds = function () {
   window._cloudsActive = !window._cloudsActive;
@@ -315,7 +313,6 @@ window.toggleClouds = function () {
   }
 };
 
-// --- GLOBAL WIND PARTICLES ---
 window._windActive = false;
 window.toggleWind = function () {
   window._windActive = !window._windActive;
@@ -523,7 +520,7 @@ function initMap(type) {
         `,
         )
         .onPolygonHover((hoverD) => {
-          if (hoverD === hoverObj) return; // Prevent infinite re-render loop locking the main thread
+          if (hoverD === hoverObj) return;
 
           const t = document.getElementById("map-tooltip");
           if (hoverD) {
@@ -537,7 +534,6 @@ function initMap(type) {
           }
 
           hoverObj = hoverD;
-          // Trigger reactivity natively without re-injecting the massive polygon array
           window.myGlobe.polygonAltitude(window.myGlobe.polygonAltitude());
           window.myGlobe.polygonCapColor(window.myGlobe.polygonCapColor());
           window.myGlobe.polygonSideColor(window.myGlobe.polygonSideColor());
@@ -567,7 +563,6 @@ function initMap(type) {
       window.myGlobe.controls().autoRotateSpeed = 0.5;
     }
 
-    // --- PHASE 5: MULTI-LAYER TOPOGRAPHY & RADAR ---
     const CLOUDS_IMG_URL = "//unpkg.com/three-globe/example/img/clouds.png";
     if (window.THREE) {
       new window.THREE.TextureLoader().load(CLOUDS_IMG_URL, (cloudsTexture) => {
@@ -593,7 +588,6 @@ function initMap(type) {
         })();
       });
 
-      // --- PHASE 11: GLOBAL WIND PARTICLES ---
       const particleCount = 6000;
       const geometry = new window.THREE.BufferGeometry();
       const positions = [];
@@ -634,7 +628,6 @@ function initMap(type) {
         requestAnimationFrame(animateWind);
       })();
 
-      // --- PHASE 5: CLOUD RADAR LAYER ---
       const cloudGeom = new window.THREE.SphereGeometry(
         window.myGlobe.getGlobeRadius() * 1.01,
         64,
@@ -660,7 +653,6 @@ function initMap(type) {
       })();
     }
 
-    // Embed Submarine Cable Topology
     fetch(
       "https://raw.githubusercontent.com/telegeography/www.submarinecablemap.com/master/web/public/api/v3/cable/cable-geo.json",
     )
@@ -970,7 +962,6 @@ window.deactivateMapInteraction = () => {
   const overlay = document.getElementById("map-interaction-overlay");
   if (overlay) {
     overlay.style.display = "";
-    // Wait for display block to apply before transitioning opacity
     requestAnimationFrame(() => {
       overlay.classList.remove("opacity-0");
       overlay.style.pointerEvents = "auto";
@@ -1177,7 +1168,6 @@ window.toggleChronos = function () {
       btn.classList.remove("active");
       btn.title = "Chronos Engine: OFF";
     }
-    // Automatically reset the timeline to LIVE when closed
     const slider = document.getElementById("chronos-slider");
     if (slider) {
       slider.value = 0;
@@ -1656,7 +1646,6 @@ window.toggleAircraftLayer = function () {
   }, 30000);
 };
 
-// --- ISS ORBITAL TRACKING ENGINE ---
 window._issData = [{ lat: 0, lng: 0, alt: 0.1, name: "ISS" }];
 window._issInitialized = false;
 
@@ -1671,11 +1660,9 @@ window.updateISS = async function () {
 
     window._issData[0].lat = data.latitude;
     window._issData[0].lng = data.longitude;
-    // Scale ISS altitude: earth radius is ~6371km, ISS is ~400km (400/6371 = ~0.06)
     window._issData[0].alt = data.altitude / 6371 + 0.1;
     window._issData[0].velocity = data.velocity;
 
-    // Attach custom 3D mesh processing the first cycle
     if (!window._issInitialized && window.THREE) {
       window.myGlobe
         .objectLat("lat")
@@ -1752,10 +1739,8 @@ window.updateISS = async function () {
       ];
     }
 
-    // Inject the array reference back in to trigger WebGL recalculation
     window.myGlobe.objectsData(window._issData);
 
-    // Merge radar pings with ISS ping
     window.myGlobe.ringsData([...window._radarPings, ...window._issData]);
   } catch (e) {
     console.warn("ISS orbital tracking fetch failed", e);
@@ -1767,16 +1752,15 @@ if (!window._issInterval) {
   window._issInterval = setInterval(window.updateISS, 3000);
 }
 
-// --- CYBER WARFARE STREAM ENGINE ---
 window._cyberDataCenters = [
-  { lat: 38.8951, lng: -77.0364 }, // Washington
-  { lat: 55.7558, lng: 37.6173 }, // Moscow
-  { lat: 39.9042, lng: 116.4074 }, // Beijing
-  { lat: 51.5074, lng: -0.1278 }, // London
-  { lat: 35.6762, lng: 139.6503 }, // Tokyo
-  { lat: -33.8688, lng: 151.2093 }, // Sydney
-  { lat: 50.1109, lng: 8.6821 }, // Frankfurt
-  { lat: 1.3521, lng: 103.8198 }, // Singapore
+  { lat: 38.8951, lng: -77.0364 },
+  { lat: 55.7558, lng: 37.6173 },
+  { lat: 39.9042, lng: 116.4074 },
+  { lat: 51.5074, lng: -0.1278 },
+  { lat: 35.6762, lng: 139.6503 },
+  { lat: -33.8688, lng: 151.2093 },
+  { lat: 50.1109, lng: 8.6821 },
+  { lat: 1.3521, lng: 103.8198 },
 ];
 
 window.updateCyberArcs = function () {
@@ -1822,12 +1806,10 @@ if (!window._cyberInterval) {
   window._cyberInterval = setInterval(window.updateCyberArcs, 600);
 }
 
-// --- GLOBE THEME TOGGLE ---
 if (typeof window._globeTheme === "undefined") {
   window._globeTheme = "night";
 }
 
-// --- CLOUD ROTATION & VIEW TOGGLES ---
 window._autoRotateActive = true;
 window.toggleAutoRotate = function () {
   window._autoRotateActive = !window._autoRotateActive;
@@ -1870,26 +1852,3 @@ window.toggleGlobeTheme = function () {
     );
   }
 };
-
-// --- CLICK-TO-INTERACT MAP PROTECTION ---
-window.activateMapInteraction = function () {
-  const overlay = document.getElementById("map-interaction-overlay");
-  if (overlay) {
-    overlay.style.pointerEvents = "none";
-    overlay.style.opacity = "0";
-  }
-};
-
-// Listen for clicks outside the map container to re-enable interaction protection
-document.addEventListener("click", (e) => {
-  const mapContainer = document.getElementById("map-container");
-  const overlay = document.getElementById("map-interaction-overlay");
-
-  if (mapContainer && overlay && overlay.style.pointerEvents === "none") {
-    // If the click was NOT inside the map container or its children
-    if (!mapContainer.contains(e.target)) {
-      overlay.style.pointerEvents = "auto";
-      overlay.style.opacity = "1";
-    }
-  }
-});

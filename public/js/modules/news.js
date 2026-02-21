@@ -1,5 +1,5 @@
 let allNews = [];
-let displayedNewsCount = 20;
+let displayedNewsCount = 21; // Multiple of 3
 let currentNewsFilters = { search: "", time: "All Time", sort: "Most Recent" };
 let newsSearchQuery = "";
 let newsSearchTimer = null;
@@ -8,7 +8,7 @@ let isLiveSearching = false;
 async function fetchNews(overrideQ) {
   const loading = document.getElementById("news-loading");
   if (loading) loading.classList.remove("hidden");
-  displayedNewsCount = 20;
+  displayedNewsCount = 21; // Multiple of 3
   isLiveSearching = false;
   try {
     const q = overrideQ !== undefined ? overrideQ : newsSearchQuery;
@@ -89,13 +89,19 @@ window.setCategory = (el, cat) => {
 };
 function displayFilteredNews() {
   let filtered = [...allNews];
-  displayNewsArticles(filtered.slice(0, displayedNewsCount));
+
+  // Ensure we only display multiples of 3 to fill the grid row completely without empty spaces
+  let countToDisplay = Math.min(displayedNewsCount, filtered.length);
+  const remainder = countToDisplay % 3;
+  if (remainder !== 0 && countToDisplay > remainder) {
+    countToDisplay -= remainder;
+  }
+
+  displayNewsArticles(filtered.slice(0, countToDisplay));
+
   const loadMoreEl = document.getElementById("news-load-more");
   if (loadMoreEl) {
-    loadMoreEl.classList.toggle(
-      "hidden",
-      filtered.length <= displayedNewsCount,
-    );
+    loadMoreEl.classList.toggle("hidden", filtered.length <= countToDisplay);
   }
 }
 function displayNewsArticles(articles) {
@@ -126,7 +132,7 @@ function displayNewsArticles(articles) {
   });
 }
 window.loadMoreNews = () => {
-  displayedNewsCount += 20;
+  displayedNewsCount += 21; // Multiple of 3
   displayFilteredNews();
 };
 window.checkNewsScroll = () => {

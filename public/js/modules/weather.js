@@ -413,3 +413,41 @@ window.resetWeatherData = () => {
     hourlyContainer.innerHTML =
       '<div class="text-xs text-slate-600 font-mono p-4 text-center">AWAITING SECTOR UPLINK...</div>';
 };
+
+window.searchAtmosphereCity = async () => {
+  const inputEl = document.getElementById("atmo-city-search");
+  if (!inputEl) return;
+  const q = inputEl.value.trim();
+  if (!q) return;
+
+  const btn = inputEl.nextElementSibling;
+  const originalBtnText = btn.innerText;
+  btn.innerText = "WAIT..";
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(
+      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=1&format=json`,
+    );
+    const data = await res.json();
+    if (data.results && data.results.length > 0) {
+      const topHit = data.results[0];
+      window._currentWeatherLocation =
+        `${topHit.name}, ${topHit.country || topHit.admin1 || ""}`.replace(
+          /,\s*$/,
+          "",
+        );
+      await window.fetchWeather(topHit.latitude, topHit.longitude);
+      inputEl.value = "";
+    } else {
+      inputEl.value = "";
+      inputEl.placeholder = "Sector undetected...";
+      setTimeout(() => (inputEl.placeholder = "Enter target city..."), 2000);
+    }
+  } catch (e) {
+    console.error("Meteorological Geocoding Failed:", e);
+  }
+
+  btn.innerText = originalBtnText;
+  btn.disabled = false;
+};

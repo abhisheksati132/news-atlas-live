@@ -1756,6 +1756,26 @@
           <svg id="world-map" class="w-full h-full"></svg>
           <div class="map-scan-line"></div>
 
+          <!-- SCROLL ZOOM OVERLAY -->
+          <div
+            id="map-scroll-overlay"
+            class="absolute inset-0 flex items-center justify-center bg-slate-950/40 backdrop-blur-[2px] z-50 transition-opacity duration-300 opacity-0 pointer-events-none"
+          >
+            <div
+              class="px-6 py-3 rounded-full border border-blue-500/50 bg-blue-900/60 text-blue-100 font-mono text-sm tracking-widest shadow-[0_0_20px_rgba(59,130,246,0.3)] flex items-center gap-3"
+            >
+              <i class="fas fa-search-plus text-blue-400"></i>
+              <span
+                >USE
+                <kbd
+                  class="px-2 py-0.5 mx-1 bg-black/60 rounded border border-blue-400/30 text-xs font-black text-white"
+                  >CTRL</kbd
+                >
+                + SCROLL TO ZOOM</span
+              >
+            </div>
+          </div>
+
           <!-- CHRONOS SLIDER -->
           <div
             id="chronos-slider-container"

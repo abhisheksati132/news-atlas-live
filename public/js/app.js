@@ -1705,3 +1705,44 @@ window.toggleGlobeTheme = function () {
     );
   }
 };
+
+// --- SCROLL ZOOM PROTECTION ---
+let scrollOverlayTimeout;
+document.addEventListener("DOMContentLoaded", () => {
+  const mapContainer = document.getElementById("map-container");
+
+  if (mapContainer) {
+    mapContainer.addEventListener(
+      "wheel",
+      (e) => {
+        const scrollOverlay = document.getElementById("map-scroll-overlay");
+
+        // If they are scrolling natively without Ctrl/Cmd
+        if (!e.ctrlKey && !e.metaKey) {
+          // Intercept the scroll from reaching Globe.gl or D3 (prevents map zoom)
+          e.stopPropagation();
+
+          // Flash overlay message
+          if (scrollOverlay) {
+            scrollOverlay.classList.remove("opacity-0");
+            scrollOverlay.classList.add("opacity-100");
+
+            clearTimeout(scrollOverlayTimeout);
+            scrollOverlayTimeout = setTimeout(() => {
+              scrollOverlay.classList.remove("opacity-100");
+              scrollOverlay.classList.add("opacity-0");
+            }, 1200);
+          }
+        } else {
+          // If they ARE holding Ctrl/Cmd, kill page scroll so they strictly zoom the map smoothly
+          e.preventDefault();
+          if (scrollOverlay) {
+            scrollOverlay.classList.remove("opacity-100");
+            scrollOverlay.classList.add("opacity-0");
+          }
+        }
+      },
+      { capture: true, passive: false },
+    );
+  }
+});

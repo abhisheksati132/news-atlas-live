@@ -1800,9 +1800,10 @@
           </div>
         </div>
 
-        <div id="map-container" class="flex-1 relative w-full h-full">
-          <svg id="world-map" class="w-full h-full"></svg>
-          <div class="map-scan-line"></div>
+        <div class="flex-1 relative w-full h-full overflow-hidden">
+          <div id="map-container" class="absolute inset-0 w-full h-full"></div>
+
+          <div class="map-scan-line pointer-events-none"></div>
 
           <!-- CLICK TO INTERACT OVERLAY -->
           <div
@@ -1857,24 +1858,6 @@
               <span>T-48H</span>
               <span>T-24H</span>
               <span>LIVE</span>
-            </div>
-          </div>
-
-          <div
-            id="map-overlay-guard"
-            class="map-interaction-overlay"
-            onclick="activateMapInteraction()"
-          >
-            <div
-              class="flex items-center gap-3 px-5 py-2.5 rounded-full font-bold uppercase tracking-widest text-xs text-blue-300 transition-transform hover:scale-105"
-              style="
-                background: rgba(2, 6, 23, 0.7);
-                border: 1px solid rgba(59, 130, 246, 0.3);
-                backdrop-filter: blur(8px);
-                font-family: &quot;JetBrains Mono&quot;, monospace;
-              "
-            >
-              <i class="fas fa-mouse-pointer"></i> Click to Interact
             </div>
           </div>
         </div>

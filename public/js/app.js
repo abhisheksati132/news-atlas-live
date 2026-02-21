@@ -224,6 +224,7 @@ async function generateAIBriefing(loc) {
         endLat: centroid[1],
         endLng: centroid[0],
         color: ["rgba(6, 182, 212, 0)", "rgba(6, 182, 212, 1)"],
+        type: "ai",
       };
       window.myGlobe.arcsData([...(window.myGlobe.arcsData() || []), beamArc]);
       setTimeout(() => {
@@ -413,25 +414,40 @@ function initMap(type) {
       .showAtmosphere(true)
       .atmosphereColor("rgba(59, 130, 246, 0.4)")
       .atmosphereAltitude(0.15)
-      .globeImageUrl(
-        "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg",
-      )
-      .bumpImageUrl("//unpkg.com/three-globe/example/img/earth-topology.png");
+      .globeImageUrl("//unpkg.com/three-globe/example/img/earth-night.jpg")
+      .bumpImageUrl("//unpkg.com/three-globe/example/img/earth-topology.png")
+      .bumpScale(4);
 
     const loadGlobeData = (features) => {
+      let hoverObj = null;
       window.myGlobe
         .polygonsData(features)
-        .polygonCapColor(() => "rgba(59, 130, 246, 0.1)")
-        .polygonSideColor(() => "rgba(59, 130, 246, 0.05)")
+        .polygonAltitude((d) => (d === hoverObj ? 0.06 : 0.01))
+        .polygonCapColor((d) =>
+          d === hoverObj ? "rgba(6, 182, 212, 0.5)" : "rgba(59, 130, 246, 0.1)",
+        )
+        .polygonSideColor((d) =>
+          d === hoverObj
+            ? "rgba(6, 182, 212, 0.15)"
+            : "rgba(59, 130, 246, 0.05)",
+        )
         .polygonStrokeColor(() => "#3b82f6")
+        .polygonLabel(
+          ({ properties: d }) => `
+            <div style="background: rgba(2, 6, 23, 0.8); border: 1px solid rgba(59, 130, 246, 0.4); border-radius: 8px; padding: 6px 10px; font-family: monospace; font-size: 11px; text-transform: uppercase;">
+               <b style="color: #60a5fa">${d.name}</b>
+            </div>
+        `,
+        )
         .onPolygonHover((hoverD) => {
-          const t = document.getElementById("map-tooltip");
-          if (hoverD) {
+          if (hoverD && hoverD !== hoverObj) {
             window.playTacticalSound("hover");
-            showRichTooltip({ pageX: mouseX, pageY: mouseY }, hoverD);
-          } else {
-            t.classList.add("hidden");
           }
+          hoverObj = hoverD;
+          // Trigger reactivity
+          window.myGlobe.polygonAltitude(window.myGlobe.polygonAltitude());
+          window.myGlobe.polygonCapColor(window.myGlobe.polygonCapColor());
+          window.myGlobe.polygonSideColor(window.myGlobe.polygonSideColor());
         })
         .onPolygonClick((d) => {
           if (d) handleCountryClick(null, d);
@@ -457,6 +473,107 @@ function initMap(type) {
       window.myGlobe.controls().autoRotate = true;
       window.myGlobe.controls().autoRotateSpeed = 0.5;
     }
+
+    // --- PHASE 5: MULTI-LAYER TOPOGRAPHY & RADAR ---
+    const CLOUDS_IMG_URL = "//unpkg.com/three-globe/example/img/clouds.png";
+    if (window.THREE) {
+      new window.THREE.TextureLoader().load(CLOUDS_IMG_URL, (cloudsTexture) => {
+        const clouds = new window.THREE.Mesh(
+          new window.THREE.SphereGeometry(
+            window.myGlobe.getGlobeRadius() * (1 + 0.005),
+            75,
+            75,
+          ),
+          new window.THREE.MeshPhongMaterial({
+            map: cloudsTexture,
+            transparent: true,
+            opacity: 0.25,
+            blending: window.THREE.AdditiveBlending,
+          }),
+        );
+        window.myGlobe.scene().add(clouds);
+
+        (function rotateClouds() {
+          if (projectionType !== "3d") return;
+          clouds.rotation.y += 0.0002;
+          requestAnimationFrame(rotateClouds);
+        })();
+      });
+
+      // --- PHASE 11: GLOBAL WIND PARTICLES ---
+      const particleCount = 6000;
+      const geometry = new window.THREE.BufferGeometry();
+      const positions = [];
+      const r = window.myGlobe.getGlobeRadius() * 1.015;
+
+      for (let i = 0; i < particleCount; i++) {
+        const u = Math.random();
+        const v = Math.random();
+        const theta = u * 2.0 * Math.PI;
+        const phi = Math.acos(2.0 * v - 1.0);
+        const x = r * Math.sin(phi) * Math.cos(theta);
+        const y = r * Math.sin(phi) * Math.sin(theta);
+        const z = r * Math.cos(phi);
+        positions.push(x, y, z);
+      }
+      geometry.setAttribute(
+        "position",
+        new window.THREE.Float32BufferAttribute(positions, 3),
+      );
+
+      const pMaterial = new window.THREE.PointsMaterial({
+        color: 0x38bdf8,
+        size: 0.5,
+        transparent: true,
+        opacity: 0.4,
+        blending: window.THREE.AdditiveBlending,
+      });
+
+      const windParticles = new window.THREE.Points(geometry, pMaterial);
+      window.myGlobe.scene().add(windParticles);
+
+      (function animateWind() {
+        if (projectionType !== "3d") return;
+        windParticles.rotation.y += 0.001;
+        windParticles.rotation.x += 0.0002;
+        requestAnimationFrame(animateWind);
+      })();
+    }
+
+    // Embed Submarine Cable Topology
+    fetch(
+      "https://raw.githubusercontent.com/telegeography/www.submarinecablemap.com/master/web/public/api/v3/cable/cable-geo.json",
+    )
+      .then((res) => res.json())
+      .then((cableGeo) => {
+        if (projectionType !== "3d") return;
+        const cablePaths = [];
+        cableGeo.features.forEach((feature) => {
+          if (feature.geometry && feature.geometry.type === "LineString") {
+            cablePaths.push({ coords: feature.geometry.coordinates });
+          } else if (
+            feature.geometry &&
+            feature.geometry.type === "MultiLineString"
+          ) {
+            feature.geometry.coordinates.forEach((line) =>
+              cablePaths.push({ coords: line }),
+            );
+          }
+        });
+        if (window.myGlobe.pathsData) {
+          window.myGlobe
+            .pathsData(cablePaths)
+            .pathPoints("coords")
+            .pathPointLat((p) => p[1])
+            .pathPointLng((p) => p[0])
+            .pathColor(() => "rgba(6, 182, 212, 0.35)")
+            .pathDashLength(0.1)
+            .pathDashGap(0.008)
+            .pathDashAnimateTime(12000)
+            .pathStroke(1.5);
+        }
+      })
+      .catch((err) => console.warn("Topology cable layer fetch failed", err));
   }
 }
 
@@ -1123,7 +1240,11 @@ async function renderAircraft() {
   if (_aircraftGroup) _aircraftGroup.remove();
   _aircraftGroup = null;
 
-  if (window.myGlobe) window.myGlobe.arcsData([]);
+  if (window.myGlobe && window.myGlobe.arcsData) {
+    window.myGlobe.arcsData(
+      (window.myGlobe.arcsData() || []).filter((a) => a.type !== "flight"),
+    );
+  }
 
   try {
     const res = await fetch(
@@ -1144,6 +1265,7 @@ async function renderAircraft() {
           endLat: lat + Math.cos(rad) * 3,
           endLng: lon + Math.sin(rad) * 3,
           color: ["rgba(96, 165, 250, 1)", "rgba(96, 165, 250, 0)"],
+          type: "flight",
         };
       });
       window.myGlobe
@@ -1317,7 +1439,30 @@ window.toggleGDELTLayer = async function () {
           .attr("fill", "#ef4444")
           .attr("opacity", 0.5)
           .attr("stroke", "#b91c1c")
-          .attr("stroke-width", 0.5);
+          .attr("stroke-width", 0.5)
+          .style("cursor", "pointer")
+          .on("mouseover", function (event) {
+            const t = document.getElementById("map-tooltip");
+            if (t) {
+              document.getElementById("tooltip-name").innerText =
+                f.properties.name || "Conflict Zone";
+              document.getElementById("tooltip-flag").classList.add("hidden");
+              document.getElementById("tooltip-label-1").innerText = "Type";
+              document.getElementById("tooltip-label-2").innerText =
+                "Intensity";
+              document.getElementById("tooltip-capital").innerText =
+                "Armed Conflict";
+              document.getElementById("tooltip-pop").innerText =
+                (f.properties.count || 50) + " Events";
+              t.style.left = event.pageX + 15 + "px";
+              t.style.top = event.pageY - 15 + "px";
+              t.classList.remove("hidden");
+            }
+          })
+          .on("mouseleave", () => {
+            const t = document.getElementById("map-tooltip");
+            if (t) t.classList.add("hidden");
+          });
       });
     }
   }
@@ -1329,11 +1474,10 @@ window.toggleAircraftLayer = function () {
   if (!_aircraftActive) {
     if (_aircraftGroup) _aircraftGroup.remove();
     _aircraftGroup = null;
-    if (window.myGlobe) {
-      const existingArcs = window.myGlobe.arcsData() || [];
-      // Filtering out flight arcs specifically by checking if color isn't an Intel Beam array string
-      // We can just wipe arcs array entirely for safety, or we tag flights. Let's just wipe.
-      window.myGlobe.arcsData([]);
+    if (window.myGlobe && window.myGlobe.arcsData) {
+      window.myGlobe.arcsData(
+        (window.myGlobe.arcsData() || []).filter((a) => a.type !== "flight"),
+      );
     }
     clearInterval(_aircraftInterval);
     _aircraftInterval = null;
@@ -1352,3 +1496,169 @@ window.toggleAircraftLayer = function () {
     if (_aircraftActive) renderAircraft();
   }, 30000);
 };
+
+// --- ISS ORBITAL TRACKING ENGINE ---
+window._issData = [{ lat: 0, lng: 0, alt: 0.1, name: "ISS" }];
+window._issInitialized = false;
+
+window.updateISS = async function () {
+  if (typeof projectionType !== "undefined" && projectionType !== "3d") return;
+  if (!window.myGlobe) return;
+
+  try {
+    const res = await fetch("https://api.wheretheiss.at/v1/satellites/25544");
+    if (!res.ok) return;
+    const data = await res.json();
+
+    window._issData[0].lat = data.latitude;
+    window._issData[0].lng = data.longitude;
+    // Scale ISS altitude: earth radius is ~6371km, ISS is ~400km (400/6371 = ~0.06)
+    window._issData[0].alt = data.altitude / 6371 + 0.1;
+    window._issData[0].velocity = data.velocity;
+
+    // Attach custom 3D mesh processing the first cycle
+    if (!window._issInitialized && window.THREE) {
+      window.myGlobe
+        .objectLat("lat")
+        .objectLng("lng")
+        .objectAltitude("alt")
+        .objectThreeObject(() => {
+          const group = new window.THREE.Group();
+          const core = new window.THREE.Mesh(
+            new window.THREE.BoxGeometry(0.8, 0.8, 0.8),
+            new window.THREE.MeshPhongMaterial({
+              color: "#fb923c",
+              emissive: "#ea580c",
+            }),
+          );
+          group.add(core);
+
+          const panel = new window.THREE.Mesh(
+            new window.THREE.BoxGeometry(3.5, 0.1, 0.8),
+            new window.THREE.MeshPhongMaterial({
+              color: "#3b82f6",
+              emissive: "#1d4ed8",
+              transparent: true,
+              opacity: 0.8,
+            }),
+          );
+          group.add(panel);
+          return group;
+        })
+        .ringLat("lat")
+        .ringLng("lng")
+        .ringAltitude((d) => d.alt || 0.01)
+        .ringColor((d) => d.color || "#fb923c")
+        .ringMaxRadius((d) => d.r || 4)
+        .ringPropagationSpeed((d) => d.speed || 1)
+        .ringRepeatPeriod((d) => d.period || 1000);
+
+      window._issInitialized = true;
+    }
+
+    if (!window._radarPings) {
+      window._radarPings = [
+        {
+          lat: 38.8951,
+          lng: -77.0364,
+          r: 6,
+          color: "#ef4444",
+          speed: 0.5,
+          period: 2000,
+        },
+        {
+          lat: 55.7558,
+          lng: 37.6173,
+          r: 6,
+          color: "#ef4444",
+          speed: 0.5,
+          period: 2000,
+        },
+        {
+          lat: 39.9042,
+          lng: 116.4074,
+          r: 6,
+          color: "#ef4444",
+          speed: 0.5,
+          period: 2000,
+        },
+        {
+          lat: 20.5937,
+          lng: 78.9629,
+          r: 10,
+          color: "#3b82f6",
+          speed: 0.8,
+          period: 1500,
+        },
+      ];
+    }
+
+    // Inject the array reference back in to trigger WebGL recalculation
+    window.myGlobe.objectsData(window._issData);
+
+    // Merge radar pings with ISS ping
+    window.myGlobe.ringsData([...window._radarPings, ...window._issData]);
+  } catch (e) {
+    console.warn("ISS orbital tracking fetch failed", e);
+  }
+};
+
+if (!window._issInterval) {
+  setTimeout(() => window.updateISS(), 2000);
+  window._issInterval = setInterval(window.updateISS, 3000);
+}
+
+// --- CYBER WARFARE STREAM ENGINE ---
+window._cyberDataCenters = [
+  { lat: 38.8951, lng: -77.0364 }, // Washington
+  { lat: 55.7558, lng: 37.6173 }, // Moscow
+  { lat: 39.9042, lng: 116.4074 }, // Beijing
+  { lat: 51.5074, lng: -0.1278 }, // London
+  { lat: 35.6762, lng: 139.6503 }, // Tokyo
+  { lat: -33.8688, lng: 151.2093 }, // Sydney
+  { lat: 50.1109, lng: 8.6821 }, // Frankfurt
+  { lat: 1.3521, lng: 103.8198 }, // Singapore
+];
+
+window.updateCyberArcs = function () {
+  if (typeof projectionType !== "undefined" && projectionType !== "3d") return;
+  if (!window.myGlobe || !window.myGlobe.arcsData) return;
+
+  let currentArcs = window.myGlobe.arcsData() || [];
+
+  if (Math.random() > 0.25) {
+    const src =
+      window._cyberDataCenters[
+        Math.floor(Math.random() * window._cyberDataCenters.length)
+      ];
+    let tgt =
+      window._cyberDataCenters[
+        Math.floor(Math.random() * window._cyberDataCenters.length)
+      ];
+    while (src === tgt)
+      tgt =
+        window._cyberDataCenters[
+          Math.floor(Math.random() * window._cyberDataCenters.length)
+        ];
+
+    currentArcs.push({
+      startLat: src.lat,
+      startLng: src.lng,
+      endLat: tgt.lat,
+      endLng: tgt.lng,
+      color: ["rgba(239, 68, 68, 0)", "rgba(239, 68, 68, 1)"],
+      type: "cyber",
+      timeCreated: Date.now(),
+    });
+  }
+
+  const now = Date.now();
+  currentArcs = currentArcs.filter(
+    (a) => a.type !== "cyber" || now - a.timeCreated < 3000,
+  );
+  window.myGlobe.arcsData(currentArcs);
+};
+
+if (!window._cyberInterval) {
+  window._cyberInterval = setInterval(window.updateCyberArcs, 600);
+}

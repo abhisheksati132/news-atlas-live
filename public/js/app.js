@@ -260,6 +260,78 @@ async function generateAIBriefing(loc) {
     if (text) text.innerText = "Briefing handshake failed.";
   }
 }
+// --- AIR QUALITY ENGINE (OPENAQ) ---
+window._airQualityActive = false;
+window._aqData = [];
+
+window.toggleAirQuality = async function () {
+  window._airQualityActive = !window._airQualityActive;
+  const btn = document.getElementById("airquality-toggle-btn");
+  if (btn) btn.classList.toggle("active", window._airQualityActive);
+
+  if (!window._airQualityActive) {
+    if (window.myGlobe) {
+      window.myGlobe
+        .hexBinPointWeight("weight")
+        .hexBinPointColor(() => "rgba(239, 68, 68, 0.6)")
+        .hexBinPointsData(window._gdeltData || []);
+    }
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      "https://api.openaq.org/v2/latest?limit=100&parameter=pm25",
+    );
+    const data = await res.json();
+    window._aqData = (data.results || [])
+      .filter((r) => r.coordinates)
+      .map((r) => ({
+        lat: r.coordinates.latitude,
+        lng: r.coordinates.longitude,
+        weight: r.measurements[0].value,
+      }));
+
+    if (window.myGlobe) {
+      window.myGlobe
+        .hexBinPointWeight("weight")
+        .hexBinPointColor(() => "rgba(16, 185, 129, 0.7)")
+        .hexBinPointsData(window._aqData);
+    }
+  } catch (e) {
+    console.warn("OpenAQ fetch failed", e);
+  }
+};
+
+// --- CLOUD RADAR ENGINE ---
+window._cloudsActive = false;
+window.toggleClouds = function () {
+  window._cloudsActive = !window._cloudsActive;
+  const btn = document.getElementById("clouds-toggle-btn");
+  if (btn) btn.classList.toggle("active", window._cloudsActive);
+
+  if (window._cloudMesh) {
+    window._cloudMesh.visible = window._cloudsActive;
+  }
+};
+
+// --- GLOBAL WIND PARTICLES ---
+window._windActive = false;
+window.toggleWind = function () {
+  window._windActive = !window._windActive;
+  const btn = document.getElementById("wind-toggle-btn");
+  if (btn) btn.classList.toggle("active", window._windActive);
+
+  if (window._windParticles) {
+    window._windParticles.visible = window._windActive;
+  }
+};
+
+window.playTacticalSound = function (type) {
+  const audio = new Audio(`/audio/${type}.mp3`);
+  audio.volume = 0.1;
+  audio.play();
+};
 window.myGlobe = null;
 
 function initMap(type) {
@@ -419,7 +491,11 @@ function initMap(type) {
           ? "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
           : "//unpkg.com/three-globe/example/img/earth-night.jpg",
       )
-      .bumpImageUrl("//unpkg.com/three-globe/example/img/earth-topology.png");
+      .bumpImageUrl("//unpkg.com/three-globe/example/img/earth-topology.png")
+      .ringColor((d) => d.color || "#3b82f6")
+      .ringMaxRadius((d) => d.r || 5)
+      .ringPropagationSpeed((d) => d.speed || 0.5)
+      .ringRepeatPeriod((d) => d.period || 1000);
 
     const loadGlobeData = (features) => {
       let hoverObj = null;
@@ -547,13 +623,40 @@ function initMap(type) {
       });
 
       const windParticles = new window.THREE.Points(geometry, pMaterial);
+      window._windParticles = windParticles;
+      window._windParticles.visible = false;
       window.myGlobe.scene().add(windParticles);
 
       (function animateWind() {
         if (projectionType !== "3d" || !window.myGlobe) return;
-        windParticles.rotation.y += 0.001;
-        windParticles.rotation.x += 0.0002;
+        window._windParticles.rotation.y += 0.001;
+        window._windParticles.rotation.x += 0.0002;
         requestAnimationFrame(animateWind);
+      })();
+
+      // --- PHASE 5: CLOUD RADAR LAYER ---
+      const cloudGeom = new window.THREE.SphereGeometry(
+        window.myGlobe.getGlobeRadius() * 1.01,
+        64,
+        64,
+      );
+      const cloudMat = new window.THREE.MeshPhongMaterial({
+        map: new window.THREE.TextureLoader().load(
+          "//unpkg.com/three-globe/example/img/earth-clouds.png",
+        ),
+        transparent: true,
+        opacity: 0.8,
+      });
+      const cloudMesh = new window.THREE.Mesh(cloudGeom, cloudMat);
+      window._cloudMesh = cloudMesh;
+      window._cloudMesh.visible = false;
+      window.myGlobe.scene().add(cloudMesh);
+
+      (function animateClouds() {
+        if (projectionType !== "3d" || !window.myGlobe || !window._cloudMesh)
+          return;
+        window._cloudMesh.rotation.y += 0.0004;
+        requestAnimationFrame(animateClouds);
       })();
     }
 

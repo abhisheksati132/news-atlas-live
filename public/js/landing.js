@@ -8,7 +8,6 @@ let pIdx = 0,
   cIdx = 0,
   deleting = false;
 const typedEl = document.getElementById("typed-text");
-
 function type() {
   const phrase = phrases[pIdx];
   if (!deleting) {
@@ -28,7 +27,6 @@ function type() {
   setTimeout(type, deleting ? 28 : 55);
 }
 type();
-
 const cmds = [
   "query --region EU --threat-level HIGH",
   "fetch-market --exchange NYSE,NASDAQ --interval 1m",
@@ -39,7 +37,6 @@ let ci = 0,
   cc = 0,
   cd = false;
 const cmdEl = document.getElementById("cmd-text");
-
 function typeCmd() {
   const cmd = cmds[ci];
   if (!cd) {
@@ -59,7 +56,6 @@ function typeCmd() {
   setTimeout(typeCmd, cd ? 30 : 65);
 }
 setTimeout(typeCmd, 2000);
-
 function updateClock() {
   const el = document.getElementById("hero-time");
   if (!el) return;
@@ -71,7 +67,6 @@ function updateClock() {
 }
 updateClock();
 setInterval(updateClock, 1000);
-
 const observer = new IntersectionObserver(
   (entries) => {
     entries.forEach((e) => {
@@ -84,14 +79,12 @@ const observer = new IntersectionObserver(
   },
   { threshold: 0.1 },
 );
-
 document.querySelectorAll(".feat-card, .glass").forEach((el) => {
   el.style.opacity = "0";
   el.style.transform = "translateY(20px)";
   el.style.transition = "opacity 0.6s ease, transform 0.6s ease";
   observer.observe(el);
 });
-
 document.addEventListener("DOMContentLoaded", () => {
   const viewBriefingBtn = document.getElementById("view-briefing-btn");
   if (viewBriefingBtn) {
@@ -104,20 +97,17 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-
   function animateCounter(el, target, suffix = "", duration = 1800) {
     let start = null;
     const step = (ts) => {
       if (!start) start = ts;
       const progress = Math.min((ts - start) / duration, 1);
-
       const eased = 1 - Math.pow(1 - progress, 3);
       el.textContent = Math.floor(eased * target).toLocaleString() + suffix;
       if (progress < 1) requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
   }
-
   const statsEl = document.getElementById("stat-nations");
   if (statsEl) {
     const statsObserver = new IntersectionObserver(

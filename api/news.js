@@ -1,5 +1,4 @@
 import Parser from "rss-parser";
-
 const parser = new Parser({
   customFields: {
     item: [
@@ -8,7 +7,6 @@ const parser = new Parser({
     ],
   },
 });
-
 const FEEDS = [
   {
     url: "https://feeds.bbci.co.uk/news/world/rss.xml",
@@ -35,7 +33,6 @@ const FEEDS = [
     category: "world",
     source: "The Guardian",
   },
-
   {
     url: "https://techcrunch.com/feed/",
     category: "technology",
@@ -61,7 +58,6 @@ const FEEDS = [
     category: "technology",
     source: "Wired",
   },
-
   {
     url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000664",
     category: "business",
@@ -82,7 +78,6 @@ const FEEDS = [
     category: "business",
     source: "The Economist",
   },
-
   {
     url: "https://cointelegraph.com/rss",
     category: "crypto",
@@ -98,7 +93,6 @@ const FEEDS = [
     category: "crypto",
     source: "Bitcoin Magazine",
   },
-
   {
     url: "https://www.sciencedaily.com/rss/all.xml",
     category: "science",
@@ -115,7 +109,6 @@ const FEEDS = [
     source: "Nature",
   },
 ];
-
 const COUNTRY_FEEDS = {
   in: [
     {
@@ -364,24 +357,18 @@ const COUNTRY_FEEDS = {
     { url: "https://arynews.tv/feed/", category: "world", source: "ARY News" },
   ],
 };
-
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Credentials", true);
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
   if (req.method === "OPTIONS") return res.status(200).end();
-
   const { category, q, iso2 } = req.query;
-
   try {
     let selectedFeeds = [...FEEDS];
-
     if (iso2) {
       const countryCode = iso2.toLowerCase();
       const countrySpecific = COUNTRY_FEEDS[countryCode] || [];
-
       const allUrls = new Set();
       const merged = [];
       for (const f of [...countrySpecific, ...FEEDS]) {
@@ -392,14 +379,11 @@ export default async function handler(req, res) {
       }
       selectedFeeds = merged;
     }
-
     if (category && category !== "top") {
       const catFiltered = selectedFeeds.filter((f) => f.category === category);
       selectedFeeds = catFiltered.length > 0 ? catFiltered : selectedFeeds;
     }
-
     const feedsToProcess = selectedFeeds.slice(0, 20);
-
     const feedPromises = feedsToProcess.map(async (feed) => {
       try {
         const feedContent = await parser.parseURL(feed.url);
@@ -421,10 +405,8 @@ export default async function handler(req, res) {
         return [];
       }
     });
-
     const results = await Promise.all(feedPromises);
     let allArticles = results.flat();
-
     if (q) {
       const lowerQ = q.toLowerCase();
       allArticles = allArticles.filter(
@@ -433,15 +415,12 @@ export default async function handler(req, res) {
           (a.description && a.description.toLowerCase().includes(lowerQ)),
       );
     }
-
     allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-
     const responseData = {
       status: "success",
       totalResults: allArticles.length,
       results: allArticles.slice(0, 200),
     };
-
     res.status(200).json(responseData);
   } catch (error) {
     console.error("RSS Handler Error:", error);

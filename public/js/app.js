@@ -12,17 +12,13 @@ window.selectedCountry = selectedCountry;
 window.currencyCode = currencyCode;
 window.iso2Code = iso2Code;
 window.currentCategory = currentCategory;
-
-/** Shared magnitude → color helper used by earthquake layer and globe hexbins. */
 function magColor(m) {
   return m >= 7 ? "#ef4444" : m >= 6 ? "#f97316" : m >= 5 ? "#eab308" : "#10b981";
 }
 window.magColor = magColor;
-
 function safeEl(id) {
   return document.getElementById(id);
 }
-
 function setText(id, text) {
   const el = safeEl(id);
   if (el) el.innerText = text;
@@ -31,7 +27,6 @@ function setSrc(id, src) {
   const el = safeEl(id);
   if (el) el.src = src;
 }
-
 async function runBootSequence() {
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const logs = [
@@ -72,7 +67,6 @@ function showBackendRequiredBanner() {
   `;
   document.body.appendChild(banner);
 }
-
 async function initTerminal() {
   runBootSequence();
   let config = {};
@@ -135,7 +129,6 @@ async function initTerminal() {
     globalSearchData = await res.json();
     window.globalSearchData = globalSearchData;
   } catch (e) { }
-
   window.fetchNews();
   if (window.generateAIBriefing) window.generateAIBriefing("Global Context");
   if (window.fetchGDELTEvents) window.fetchGDELTEvents("");
@@ -145,7 +138,6 @@ async function initTerminal() {
 async function startStockTicker() {
   const tickerContent = document.getElementById("stock-ticker-content");
   if (!tickerContent) return;
-
   function renderTicker(stocks) {
     let html = "";
     stocks.forEach((stock) => {
@@ -159,10 +151,8 @@ async function startStockTicker() {
       const dot = `<span style="color:rgba(255,255,255,.12);margin:0 .25rem">│</span>`;
       html += `<div class="ticker-item">${dot}<span class="text-slate-400">${stock.label}</span> <span class="text-white font-black">${priceStr}</span> <span class="${color} ml-1">${arrow} ${Math.abs(stock.change).toFixed(2)}%</span></div>`;
     });
-
     tickerContent.innerHTML = html + html;
   }
-
   async function fetchAndRender() {
     try {
       const fetcher = window.fetchWithRetry || fetch;
@@ -186,7 +176,6 @@ async function startStockTicker() {
       }
     }
   }
-
   let tickerLastUpdate = 0;
   function setTickerLastUpdated() {
     const el = document.getElementById("ticker-last-updated");
@@ -205,7 +194,6 @@ async function startStockTicker() {
     el.textContent = mins < 1 ? "Last updated just now" : "Last updated " + mins + " min ago";
   }, 60000);
 }
-
 async function fetchAllData(name) {
   const apiName = countryNameForRestCountries(name);
   try {
@@ -251,7 +239,6 @@ async function fetchAllData(name) {
       ) {
         [lat, lon] = c.capitalInfo.latlng;
       }
-
       const capitalName = c.capital ? c.capital[0] : c.name.common;
       window._currentWeatherLocation = `${capitalName}, ${c.name.common}`;
       if (lat || lon) window.fetchWeather(lat, lon);
@@ -277,8 +264,6 @@ async function generateAIBriefing(loc) {
   if (text) { text.innerText = ""; text.classList.add("ai-streaming"); }
   if (loading) loading.classList.remove("hidden");
   if (actions) actions.classList.add("hidden");
-
-  // Blinking cursor while loading
   let _cursorInterval = null;
   if (text) {
     let _cursorOn = true;
@@ -286,7 +271,6 @@ async function generateAIBriefing(loc) {
       if (!text.__streaming) { text.textContent = (_cursorOn ? "█" : " "); _cursorOn = !_cursorOn; }
     }, 400);
   }
-
   if (window.myGlobe && projectionType !== "2d") {
     const feature = window.worldFeatures?.find((f) => f.properties.name === loc);
     if (feature) {
@@ -296,35 +280,28 @@ async function generateAIBriefing(loc) {
       setTimeout(() => { if (window.myGlobe) window.myGlobe.arcsData((window.myGlobe.arcsData() || []).filter((a) => a !== beamArc)); }, 4000);
     }
   }
-
   const briefingPrompt = `Target Sector: ${loc}.
 Generate a high-density Intelligence Dossier with exactly 10 numbered strategic metrics.
 Format: 1. [METRIC_NAME]: Value/Status - Brief Context. ... 10. [METRIC_NAME]: Value/Status - Brief Context.
 Include: Political Stability, Border Integrity, Cyber Threat, Civil Unrest, Military Readiness, Energy Reserves, Supply Chain, Inflation, Foreign Relations, Infrastructure.
 Tone: Strict military/intelligence.`;
-
   try {
     const res = await fetch("/api/ai?stream=true", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt: briefingPrompt }),
     });
-
     if (!res.ok || !res.body) throw new Error("Stream not available");
-
     if (_cursorInterval) { clearInterval(_cursorInterval); _cursorInterval = null; }
     if (loading) loading.classList.add("hidden");
     if (text) { text.innerText = ""; text.__streaming = true; }
-
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let accumulated = "";
-
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
       const chunk = decoder.decode(value, { stream: true });
-      // Parse SSE lines
       const lines = chunk.split("\n");
       for (const line of lines) {
         if (!line.startsWith("data: ")) continue;
@@ -340,13 +317,11 @@ Tone: Strict military/intelligence.`;
         } catch { }
       }
     }
-
     if (text) { text.__streaming = false; text.classList.remove("ai-streaming"); }
     if (actions) actions.classList.remove("hidden");
     window.playTacticalSound("success");
     if (window.showToast) window.showToast("Briefing generated", "success");
   } catch (e) {
-    // Fallback to non-streaming
     if (_cursorInterval) { clearInterval(_cursorInterval); _cursorInterval = null; }
     try {
       const res2 = await fetch("/api/ai", {
@@ -371,7 +346,6 @@ Tone: Strict military/intelligence.`;
     }
   }
 }
-
 window.copyBriefingToClipboard = function () {
   const text = safeEl("ai-briefing-text");
   if (!text || !text.innerText) return;
@@ -382,12 +356,10 @@ window.copyBriefingToClipboard = function () {
 };
 window._airQualityActive = false;
 window._aqData = [];
-
 window.toggleAirQuality = async function () {
   window._airQualityActive = !window._airQualityActive;
   const btn = document.getElementById("airquality-toggle-btn");
   if (btn) btn.classList.toggle("active", window._airQualityActive);
-
   if (!window._airQualityActive) {
     window._hexLayers.aq = [];
     if (window.updateGlobeHexbins) window.updateGlobeHexbins();
@@ -395,30 +367,25 @@ window.toggleAirQuality = async function () {
     if (window.showToast) window.showToast("Air quality layer off", "info");
     return;
   }
-
   if (window.showToast) window.showToast("Loading air quality data…", "info");
   try {
-    // WAQI feed — truly free, no key, returns ~1000 stations with AQI + coords
     const res = await fetch(
       "https://api.waqi.info/map/bounds/?latlng=-90,-180,90,180&token=demo",
     );
     const data = await res.json();
     if (data.status !== "ok") throw new Error("WAQI status: " + data.status);
-
     window._hexLayers.aq = data.data
       .filter((s) => s.lat && s.lon && typeof s.aqi === "number" && s.aqi > 0)
       .map((s) => ({
         type: "aq",
         lat: s.lat,
         lng: s.lon,
-        weight: s.aqi,          // 0–500+ AQI value
+        weight: s.aqi,
       }));
-
     if (window.updateGlobeHexbins) window.updateGlobeHexbins();
     if (window.showToast) window.showToast(`Air quality: ${window._hexLayers.aq.length} stations`, "success");
   } catch (e) {
     console.warn("AQ fetch failed", e);
-    // Fallback: generate synthetic AQ dots from globalSearchData capitals
     const synth = (window.globalSearchData || []).slice(0, 80).map((c) => ({
       type: "aq",
       lat: (c.latlng || [0, 0])[0] + (Math.random() - 0.5) * 5,
@@ -431,10 +398,8 @@ window.toggleAirQuality = async function () {
   }
   if (window.updateLayerLegend) window.updateLayerLegend();
 };
-
 window._cloudsActive = false;
 window.toggleClouds = function (retries = 12) {
-  // If mesh isn't ready yet, retry
   if (!window._cloudMesh) {
     if (retries <= 0) { if (window.showToast) window.showToast("Cloud layer unavailable (3D only)", "info"); return; }
     setTimeout(() => window.toggleClouds(retries - 1), 500);
@@ -444,8 +409,6 @@ window.toggleClouds = function (retries = 12) {
   const btn = document.getElementById("clouds-toggle-btn");
   if (btn) btn.classList.toggle("active", window._cloudsActive);
   window._cloudMesh.visible = window._cloudsActive;
-
-  // Restart animation loop if it exited while mesh was invisible
   if (window._cloudsActive) {
     (function animateClouds() {
       if (!window._cloudMesh || !window._cloudsActive) return;
@@ -457,7 +420,6 @@ window.toggleClouds = function (retries = 12) {
     window._cloudsActive ? "Cloud radar on" : "Cloud radar off", "info"
   );
 };
-
 window._windActive = false;
 window.toggleWind = function (retries = 12) {
   if (!window._windParticles) {
@@ -469,7 +431,6 @@ window.toggleWind = function (retries = 12) {
   const btn = document.getElementById("wind-toggle-btn");
   if (btn) btn.classList.toggle("active", window._windActive);
   window._windParticles.visible = window._windActive;
-
   if (window._windActive) {
     (function animateWind() {
       if (!window._windParticles || !window._windActive) return;
@@ -482,12 +443,7 @@ window.toggleWind = function (retries = 12) {
     window._windActive ? "Wind particles on" : "Wind particles off", "info"
   );
 };
-
-
-
-// playTacticalSound is provided by js/core/audio.js (procedural Web Audio; no assets)
 window.myGlobe = null;
-
 function initMap(type) {
   projectionType = type;
   window.projectionType = type;
@@ -499,27 +455,20 @@ function initMap(type) {
     setTimeout(() => initMap(type), 300);
     return;
   }
-
   if (window.myGlobe) {
     container.innerHTML = "";
     window.myGlobe = null;
   }
-
   const mapContainer = d3.select("#map-container");
   mapContainer.selectAll("svg").remove();
-
-  // Update right-side live stats widget projection indicator
   const _pmIcon = safeEl("map-projection-icon");
   const _pmLabel = safeEl("map-projection-mode");
   if (_pmIcon) _pmIcon.className = type === "3d" ? "fas fa-globe text-[9px] text-blue-400" : "fas fa-map text-[9px] text-slate-500";
   if (_pmLabel) { _pmLabel.textContent = type === "3d" ? "3D" : "2D"; _pmLabel.className = type === "3d" ? "text-[9px] font-black text-blue-400 uppercase tracking-widest font-mono" : "text-[9px] font-black text-slate-500 uppercase tracking-widest font-mono"; }
-
-  // 3D-only buttons: auto-rotate and day/night theme
   const _themeBtn = safeEl("theme-toggle-btn");
   const _rotateBtn = safeEl("autorotate-toggle-btn");
   if (_themeBtn) _themeBtn.classList.toggle("hidden", type !== "3d");
   if (_rotateBtn) _rotateBtn.classList.toggle("hidden", type !== "3d");
-
   if (type === "2d") {
     setText("projection-label", "Orbital Interface: 2D Active");
     const cloudsBtn = safeEl("clouds-toggle-btn");
@@ -542,7 +491,6 @@ function initMap(type) {
       .scaleExtent([1, 15])
       .on("zoom", (e) => g.attr("transform", e.transform));
     svg.call(zoom);
-
     window.syncMapOverlays = function () {
       if (
         typeof _quakeActive !== "undefined" &&
@@ -585,12 +533,10 @@ function initMap(type) {
         });
       }
     };
-
     if (!window._dataFlows) {
       window._dataFlows = new DataFlows("world-map", currentProjection);
     }
     if (!window._heatMap) window._heatMap = new HeatMap();
-
     d3.json(
       "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json",
     ).then((data) => {
@@ -638,7 +584,6 @@ function initMap(type) {
     if (windBtn) windBtn.style.display = "block";
     currentProjection = () => [0, 0];
     window.syncMapOverlays = function () { };
-
     window.mouseX = 0;
     window.mouseY = 0;
     const updateTooltipPos = (e) => {
@@ -652,7 +597,6 @@ function initMap(type) {
     };
     container.removeEventListener("mousemove", updateTooltipPos);
     container.addEventListener("mousemove", updateTooltipPos);
-
     window.myGlobe = Globe()(container)
       .width(width)
       .height(height)
@@ -670,7 +614,6 @@ function initMap(type) {
       .ringMaxRadius((d) => d.r || 5)
       .ringPropagationSpeed((d) => d.speed || 0.5)
       .ringRepeatPeriod((d) => d.period || 1000);
-
     const loadGlobeData = (features) => {
       let hoverObj = null;
       window.myGlobe
@@ -689,16 +632,9 @@ function initMap(type) {
             : "rgba(0, 0, 0, 0)";
         })
         .polygonStrokeColor(() => "#3b82f6")
-        .polygonLabel(
-          ({ properties: d }) => `
-            <div style="background: rgba(2, 6, 23, 0.8); border: 1px solid rgba(59, 130, 246, 0.4); border-radius: 8px; padding: 6px 10px; font-family: monospace; font-size: 11px; text-transform: uppercase;">
-               <b style="color: #60a5fa">${d.name}</b>
-            </div>
-        `,
-        )
+        .polygonLabel(() => "")
         .onPolygonHover((hoverD) => {
           if (hoverD === hoverObj) return;
-
           const t = safeEl("map-tooltip");
           if (hoverD) {
             window.playTacticalSound("hover");
@@ -709,7 +645,6 @@ function initMap(type) {
           } else {
             if (t) t.classList.add("hidden");
           }
-
           hoverObj = hoverD;
           window.myGlobe.polygonAltitude(window.myGlobe.polygonAltitude());
           window.myGlobe.polygonCapColor(window.myGlobe.polygonCapColor());
@@ -718,8 +653,25 @@ function initMap(type) {
         .onPolygonClick((d) => {
           if (d) handleCountryClick(null, d);
         });
+      const ARC_REL_LEN = 0.4;
+      const arcData = [
+        { startLat: 40.7128, startLng: -74.006, endLat: 51.5074, endLng: -0.1276, color: ['#3b82f6', '#10b981'] },
+        { startLat: 51.5074, startLng: -0.1276, endLat: 35.6895, endLng: 139.6917, color: ['#10b981', '#f59e0b'] },
+        { startLat: 35.6895, startLng: 139.6917, endLat: 37.7749, endLng: -122.4194, color: ['#f59e0b', '#3b82f6'] },
+        { startLat: 37.7749, startLng: -122.4194, endLat: -33.8688, endLng: 151.2093, color: ['#3b82f6', '#ec4899'] },
+        { startLat: 25.2048, startLng: 55.2708, endLat: 51.5074, endLng: -0.1276, color: ['#f59e0b', '#10b981'] },
+        { startLat: 1.3521, startLng: 103.8198, endLat: 35.6895, endLng: 139.6917, color: ['#06b6d4', '#f59e0b'] },
+        { startLat: 19.0760, startLng: 72.8777, endLat: 25.2048, endLng: 55.2708, color: ['#8b5cf6', '#f59e0b'] },
+      ];
+      window.myGlobe
+        .arcsData(arcData)
+        .arcColor('color')
+        .arcDashLength(ARC_REL_LEN)
+        .arcDashGap(2)
+        .arcDashInitialGap(() => Math.random() * 5)
+        .arcDashAnimateTime(2500)
+        .arcAltitudeAutoScale(0.3);
     };
-
     if (!window.worldFeatures) {
       d3.json(
         "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json",
@@ -734,12 +686,10 @@ function initMap(type) {
     } else {
       loadGlobeData(window.worldFeatures);
     }
-
     if (window.myGlobe.controls) {
       window.myGlobe.controls().autoRotate = window._autoRotateActive !== false;
       window.myGlobe.controls().autoRotateSpeed = 0.5;
     }
-
     const CLOUDS_IMG_URL = "//unpkg.com/three-globe/example/img/clouds.png";
     if (window.THREE) {
       new window.THREE.TextureLoader().load(CLOUDS_IMG_URL, (cloudsTexture) => {
@@ -757,19 +707,16 @@ function initMap(type) {
           }),
         );
         window.myGlobe.scene().add(clouds);
-
         (function rotateClouds() {
           if (projectionType !== "3d" || !window.myGlobe) return;
           clouds.rotation.y += 0.0002;
           requestAnimationFrame(rotateClouds);
         })();
       });
-
       const particleCount = 6000;
       const geometry = new window.THREE.BufferGeometry();
       const positions = [];
       const r = window.myGlobe.getGlobeRadius() * 1.015;
-
       for (let i = 0; i < particleCount; i++) {
         const u = Math.random();
         const v = Math.random();
@@ -784,7 +731,6 @@ function initMap(type) {
         "position",
         new window.THREE.Float32BufferAttribute(positions, 3),
       );
-
       const pMaterial = new window.THREE.PointsMaterial({
         color: 0x38bdf8,
         size: 0.5,
@@ -792,12 +738,10 @@ function initMap(type) {
         opacity: 0.4,
         blending: window.THREE.AdditiveBlending,
       });
-
       const windParticles = new window.THREE.Points(geometry, pMaterial);
       window._windParticles = windParticles;
       window._windParticles.visible = false;
       window.myGlobe.scene().add(windParticles);
-
       (function animateWind() {
         if (!window.myGlobe) return;
         if (window._windActive && window._windParticles) {
@@ -806,7 +750,6 @@ function initMap(type) {
         }
         requestAnimationFrame(animateWind);
       })();
-
       const cloudGeom = new window.THREE.SphereGeometry(
         window.myGlobe.getGlobeRadius() * 1.01,
         64,
@@ -814,7 +757,7 @@ function initMap(type) {
       );
       const cloudMat = new window.THREE.MeshPhongMaterial({
         map: new window.THREE.TextureLoader().load(
-          "//unpkg.com/three-globe/example/img/earth-clouds.png",
+          "//unpkg.com/three-globe/example/img/clouds.png"
         ),
         transparent: true,
         opacity: 0.8,
@@ -823,7 +766,6 @@ function initMap(type) {
       window._cloudMesh = cloudMesh;
       window._cloudMesh.visible = false;
       window.myGlobe.scene().add(cloudMesh);
-
       (function animateClouds() {
         if (!window.myGlobe) return;
         if (window._cloudsActive && window._cloudMesh) {
@@ -832,12 +774,8 @@ function initMap(type) {
         requestAnimationFrame(animateClouds);
       })();
     }
-
-    // TeleGeography Submarine Cables API returns 404. Block removed to prevent console crash loop.
   }
 }
-
-/** Map/GeoJSON short names to RestCountries API full names where needed. */
 const _countryNameForAPI = {
   "Central African Rep.": "Central African Republic",
   "Dem. Rep. Congo": "Democratic Republic of the Congo",
@@ -849,7 +787,6 @@ const _countryNameForAPI = {
 function countryNameForRestCountries(name) {
   return _countryNameForAPI[name] || name;
 }
-
 const _tooltipCache = {};
 async function showRichTooltip(e, d) {
   const t = safeEl("map-tooltip");
@@ -938,9 +875,7 @@ async function handleCountryClick(event, d) {
     else rotateToCountry(d);
     generateAIBriefing(d.properties.name);
     window.fetchMarketIntel(d.properties.name, currencyCode);
-
     spawnPulseRings(d);
-
     if (window._dataFlows) {
       const centroid = d3.geoCentroid(d);
       const hubs = [
@@ -961,7 +896,6 @@ async function handleCountryClick(event, d) {
     }
   }
 }
-
 function spawnPulseRings(d) {
   if (projectionType !== "2d") return;
   try {
@@ -992,7 +926,6 @@ function spawnPulseRings(d) {
     });
   } catch (_) { }
 }
-
 function rotateToCountry(d) {
   if (window.myGlobe) {
     const centroid = d3.geoCentroid(d);
@@ -1030,7 +963,6 @@ function zoomToCountry(d) {
         .scale(scale),
     );
 }
-
 window.switchTab = (id) => {
   window.playTacticalSound("tab");
   document.querySelectorAll(".nav-tab").forEach((t) => {
@@ -1049,7 +981,6 @@ window.switchTab = (id) => {
   }
   const targetContent = document.getElementById(`tab-${id}`);
   if (targetContent) targetContent.classList.add("active");
-
   if (id === "intel") {
     if (window.fetchGDELTEvents)
       window.fetchGDELTEvents(window.selectedCountry);
@@ -1113,14 +1044,12 @@ window.resetToGlobalCenter = () => {
   }
   window.fetchNews();
   if (window.resetWeatherData) window.resetWeatherData();
-
   const hp = safeEl("hierarchy-panel");
   if (hp) hp.classList.add("hidden");
   const stateEl = safeEl("state-selector");
   if (stateEl) stateEl.classList.add("hidden");
   const cityEl = safeEl("city-selector");
   if (cityEl) cityEl.classList.add("hidden");
-
   if (window.initializeMarkets) window.initializeMarkets("Global");
   if (window.fetchDetailedEconomics)
     window.fetchDetailedEconomics("Global Macro Economy");
@@ -1212,6 +1141,9 @@ function setupEventListeners() {
 }
 function updateSystemTime() {
   const now = new Date();
+  if (typeof window._timeOffsetHours === 'number' && window._timeOffsetHours !== 0) {
+    now.setHours(now.getHours() + window._timeOffsetHours);
+  }
   setText(
     "system-time",
     now.toLocaleTimeString("en-US", {
@@ -1219,15 +1151,20 @@ function updateSystemTime() {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
-    }),
+    }) + " UTC",
   );
   if (countryUTCOffset) {
     const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+    const currentRealTime = new Date();
+    if (typeof window._timeOffsetHours === 'number' && window._timeOffsetHours !== 0) {
+      currentRealTime.setHours(currentRealTime.getHours() + window._timeOffsetHours);
+    }
+    const realUtc = currentRealTime.getTime() + currentRealTime.getTimezoneOffset() * 60000;
     let off = 0;
     const match = countryUTCOffset.match(/UTC([+-]\d+):?(\d+)?/);
     if (match)
       off = parseInt(match[1]) * 60 + (match[2] ? parseInt(match[2]) : 0);
-    const localDate = new Date(utc + 60000 * off);
+    const localDate = new Date(realUtc + 60000 * off);
     const localEl = safeEl("local-time");
     if (localEl)
       localEl.innerText = localDate.toLocaleTimeString("en-US", {
@@ -1289,7 +1226,6 @@ window.activateVoice = () => {
   recognition.onerror = () =>
     btn.classList.remove("text-red-500", "animate-pulse");
 };
-
 const RECENT_COUNTRIES_KEY = "newsatlas_recent_countries";
 const RECENT_COUNTRIES_MAX = 5;
 window.addRecentCountry = function (name) {
@@ -1312,7 +1248,6 @@ window.getRecentCountries = function () {
     return [];
   }
 };
-
 window._mapHintShown = false;
 window.showMapHintOnce = function () {
   if (window._mapHintShown) return;
@@ -1327,7 +1262,6 @@ window.showMapHintOnce = function () {
     }, 3000);
   }
 };
-
 window.updateLayerLegend = function () {
   const el = safeEl("layer-legend");
   if (!el) return;
@@ -1336,7 +1270,6 @@ window.updateLayerLegend = function () {
   if (typeof _aircraftActive !== "undefined" && _aircraftActive) active.push({ label: "Aircraft", color: "#3b82f6" });
   if (window._airQualityActive) active.push({ label: "Air quality", color: "#10b981" });
   if (typeof _gdeltActive !== "undefined" && _gdeltActive) active.push({ label: "Conflict", color: "#ef4444" });
-  // Update right-side live layer count badge
   const countEl = safeEl("active-layer-count");
   if (countEl) {
     countEl.textContent = active.length;
@@ -1352,7 +1285,6 @@ window.updateLayerLegend = function () {
   el.classList.remove("hidden");
   el.innerHTML = active.map((a) => `<span style="color:${a.color}">● ${a.label}</span>`).join(" ");
 };
-
 window.toggleSidebarMobile = function () {
   const sidebar = safeEl("sidebar");
   const btn = safeEl("sidebar-toggle-mobile");
@@ -1390,6 +1322,92 @@ window.personalizeSession = (user) => {
   if (roleEl) roleEl.innerText = "AUTHENTICATED FIELD OPERATOR";
   if (levelEl) levelEl.innerText = "CLEARANCE: OMEGA-LEVEL (VERIFIED)";
 };
+window.calculateRiskScore = function (countryName) {
+  let risk = 50;
+  const code = Object.keys(window.countryMapping).find(k => window.countryMapping[k] === countryName);
+  if (code && window.globalSearchData && window.globalSearchData[code]) {
+    const cData = window.globalSearchData[code];
+    if (cData.metrics && typeof cData.metrics.eventCount === "number") {
+      risk += Math.min(40, (cData.metrics.eventCount / 100) * 40);
+    }
+  }
+  if (window.worldFeatures) {
+    const feat = window.worldFeatures.find(f => f.properties.name === countryName);
+    if (feat && feat.properties.gdp_md) {
+      const gdp = feat.properties.gdp_md;
+      if (gdp > 1000000) risk -= 10;
+      if (gdp < 50000) risk += 10;
+    }
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  const hash = Array.from(countryName + today).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const fuzz = (hash % 20) - 10;
+  risk += fuzz;
+  return Math.max(0, Math.min(100, Math.round(risk)));
+};
+let _riskIndexActive = false;
+window.toggleRiskIndex = function () {
+  _riskIndexActive = !_riskIndexActive;
+  const btn = document.getElementById("risk-toggle-btn");
+  if (btn) btn.classList.toggle("active", _riskIndexActive);
+  if (_riskIndexActive) {
+    window.setChoropleth(null);
+    window._choroplethMode = "risk";
+    document.getElementById("color-by-select").value = "risk";
+    const interpolateRisk = d3.interpolateRgbBasis(["#10b981", "#f59e0b", "#ef4444"]);
+    window.myGlobe.polygonCapColor((d) => {
+      const score = window.calculateRiskScore(d.properties.name);
+      return interpolateRisk(score / 100);
+    }).polygonAltitude(0.02);
+    window.showToast?.("Geopolitical Risk Matrix Active", "warning");
+    const el = safeEl("map-legend");
+    if (el) {
+      el.classList.remove("hidden");
+      el.innerHTML = `
+              <div class="text-[9px] text-slate-400 mb-1 font-bold tracking-wider">GEOPOLITICAL RISK (0-100)</div>
+              <div class="h-1.5 w-full rounded" style="background: linear-gradient(to right, #10b981, #f59e0b, #ef4444)"></div>
+              <div class="flex justify-between text-[9px] text-slate-500 mt-1"><span>STABLE</span><span>CRITICAL</span></div>
+          `;
+    }
+  } else {
+    window.setChoropleth(null);
+    document.getElementById("color-by-select").value = "";
+    window.showToast?.("Risk Matrix Disabled", "info");
+  }
+};
+window._timeOffsetHours = 0;
+window.toggleChronos = function () {
+  const container = document.getElementById("chronos-slider-container");
+  const btn = document.getElementById("chronos-toggle-btn");
+  if (!container || !btn) return;
+  const isActive = !container.classList.contains("hidden");
+  if (isActive) {
+    container.classList.add("hidden");
+    btn.classList.remove("active");
+    if (window._timeOffsetHours !== 0) {
+      window.updateChronos(0);
+      document.getElementById("chronos-slider").value = 0;
+    }
+    window.showToast?.("Chronos Engine Offline", "info");
+  } else {
+    container.classList.remove("hidden");
+    btn.classList.add("active");
+    window.showToast?.("Chronos Engine Online. Select timeframe.", "warning");
+  }
+};
+window.updateChronos = function (val) {
+  const hours = parseInt(val, 10);
+  window._timeOffsetHours = hours;
+  const display = document.getElementById("chronos-display");
+  if (display) {
+    display.textContent = hours === 0 ? "LIVE / -0H" : `SIMULATION: ${hours}H`;
+    display.style.color = hours === 0 ? "white" : "#f59e0b";
+  }
+  if (window._gdeltActive && window.renderGDELTLayer) {
+    window.renderGDELTLayer(false);
+  }
+  updateSystemTime();
+};
 window.generateAIBriefing = generateAIBriefing;
 initTerminal();
 initMap("2d");
@@ -1423,7 +1441,6 @@ window.addEventListener("resize", () => {
     initMap(projectionType);
   }
 });
-
 window._chronosOffset = 0;
 window.updateChronos = function (val) {
   window._chronosOffset = parseInt(val, 10);
@@ -1449,13 +1466,11 @@ window.updateChronos = function (val) {
     if (window._aircraftGroup) window._aircraftGroup.attr("opacity", 1);
   }
 };
-
 window._chronosActive = false;
 window.toggleChronos = function () {
   window._chronosActive = !window._chronosActive;
   const btn = document.getElementById("chronos-toggle-btn");
   const container = document.getElementById("chronos-slider-container");
-
   if (!window._chronosActive) {
     if (container) container.classList.add("hidden");
     if (btn) {
@@ -1469,30 +1484,25 @@ window.toggleChronos = function () {
     }
     return;
   }
-
   if (container) container.classList.remove("hidden");
   if (btn) {
     btn.classList.add("active");
     btn.title = "Chronos Engine: ON";
   }
 };
-
 window._hexLayers = { seismic: [], gdelt: [] };
 window.updateGlobeHexbins = function () {
   if (!window.myGlobe) return;
-
   const targetTime = Date.now() + window._chronosOffset * 3600 * 1000;
   const filteredSeismic = window._hexLayers.seismic.filter(
     (d) => !d.time || d.time <= targetTime,
   );
-
   const combinedData = [
     ...filteredSeismic,
     ...window._hexLayers.gdelt,
     ...(window._hexLayers.aq || []),
   ];
   const magToHeight = (mag) => Math.max(0.01, (mag - 3) * 0.04);
-
   window.myGlobe
     .hexBinPointsData(combinedData)
     .hexBinPointLat((d) => d.lat)
@@ -1554,7 +1564,6 @@ window.updateGlobeHexbins = function () {
       }
     });
 };
-
 let _quakeActive = false,
   _quakeGroup = null;
 window.toggleEarthquakeLayer = async function () {
@@ -1591,9 +1600,6 @@ window.toggleEarthquakeLayer = async function () {
     );
     const data = await res.json();
     const features = data.features || [];
-    // magColor is the shared top-level helper
-
-    // Update right-side seismic stat widget
     if (features.length > 0) {
       const topMag = features.reduce((max, f) => Math.max(max, f.properties.mag || 0), 0);
       const seismicValEl = safeEl("map-seismic-val");
@@ -1602,7 +1608,6 @@ window.toggleEarthquakeLayer = async function () {
         seismicValEl.style.color = topMag >= 6 ? "#ef4444" : topMag >= 5 ? "#f97316" : "#fbbf24";
       }
     }
-
     if (projectionType !== "2d" && window.myGlobe) {
       window._hexLayers.seismic = features.map((f) => {
         const [lon, lat, depth] = f.geometry.coordinates;
@@ -1619,7 +1624,6 @@ window.toggleEarthquakeLayer = async function () {
       window.updateGlobeHexbins();
       return;
     }
-
     features.forEach((f) => {
       const [lon, lat] = f.geometry.coordinates;
       const mag = f.properties.mag;
@@ -1628,7 +1632,6 @@ window.toggleEarthquakeLayer = async function () {
       if (!proj) return;
       const [cx, cy] = proj;
       const r = Math.max(4, (mag - 3) * 3);
-
       for (let d = 0; d <= 600; d += 300) {
         _quakeGroup
           .append("circle")
@@ -1661,7 +1664,6 @@ window.toggleEarthquakeLayer = async function () {
               .on("end", repeat);
           });
       }
-
       _quakeGroup
         .append("circle")
         .datum([lon, lat])
@@ -1705,7 +1707,6 @@ window.toggleEarthquakeLayer = async function () {
   }
   if (window.updateLayerLegend) window.updateLayerLegend();
 };
-
 let _aircraftActive = false,
   _aircraftGroup = null,
   _aircraftInterval = null;
@@ -1713,20 +1714,17 @@ async function renderAircraft() {
   const svg = d3.select("#world-map");
   if (_aircraftGroup) _aircraftGroup.remove();
   _aircraftGroup = null;
-
   if (window.myGlobe && window.myGlobe.arcsData) {
     window.myGlobe.arcsData(
       (window.myGlobe.arcsData() || []).filter((a) => a.type !== "flight"),
     );
   }
-
   try {
     const res = await fetch(
       "https://opensky-network.org/api/states/all?lamin=-60&lomin=-180&lamax=80&lomax=180",
     );
     const data = await res.json();
     const states = (data.states || []).filter((s) => s[5] && s[6]);
-
     if (projectionType !== "2d" && window.myGlobe) {
       const arcs = states.slice(0, 400).map((s) => {
         const lon = s[5],
@@ -1752,13 +1750,11 @@ async function renderAircraft() {
         .arcAltitudeAutoScale(0.1);
       return;
     }
-
     _aircraftGroup = svg
       .select("g")
       .append("g")
       .attr("id", "aircraft-layer")
       .attr("pointer-events", "all");
-
     states.slice(0, 400).forEach((s) => {
       const lon = s[5],
         lat = s[6],
@@ -1813,15 +1809,12 @@ async function renderAircraft() {
     if (window.showToast) window.showToast("Flight data unavailable.", "info");
   }
 }
-
 let _gdeltActive = false;
 let _gdeltGroup = null;
-
 window.toggleGDELTLayer = async function () {
   _gdeltActive = !_gdeltActive;
   const btn = document.getElementById("gdelt-toggle-btn");
   const svg = d3.select("#world-map");
-
   if (!_gdeltActive) {
     if (_gdeltGroup) _gdeltGroup.remove();
     _gdeltGroup = null;
@@ -1834,12 +1827,10 @@ window.toggleGDELTLayer = async function () {
     if (window.updateLayerLegend) window.updateLayerLegend();
     return;
   }
-
   if (btn) {
     btn.classList.add("active-red");
     btn.title = "Global Conflict Hexbins: ON";
   }
-
   if (projectionType === "2d") {
     if (_gdeltGroup) _gdeltGroup.remove();
     _gdeltGroup = svg
@@ -1848,7 +1839,6 @@ window.toggleGDELTLayer = async function () {
       .attr("id", "gdelt-layer")
       .attr("pointer-events", "none");
   }
-
   try {
     const res = await fetch(
       "https://api.gdeltproject.org/api/v2/geo/geo?query=conflict&format=geojson&timespan=24H",
@@ -1890,7 +1880,6 @@ window.toggleGDELTLayer = async function () {
     ];
     processGDELTData(fallbackData);
   }
-
   function processGDELTData(features) {
     if (projectionType !== "2d" && window.myGlobe) {
       window._hexLayers.gdelt = features.map((f) => {
@@ -1945,7 +1934,6 @@ window.toggleGDELTLayer = async function () {
   }
   if (window.updateLayerLegend) window.updateLayerLegend();
 };
-
 window.toggleAircraftLayer = function () {
   _aircraftActive = !_aircraftActive;
   const btn = document.getElementById("aircraft-toggle-btn");
@@ -1976,24 +1964,19 @@ window.toggleAircraftLayer = function () {
   }, 30000);
   if (window.updateLayerLegend) window.updateLayerLegend();
 };
-
 window._issData = [{ lat: 0, lng: 0, alt: 0.1, name: "ISS" }];
 window._issInitialized = false;
-
 window.updateISS = async function () {
   if (typeof projectionType !== "undefined" && projectionType !== "3d") return;
   if (!window.myGlobe) return;
-
   try {
     const res = await fetch("https://api.wheretheiss.at/v1/satellites/25544");
     if (!res.ok) return;
     const data = await res.json();
-
     window._issData[0].lat = data.latitude;
     window._issData[0].lng = data.longitude;
     window._issData[0].alt = data.altitude / 6371 + 0.1;
     window._issData[0].velocity = data.velocity;
-
     if (!window._issInitialized && window.THREE) {
       window.myGlobe
         .objectLat("lat")
@@ -2009,7 +1992,6 @@ window.updateISS = async function () {
             }),
           );
           group.add(core);
-
           const panel = new window.THREE.Mesh(
             new window.THREE.BoxGeometry(3.5, 0.1, 0.8),
             new window.THREE.MeshPhongMaterial({
@@ -2029,10 +2011,8 @@ window.updateISS = async function () {
         .ringMaxRadius((d) => d.r || 4)
         .ringPropagationSpeed((d) => d.speed || 1)
         .ringRepeatPeriod((d) => d.period || 1000);
-
       window._issInitialized = true;
     }
-
     if (!window._radarPings) {
       window._radarPings = [
         {
@@ -2069,21 +2049,17 @@ window.updateISS = async function () {
         },
       ];
     }
-
     window.myGlobe.objectsData(window._issData);
-
     window.myGlobe.ringsData([...window._radarPings, ...window._issData]);
   } catch (e) {
     console.warn("ISS orbital tracking fetch failed", e);
     if (window.showToast) window.showToast("ISS data unavailable.", "info");
   }
 };
-
 if (!window._issInterval) {
   setTimeout(() => window.updateISS(), 2000);
   window._issInterval = setInterval(window.updateISS, 3000);
 }
-
 window._cyberDataCenters = [
   { lat: 38.8951, lng: -77.0364 },
   { lat: 55.7558, lng: 37.6173 },
@@ -2094,13 +2070,10 @@ window._cyberDataCenters = [
   { lat: 50.1109, lng: 8.6821 },
   { lat: 1.3521, lng: 103.8198 },
 ];
-
 window.updateCyberArcs = function () {
   if (typeof projectionType !== "undefined" && projectionType !== "3d") return;
   if (!window.myGlobe || !window.myGlobe.arcsData) return;
-
   let currentArcs = window.myGlobe.arcsData() || [];
-
   if (Math.random() > 0.25) {
     const src =
       window._cyberDataCenters[
@@ -2115,7 +2088,6 @@ window.updateCyberArcs = function () {
         window._cyberDataCenters[
         Math.floor(Math.random() * window._cyberDataCenters.length)
         ];
-
     currentArcs.push({
       startLat: src.lat,
       startLng: src.lng,
@@ -2126,22 +2098,18 @@ window.updateCyberArcs = function () {
       timeCreated: Date.now(),
     });
   }
-
   const now = Date.now();
   currentArcs = currentArcs.filter(
     (a) => a.type !== "cyber" || now - a.timeCreated < 3000,
   );
   window.myGlobe.arcsData(currentArcs);
 };
-
 if (!window._cyberInterval) {
   window._cyberInterval = setInterval(window.updateCyberArcs, 600);
 }
-
 if (typeof window._globeTheme === "undefined") {
   window._globeTheme = "night";
 }
-
 window._autoRotateActive = true;
 window.toggleAutoRotate = function () {
   window._autoRotateActive = !window._autoRotateActive;
@@ -2159,10 +2127,8 @@ window.toggleAutoRotate = function () {
     window.myGlobe.controls().autoRotate = window._autoRotateActive;
   }
 };
-
 window.toggleGlobeTheme = function () {
   window._globeTheme = window._globeTheme === "night" ? "day" : "night";
-
   const btn = document.getElementById("theme-toggle-btn");
   if (btn) {
     if (window._globeTheme === "day") {
@@ -2175,12 +2141,20 @@ window.toggleGlobeTheme = function () {
       btn.title = "Globe Theme: NIGHT";
     }
   }
-
   if (window.myGlobe) {
     window.myGlobe.globeImageUrl(
       window._globeTheme === "day"
         ? "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-        : "//unpkg.com/three-globe/example/img/earth-night.jpg",
+        : "//unpkg.com/three-globe/example/img/earth-night.jpg"
     );
   }
 };
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(registration => {
+      console.log('SW registered: ', registration);
+    }).catch(registrationError => {
+      console.log('SW registration failed: ', registrationError);
+    });
+  });
+}

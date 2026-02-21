@@ -1,13 +1,3 @@
-/**
- * enhancements.js — NewsAtlas UX Enhancement Layer
- * Covers: URL deep linking, Watchlist, Choropleth overlay,
- *         Number count-up animations, Headline ticker updater,
- *         Economics skeleton loaders
- */
-
-/* =========================================================
-   1. URL DEEP LINKING
-   ========================================================= */
 window.pushStateCountry = function (country, tab) {
     const params = new URLSearchParams(window.location.search);
     if (country) params.set("country", country);
@@ -17,14 +7,12 @@ window.pushStateCountry = function (country, tab) {
     const newUrl = `${window.location.pathname}?${params.toString()}`;
     history.pushState({ country, tab }, "", newUrl);
 };
-
 window.restoreFromURL = function () {
     const params = new URLSearchParams(window.location.search);
     const country = params.get("country");
     const tab = params.get("tab");
     if (tab && window.switchTab) window.switchTab(tab);
     if (country) {
-        // Wait for map + data to be ready
         const tryRestore = (attempts) => {
             if (attempts <= 0) return;
             if (window.globalSearchData && window.globalSearchData.length > 0) {
@@ -41,8 +29,6 @@ window.restoreFromURL = function () {
         setTimeout(() => tryRestore(8), 1200);
     }
 };
-
-// Hook into switchTab to update URL
 const _origSwitchTab = window.switchTab;
 if (_origSwitchTab) {
     window.switchTab = function (id) {
@@ -52,20 +38,12 @@ if (_origSwitchTab) {
         history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
     };
 }
-
-// Call on load (after a tick to let app.js init first)
 window.addEventListener("load", () => setTimeout(window.restoreFromURL, 500));
-
-/* =========================================================
-   2. WATCHLIST / PINNED COUNTRIES
-   ========================================================= */
 const WATCHLIST_KEY = "newsatlas_watchlist";
-
 window.getWatchlist = function () {
     try { return JSON.parse(localStorage.getItem(WATCHLIST_KEY)) || []; }
     catch { return []; }
 };
-
 window.toggleWatchlist = function (name) {
     if (!name) return;
     let list = window.getWatchlist();
@@ -78,11 +56,9 @@ window.toggleWatchlist = function (name) {
         window.showToast(idx >= 0 ? `Removed ${name} from watchlist` : `${name} added to watchlist ⭐`, "info");
     }
 };
-
 window.isWatchlisted = function (name) {
     return window.getWatchlist().some((c) => c.toLowerCase() === (name || "").toLowerCase());
 };
-
 window.updateWatchlistBtn = function (name) {
     const btn = document.getElementById("watchlist-star-btn");
     if (!btn) return;
@@ -92,8 +68,6 @@ window.updateWatchlistBtn = function (name) {
         : `<i class="fas fa-star text-slate-600 text-xs"></i>`;
     btn.title = active ? "Remove from watchlist" : "Add to watchlist";
 };
-
-// Append ⭐ button to the active-sector-display once DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
     const sectorDisplay = document.getElementById("active-sector-display");
     if (sectorDisplay) {
@@ -106,12 +80,9 @@ document.addEventListener("DOMContentLoaded", () => {
         sectorDisplay.appendChild(btn);
     }
 });
-
-// Inject watchlist section into search overlay results
 const _origToggleSearch = window.toggleSearch;
 window.toggleSearch = function () {
     if (typeof _origToggleSearch === "function") _origToggleSearch();
-    // After opening, prepend pinned items if watchlist is non-empty
     setTimeout(() => {
         const results = document.getElementById("search-results");
         const input = document.getElementById("country-search");
@@ -139,19 +110,12 @@ window.toggleSearch = function () {
         results.prepend(section);
     }, 80);
 };
-
-/* =========================================================
-   3. CHOROPLETH MAP OVERLAY
-   ========================================================= */
 window._choroplethMode = null;
 window._choroplethData = {};
-
 window.setChoropleth = async function (mode) {
     window._choroplethMode = mode;
     const legend = document.getElementById("choropleth-legend");
-
     if (!mode) {
-        // Reset all country fills
         if (window.svg) {
             window.svg.selectAll("path.country").attr("fill", null);
         }
@@ -159,77 +123,83 @@ window.setChoropleth = async function (mode) {
         if (window.showToast) window.showToast("Map color overlay cleared", "info");
         return;
     }
-
     if (window.showToast) window.showToast(`Loading ${mode} data...`, "info");
-
     let values = {};
-
     if (mode === "population") {
-        // Use globalSearchData which already has population from restcountries
         (window.globalSearchData || []).forEach((c) => {
             if (c.population) values[c.name] = c.population;
         });
     } else if (mode === "gdp") {
-        // Use cached from worldbank if available, or use globalSearchData gdp estimates
         (window.globalSearchData || []).forEach((c) => {
             if (c.gdp) values[c.name] = c.gdp;
         });
         if (Object.keys(values).length === 0) {
-            // Fallback: generate from population as proxy
             (window.globalSearchData || []).forEach((c) => {
                 values[c.name] = (c.population || 1000000) * 15000;
             });
         }
     } else if (mode === "conflict") {
-        // Use GDELT cached hex data if available
         if (window._hexLayers && window._hexLayers.gdelt) {
             window._hexLayers.gdelt.forEach((p) => {
                 const key = "conflict_" + Math.round(p.lat) + "_" + Math.round(p.lng);
                 values[key] = (values[key] || 0) + 1;
             });
         }
+    } else if (mode === "risk") {
+        (window.globalSearchData || []).forEach((c) => {
+            if (window.calculateRiskScore) {
+                values[c.name] = window.calculateRiskScore(c.name);
+            }
+        });
     }
-
     window._choroplethData = values;
     applyChoropleth(mode, values);
 };
-
 function applyChoropleth(mode, values) {
     if (!window.svg || !window.worldFeatures || !window.worldFeatures.length) {
         setTimeout(() => applyChoropleth(mode, values), 500);
         return;
     }
-
     const allVals = Object.values(values).filter(Boolean);
     if (!allVals.length) return;
-
     const minV = Math.min(...allVals);
     const maxV = Math.max(...allVals);
-
     const colorScale = (v) => {
-        if (!v) return "rgba(30,41,59,0.6)";
+        if (!v && mode !== "risk") return "rgba(30,41,59,0.6)"; 
+        if (!v && mode === "risk") v = 50; 
+        if (mode === "risk") {
+            const t = Math.min(1, Math.max(0, v / 100));
+            if (t < 0.5) {
+                const t2 = t * 2;
+                const r = Math.round(16 + (245 - 16) * t2);
+                const g = Math.round(185 + (158 - 185) * t2);
+                const b = Math.round(129 + (11 - 129) * t2);
+                return `rgba(${r},${g},${b},0.8)`;
+            } else {
+                const t2 = (t - 0.5) * 2;
+                const r = Math.round(245 + (239 - 245) * t2);
+                const g = Math.round(158 + (68 - 158) * t2);
+                const b = Math.round(11 + (68 - 11) * t2);
+                return `rgba(${r},${g},${b},0.8)`;
+            }
+        }
         const t = Math.min(1, Math.max(0, (v - minV) / (maxV - minV)));
         if (mode === "conflict") {
-            // Red scale
             const r = Math.round(239 * t + 30 * (1 - t));
             const g = Math.round(30 * (1 - t));
             const b = Math.round(30 * (1 - t));
             return `rgba(${r},${g},${b},${0.3 + t * 0.5})`;
         }
-        // Blue-green scale for gdp/population
         const r = Math.round(59 + (16 - 59) * t);
         const g = Math.round(130 + (185 - 130) * t);
         const b = Math.round(246 + (129 - 246) * t);
         return `rgba(${r},${g},${b},${0.25 + t * 0.55})`;
     };
-
     window.svg.selectAll("path.country").attr("fill", (d) => {
         const name = d.properties?.name;
         const v = values[name];
         return colorScale(v);
     });
-
-    // Update / show legend
     let legend = document.getElementById("choropleth-legend");
     if (!legend) {
         legend = document.createElement("div");
@@ -238,34 +208,36 @@ function applyChoropleth(mode, values) {
         legend.style.cssText = "background:rgba(2,6,23,0.8);border:1px solid rgba(59,130,246,0.2);backdrop-filter:blur(8px)";
         document.getElementById("map-container")?.appendChild(legend);
     }
-    const Label = { gdp: "GDP", population: "Population", conflict: "Conflict" }[mode] || mode;
-    const low = mode === "conflict" ? "Low" : "$Low";
-    const high = mode === "conflict" ? "High" : "$High";
-    legend.innerHTML = `
-    <span class="text-[9px] font-mono font-black text-slate-400 uppercase tracking-widest">${Label}</span>
-    <span class="text-[8px] font-mono text-slate-600">${low}</span>
-    <div class="w-16 h-2 rounded" style="background:linear-gradient(to right,rgba(59,130,246,0.3),rgba(16,185,129,0.8))"></div>
-    <span class="text-[8px] font-mono text-slate-600">${high}</span>`;
+    if (mode === "risk") {
+        legend.innerHTML = `
+        <span class="text-[9px] font-mono font-black text-slate-400 uppercase tracking-widest">Geopolitical Risk</span>
+        <span class="text-[8px] font-mono text-slate-600">Stable</span>
+        <div class="w-16 h-2 rounded" style="background:linear-gradient(to right,#10b981,#f59e0b,#ef4444)"></div>
+        <span class="text-[8px] font-mono text-slate-600">Critical</span>`;
+    } else {
+        const Label = { gdp: "GDP", population: "Population", conflict: "Conflict" }[mode] || mode;
+        const low = mode === "conflict" ? "Low" : "$Low";
+        const high = mode === "conflict" ? "High" : "$High";
+        legend.innerHTML = `
+        <span class="text-[9px] font-mono font-black text-slate-400 uppercase tracking-widest">${Label}</span>
+        <span class="text-[8px] font-mono text-slate-600">${low}</span>
+        <div class="w-16 h-2 rounded" style="background:linear-gradient(to right,rgba(59,130,246,0.3),rgba(16,185,129,0.8))"></div>
+        <span class="text-[8px] font-mono text-slate-600">${high}</span>`;
+    }
     legend.classList.remove("hidden");
-
-    if (window.showToast) window.showToast(`Map colored by ${Label}`, "info");
+    if (window.showToast) window.showToast(`Map colored by ${mode === 'risk' ? 'Geopolitical Risk' : mode}`, "info");
 }
-
-/* =========================================================
-   4. NUMBER COUNT-UP ANIMATION
-   ========================================================= */
 window.animateNumber = function (el, targetStr, duration = 800) {
     if (!el) return;
     const isPercent = targetStr.includes("%");
     const hasDollar = targetStr.includes("$");
     const target = parseFloat(targetStr.replace(/[^0-9.-]/g, ""));
     if (isNaN(target)) { el.textContent = targetStr; return; }
-
     el.classList.add("animate-countup");
     const start = performance.now();
     const step = (now) => {
         const p = Math.min(1, (now - start) / duration);
-        const eased = 1 - Math.pow(1 - p, 3); // ease-out cubic
+        const eased = 1 - Math.pow(1 - p, 3); 
         const val = target * eased;
         const formatted = target >= 1000
             ? val.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
@@ -276,13 +248,10 @@ window.animateNumber = function (el, targetStr, duration = 800) {
     };
     requestAnimationFrame(step);
 };
-
-// Patch economics module to use count-up
 const _origFetchEconomics = window.fetchDetailedEconomics;
 if (_origFetchEconomics) {
     window.fetchDetailedEconomics = async function (country) {
         await _origFetchEconomics(country);
-        // After data loads, re-animate the numbers
         setTimeout(() => {
             ["eco-gdp", "eco-growth", "eco-inflation", "eco-unemployment", "eco-interest", "eco-debt", "eco-capita"].forEach((id) => {
                 const el = document.getElementById(id);
@@ -293,15 +262,10 @@ if (_origFetchEconomics) {
         }, 100);
     };
 }
-
-/* =========================================================
-   5. HEADLINE TICKER UPDATER
-   ========================================================= */
 window.updateHeadlineTicker = function (articles) {
     const wrap = document.getElementById("headline-ticker-content");
     if (!wrap || !articles || !articles.length) return;
     const top = articles.slice(0, 8);
-    // Duplicate for seamless loop
     const items = [...top, ...top].map((a) => {
         const sent = a.title?.toLowerCase().match(/\b(war|attack|crisis|conflict|crash)\b/) ? "text-red-400" :
             a.title?.toLowerCase().match(/\b(record|deal|growth|summit)\b/) ? "text-emerald-400" : "text-slate-400";
@@ -311,27 +275,16 @@ window.updateHeadlineTicker = function (articles) {
     </span>`;
     }).join("");
     wrap.innerHTML = items;
-    // Restart animation
     wrap.style.animation = "none";
     requestAnimationFrame(() => { wrap.style.animation = ""; });
 };
-
-/* =========================================================
-   6. HANDLE COUNTRY CLICK BY NAME (for URL restore + watchlist)
-   ========================================================= */
 window.handleCountryClickByName = function (name) {
-    // Update URL
     window.pushStateCountry(name, null);
-    // Update watchlist button
     window.updateWatchlistBtn(name);
-    // Delegate to existing fetchAllData + generateAIBriefing
     if (window.fetchAllData) window.fetchAllData(name);
     if (window.generateAIBriefing) window.generateAIBriefing(name);
 };
-
-// Patch handleCountryClick to also push URL state and update watchlist button
 document.addEventListener("DOMContentLoaded", () => {
-    // We'll check for selectedCountry changes via a MutationObserver on #selected-country-name
     const nameEl = document.getElementById("selected-country-name");
     if (nameEl) {
         const obs = new MutationObserver(() => {

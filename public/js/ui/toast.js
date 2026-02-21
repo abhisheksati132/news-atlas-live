@@ -1,11 +1,7 @@
-/**
- * Toast / snackbar for user feedback (replaces alert for non-critical messages).
- */
 const TOAST_DURATION = 4000;
 let toastQueue = [];
 let toastEl = null;
 let toastTimeout = null;
-
 function ensureToastContainer() {
   if (toastEl) return toastEl;
   toastEl = document.getElementById("toast-container");
@@ -17,7 +13,6 @@ function ensureToastContainer() {
   document.body.appendChild(toastEl);
   return toastEl;
 }
-
 function showNextToast() {
   if (toastQueue.length === 0) return;
   const container = ensureToastContainer();
@@ -42,7 +37,6 @@ function showNextToast() {
     showNextToast();
   }, TOAST_DURATION);
 }
-
 window.showToast = function (message, type = "info") {
   toastQueue.push({ message, type });
   if (!toastTimeout) showNextToast();

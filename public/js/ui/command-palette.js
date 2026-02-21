@@ -1,8 +1,3 @@
-/**
- * Command Palette — Ctrl+K / / to open
- * Full command palette with fuzzy match, keyboard navigation, enter to execute
- */
-
 const COMMANDS = [
     { id: "search", label: "Search Countries", icon: "fa-search", shortcut: "/", run: () => window.toggleSearch() },
     { id: "3d", label: "Switch to 3D Globe", icon: "fa-globe", shortcut: "P", run: () => { if (window.projectionType !== "3d" && window.toggleProjection) window.toggleProjection(); } },
@@ -29,11 +24,9 @@ const COMMANDS = [
     { id: "compare", label: "Enter Country Compare Mode", icon: "fa-columns", shortcut: null, run: () => window.toggleCompareMode && window.toggleCompareMode() },
     { id: "cli", label: "Open Neural CLI Terminal", icon: "fa-terminal", shortcut: "`", run: () => window.toggleCLI && window.toggleCLI() },
 ];
-
 let _paletteOpen = false;
 let _paletteSelected = 0;
 let _paletteFiltered = [...COMMANDS];
-
 function fuzzyMatch(haystack, needle) {
     if (!needle) return true;
     const h = haystack.toLowerCase();
@@ -46,7 +39,6 @@ function fuzzyMatch(haystack, needle) {
     }
     return true;
 }
-
 function openCommandPalette() {
     _paletteOpen = true;
     _paletteFiltered = [...COMMANDS];
@@ -57,13 +49,11 @@ function openCommandPalette() {
     if (input) { input.value = ""; input.focus(); }
     renderPaletteItems();
 }
-
 function closeCommandPalette() {
     _paletteOpen = false;
     const overlay = document.getElementById("cmd-palette-overlay");
     if (overlay) overlay.classList.add("hidden");
 }
-
 function renderPaletteItems() {
     const list = document.getElementById("cmd-palette-list");
     if (!list) return;
@@ -83,7 +73,6 @@ function renderPaletteItems() {
     </div>
   `).join("");
 }
-
 window._paletteHover = (i) => { _paletteSelected = i; renderPaletteItems(); };
 window._executePaletteCmd = (i) => {
     const cmd = _paletteFiltered[i];
@@ -91,10 +80,7 @@ window._executePaletteCmd = (i) => {
     closeCommandPalette();
     setTimeout(() => cmd.run(), 80);
 };
-
-// Keyboard nav
 document.addEventListener("keydown", (e) => {
-    // Open with Ctrl+K
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         _paletteOpen ? closeCommandPalette() : openCommandPalette();
@@ -106,7 +92,6 @@ document.addEventListener("keydown", (e) => {
         e.preventDefault();
         _paletteSelected = Math.min(_paletteSelected + 1, _paletteFiltered.length - 1);
         renderPaletteItems();
-        // scroll selected into view
         const items = document.querySelectorAll(".cmd-palette-item");
         if (items[_paletteSelected]) items[_paletteSelected].scrollIntoView({ block: "nearest" });
         return;
@@ -125,8 +110,6 @@ document.addEventListener("keydown", (e) => {
         return;
     }
 });
-
-// Hook input for filtering
 document.addEventListener("DOMContentLoaded", () => {
     const input = document.getElementById("cmd-palette-input");
     if (input) {
@@ -138,6 +121,5 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
-
 window.openCommandPalette = openCommandPalette;
 window.closeCommandPalette = closeCommandPalette;

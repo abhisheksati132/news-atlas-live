@@ -1,0 +1,33 @@
+{
+    "name": "NewsAtlas | Global Intelligence Terminal",
+    "short_name": "NewsAtlas",
+    "description": "Real-time global intelligence dashboard mapping geopolitics, conflict, and economics.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#020617",
+    "theme_color": "#020617",
+    "orientation": "any",
+    "icons": [
+        {
+            "src": "/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "/icons/icon-512x512-maskable.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "categories": [
+        "news",
+        "productivity",
+        "finance"
+    ]
+}

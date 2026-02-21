@@ -260,7 +260,6 @@ window.fetchDetailedEconomics = fetchDetailedEconomics;
 window.drawGDPTrend = drawGDPTrend;
 window.fetchCurrency = fetchCurrency;
 window.fetchMarketIntel = fetchMarketIntel;
-
 async function fetchECBRates() {
   const container = document.getElementById("ecb-rates-content");
   if (!container) return;

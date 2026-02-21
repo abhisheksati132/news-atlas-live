@@ -79,7 +79,6 @@ export default async function handler(req, res) {
     });
   };
   const isStream = req.query?.stream === "true";
-
   if (!apiKey) {
     if (isStream) {
       res.setHeader("Content-Type", "text/event-stream");
@@ -99,6 +98,11 @@ export default async function handler(req, res) {
       " You MUST return ONLY valid JSON. Do not use Markdown code blocks.";
   }
   try {
+    const messages = [{ role: "system", content: systemInstruction }];
+    if (body.history && Array.isArray(body.history)) {
+      body.history.slice(-6).forEach(msg => messages.push(msg));
+    }
+    messages.push({ role: "user", content: body.prompt });
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -107,27 +111,21 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
-        messages: [
-          { role: "system", content: systemInstruction },
-          { role: "user", content: body.prompt },
-        ],
+        messages: messages,
         temperature: 0.5,
         max_tokens: 800,
         stream: isStream,
       }),
     });
-
     if (isStream) {
       res.setHeader("Content-Type", "text/event-stream");
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("X-Accel-Buffering", "no");
-      // Pipe SSE chunks straight through
       for await (const chunk of response.body) {
         res.write(chunk);
       }
       return res.end();
     }
-
     const data = await response.json();
     if (data.error) return returnSimulation();
     const aiText = data.choices[0].message.content;

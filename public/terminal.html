@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,11 +13,15 @@
   <link
     href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap"
     rel="stylesheet" />
-
   <meta name="description" content="NewsAtlas: Real-time Global Intelligence Terminal." />
   <meta name="theme-color" content="#020617" />
-  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2072/2072130.png" type="image/x-icon" />
-
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="NewsAtlas">
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
   <style>
     :root {
       --blue: #3b82f6;
@@ -30,7 +33,6 @@
       --glass: rgba(5, 15, 40, 0.93);
       --border: rgba(59, 130, 246, 0.11);
     }
-
     *,
     *::before,
     *::after {
@@ -38,7 +40,6 @@
       margin: 0;
       padding: 0;
     }
-
     body {
       font-family: "Syne", "Segoe UI", sans-serif;
       font-size: 16.5px;
@@ -63,7 +64,6 @@
       width: 100vw;
       cursor: crosshair;
     }
-
     body::before {
       content: "";
       position: fixed;
@@ -77,7 +77,6 @@
           rgba(0, 0, 0, 0.09) 4px);
       opacity: 0.55;
     }
-
     body::after {
       content: "";
       position: fixed;
@@ -87,7 +86,6 @@
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
       opacity: 0.32;
     }
-
     .glass-panel {
       background: var(--glass);
       backdrop-filter: blur(32px);
@@ -99,23 +97,19 @@
         0 20px 60px rgba(0, 0, 0, 0.6),
         inset 0 1px 0 rgba(255, 255, 255, 0.04);
     }
-
     /* Accessibility: visible focus for keyboard users */
     :focus-visible {
       outline: 2px solid var(--blue);
       outline-offset: 2px;
     }
-
     button:focus-visible,
     .nav-tab:focus-visible,
     [role="tab"]:focus-visible {
       outline: 2px solid var(--cyan);
       outline-offset: 2px;
     }
-
     /* Respect reduced motion */
     @media (prefers-reduced-motion: reduce) {
-
       *,
       *::before,
       *::after {
@@ -124,13 +118,13 @@
         transition-duration: 0.01ms !important;
       }
     }
-
     header {
       height: 100px;
       padding: 0 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 1.5rem;
       flex-shrink: 0;
       position: fixed;
       top: 0;
@@ -141,12 +135,15 @@
       border-bottom: 1px solid rgba(59, 130, 246, 0.1);
       box-shadow: 0 1px 40px rgba(0, 0, 0, 0.6);
       max-width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;
     }
-
+    header::-webkit-scrollbar {
+      display: none;
+    }
     header>* {
       flex-shrink: 0;
     }
-
     .main-content {
       margin-top: 100px;
       padding: 1.25rem;
@@ -155,7 +152,6 @@
       flex-direction: column;
       width: 100%;
     }
-
     .map-box {
       position: relative;
       width: 100%;
@@ -172,7 +168,6 @@
         0 0 0 1px rgba(59, 130, 246, 0.04),
         0 0 60px rgba(59, 130, 246, 0.04);
     }
-
     .map-interaction-overlay {
       position: absolute;
       inset: 0;
@@ -185,58 +180,47 @@
       cursor: pointer;
       backdrop-filter: blur(1px);
     }
-
     .map-interaction-overlay.active {
       opacity: 0;
       pointer-events: none;
     }
-
     /* CUSTOM MAP TOGGLE COLORS & GLOW */
     #quake-toggle-btn.active {
       color: #f97316 !important;
       filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.8));
     }
-
     #aircraft-toggle-btn.active {
       color: #3b82f6 !important;
       filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8));
     }
-
     #airquality-toggle-btn.active {
       color: #10b981 !important;
       filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.8));
     }
-
     #clouds-toggle-btn.active {
       color: #bae6fd !important;
       filter: drop-shadow(0 0 4px rgba(186, 230, 253, 0.8));
     }
-
     #wind-toggle-btn.active {
       color: #22d3ee !important;
       filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.8));
     }
-
     #gdelt-toggle-btn.active {
       color: #ef4444 !important;
       filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.8));
     }
-
     #chronos-toggle-btn.active {
       color: #a855f7 !important;
       filter: drop-shadow(0 0 4px rgba(168, 85, 247, 0.8));
     }
-
     @keyframes mapscan {
       0% {
         top: -2px;
       }
-
       100% {
         top: 100%;
       }
     }
-
     .map-scan-line {
       position: absolute;
       left: 0;
@@ -250,7 +234,6 @@
       pointer-events: none;
       z-index: 5;
     }
-
     .intel-sidebar {
       width: 100%;
       display: flex;
@@ -259,26 +242,22 @@
       flex-shrink: 0;
       min-height: 100vh;
     }
-
     .country {
       stroke: #020617;
       stroke-width: 0.4;
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
     }
-
     .country:hover {
       fill: #1e3a5f;
       filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
     }
-
     .country.active {
       fill: var(--blue);
       stroke: rgba(255, 255, 255, 0.6);
       stroke-width: 1.5;
       filter: drop-shadow(0 0 25px rgba(59, 130, 246, 0.7));
     }
-
     .dossier-card {
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid rgba(255, 255, 255, 0.05);
@@ -289,7 +268,6 @@
       display: flex;
       flex-direction: column;
     }
-
     .dossier-card:hover {
       background: rgba(59, 130, 246, 0.04);
       border-color: rgba(59, 130, 246, 0.25);
@@ -297,71 +275,59 @@
       box-shadow: 0 0 20px rgba(59, 130, 246, 0.07),
         inset 0 1px 0 rgba(255, 255, 255, 0.06);
     }
-
     /* News card animations */
     @keyframes slideInCard {
       from {
         opacity: 0;
         transform: translateY(14px);
       }
-
       to {
         opacity: 1;
         transform: translateY(0);
       }
     }
-
     .news-card-animate {
       animation: slideInCard 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
     }
-
     /* Featured (first) news card */
     .news-card-featured {
       background: linear-gradient(135deg, rgba(59, 130, 246, 0.06), rgba(6, 182, 212, 0.03)) !important;
       border-color: rgba(59, 130, 246, 0.25) !important;
     }
-
     .news-card-featured:hover {
       border-color: rgba(59, 130, 246, 0.45) !important;
       box-shadow: 0 0 30px rgba(59, 130, 246, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
     }
-
     /* Sentiment tags */
     .sentiment-negative {
       background: rgba(239, 68, 68, 0.12);
       color: #f87171;
       border: 1px solid rgba(239, 68, 68, 0.25);
     }
-
     .sentiment-positive {
       background: rgba(16, 185, 129, 0.12);
       color: #34d399;
       border: 1px solid rgba(16, 185, 129, 0.25);
     }
-
     .sentiment-neutral {
       background: rgba(245, 158, 11, 0.12);
       color: #fbbf24;
       border: 1px solid rgba(245, 158, 11, 0.2);
     }
-
     /* Number count-up animation hint */
     @keyframes countUp {
       from {
         opacity: 0;
         transform: translateY(6px);
       }
-
       to {
         opacity: 1;
         transform: translateY(0);
       }
     }
-
     .animate-countup {
       animation: countUp 0.5s ease both;
     }
-
     /* Second headline ticker track */
     .headline-ticker-wrap {
       overflow: hidden;
@@ -369,13 +335,11 @@
       border-top: 1px solid rgba(255, 255, 255, 0.04);
       background: rgba(2, 6, 23, 0.6);
     }
-
     .headline-ticker-content {
       display: inline-flex;
       gap: 0;
       animation: marquee 40s linear infinite;
     }
-
     .headline-ticker-item {
       display: inline-flex;
       align-items: center;
@@ -385,30 +349,24 @@
       color: rgba(148, 163, 184, 0.75);
       white-space: nowrap;
     }
-
     /* Command palette overlay */
     #cmd-palette-overlay {
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
     }
-
     @keyframes paletteDrop {
       from {
         opacity: 0;
         transform: translateY(-12px) scale(0.98);
       }
-
       to {
         opacity: 1;
         transform: translateY(0) scale(1);
       }
     }
-
     #cmd-palette-box {
       animation: paletteDrop 0.2s cubic-bezier(0.4, 0, 0.2, 1) both;
     }
-
-
     .nav-tab {
       transition: all 0.25s ease;
       background: transparent;
@@ -428,19 +386,16 @@
       color: rgba(100, 116, 139, 0.7);
       appearance: none;
     }
-
     .nav-tab:hover {
       color: #e2e8f0;
       background: rgba(59, 130, 246, 0.06);
     }
-
     .nav-tab.active {
       color: var(--blue);
       border-bottom-color: var(--blue);
       background: rgba(59, 130, 246, 0.05);
       text-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
     }
-
     .intel-tab {
       cursor: pointer;
       font-family: "JetBrains Mono", monospace;
@@ -455,15 +410,12 @@
       white-space: nowrap;
       position: relative;
     }
-
     .intel-tab:hover {
       color: #e2e8f0;
     }
-
     .intel-tab.active {
       color: var(--blue);
     }
-
     .intel-tab.active::after {
       content: "";
       position: absolute;
@@ -474,18 +426,15 @@
       background: var(--blue);
       box-shadow: 0 0 8px var(--blue);
     }
-
     .tab-content {
       display: none;
       height: 100%;
       flex-direction: column;
       overflow: visible;
     }
-
     .tab-content.active {
       display: flex;
     }
-
     .content-scroll-area {
       flex: 1;
       overflow-y: visible;
@@ -494,37 +443,31 @@
       flex-direction: column;
       gap: 1rem;
     }
-
     #articles-container {
       display: grid;
       grid-template-columns: repeat(1, 1fr);
       gap: 1rem;
     }
-
     @media (min-width: 768px) {
       #articles-container {
         grid-template-columns: repeat(2, 1fr);
       }
     }
-
     @media (min-width: 1024px) {
       #articles-container {
         grid-template-columns: repeat(3, 1fr);
       }
     }
-
     .ticker-wrap {
       width: 100%;
       overflow: hidden;
       white-space: nowrap;
     }
-
     .ticker {
       display: inline-block;
       padding-left: 100%;
       animation: ticker-anim 45s linear infinite;
     }
-
     .ticker-item {
       display: inline-block;
       padding: 0 1rem;
@@ -533,17 +476,14 @@
       font-weight: 600;
       letter-spacing: 0.02em;
     }
-
     @keyframes ticker-anim {
       0% {
         transform: translate3d(0, 0, 0);
       }
-
       100% {
         transform: translate3d(-100%, 0, 0);
       }
     }
-
     .skeleton {
       background: linear-gradient(90deg,
           rgba(255, 255, 255, 0.02) 25%,
@@ -552,89 +492,71 @@
       background-size: 200% 100%;
       animation: skel 1.5s infinite linear;
     }
-
     @keyframes skel {
       0% {
         background-position: 200% 0;
       }
-
       100% {
         background-position: -200% 0;
       }
     }
-
     .animate-marquee {
       display: inline-block;
       animation: marquee 50s linear infinite;
     }
-
     @keyframes marquee {
       0% {
         transform: translateX(0);
       }
-
       100% {
         transform: translateX(-50%);
       }
     }
-
     ::-webkit-scrollbar {
       width: 3px;
     }
-
     ::-webkit-scrollbar-thumb {
       background: rgba(59, 130, 246, 0.3);
       border-radius: 10px;
     }
-
     ::-webkit-scrollbar-track {
       background: transparent;
     }
-
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
-
     .no-scrollbar {
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
-
     #search-overlay,
     #about-overlay {
       background: rgba(2, 6, 23, 0.98);
       backdrop-filter: blur(24px);
       z-index: 1000;
     }
-
     .tactical-btn {
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
     @media (max-width: 1023px) {
       .tactical-btn {
         min-width: 44px;
         min-height: 44px;
       }
     }
-
     .tactical-btn:hover {
       transform: scale(1.08);
       filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.55));
     }
-
     .signal-blue {
       border-left: 3px solid var(--blue);
     }
-
     .signal-emerald {
       border-left: 3px solid var(--emerald);
     }
-
     .signal-red {
       border-left: 3px solid var(--red);
     }
-
     .skill-tag {
       background: rgba(59, 130, 246, 0.1);
       border: 1px solid rgba(59, 130, 246, 0.25);
@@ -649,7 +571,6 @@
       align-items: center;
       gap: 5px;
     }
-
     .skill-dot {
       width: 5px;
       height: 5px;
@@ -657,7 +578,6 @@
       background: #60a5fa;
       box-shadow: 0 0 5px #60a5fa;
     }
-
     .meter-bg {
       background: rgba(255, 255, 255, 0.08);
       height: 3px;
@@ -666,7 +586,6 @@
       overflow: hidden;
       margin-top: 5px;
     }
-
     .meter-fill {
       height: 100%;
       background: var(--blue);
@@ -674,12 +593,10 @@
       transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
       box-shadow: 0 0 6px var(--blue);
     }
-
     .scanner-container {
       position: relative;
       overflow: hidden;
     }
-
     .scanner-line {
       position: absolute;
       top: 0;
@@ -693,34 +610,27 @@
       transform: translateY(-150%);
       animation: scan-anim 2.5s infinite linear;
     }
-
     @keyframes scan-anim {
       0% {
         transform: translateY(-150%);
       }
-
       100% {
         transform: translateY(150%);
       }
     }
-
     @keyframes blink {
-
       0%,
       100% {
         opacity: 1;
       }
-
       50% {
         opacity: 0;
       }
     }
-
     .typing-cursor::after {
       content: "|";
       animation: blink 1s infinite;
     }
-
     .map-ctrl-btn {
       width: 36px;
       height: 36px;
@@ -734,33 +644,27 @@
       cursor: pointer;
       color: rgba(148, 163, 184, 0.7);
     }
-
     .map-ctrl-btn:hover {
       background: rgba(59, 130, 246, 0.1);
       border-color: rgba(59, 130, 246, 0.3);
       color: #e2e8f0;
     }
-
     #boot-screen {
       transition: opacity 0.8s ease-out;
     }
-
     @keyframes logFade {
       0% {
         opacity: 0;
         transform: translateX(-8px);
       }
-
       100% {
         opacity: 1;
         transform: translateX(0);
       }
     }
-
     .log-entry {
       animation: logFade 0.3s ease-out forwards;
     }
-
     #map-tooltip {
       pointer-events: none;
       z-index: 100;
@@ -768,26 +672,21 @@
       backdrop-filter: blur(8px);
       font-family: "JetBrains Mono", monospace;
     }
-
     .day-mode {
       --solar-glow: rgba(59, 130, 246, 0.08);
     }
-
     .night-mode {
       --solar-glow: rgba(139, 92, 246, 0.12);
     }
-
     #ai-briefing-text {
       font-family: "JetBrains Mono", monospace;
       font-size: 13px;
       line-height: 1.9;
     }
-
     ::selection {
       background: rgba(59, 130, 246, 0.3);
       color: #fff;
     }
-
     .glass-panel-enhanced {
       background: rgba(5, 15, 40, 0.4);
       backdrop-filter: blur(40px) saturate(180%);
@@ -799,53 +698,42 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.1),
         0 0 60px rgba(59, 130, 246, 0.05);
     }
-
     .loading-pulse {
       animation: loading-pulse 2s ease-in-out infinite;
     }
-
     @keyframes loading-pulse {
-
       0%,
       100% {
         opacity: 0.4;
       }
-
       50% {
         opacity: 1;
       }
     }
-
     * {
       transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     }
-
     .map-ctrl-btn.active {
       background: rgba(59, 130, 246, 0.2) !important;
       border-color: rgba(59, 130, 246, 0.5) !important;
       color: #60a5fa !important;
     }
-
     .map-ctrl-btn.active-red {
       background: rgba(239, 68, 68, 0.2) !important;
       border-color: rgba(239, 68, 68, 0.5) !important;
       color: #f87171 !important;
     }
-
     .map-ctrl-btn.active-amber {
       background: rgba(245, 158, 11, 0.2) !important;
       border-color: rgba(245, 158, 11, 0.5) !important;
       color: #fbbf24 !important;
     }
-
     #map-interaction-overlay:hover .fixed-label {
       opacity: 1;
     }
-
     #map-interaction-overlay:hover #map-hint-click {
       opacity: 0.7;
     }
-
     .dossier-card.enhanced {
       background: rgba(5, 15, 40, 0.5);
       backdrop-filter: blur(20px) saturate(150%);
@@ -855,7 +743,6 @@
         0 4px 16px rgba(0, 0, 0, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
-
     .shortcuts-overlay {
       position: fixed;
       bottom: 2rem;
@@ -871,31 +758,26 @@
       display: none;
       min-width: 300px;
     }
-
     .shortcuts-overlay.active {
       display: block;
       animation: fadeIn 0.3s ease;
     }
-
     @keyframes fadeIn {
       from {
         opacity: 0;
         transform: translateY(10px);
       }
-
       to {
         opacity: 1;
         transform: translateY(0);
       }
     }
-
     .shortcut-item {
       display: flex;
       justify-content: space-between;
       padding: 0.5rem 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
-
     .shortcut-key {
       background: rgba(59, 130, 246, 0.1);
       border: 1px solid rgba(59, 130, 246, 0.3);
@@ -904,35 +786,29 @@
       font-weight: 700;
       color: #60a5fa;
     }
-
     /* Toast */
     @keyframes toastIn {
       from {
         opacity: 0;
         transform: translateY(12px);
       }
-
       to {
         opacity: 1;
         transform: translateY(0);
       }
     }
-
     @keyframes toastOut {
       to {
         opacity: 0;
         transform: translateY(-8px);
       }
     }
-
     .animate-toast-in {
       animation: toastIn 0.3s ease forwards;
     }
-
     .animate-toast-out {
       animation: toastOut 0.3s ease forwards;
     }
-
     /* Focus & a11y */
     .nav-tab:focus-visible,
     .map-ctrl-btn:focus-visible,
@@ -941,36 +817,29 @@
       outline: 2px solid var(--blue);
       outline-offset: 2px;
     }
-
     @media (prefers-reduced-motion: reduce) {
-
       .map-scan-line,
       .pulse-ring,
       .status-dot,
       .animate-pulse {
         animation: none !important;
       }
-
       .ticker-track {
         animation-duration: 60s !important;
       }
     }
-
     /* Tab transition */
     .tab-content {
       transition: opacity 0.2s ease;
     }
-
     .tab-content:not(.active) {
       opacity: 0;
       pointer-events: none;
       position: absolute;
     }
-
     .tab-content.active {
       opacity: 1;
     }
-
     /* Layer legend */
     .layer-legend {
       font-family: "JetBrains Mono", monospace;
@@ -980,7 +849,6 @@
       background: rgba(2, 6, 23, 0.85);
       border: 1px solid rgba(59, 130, 246, 0.2);
     }
-
     /* Mobile: sidebar drawer & touch targets */
     @media (max-width: 1023px) {
       .intel-sidebar {
@@ -994,23 +862,19 @@
         transition: transform 0.3s ease;
         box-shadow: -8px 0 24px rgba(0, 0, 0, 0.4);
       }
-
       .intel-sidebar.open {
         transform: translateX(0);
       }
-
       .map-ctrl-btn {
         min-width: 44px;
         min-height: 44px;
       }
     }
-
     @media (min-width: 1024px) {
       .sidebar-toggle-mobile {
         display: none;
       }
     }
-
     .sidebar-toggle-mobile {
       position: fixed;
       right: 1rem;
@@ -1027,7 +891,6 @@
       justify-content: center;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
-
     /* Feature 1: Per-tab AI Chat Widget */
     .tab-ai-chat {
       background: rgba(59, 130, 246, 0.04);
@@ -1037,14 +900,12 @@
       margin-bottom: 1.25rem;
       flex-shrink: 0;
     }
-
     .tab-ai-chat-header {
       display: flex;
       align-items: center;
       gap: 6px;
       margin-bottom: 8px;
     }
-
     .tab-ai-chat-response {
       font-family: "JetBrains Mono", monospace;
       font-size: 11px;
@@ -1057,7 +918,6 @@
         max-height 0.4s ease,
         padding 0.3s ease;
     }
-
     .tab-ai-chat-response.open {
       max-height: 280px;
       overflow-y: auto;
@@ -1065,13 +925,11 @@
       border-top: 1px solid rgba(255, 255, 255, 0.05);
       margin-top: 8px;
     }
-
     .tab-ai-thinking {
       display: inline-flex;
       align-items: center;
       gap: 5px;
     }
-
     .tab-ai-thinking span {
       display: inline-block;
       width: 5px;
@@ -1080,29 +938,23 @@
       background: #3b82f6;
       animation: ai-pulse 1.2s ease-in-out infinite;
     }
-
     .tab-ai-thinking span:nth-child(2) {
       animation-delay: 0.2s;
     }
-
     .tab-ai-thinking span:nth-child(3) {
       animation-delay: 0.4s;
     }
-
     @keyframes ai-pulse {
-
       0%,
       100% {
         opacity: 0.2;
         transform: scale(0.8);
       }
-
       50% {
         opacity: 1;
         transform: scale(1.2);
       }
     }
-
     .tab-ai-input {
       flex: 1;
       background: transparent;
@@ -1112,11 +964,9 @@
       font-family: "JetBrains Mono", monospace;
       font-size: 11px;
     }
-
     .tab-ai-input::placeholder {
       color: rgba(100, 116, 139, 0.5);
     }
-
     .tab-ai-send-btn {
       background: rgba(59, 130, 246, 0.15);
       border: 1px solid rgba(59, 130, 246, 0.3);
@@ -1131,14 +981,12 @@
       text-transform: uppercase;
       letter-spacing: 0.1em;
     }
-
     .tab-ai-send-btn:hover {
       background: rgba(59, 130, 246, 0.3);
       border-color: rgba(59, 130, 246, 0.6);
     }
   </style>
 </head>
-
 <body class="flex flex-col day-mode">
   <div id="boot-screen" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center"
     style="background: #020617">
@@ -1170,7 +1018,6 @@
           "></div>
     </div>
   </div>
-
   <div id="map-tooltip"
     class="fixed hidden text-white rounded-xl shadow-2xl border-l-4 border-l-emerald-500 overflow-hidden" style="
         background: rgba(2, 6, 23, 0.97);
@@ -1198,7 +1045,6 @@
       </div>
     </div>
   </div>
-
   <div id="about-overlay" class="fixed inset-0 hidden flex items-center justify-center p-6">
     <div
       class="glass-panel max-w-5xl w-full p-0 border-blue-500/20 relative overflow-hidden flex flex-col z-20 h-[85vh]"
@@ -1404,7 +1250,6 @@
             </div>
           </div>
           <div class="flex flex-col gap-5 h-full">
-            <!-- CLI quick-launch (floating terminal is the real one) -->
             <div
               class="dossier-card p-4 font-mono flex-none flex flex-col items-start gap-3 relative rounded-xl overflow-hidden"
               style="background:rgba(0,0,0,0.75);border-color:rgba(59,130,246,0.15);">
@@ -1422,7 +1267,6 @@
                   <i class="fas fa-terminal text-xs"></i> Launch Terminal
                 </button>
               </div>
-
             </div>
             <div class="grid grid-cols-3 gap-3">
               <div class="dossier-card p-4" style="
@@ -1519,7 +1363,6 @@
                     <i class="fas fa-brain text-emerald-400 text-xs"></i>Groq
                     Llama 3 AI Core
                   </div>
-
                   <div class="flex items-center gap-2">
                     <i class="fas fa-wave-square text-pink-400 text-xs"></i>Web Audio API Engine
                   </div>
@@ -1547,7 +1390,6 @@
                     <i class="fas fa-globe text-purple-400 text-xs"></i>Dual
                     2D/3D Projection
                   </div>
-
                   <div class="flex items-center gap-2">
                     <i class="fas fa-chart-area text-pink-400 text-xs"></i>Live Telemetry Ticker
                   </div>
@@ -1606,10 +1448,8 @@
           </p>
         </div>
       </div>
-
     </div>
   </div>
-
   <div id="search-overlay" class="fixed inset-0 hidden flex items-center justify-center z-[100] px-6">
     <div class="glass-panel max-w-3xl w-full border-blue-500/20 flex flex-col max-h-[75vh] overflow-hidden p-0">
       <div class="flex items-center p-6 gap-5 shrink-0 border-b border-white/8">
@@ -1627,7 +1467,6 @@
       <div id="search-results" class="flex-1 overflow-y-auto"></div>
     </div>
   </div>
-
   <header>
     <div class="flex items-center gap-4 cursor-pointer group" onclick="resetToGlobalCenter(true)">
       <div class="relative w-14 h-14">
@@ -1653,7 +1492,6 @@
         </p>
       </div>
     </div>
-
     <div class="hidden lg:flex items-center gap-3 xl:gap-4 px-4 xl:px-6 h-[68px] rounded-xl" style="
           background: rgba(255, 255, 255, 0.02);
           border: 1px solid rgba(255, 255, 255, 0.06);
@@ -1719,7 +1557,6 @@
         </button>
       </div>
     </div>
-
     <div class="flex items-center gap-4">
       <button onclick="goToIndiaHome()"
         class="flex items-center justify-center gap-2 px-4 xl:px-6 h-[68px] rounded-xl tactical-btn group transition-all"
@@ -1733,12 +1570,11 @@
       </button>
     </div>
   </header>
-
   <main class="main-content">
     <div id="map-box-id" class="map-box" onmouseleave="deactivateMapInteraction()">
       <div class="px-4 py-3 border-b border-white/6 flex flex-col flex-shrink-0"
         style="background: rgba(59, 130, 246, 0.03)">
-        <div class="flex items-center relative min-h-[44px]">
+        <div class="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3 relative min-h-[44px]">
           <div class="flex-1 flex items-center gap-3 min-w-0">
             <span id="projection-label" class="text-xs font-black text-slate-300 uppercase tracking-widest shrink-0"
               style="font-family: &quot;JetBrains Mono&quot;, monospace">Orbital Interface: 2D Active</span>
@@ -1751,42 +1587,39 @@
                 style="font-family: &quot;JetBrains Mono&quot;, monospace">--</span>
             </div>
           </div>
-          <div class="absolute left-1/2 -translate-x-1/2 flex gap-2 items-center">
+          <div class="flex gap-2 items-center w-full xl:w-auto overflow-x-auto pb-1 custom-scrollbar shrink-0">
             <button id="quake-toggle-btn" onclick="toggleEarthquakeLayer()" class="map-ctrl-btn text-slate-400"
               title="Earthquake Layer: OFF">
               <i class="fas fa-radiation text-xs"></i>
             </button>
-
             <button id="aircraft-toggle-btn" onclick="toggleAircraftLayer()" class="map-ctrl-btn text-slate-400"
               title="Live Aircraft: OFF">
               <i class="fas fa-plane text-xs"></i>
             </button>
-
             <button id="airquality-toggle-btn" onclick="toggleAirQuality()" class="map-ctrl-btn text-slate-400"
               title="Air Quality (PM2.5): OFF">
               <i class="fas fa-leaf text-xs"></i>
             </button>
-
             <button id="clouds-toggle-btn" onclick="toggleClouds()" class="map-ctrl-btn text-slate-400"
               title="Cloud Radar: OFF">
               <i class="fas fa-cloud text-xs"></i>
             </button>
-
             <button id="wind-toggle-btn" onclick="toggleWind()" class="map-ctrl-btn text-slate-400"
               title="Global Wind: OFF">
               <i class="fas fa-wind text-xs"></i>
             </button>
-
             <button id="gdelt-toggle-btn" onclick="toggleGDELTLayer()" class="map-ctrl-btn text-slate-400"
               title="Global Conflict Hexbins: OFF">
               <i class="fas fa-crosshairs text-xs"></i>
             </button>
-
             <button id="chronos-toggle-btn" onclick="toggleChronos()" class="map-ctrl-btn text-slate-400"
               title="Chronos Engine: OFF">
               <i class="fas fa-history text-xs"></i>
             </button>
-
+            <button id="risk-toggle-btn" onclick="toggleRiskIndex()" class="map-ctrl-btn text-slate-400"
+              title="Geopolitical Risk Matrix: OFF">
+              <i class="fas fa-biohazard text-xs"></i>
+            </button>
             <button onclick="zoomMap(1.6)" class="map-ctrl-btn" title="Zoom In">
               <i class="fas fa-plus text-xs"></i>
             </button>
@@ -1807,7 +1640,6 @@
             </button>
           </div>
           <div class="flex-1 min-w-0 flex items-center justify-end gap-3 pr-1">
-            <!-- Live Map Stats Widget -->
             <div id="map-live-stats" class="flex items-center gap-3">
               <div class="flex items-center gap-1.5" title="Active map overlay layers">
                 <span class="text-[9px] font-black text-slate-600 uppercase tracking-widest font-mono">Layers</span>
@@ -1831,14 +1663,10 @@
         </div>
         <div id="layer-legend" class="hidden mt-2 flex flex-wrap gap-2 layer-legend justify-center px-4 pb-1"></div>
       </div>
-
       <div class="flex-1 relative w-full h-full overflow-hidden">
         <div id="map-container" class="absolute inset-0 w-full h-full" role="img"
           aria-label="Interactive world map. Click a country for intelligence data. Supports 2D and 3D view."></div>
-
         <div class="map-scan-line pointer-events-none"></div>
-
-        <!-- CLICK TO INTERACT OVERLAY -->
         <div id="map-interaction-overlay"
           class="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-transparent z-10 transition-colors duration-300 hover:bg-slate-900/40 cursor-pointer"
           onclick="activateMapInteraction()">
@@ -1851,8 +1679,6 @@
             class="text-[10px] font-mono text-slate-500 tracking-widest opacity-0 pointer-events-none transition-opacity duration-300">
             Click a country for intel</div>
         </div>
-
-        <!-- CHRONOS SLIDER -->
         <div id="chronos-slider-container"
           class="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-3/4 max-w-2xl px-6 py-3 rounded-2xl glass-panel z-10 flex flex-col gap-2 transition-all opacity-90 hover:opacity-100 hidden"
           style="
@@ -1876,7 +1702,6 @@
         </div>
       </div>
     </div>
-
     <button type="button" id="sidebar-toggle-mobile" class="sidebar-toggle-mobile"
       onclick="window.toggleSidebarMobile()" aria-label="Open sidebar"
       title="Open sidebar (Intel, News, Markets, Atmosphere, Economic)">
@@ -1911,7 +1736,6 @@
           Economic
         </button>
       </nav>
-
       <div id="sidebar-content" class="flex-1 overflow-hidden relative">
         <div id="tab-intel" class="tab-content active">
           <div class="content-scroll-area space-y-4">
@@ -1934,7 +1758,6 @@
               </div>
               <div class="tab-ai-chat-response" id="ai-chat-response-intel"></div>
             </div>
-
             <div id="hierarchy-panel" class="hidden">
               <div class="flex items-center gap-2 text-xs font-mono mb-3">
                 <span class="text-blue-400 cursor-pointer" onclick="resetToCountry()">
@@ -1955,7 +1778,6 @@
                   </span>
                 </span>
               </div>
-
               <div id="state-selector" class="dossier-card p-4 hidden">
                 <h4 class="text-xs font-mono font-bold text-blue-400 uppercase tracking-widest mb-3">
                   <i class="fas fa-map"></i> Select State/Region
@@ -1966,7 +1788,6 @@
                   style="font-family: &quot;JetBrains Mono&quot;, monospace" />
                 <div id="state-list" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto"></div>
               </div>
-
               <div id="city-selector" class="dossier-card p-4 hidden mt-3">
                 <h4 class="text-xs font-mono font-bold text-cyan-400 uppercase tracking-widest mb-3">
                   <i class="fas fa-city"></i> Select City
@@ -1978,7 +1799,6 @@
                 <div id="city-list" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto"></div>
               </div>
             </div>
-
             <div id="ai-briefing-box" class="dossier-card mb-4" style="
                   background: rgba(59, 130, 246, 0.05);
                   border-color: rgba(59, 130, 246, 0.2);
@@ -2006,7 +1826,6 @@
                 </button>
               </div>
             </div>
-
             <div class="dossier-card mb-4" style="
                   background: rgba(16, 185, 129, 0.04);
                   border-color: rgba(16, 185, 129, 0.15);
@@ -2026,7 +1845,6 @@
             </div>
           </div>
         </div>
-
         <div id="tab-news" class="tab-content">
           <div style="padding: 1.25rem 1.25rem 0 1.25rem; flex-shrink: 0">
             <div class="tab-ai-chat">
@@ -2060,7 +1878,6 @@
                 style="font-family: &quot;JetBrains Mono&quot;, monospace"><span id="news-count">0</span>
                 FRAGMENTS</span>
             </div>
-
             <div class="flex gap-2 items-center">
               <div class="flex-1 relative">
                 <input type="text" id="news-search" placeholder="🔍 Search articles..."
@@ -2072,7 +1889,6 @@
                 CLEAR
               </button>
             </div>
-
             <div class="flex gap-2 overflow-x-auto no-scrollbar w-full items-center">
               <div class="intel-tab active" onclick="window.setCategory(this, 'top')">
                 Headlines
@@ -2122,7 +1938,6 @@
             </div>
           </div>
         </div>
-
         <div id="tab-markets" class="tab-content">
           <div class="content-scroll-area">
             <div class="tab-ai-chat">
@@ -2144,8 +1959,6 @@
               </div>
               <div class="tab-ai-chat-response" id="ai-chat-response-markets"></div>
             </div>
-
-            <!-- AI Market Analysis Moved Here -->
             <div class="dossier-card mb-4" style="
                   background: rgba(99, 102, 241, 0.04);
                   border-color: rgba(99, 102, 241, 0.15);
@@ -2164,14 +1977,12 @@
                   ">
                 <span class="animate-pulse text-slate-500">Initializing financial uplink...</span>
               </div>
-
               <div class="hidden">
                 <span id="price-gold"></span>
                 <span id="price-silver"></span>
                 <span id="market-brief-text"></span>
               </div>
             </div>
-
             <div class="dossier-card mb-4" style="
                   background: rgba(0, 0, 0, 0.5);
                   border-color: rgba(255, 255, 255, 0.05);
@@ -2185,7 +1996,6 @@
                 <div class="ticker" id="stock-ticker-content"></div>
               </div>
               <span id="ticker-last-updated" class="text-[9px] text-slate-600 font-mono mt-1 block"></span>
-              <!-- Headline news ticker (second track) -->
               <div class="headline-ticker-wrap mt-1" id="headline-ticker-row"
                 style="height:22px;display:flex;align-items:center;">
                 <span
@@ -2198,7 +2008,6 @@
                 </div>
               </div>
             </div>
-
             <div class="dossier-card mb-4">
               <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer"
                 onclick="toggleMarketCategory('metals')">
@@ -2210,7 +2019,6 @@
               </div>
               <div id="metals-content" class="grid grid-cols-2 md:grid-cols-3 gap-3"></div>
             </div>
-
             <div class="dossier-card mb-4">
               <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer"
                 onclick="toggleMarketCategory('indices')">
@@ -2222,7 +2030,6 @@
               </div>
               <div id="indices-content" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
             </div>
-
             <div class="dossier-card mb-4">
               <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer"
                 onclick="toggleMarketCategory('crypto')">
@@ -2234,7 +2041,6 @@
               </div>
               <div id="crypto-content" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"></div>
             </div>
-
             <div class="dossier-card mb-4">
               <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer"
                 onclick="toggleMarketCategory('forex')">
@@ -2246,7 +2052,6 @@
               </div>
               <div id="forex-content" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
             </div>
-
             <div class="dossier-card mb-4">
               <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer"
                 onclick="toggleMarketCategory('commodities')">
@@ -2258,7 +2063,6 @@
               </div>
               <div id="commodities-content" class="grid grid-cols-2 md:grid-cols-3 gap-3"></div>
             </div>
-
             <div class="dossier-card mb-4" style="
                   background: rgba(245, 158, 11, 0.04);
                   border-color: rgba(245, 158, 11, 0.15);
@@ -2277,7 +2081,6 @@
                 </div>
               </div>
             </div>
-
             <div class="dossier-card mb-4" style="
                   background: rgba(99, 102, 241, 0.04);
                   border-color: rgba(99, 102, 241, 0.15);
@@ -2297,7 +2100,6 @@
                 </div>
               </div>
             </div>
-
             <div class="dossier-card mb-4" style="
                   background: rgba(6, 182, 212, 0.04);
                   border-color: rgba(6, 182, 212, 0.15);
@@ -2317,7 +2119,6 @@
             </div>
           </div>
         </div>
-
         <div id="tab-atmosphere" class="tab-content">
           <div class="content-scroll-area space-y-4">
             <div class="tab-ai-chat">
@@ -2325,7 +2126,6 @@
                 <i class="fas fa-cloud-sun text-blue-300 text-xs"></i>
                 <span class="text-[9px] font-black text-blue-300 uppercase tracking-widest"
                   style="font-family: &quot;JetBrains Mono&quot;, monospace">Weather AI · Ask Anything</span>
-
                 <div class="flex-1"></div>
                 <span id="atmo-location-label"
                   class="hidden text-[9px] font-bold text-slate-400 uppercase tracking-wider"
@@ -2344,7 +2144,6 @@
               </div>
               <div class="tab-ai-chat-response" id="ai-chat-response-atmosphere"></div>
             </div>
-
             <div class="dossier-card mb-4">
               <div class="flex justify-between items-center mb-3">
                 <span class="text-[10px] text-cyan-400 uppercase font-black tracking-widest"
@@ -2365,7 +2164,6 @@
                 </button>
               </div>
             </div>
-
             <div class="dossier-card" style="
                   background: rgba(59, 130, 246, 0.05);
                   border-color: rgba(59, 130, 246, 0.2);
@@ -2382,7 +2180,6 @@
                 <span class="animate-pulse text-slate-500">Analyzing atmospheric conditions...</span>
               </div>
             </div>
-
             <div id="weather-alerts" class="hidden space-y-2"></div>
             <div class="flex flex-col md:flex-row gap-4">
               <div class="flex-1 dossier-card relative overflow-hidden group" style="
@@ -2454,7 +2251,6 @@
                 </div>
               </div>
             </div>
-
             <div class="dossier-card p-0 overflow-hidden">
               <div class="px-4 py-2.5 border-b border-white/5" style="background: rgba(255, 255, 255, 0.02)">
                 <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest"
@@ -2462,7 +2258,6 @@
               </div>
               <div id="atmo-hourly-container" class="flex overflow-x-auto p-4 gap-5 no-scrollbar"></div>
             </div>
-
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div class="dossier-card flex flex-col items-center justify-center relative p-5">
                 <span class="absolute top-3 left-3 text-[9px] text-slate-500 font-bold uppercase tracking-widest"
@@ -2621,7 +2416,6 @@
                 </div>
               </div>
             </div>
-
             <div class="dossier-card p-0 overflow-hidden">
               <div class="px-5 py-3 border-b border-white/5 flex justify-between items-center"
                 style="background: rgba(255, 255, 255, 0.02)">
@@ -2633,7 +2427,6 @@
             </div>
           </div>
         </div>
-
         <div id="tab-economic" class="tab-content">
           <div class="content-scroll-area space-y-4">
             <div class="tab-ai-chat">
@@ -2656,7 +2449,6 @@
               </div>
               <div class="tab-ai-chat-response" id="ai-chat-response-economic"></div>
             </div>
-
             <div class="flex flex-col md:flex-row gap-4">
               <div class="flex-1 dossier-card relative overflow-hidden" style="
                     background: rgba(16, 185, 129, 0.04);
@@ -2778,7 +2570,6 @@
                   of GDP
                 </div>
               </div>
-
               <div class="dossier-card p-4">
                 <div class="flex justify-between items-start mb-2">
                   <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest"
@@ -2836,7 +2627,6 @@
                 </div>
               </div>
             </div>
-
             <div class="dossier-card p-0">
               <div class="px-4 py-3 border-b border-white/5" style="background: rgba(255, 255, 255, 0.02)">
                 <span class="text-[10px] text-blue-400 font-bold uppercase tracking-widest"
@@ -2913,7 +2703,6 @@
       </div>
     </div>
   </main>
-
   <footer class="h-11 border-t overflow-hidden flex items-center flex-shrink-0" style="
         background: rgba(2, 6, 23, 0.98);
         border-color: rgba(59, 130, 246, 0.1);
@@ -2935,7 +2724,6 @@
         ORCHESTRATION</span>
     </div>
   </footer>
-
   <div id="fact-pop" class="hidden"></div>
   <div id="fact-currency" class="hidden"></div>
   <div id="fact-cap" class="hidden"></div>
@@ -2945,7 +2733,6 @@
   <div id="fact-demonym" class="hidden"></div>
   <div id="fact-gini" class="hidden"></div>
   <div id="fact-drive" class="hidden"></div>
-
   <div id="shortcuts-overlay" class="shortcuts-overlay">
     <div class="flex justify-between items-center mb-4 pb-3 border-b border-white/10">
       <h3 class="text-blue-400 font-black uppercase tracking-wider text-sm">
@@ -3006,7 +2793,6 @@
       </div>
     </div>
   </div>
-
   <script src="js/core/fetch-helper.js"></script>
   <script src="js/core/audio.js"></script>
   <script src="js/modules/map-engine.js"></script>
@@ -3021,11 +2807,8 @@
   <script src="js/ui/command-palette.js"></script>
   <script src="js/ui/cli-terminal.js"></script>
   <script src="js/enhancements.js"></script>
-
   <script type="module" src="js/core/firebase.js"></script>
   <script type="module" src="js/app.js"></script>
-
-  <!-- ═══════════════════════ FLOATING CLI TERMINAL ═══════════════════════ -->
   <style>
     /* === Floating draggable container === */
     #floating-cli {
@@ -3048,13 +2831,10 @@
       -webkit-backdrop-filter: blur(22px);
       transition: width 0.26s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
     /* Expanded state: full width */
     #floating-cli.cli-expanded {
       width: 420px;
     }
-
-
     /* === Title bar / handle === */
     #floating-cli-handle {
       display: flex;
@@ -3067,11 +2847,9 @@
       cursor: grab;
       user-select: none;
     }
-
     #floating-cli-handle:active {
       cursor: grabbing;
     }
-
     /* === Collapsible body === */
     #floating-cli-body {
       display: none;
@@ -3080,11 +2858,9 @@
       max-height: 0;
       transition: max-height 0.26s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
     #floating-cli-body.cli-body-open {
       max-height: 320px;
     }
-
     /* === Output pane === */
     #floating-cli-output {
       height: 230px;
@@ -3095,13 +2871,11 @@
       scrollbar-width: thin;
       scrollbar-color: rgba(59, 130, 246, 0.3) transparent;
     }
-
     /* === Text colour classes === */
     .cli-line {
       margin-bottom: 2px;
       word-break: break-word;
     }
-
     .cli-head {
       color: #38bdf8;
       font-weight: 900;
@@ -3109,61 +2883,49 @@
       text-transform: uppercase;
       font-size: 9px;
     }
-
     .cli-key {
       color: #60a5fa;
       font-weight: 700;
     }
-
     .cli-val,
     .cli-ok {
       color: #34d399;
     }
-
     .cli-err {
       color: #f87171;
     }
-
     .cli-dim {
       color: rgba(148, 163, 184, .5);
       font-size: 10px;
     }
-
     .cli-cmd {
       color: #e2e8f0;
     }
-
     .cli-prompt {
       color: #38bdf8;
     }
-
     .cli-ai {
       color: #60a5fa;
       font-weight: 900;
       font-size: 9px;
       letter-spacing: .1em;
     }
-
     .cli-reply {
       color: #cbd5e1;
     }
-
     /* === Thinking dots === */
     @keyframes cliDot {
-
       0%,
       80%,
       100% {
         opacity: .2;
         transform: scale(.8);
       }
-
       40% {
         opacity: 1;
         transform: scale(1);
       }
     }
-
     .cli-dot {
       display: inline-block;
       width: 4px;
@@ -3173,18 +2935,19 @@
       margin: 0 1px;
       animation: cliDot 1.2s infinite;
     }
-
     .cli-dot:nth-child(2) {
       animation-delay: .2s;
     }
-
     .cli-dot:nth-child(3) {
       animation-delay: .4s;
     }
+    @media (max-width: 480px) {
+      #floating-cli.cli-expanded {
+        width: calc(100vw - 48px);
+      }
+    }
   </style>
-
   <div id="floating-cli">
-    <!-- Title bar (drag handle + toggle) -->
     <div id="floating-cli-handle" onclick="window.toggleCLI()">
       <div class="flex items-center gap-2">
         <i class="fas fa-terminal text-blue-400" style="font-size:10px"></i>
@@ -3195,9 +2958,6 @@
         </div>
       </div>
     </div>
-
-
-    <!-- Collapsible body (output + input) -->
     <div id="floating-cli-body">
       <div id="floating-cli-output"></div>
       <div class="flex items-center gap-2 px-3 py-2"
@@ -3214,14 +2974,10 @@
       </div>
     </div>
   </div>
-
-
-  <!-- Command Palette Overlay -->
   <div id="cmd-palette-overlay" class="fixed inset-0 z-[200] hidden flex items-start justify-center pt-24 px-4"
     onclick="if(event.target===this)window.closeCommandPalette()" style="background:rgba(2,6,23,0.75);">
     <div id="cmd-palette-box" class="glass-panel w-full max-w-xl flex flex-col overflow-hidden p-0"
       style="border-color:rgba(59,130,246,0.25);max-height:60vh;">
-      <!-- Search input -->
       <div class="flex items-center gap-3 px-4 py-3 border-b border-white/8">
         <i class="fas fa-terminal text-blue-400 text-sm"></i>
         <input id="cmd-palette-input" type="text" placeholder="Type a command..." autocomplete="off"
@@ -3230,9 +2986,7 @@
         <kbd
           class="text-[9px] font-mono text-slate-600 px-1.5 py-0.5 rounded bg-white/6 border border-white/10">ESC</kbd>
       </div>
-      <!-- Command list -->
       <div id="cmd-palette-list" class="overflow-y-auto" style="max-height:48vh;"></div>
-      <!-- Footer -->
       <div class="flex items-center gap-4 px-4 py-2 border-t border-white/5">
         <span class="text-[9px] text-slate-700 font-mono"><kbd class="text-slate-600">↑↓</kbd> Navigate</span>
         <span class="text-[9px] text-slate-700 font-mono"><kbd class="text-slate-600">↵</kbd> Execute</span>
@@ -3240,7 +2994,6 @@
       </div>
     </div>
   </div>
-
   <script>
     window.sendTabAI = async function (tabId) {
       const input = document.getElementById(`ai-chat-input-${tabId}`);
@@ -3249,7 +3002,6 @@
       const query = input.value.trim();
       if (!query) return;
       input.disabled = true;
-
       // Build context-aware system prompt
       const country = window.selectedCountry?.properties?.name || "Global";
       const contextMap = {
@@ -3262,10 +3014,8 @@
       const systemContext =
         contextMap[tabId] ||
         `Answer the question about ${country} in under 120 words.`;
-
       responseEl.classList.add("open");
       responseEl.innerHTML = `<div class="tab-ai-thinking"><span></span><span></span><span></span> <span style="color:#94a3b8;font-size:10px;margin-left:4px">Analyzing...</span></div>`;
-
       try {
         const res = await fetch("/api/ai", {
           method: "POST",
@@ -3292,17 +3042,14 @@
       }
     };
   </script>
-
   <script>
     window.toggleShortcuts = () => {
       const overlay = document.getElementById("shortcuts-overlay");
       overlay.classList.toggle("active");
     };
-
     window.addEventListener("keydown", (e) => {
       if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
         return;
-
       switch (e.key) {
         case "/":
           e.preventDefault();
@@ -3364,7 +3111,6 @@
           break;
       }
     });
-
     setTimeout(() => {
       if (!localStorage.getItem("shortcuts-seen")) {
         const hint = document.createElement("div");
@@ -3390,7 +3136,6 @@
           localStorage.setItem("shortcuts-seen", "true");
         };
         document.body.appendChild(hint);
-
         setTimeout(() => {
           hint.style.transition = "opacity 0.5s ease";
           hint.style.opacity = "0";
@@ -3400,5 +3145,4 @@
     }, 3000);
   </script>
 </body>
-
 </html>

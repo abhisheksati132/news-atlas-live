@@ -43,7 +43,6 @@ export default async function handler(req, res) {
         .status(200)
         .json({ type: "ticker", data: results.filter(Boolean) });
     }
-
     if (type === "crypto") {
       const cur = (currency || "usd").toLowerCase();
       const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${cur}&order=market_cap_desc&per_page=20&page=1&sparkline=false&price_change_percentage=24h`;
@@ -145,7 +144,6 @@ export default async function handler(req, res) {
           unit: "per tonne",
         },
       ];
-
       let rate = 1;
       const cur = (currency || "USD").toUpperCase();
       if (cur !== "USD") {
@@ -155,7 +153,6 @@ export default async function handler(req, res) {
           rate = erData.rates[cur] || 1;
         } catch (_) { }
       }
-
       const results = await Promise.all(
         metalsList.map(async (m) => {
           try {
@@ -181,7 +178,6 @@ export default async function handler(req, res) {
           }
         }),
       );
-
       const data = {};
       results.forEach((r) => {
         if (r && r.priceUSD) {

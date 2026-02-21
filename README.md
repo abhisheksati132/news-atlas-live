@@ -6,20 +6,6 @@
 
 ---
 
-## ▶ Running locally (important)
-
-**Do not open the app with Live Server (e.g. port 5500).** The APIs (`/api/news`, `/api/config`, `/api/markets`, etc.) are served by the Node backend. If you open only the static files, you will get **404** and **405** errors.
-
-1. In the project root, run:
-   ```bash
-   npm install
-   npm run dev
-   ```
-2. Open in your browser: **http://localhost:3000**
-3. Use **terminal.html** (main app) or **index.html** (landing) from that origin.
-
-If you see a yellow banner saying "API not available", the backend is not running — start it with `npm run dev` and use `http://localhost:3000`.
-
 ---
 
 ## 🚀 Project Overview
@@ -73,19 +59,22 @@ NewsAtlas is a cutting-edge Single Page Application (SPA) that transforms global
   - _Political Stability & Economic Outlook_
   - _Cyber Threat Levels & Border Integrity_
   - _Military Readiness & Global Relations_
-- **Multi-Tab AI Chat Widgets:** Each of the 5 main system tabs (Intel, News, Markets, Atmosphere, Economics) features a dedicated generative AI chat widget capable of contextually analyzing the active data streams.
+- **Conversational Memory & Streamed AI:** Multi-turn AI chat interfaces with contextual awareness (feeding selected country and active layers to the prompt) via Groq streaming protocols.
+- **Geopolitical Risk Index:** Real-time composite scoring algorithm combining GDELT conflict data and economic indicators into a 0-100 threshold mapped onto the 3D globe.
 
 ### 5. 📉 Real-Time Market Telemetry
 
+- **Live WebSocket Integration:** Sub-second BTC/USDT price flashes piped directly from Binance into the top system ticker.
 - **Global Indices Hub:** Live-tracking grids monitoring primary exchanges (S&P 500, NASDAQ, Dow Jones, FTSE 100, NIKKEI 225).
 - **Crypto Command:** Live prices via CoinGecko, featuring an expandable dense-grid view of trending tokens and top-10 crypto assets by market capitalization.
 - **Expanded Forex Uplink:** Continuous polling of over 16+ currency exchange rates dynamically baselined against USD.
 - **Precious Metals & Commodities:** Live Spot Gold (XAU), Silver (XAG), Platinum (XPT), Palladium (XPD), Aluminum (ALI), Zinc (ZNC), alongside Copper, Crude Oil, and Natural Gas tracking.
 
-### 6. 📰 Global Signal Intelligence (News)
+### 6. 📰 Global Signal Intelligence & Time Scrubber
 
-- **Real-time Server-Side Search:** Instantaneously fetches and cross-references active news events across a backend scraper. Dropdown time limitations have been entirely stripped out for unfiltered global searching without third-party API keys limitations.
+- **Real-time Server-Side Search:** Instantaneously fetches and cross-references active news events across a backend scraper.
 - **GDELT Integration:** Monitors the Global Database of Events, Language, and Tone tracking granular conflict and political data point mutations.
+- **Chronos Time Engine:** A temporal scrubber allowing analysts to rewind the system cache up to -72H, simulating past global intelligence states and filtering map events dynamically.
 
 ### 7. 📊 Economic Intelligence Dashboard
 

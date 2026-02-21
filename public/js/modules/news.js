@@ -4,8 +4,6 @@ let currentNewsFilters = { search: "", time: "All Time", sort: "Most Recent" };
 let newsSearchQuery = "";
 let newsSearchTimer = null;
 let isLiveSearching = false;
-
-/** Returns a sentiment object {cls, label} from article title+description */
 function getNewsSentiment(title, desc) {
   const text = ((title || "") + " " + (desc || "")).toLowerCase();
   const neg = /\b(war|attack|kill|crisis|conflict|crash|terror|dead|threat|sanction|protest|clash|bomb|missile|coup|unrest|disaster|explosion|violence|strike|riot|collapse|invasion|arrest|death|victim|destruction)\b/;
@@ -14,8 +12,6 @@ function getNewsSentiment(title, desc) {
   if (pos.test(text)) return { cls: "sentiment-positive", label: "POSITIVE" };
   return { cls: "sentiment-neutral", label: "NEUTRAL" };
 }
-
-/** Returns "2h ago", "3d ago" etc. from a pubDate string */
 function relativeTime(pubDate) {
   if (!pubDate) return "";
   const diff = Date.now() - new Date(pubDate).getTime();
@@ -28,8 +24,6 @@ function relativeTime(pubDate) {
   const days = Math.floor(hrs / 24);
   return `${days}d ago`;
 }
-
-/** Returns favicon URL for a source_url or null */
 function getFavicon(sourceUrl) {
   if (!sourceUrl) return null;
   try {
@@ -39,8 +33,6 @@ function getFavicon(sourceUrl) {
     return null;
   }
 }
-
-/** Show skeleton loading cards */
 function showNewsSkeletons(container) {
   if (!container) return;
   const skels = Array.from({ length: 3 }, () => `
@@ -54,7 +46,6 @@ function showNewsSkeletons(container) {
     </div>`).join("");
   container.innerHTML = skels;
 }
-
 async function fetchNews(overrideQ) {
   const loading = document.getElementById("news-loading");
   const container = document.getElementById("articles-container");
@@ -81,7 +72,6 @@ async function fetchNews(overrideQ) {
       if (el) el.innerText = data.totalResults;
     }
     allNews = data.results && data.results.length > 0 ? data.results : [];
-    // Update headline ticker whenever news loads
     if (window.updateHeadlineTicker) window.updateHeadlineTicker(allNews);
     displayFilteredNews();
   } catch (e) {
@@ -100,7 +90,6 @@ async function fetchNews(overrideQ) {
     if (loading) loading.classList.add("hidden");
   }
 }
-
 window.filterNews = (searchTerm) => {
   currentNewsFilters.search = searchTerm.toLowerCase();
   newsSearchQuery = searchTerm;
@@ -112,7 +101,6 @@ window.filterNews = (searchTerm) => {
   }
   newsSearchTimer = setTimeout(() => liveSearchFallback(searchTerm), 500);
 };
-
 async function liveSearchFallback(query) {
   if (isLiveSearching) return;
   isLiveSearching = true;
@@ -131,7 +119,6 @@ async function liveSearchFallback(query) {
   await fetchNews(query);
   isLiveSearching = false;
 }
-
 window.clearNewsSearch = () => {
   const input = document.getElementById("news-search");
   if (input) input.value = "";
@@ -139,7 +126,6 @@ window.clearNewsSearch = () => {
   newsSearchQuery = "";
   fetchNews("");
 };
-
 window.setCategory = (el, cat) => {
   window.playTacticalSound("click");
   document.querySelectorAll(".intel-tab").forEach((t) => t.classList.remove("active"));
@@ -147,7 +133,6 @@ window.setCategory = (el, cat) => {
   window.currentCategory = cat;
   fetchNews();
 };
-
 function displayFilteredNews() {
   let filtered = [...allNews];
   let countToDisplay = Math.min(displayedNewsCount, filtered.length);
@@ -157,7 +142,6 @@ function displayFilteredNews() {
   const loadMoreEl = document.getElementById("news-load-more");
   if (loadMoreEl) loadMoreEl.classList.toggle("hidden", filtered.length <= countToDisplay);
 }
-
 function displayNewsArticles(articles) {
   const container = document.getElementById("articles-container");
   if (!container) return;
@@ -171,26 +155,21 @@ function displayNewsArticles(articles) {
       </div>`;
     return;
   }
-
   articles.forEach((art, i) => {
     const card = document.createElement("div");
     const isFeatured = i === 0;
     const sentiment = getNewsSentiment(art.title, art.description);
     const timeAgo = relativeTime(art.pubDate);
     const favicon = getFavicon(art.source_url);
-
     const faviconHtml = favicon
       ? `<img src="${favicon}" alt="" class="w-4 h-4 rounded object-cover shrink-0" onerror="this.style.display='none'">`
       : `<i class="fas fa-newspaper text-[10px] text-slate-500"></i>`;
-
     const imgHtml = art.image_url && isFeatured
       ? `<div class="h-40 w-full mb-4 rounded-lg bg-cover bg-center border border-white/8 overflow-hidden" style="background-image:url('${art.image_url}')"></div>`
       : "";
-
     card.className = `dossier-card news-card-animate mb-4 ${isFeatured ? "news-card-featured" : ""}`;
     card.style.animationDelay = `${i * 45}ms`;
     card.onmouseenter = () => window.playTacticalSound("hover");
-
     card.innerHTML = `
       <div class="flex items-center gap-2 mb-3">
         ${faviconHtml}
@@ -211,7 +190,6 @@ function displayNewsArticles(articles) {
     container.appendChild(card);
   });
 }
-
 window.loadMoreNews = () => {
   displayedNewsCount += 21;
   displayFilteredNews();
@@ -222,11 +200,8 @@ window.checkNewsScroll = () => {
   if (container.scrollTop + container.clientHeight >= container.scrollHeight - 100)
     window.loadMoreNews();
 };
-
 window.fetchNews = fetchNews;
 window.displayFilteredNews = displayFilteredNews;
-
-
 async function fetchGDELTEvents(country) {
   const container = document.getElementById("gdelt-events-content");
   if (!container) return;
@@ -236,13 +211,24 @@ async function fetchGDELTEvents(country) {
     const query = country
       ? `${country} sourcelang:english`
       : "conflict OR economy OR geopolitics sourcelang:english";
-    const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(query)}&mode=ArtList&maxrecords=10&sort=DateDesc&format=json&timespan=24H`;
+    const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(query)}&mode=ArtList&maxrecords=50&sort=DateDesc&format=json&timespan=72H`;
     const res = await fetch(url);
     const data = await res.json();
-    const articles = data.articles || [];
+    let articles = data.articles || [];
+    if (typeof window._timeOffsetHours === 'number' && window._timeOffsetHours < 0) {
+      const thresholdDate = new Date();
+      thresholdDate.setHours(thresholdDate.getHours() + window._timeOffsetHours);
+      articles = articles.filter(a => {
+        if (!a.seendate) return false;
+        const dStr = a.seendate;
+        const iso = `${dStr.slice(0, 4)}-${dStr.slice(4, 6)}-${dStr.slice(6, 8)}T${dStr.slice(9, 11)}:${dStr.slice(11, 13)}:${dStr.slice(13, 15)}Z`;
+        const pubDate = new Date(iso);
+        return pubDate <= thresholdDate;
+      });
+    }
     if (!articles.length) {
       container.innerHTML =
-        '<div class="text-slate-500 text-xs py-2">No GDELT events in last 24h for this region.</div>';
+        '<div class="text-slate-500 text-xs py-2">No GDELT events found for this timeframe.</div>';
       return;
     }
     container.innerHTML = "";
@@ -284,7 +270,6 @@ async function fetchGDELTEvents(country) {
   }
 }
 window.fetchGDELTEvents = fetchGDELTEvents;
-
 async function fetchSeismicStatus() {
   const el = document.getElementById("seismic-count");
   if (!el) return;
@@ -301,6 +286,5 @@ async function fetchSeismicStatus() {
   }
 }
 window.fetchSeismicStatus = fetchSeismicStatus;
-
 fetchSeismicStatus();
 setInterval(fetchSeismicStatus, 300000);

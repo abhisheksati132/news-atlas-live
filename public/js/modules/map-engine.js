@@ -416,15 +416,16 @@ function enhanceCountryStyles() {
           drop-shadow(0 0 60px rgba(16, 185, 129, 0.4));
       }
     }
-
   `;
   document.head.appendChild(style);
 }
 class LiveStatsTicker {
   constructor() {
     this.createTicker();
-    this.update();
-    setInterval(() => this.update(), 5000);
+    this.updateStatic();
+    setInterval(() => this.updateStatic(), 5000);
+    this.lastBtcPrice = null;
+    this.initWebSocket();
   }
   createTicker() {
     const ticker = document.createElement("div");
@@ -455,11 +456,11 @@ class LiveStatsTicker {
         </span>
         <span class="ticker-item" style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#f59e0b;">
           <i class="fas fa-circle" style="font-size:6px;margin-right:6px;animation:pulse 2s ease-in-out infinite;"></i>
-          CRYPTO MCAP: <span id="stat-crypto">$2.1T</span>
+          BTC/USDT: <span id="stat-crypto" style="transition: color 0.3s">CONNECTING...</span>
         </span>
         <span class="ticker-item" style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#06b6d4;">
           <i class="fas fa-circle" style="font-size:6px;margin-right:6px;animation:pulse 2s ease-in-out infinite;"></i>
-          GLOBAL TEMP: <span id="stat-temp">+1.2Â°C</span>
+          GLOBAL TEMP: <span id="stat-temp">+1.2°C</span>
         </span>
         <!-- Duplicate for seamless loop -->
         <span class="ticker-item" style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#10b981;">
@@ -472,11 +473,11 @@ class LiveStatsTicker {
         </span>
         <span class="ticker-item" style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#f59e0b;">
           <i class="fas fa-circle" style="font-size:6px;margin-right:6px;animation:pulse 2s ease-in-out infinite;"></i>
-          CRYPTO MCAP: <span id="stat-crypto-2">$2.1T</span>
+          BTC/USDT: <span id="stat-crypto-2" style="transition: color 0.3s">CONNECTING...</span>
         </span>
         <span class="ticker-item" style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#06b6d4;">
           <i class="fas fa-circle" style="font-size:6px;margin-right:6px;animation:pulse 2s ease-in-out infinite;"></i>
-          GLOBAL TEMP: <span id="stat-temp-2">+1.2Â°C</span>
+          GLOBAL TEMP: <span id="stat-temp-2">+1.2°C</span>
         </span>
       </div>
     `;
@@ -486,24 +487,57 @@ class LiveStatsTicker {
         0% { transform: translateX(0); }
         100% { transform: translateX(-50%); }
       }
+      .flash-green { color: #10b981 !important; text-shadow: 0 0 8px rgba(16,185,129,0.8); }
+      .flash-red { color: #ef4444 !important; text-shadow: 0 0 8px rgba(239,68,68,0.8); }
     `;
     document.head.appendChild(style);
     document.getElementById("map-container").appendChild(ticker);
   }
-  update() {
+  initWebSocket() {
+    this.ws = new WebSocket("wss:
+    this.ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        const price = parseFloat(data.p);
+        this.updateCryptoTick(price);
+      } catch (err) {
+        console.error("WS Parse error", err);
+      }
+    };
+    this.ws.onclose = () => {
+      console.log("WS Closed. Reconnecting...");
+      setTimeout(() => this.initWebSocket(), 3000);
+    };
+  }
+  updateCryptoTick(price) {
+    if (!this.lastBtcPrice) this.lastBtcPrice = price;
+    const formatted = "$" + price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const isUp = price >= this.lastBtcPrice;
+    const flashClass = isUp ? "flash-green" : "flash-red";
+    this.lastBtcPrice = price;
+    ["", "-2"].forEach((suffix) => {
+      const el = document.getElementById(`stat-crypto${suffix}`);
+      if (!el) return;
+      el.textContent = formatted;
+      el.classList.remove("flash-green", "flash-red");
+      void el.offsetWidth;
+      el.classList.add(flashClass);
+      setTimeout(() => {
+        el.classList.remove(flashClass);
+      }, 300);
+    });
+  }
+  updateStatic() {
     const gdp = (96 + Math.random() * 0.5).toFixed(1);
     const markets = Math.floor(125 + Math.random() * 5);
-    const crypto = (2.0 + Math.random() * 0.3).toFixed(1);
     const temp = (1.2 + Math.random() * 0.1).toFixed(1);
     ["", "-2"].forEach((suffix) => {
       const gdpEl = document.getElementById(`stat-gdp${suffix}`);
       const marketsEl = document.getElementById(`stat-markets${suffix}`);
-      const cryptoEl = document.getElementById(`stat-crypto${suffix}`);
       const tempEl = document.getElementById(`stat-temp${suffix}`);
       if (gdpEl) gdpEl.textContent = `$${gdp}T`;
       if (marketsEl) marketsEl.textContent = markets;
-      if (cryptoEl) cryptoEl.textContent = `$${crypto}T`;
-      if (tempEl) tempEl.textContent = `+${temp}Â°C`;
+      if (tempEl) tempEl.textContent = `+${temp}°C`;
     });
   }
 }

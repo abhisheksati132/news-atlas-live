@@ -54,7 +54,6 @@ async function displayCountryIndices(countryName) {
   if (!container) return;
   const indicesLabelEl = document.getElementById("indices-country");
   if (indicesLabelEl) indicesLabelEl.innerText = "GLOBAL";
-
   container.innerHTML =
     '<div class="col-span-2 text-slate-500 text-xs py-2">Fetching live indices...</div>';
   try {
@@ -208,7 +207,6 @@ window.displayCrypto = displayCrypto;
 window.displayForex = displayForex;
 window.displayCommodities = displayCommodities;
 window.initializeMarkets = initializeMarkets;
-
 async function displayCoinGeckoTrending() {
   const container = document.getElementById("trending-crypto-content");
   if (!container) return;
@@ -244,7 +242,6 @@ async function displayCoinGeckoTrending() {
   }
 }
 window.displayCoinGeckoTrending = displayCoinGeckoTrending;
-
 async function displayCoinGeckoTop10() {
   const container = document.getElementById("top10-crypto-content");
   if (!container) return;

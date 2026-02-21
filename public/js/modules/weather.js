@@ -102,13 +102,11 @@ async function fetchWeather(lat, lon) {
     const res = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
     if (!res.ok) throw new Error(`Weather fetch failed: ${res.status}`);
     const data = await res.json();
-
     const locationLabel = document.getElementById("atmo-location-label");
     if (locationLabel && window._currentWeatherLocation) {
       locationLabel.innerHTML = `<i class="fas fa-map-marker-alt mr-1 text-blue-400"></i>${window._currentWeatherLocation}`;
       locationLabel.classList.remove("hidden");
     }
-
     if (data.current) {
       const curr = data.current;
       const meta = getWeatherMeta(curr.weather_code, curr.is_day);
@@ -383,7 +381,6 @@ function displayWeatherAlerts(alerts) {
 }
 window.fetchWeather = fetchWeather;
 window.generateWeatherAnalysis = generateWeatherAnalysis;
-
 window.resetWeatherData = () => {
   const ids = [
     "atmo-temp",
@@ -406,29 +403,24 @@ window.resetWeatherData = () => {
   const iconEl = document.getElementById("atmo-main-icon");
   if (iconEl)
     iconEl.className = "fas fa-meteor text-9xl text-slate-500 opacity-20";
-
   if (document.getElementById("atmo-wind-arrow"))
     document.getElementById("atmo-wind-arrow").style.transform = "rotate(0deg)";
   if (document.getElementById("atmo-uv-bar"))
     document.getElementById("atmo-uv-bar").style.width = "0%";
-
   const hourlyContainer = document.getElementById("atmo-hourly-container");
   if (hourlyContainer)
     hourlyContainer.innerHTML =
       '<div class="text-xs text-slate-600 font-mono p-4 text-center">AWAITING SECTOR UPLINK...</div>';
 };
-
 window.searchAtmosphereCity = async () => {
   const inputEl = document.getElementById("atmo-city-search");
   if (!inputEl) return;
   const q = inputEl.value.trim();
   if (!q) return;
-
   const btn = inputEl.nextElementSibling;
   const originalBtnText = btn.innerText;
   btn.innerText = "WAIT..";
   btn.disabled = true;
-
   try {
     const res = await fetch(
       `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=1&format=json`,
@@ -451,7 +443,6 @@ window.searchAtmosphereCity = async () => {
   } catch (e) {
     console.error("Meteorological Geocoding Failed:", e);
   }
-
   btn.innerText = originalBtnText;
   btn.disabled = false;
 };

@@ -6,6 +6,22 @@
 
 ---
 
+## ▶ Running locally (important)
+
+**Do not open the app with Live Server (e.g. port 5500).** The APIs (`/api/news`, `/api/config`, `/api/markets`, etc.) are served by the Node backend. If you open only the static files, you will get **404** and **405** errors.
+
+1. In the project root, run:
+   ```bash
+   npm install
+   npm run dev
+   ```
+2. Open in your browser: **http://localhost:3000**
+3. Use **terminal.html** (main app) or **index.html** (landing) from that origin.
+
+If you see a yellow banner saying "API not available", the backend is not running — start it with `npm run dev` and use `http://localhost:3000`.
+
+---
+
 ## 🚀 Project Overview
 
 NewsAtlas is a cutting-edge Single Page Application (SPA) that transforms global data streams into an immersive "Command Terminal" experience. It aggregates real-time news, financial metrics, and weather telemetry, enhanced with Generative AI to produce detailed situation reports. The platform features a cinematic boot sequence, procedural audio ambience, interactive particle networks, and a seamless 2D/3D orbital interface inspired by Web3 dashboards like Etherscan and Dune Analytics.
@@ -155,6 +171,15 @@ Power user navigation with full keyboard control:
 --amber: #f59e0b /* Warnings */ 
 --bg: #020617 /* Deep slate background */
 ```
+
+---
+
+## 📦 Tailwind CSS
+
+The app uses the **Tailwind CDN** (`cdn.tailwindcss.com`) for quick local development. The browser may show: *"cdn.tailwindcss.com should not be used in production."* For production (e.g. Vercel), either:
+
+- Keep using the CDN (simplest; the warning is a recommendation), or  
+- Install Tailwind as a dependency and build a static CSS file: see [Tailwind installation](https://tailwindcss.com/docs/installation).
 
 ---
 

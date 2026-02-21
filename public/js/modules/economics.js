@@ -1,10 +1,14 @@
+function ecoEl(id) {
+  return document.getElementById(id);
+}
 async function fetchDetailedEconomics(country) {
-  document.getElementById("eco-gdp").innerText = "--";
-  document.getElementById("eco-growth").innerText = "--%";
-  document.getElementById("eco-inflation").innerText = "--%";
-  document.getElementById("eco-unemployment").innerText = "--%";
-  document.getElementById("eco-exports").innerHTML =
-    '<div class="h-4 bg-white/10 rounded w-3/4 animate-pulse"></div>';
+  if (ecoEl("eco-gdp")) ecoEl("eco-gdp").innerText = "--";
+  if (ecoEl("eco-growth")) ecoEl("eco-growth").innerText = "--%";
+  if (ecoEl("eco-inflation")) ecoEl("eco-inflation").innerText = "--%";
+  if (ecoEl("eco-unemployment")) ecoEl("eco-unemployment").innerText = "--%";
+  if (ecoEl("eco-exports"))
+    ecoEl("eco-exports").innerHTML =
+      '<div class="h-4 bg-white/10 rounded w-3/4 animate-pulse"></div>';
   try {
     const prompt = `
             Analyze the economy of ${country}.
@@ -34,43 +38,51 @@ async function fetchDetailedEconomics(country) {
       .replace(/```json/g, "")
       .replace(/```/g, "")
       .trim();
-    const eco = JSON.parse(text);
-    if (eco.gdp_billions)
-      document.getElementById("eco-gdp").innerText = eco.gdp_billions;
-    if (eco.gdp_growth_percent)
-      document.getElementById("eco-growth").innerText =
+    let eco = {};
+    try {
+      eco = typeof text === "string" ? JSON.parse(text) : text;
+    } catch (parseErr) {
+      if (ecoEl("eco-market-ticker"))
+        ecoEl("eco-market-ticker").innerText =
+          "ECONOMIC DATALINK SEVERED. RETRYING...";
+      drawGDPTrend(country);
+      return;
+    }
+    if (eco.gdp_billions && ecoEl("eco-gdp"))
+      ecoEl("eco-gdp").innerText = eco.gdp_billions;
+    if (eco.gdp_growth_percent != null && ecoEl("eco-growth"))
+      ecoEl("eco-growth").innerText =
         (eco.gdp_growth_percent > 0 ? "+" : "") + eco.gdp_growth_percent + "%";
-    if (eco.gdp_per_capita)
-      document.getElementById("eco-capita").innerText =
-        "$" + eco.gdp_per_capita;
-    if (eco.inflation_rate)
-      document.getElementById("eco-inflation").innerText =
-        eco.inflation_rate + "%";
-    if (eco.unemployment_rate)
-      document.getElementById("eco-unemployment").innerText =
-        eco.unemployment_rate + "%";
-    if (eco.interest_rate)
-      document.getElementById("eco-interest").innerText =
-        eco.interest_rate + "%";
-    if (eco.debt_to_gdp)
-      document.getElementById("eco-debt").innerText = eco.debt_to_gdp + "%";
-    if (eco.major_exports && Array.isArray(eco.major_exports)) {
-      document.getElementById("eco-exports").innerHTML = eco.major_exports
+    if (eco.gdp_per_capita != null && ecoEl("eco-capita"))
+      ecoEl("eco-capita").innerText = "$" + eco.gdp_per_capita;
+    if (eco.inflation_rate != null && ecoEl("eco-inflation"))
+      ecoEl("eco-inflation").innerText = eco.inflation_rate + "%";
+    if (eco.unemployment_rate != null && ecoEl("eco-unemployment"))
+      ecoEl("eco-unemployment").innerText = eco.unemployment_rate + "%";
+    if (eco.interest_rate != null && ecoEl("eco-interest"))
+      ecoEl("eco-interest").innerText = eco.interest_rate + "%";
+    if (eco.debt_to_gdp != null && ecoEl("eco-debt"))
+      ecoEl("eco-debt").innerText = eco.debt_to_gdp + "%";
+    if (eco.major_exports && Array.isArray(eco.major_exports) && ecoEl("eco-exports")) {
+      ecoEl("eco-exports").innerHTML = eco.major_exports
         .map(
           (item) =>
             `<div class="flex items-center gap-2"><div class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div><span class="text-sm text-slate-300 font-bold uppercase">${item}</span></div>`,
         )
         .join("");
     }
-    if (eco.market_summary) {
-      document.getElementById("eco-market-ticker").innerText =
-        eco.market_summary.toUpperCase();
-    }
+    if (eco.market_summary && ecoEl("eco-market-ticker"))
+      ecoEl("eco-market-ticker").innerText = eco.market_summary.toUpperCase();
     window.playTacticalSound("success");
     drawGDPTrend(country);
   } catch (e) {
-    document.getElementById("eco-market-ticker").innerText =
-      "ECONOMIC DATALINK SEVERED. RETRYING...";
+    if (ecoEl("eco-gdp")) ecoEl("eco-gdp").innerText = "--";
+    if (ecoEl("eco-growth")) ecoEl("eco-growth").innerText = "--%";
+    if (ecoEl("eco-inflation")) ecoEl("eco-inflation").innerText = "--%";
+    if (ecoEl("eco-unemployment")) ecoEl("eco-unemployment").innerText = "--%";
+    if (ecoEl("eco-market-ticker"))
+      ecoEl("eco-market-ticker").innerText =
+        "ECONOMIC DATALINK SEVERED. RETRYING...";
     drawGDPTrend(country);
   }
 }

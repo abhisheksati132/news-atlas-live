@@ -715,6 +715,9 @@
       #map-interaction-overlay:hover .fixed-label {
         opacity: 1;
       }
+      #map-interaction-overlay:hover #map-hint-click {
+        opacity: 0.7;
+      }
 
       .dossier-card.enhanced {
         background: rgba(5, 15, 40, 0.5);
@@ -773,6 +776,69 @@
         border-radius: 4px;
         font-weight: 700;
         color: #60a5fa;
+      }
+
+      /* Toast */
+      @keyframes toastIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes toastOut {
+        to { opacity: 0; transform: translateY(-8px); }
+      }
+      .animate-toast-in { animation: toastIn 0.3s ease forwards; }
+      .animate-toast-out { animation: toastOut 0.3s ease forwards; }
+
+      /* Focus & a11y */
+      .nav-tab:focus-visible,
+      .map-ctrl-btn:focus-visible,
+      button:focus-visible,
+      [tabindex]:focus-visible {
+        outline: 2px solid var(--blue);
+        outline-offset: 2px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .map-scan-line, .pulse-ring, .status-dot, .animate-pulse { animation: none !important; }
+        .ticker-track { animation-duration: 60s !important; }
+      }
+
+      /* Tab transition */
+      .tab-content {
+        transition: opacity 0.2s ease;
+      }
+      .tab-content:not(.active) { opacity: 0; pointer-events: none; position: absolute; }
+      .tab-content.active { opacity: 1; }
+
+      /* Layer legend */
+      .layer-legend {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        background: rgba(2, 6, 23, 0.85);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+      }
+
+      /* Mobile: sidebar drawer & touch targets */
+      @media (max-width: 1023px) {
+        .intel-sidebar {
+          position: fixed; top: 100px; right: 0; bottom: 0;
+          width: min(100%, 360px); z-index: 40;
+          transform: translateX(100%); transition: transform 0.3s ease;
+          box-shadow: -8px 0 24px rgba(0,0,0,0.4);
+        }
+        .intel-sidebar.open { transform: translateX(0); }
+        .map-ctrl-btn { min-width: 44px; min-height: 44px; }
+      }
+      @media (min-width: 1024px) {
+        .sidebar-toggle-mobile { display: none; }
+      }
+      .sidebar-toggle-mobile {
+        position: fixed; right: 1rem; bottom: 6rem; z-index: 35;
+        width: 48px; height: 48px; border-radius: 12px;
+        background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4);
+        color: #60a5fa; display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       }
 
       /* Feature 1: Per-tab AI Chat Widget */
@@ -1579,6 +1645,9 @@
             class="font-black text-white text-lg uppercase truncate tracking-tight leading-none"
             >GLOBAL SURVEILLANCE</span
           >
+          <span id="back-to-global-wrap" class="hidden mt-1">
+            <button type="button" onclick="window.resetToGlobalCenter()" class="text-[10px] font-mono text-blue-400 hover:text-blue-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded">↩ Back to global</button>
+          </span>
           <span
             id="neural-id"
             class="text-xs font-bold text-slate-500 uppercase tracking-[.2em] mt-1.5 leading-none"
@@ -1829,11 +1898,12 @@
             <button
               onclick="resetToGlobalCenter()"
               class="map-ctrl-btn text-blue-400"
-              title="Reset View"
+              title="Reset View / Back to global"
             >
               <i class="fas fa-expand text-xs"></i>
             </button>
           </div>
+          <div id="layer-legend" class="hidden mt-2 flex flex-wrap gap-2 layer-legend"></div>
         </div>
 
         <div class="flex-1 relative w-full h-full overflow-hidden">
@@ -1844,15 +1914,16 @@
           <!-- CLICK TO INTERACT OVERLAY -->
           <div
             id="map-interaction-overlay"
-            class="absolute inset-0 flex items-center justify-center bg-transparent z-10 transition-colors duration-300 hover:bg-slate-900/40 cursor-pointer"
+            class="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-transparent z-10 transition-colors duration-300 hover:bg-slate-900/40 cursor-pointer"
             onclick="activateMapInteraction()"
           >
             <div
               class="fixed-label px-6 py-3 rounded border border-blue-500/50 bg-slate-900/80 text-blue-100 font-mono text-sm tracking-widest flex items-center gap-3 transition-opacity duration-300 opacity-0 pointer-events-none"
             >
               <i class="fas fa-hand-pointer text-blue-400"></i>
-              <span>CLICK TO INTERACT</span>
+              <span>CLICK ANYWHERE TO INTERACT WITH THE MAP</span>
             </div>
+            <div id="map-hint-click" class="text-[10px] font-mono text-slate-500 tracking-widest opacity-0 pointer-events-none transition-opacity duration-300">Click a country for intel</div>
           </div>
 
           <!-- CHRONOS SLIDER -->
@@ -1899,6 +1970,9 @@
         </div>
       </div>
 
+      <button type="button" id="sidebar-toggle-mobile" class="sidebar-toggle-mobile" onclick="window.toggleSidebarMobile()" aria-label="Open sidebar" title="Open sidebar (Intel, News, Markets, Atmosphere, Economic)">
+        <i class="fas fa-chevron-left"></i>
+      </button>
       <div id="sidebar" class="intel-sidebar glass-panel">
         <nav
           class="flex border-b border-white/6 w-full overflow-hidden"
@@ -1906,6 +1980,7 @@
         >
           <div
             class="nav-tab active"
+            title="Intel: AI briefing, GDELT events"
             onmouseenter="playTacticalSound('hover')"
             onclick="switchTab('intel')"
           >
@@ -1913,6 +1988,7 @@
           </div>
           <div
             class="nav-tab"
+            title="News: live feeds by category"
             onmouseenter="playTacticalSound('hover')"
             onclick="switchTab('news')"
           >
@@ -1920,6 +1996,7 @@
           </div>
           <div
             class="nav-tab"
+            title="Markets: indices, crypto, forex"
             onmouseenter="playTacticalSound('hover')"
             onclick="switchTab('markets')"
           >
@@ -1927,6 +2004,7 @@
           </div>
           <div
             class="nav-tab"
+            title="Atmosphere: weather & air quality"
             onmouseenter="playTacticalSound('hover')"
             onclick="switchTab('atmosphere')"
           >
@@ -1934,6 +2012,7 @@
           </div>
           <div
             class="nav-tab"
+            title="Economic: GDP, macro indicators"
             onmouseenter="playTacticalSound('hover')"
             onclick="switchTab('economic')"
           >
@@ -2075,11 +2154,16 @@
                     >
                   </div>
                 </div>
-                <p id="ai-briefing-text" class="text-slate-300">
-                  <span class="animate-pulse text-slate-500"
-                    >Awaiting target selection...</span
-                  >
-                </p>
+                <div id="ai-briefing-loading" class="hidden flex items-center gap-2 py-2 text-blue-400 text-xs font-mono">
+                  <i class="fas fa-circle-notch fa-spin"></i>
+                  <span>Generating briefing...</span>
+                </div>
+                <p id="ai-briefing-text" class="text-slate-300 whitespace-pre-wrap">Awaiting target selection...</p>
+                <div id="ai-briefing-actions" class="hidden mt-3 flex items-center gap-2">
+                  <button type="button" onclick="window.copyBriefingToClipboard()" class="px-3 py-1.5 rounded-lg border border-blue-500/30 text-blue-400 text-[10px] font-mono font-bold hover:bg-blue-500/10 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
+                    <i class="fas fa-copy mr-1"></i> Copy briefing
+                  </button>
+                </div>
               </div>
 
               <div
@@ -2383,6 +2467,7 @@
                 <div class="ticker-wrap pt-1">
                   <div class="ticker" id="stock-ticker-content"></div>
                 </div>
+                <span id="ticker-last-updated" class="text-[9px] text-slate-600 font-mono mt-1 block"></span>
               </div>
 
               <div class="dossier-card mb-4">
@@ -3649,7 +3734,7 @@
         <span
           class="text-[10px] font-black text-blue-400 uppercase tracking-[.3em] mx-16"
           style="font-family: &quot;JetBrains Mono&quot;, monospace"
-          >SYSTEM: MAP ENGINE CALIBRATED v9.7</span
+          >SYSTEM: MAP ENGINE CALIBRATED v3.7.1</span
         >
         <span
           class="text-[10px] font-black text-slate-500 uppercase tracking-[.3em] mx-16"
@@ -3735,6 +3820,7 @@
     <script src="js/modules/weather.js"></script>
     <script src="js/ui/search.js"></script>
     <script src="js/ui/about.js"></script>
+    <script src="js/ui/toast.js"></script>
 
     <script type="module" src="js/core/firebase.js"></script>
     <script type="module" src="js/app.js"></script>

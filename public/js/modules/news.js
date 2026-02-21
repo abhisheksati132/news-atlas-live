@@ -7,9 +7,11 @@ let isLiveSearching = false;
 
 async function fetchNews(overrideQ) {
   const loading = document.getElementById("news-loading");
+  const container = document.getElementById("articles-container");
   if (loading) loading.classList.remove("hidden");
   displayedNewsCount = 21;
   isLiveSearching = false;
+  const previousNews = allNews.length > 0 ? [...allNews] : null;
   try {
     const q = overrideQ !== undefined ? overrideQ : newsSearchQuery;
     const iso2 = window.iso2Code || "";
@@ -29,9 +31,18 @@ async function fetchNews(overrideQ) {
     allNews = data.results && data.results.length > 0 ? data.results : [];
     displayFilteredNews();
   } catch (e) {
-    const container = document.getElementById("articles-container");
-    if (container)
-      container.innerHTML = `<div class="col-span-full p-10 text-center text-[12px] text-red-500 font-black italic uppercase tracking-widest">Uplink Error. Retrying...</div>`;
+    if (container) {
+      container.innerHTML = `
+        <div class="col-span-full p-8 text-center">
+          <p class="text-[12px] text-red-400 font-black uppercase tracking-widest mb-4">Uplink error</p>
+          <button type="button" onclick="window.fetchNews()" class="px-5 py-2 rounded-lg border border-blue-500/40 text-blue-400 text-xs font-mono font-bold hover:bg-blue-500/10 transition-all">
+            Retry
+          </button>
+        </div>`;
+    }
+    if (previousNews && previousNews.length > 0) {
+      allNews = previousNews;
+    }
   } finally {
     if (loading) loading.classList.add("hidden");
   }
@@ -107,8 +118,12 @@ function displayNewsArticles(articles) {
   if (!container) return;
   container.innerHTML = "";
   if (!articles || articles.length === 0) {
-    container.innerHTML =
-      '<div class="col-span-full p-10 text-center text-[12px] text-slate-500 font-black italic uppercase tracking-widest">Zero news fragments matching filters.</div>';
+    container.innerHTML = `
+      <div class="col-span-full p-10 text-center">
+        <p class="text-[12px] text-slate-500 font-black uppercase tracking-widest mb-3">Zero news fragments matching filters.</p>
+        <p class="text-[11px] text-slate-600 mb-4">Try another category or search term.</p>
+        <button type="button" onclick="window.clearNewsSearch(); window.fetchNews();" class="px-4 py-2 rounded-lg border border-white/20 text-slate-400 text-xs font-mono hover:bg-white/5 transition-all">Clear &amp; refresh</button>
+      </div>`;
     return;
   }
   articles.forEach((art, i) => {

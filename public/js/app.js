@@ -11,6 +11,19 @@ window.selectedCountry = selectedCountry;
 window.currencyCode = currencyCode;
 window.iso2Code = iso2Code;
 window.currentCategory = currentCategory;
+
+function safeEl(id) {
+  return document.getElementById(id);
+}
+function setText(id, text) {
+  const el = safeEl(id);
+  if (el) el.innerText = text;
+}
+function setSrc(id, src) {
+  const el = safeEl(id);
+  if (el) el.src = src;
+}
+
 async function runBootSequence() {
   const logs = [
     "SYSTEM_INIT...",
@@ -19,59 +32,89 @@ async function runBootSequence() {
     "HANDSHAKE_VERIFIED",
     "ACCESS_GRANTED",
   ];
-  const logEl = document.getElementById("boot-log");
-  const bar = document.getElementById("boot-bar");
+  const logEl = safeEl("boot-log");
+  const bar = safeEl("boot-bar");
   for (let i = 0; i < logs.length; i++) {
     await new Promise((r) => setTimeout(r, 400));
     const d = document.createElement("div");
     d.innerText = `> ${logs[i]}`;
-    logEl.appendChild(d);
-    bar.style.width = ((i + 1) / logs.length) * 100 + "%";
+    if (logEl) logEl.appendChild(d);
+    if (bar) bar.style.width = ((i + 1) / logs.length) * 100 + "%";
   }
   await new Promise((r) => setTimeout(r, 500));
-  document.getElementById("boot-screen").style.opacity = "0";
-  setTimeout(() => document.getElementById("boot-screen").remove(), 800);
+  const bootScreen = safeEl("boot-screen");
+  if (bootScreen) {
+    bootScreen.style.opacity = "0";
+    setTimeout(() => bootScreen.remove(), 800);
+  }
 }
+function showBackendRequiredBanner() {
+  if (document.getElementById("backend-required-banner")) return;
+  const banner = document.createElement("div");
+  banner.id = "backend-required-banner";
+  banner.className = "fixed top-20 left-1/2 -translate-x-1/2 z-[10001] px-4 py-3 rounded-xl border border-amber-500/50 bg-slate-900/95 backdrop-blur text-center shadow-xl max-w-[90vw]";
+  banner.innerHTML = `
+    <p class="text-amber-300 font-mono text-xs font-bold mb-2">API not available — backend not running.</p>
+    <p class="text-slate-400 text-[11px] mb-2">Do not use Live Server (e.g. port 5500). Run the Node server instead:</p>
+    <code class="block bg-black/40 px-3 py-1.5 rounded text-emerald-400 text-[11px] font-mono mb-2">npm run dev</code>
+    <p class="text-slate-500 text-[10px]">Then open <a href="http://localhost:3000" class="text-blue-400 underline">http://localhost:3000</a></p>
+    <button type="button" onclick="this.closest('#backend-required-banner').remove()" class="mt-2 text-slate-500 hover:text-white text-[10px] font-mono">Dismiss</button>
+  `;
+  document.body.appendChild(banner);
+}
+
 async function initTerminal() {
   runBootSequence();
-  const config = {
-    apiKey: "AIzaSyBXg1tCOjaLp3mYWzLcS1BBny2LrcWlluE",
-    authDomain: "news-atlas-live.firebaseapp.com",
-    projectId: "news-atlas-live",
-    storageBucket: "news-atlas-live.firebasestorage.app",
-    messagingSenderId: "177473843770",
-    appId: "1:177473843770:web:f9abb15747f79f28a9bb03",
-  };
+  let config = {};
   try {
-    const firebaseApp = window.firebaseCore.initializeApp(config);
-    const auth = window.firebaseCore.getAuth(firebaseApp);
-    const db = window.firebaseCore.getFirestore(firebaseApp);
-    await window.firebaseCore.signInAnonymously(auth);
-    window.firebaseCore.onAuthStateChanged(auth, (u) => {
-      if (u) {
-        const idEl = document.getElementById("neural-id");
-        if (idEl && !u.isAnonymous && u.displayName) {
-          idEl.innerText = `ID: ${u.displayName.toUpperCase()}`;
-          idEl.classList.add("text-emerald-500");
-        } else if (idEl && u.isAnonymous) {
-          idEl.innerText = `ID: ${u.uid.substring(0, 8).toUpperCase()}`;
-        }
-        try {
-          const userRef = window.firebaseCore.doc(db, "visitors", u.uid);
-          window.firebaseCore.setDoc(
-            userRef,
-            {
-              last_login: window.firebaseCore.serverTimestamp(),
-              device: navigator.userAgent,
-            },
-            { merge: true },
-          );
-        } catch (e) {}
-      }
-    });
+    const res = await fetch("/api/config");
+    if (res.status === 404) {
+      showBackendRequiredBanner();
+    }
+    if (res.ok) {
+      const data = await res.json();
+      config = data.firebase || {};
+    }
   } catch (e) {
-    console.warn("Firebase Auth failed:", e);
-    document.getElementById("neural-id").innerText = "LOCAL MODE (OFFLINE)";
+    console.warn("Config fetch failed:", e);
+    showBackendRequiredBanner();
+  }
+  const hasFirebaseConfig =
+    config && config.apiKey && config.projectId;
+  if (hasFirebaseConfig && window.firebaseCore) {
+    try {
+      const firebaseApp = window.firebaseCore.initializeApp(config);
+      const auth = window.firebaseCore.getAuth(firebaseApp);
+      const db = window.firebaseCore.getFirestore(firebaseApp);
+      await window.firebaseCore.signInAnonymously(auth);
+      window.firebaseCore.onAuthStateChanged(auth, (u) => {
+        if (u) {
+          const idEl = safeEl("neural-id");
+          if (idEl && !u.isAnonymous && u.displayName) {
+            idEl.innerText = `ID: ${u.displayName.toUpperCase()}`;
+            idEl.classList.add("text-emerald-500");
+          } else if (idEl && u.isAnonymous) {
+            idEl.innerText = `ID: ${u.uid.substring(0, 8).toUpperCase()}`;
+          }
+          try {
+            const userRef = window.firebaseCore.doc(db, "visitors", u.uid);
+            window.firebaseCore.setDoc(
+              userRef,
+              {
+                last_login: window.firebaseCore.serverTimestamp(),
+                device: navigator.userAgent,
+              },
+              { merge: true },
+            );
+          } catch (e) {}
+        }
+      });
+    } catch (e) {
+      console.warn("Firebase Auth failed:", e);
+      setText("neural-id", "LOCAL MODE (OFFLINE)");
+    }
+  } else {
+    setText("neural-id", "LOCAL MODE (OFFLINE)");
   }
   try {
     const res = await fetch(
@@ -115,7 +158,7 @@ async function startStockTicker() {
       const data = await res.json();
       if (data.data && data.data.length > 0) {
         renderTicker(data.data);
-
+        setTickerLastUpdated();
         const dot = document
           .querySelector(".ticker-wrap")
           ?.previousElementSibling?.querySelector(".bg-red-400");
@@ -131,8 +174,23 @@ async function startStockTicker() {
     }
   }
 
+  let tickerLastUpdate = 0;
+  function setTickerLastUpdated() {
+    const el = document.getElementById("ticker-last-updated");
+    if (!el) return;
+    tickerLastUpdate = Date.now();
+    el.textContent = "Last updated just now";
+  }
   fetchAndRender();
-  setInterval(fetchAndRender, 60000);
+  setInterval(() => {
+    fetchAndRender();
+  }, 60000);
+  setInterval(() => {
+    const el = document.getElementById("ticker-last-updated");
+    if (!el || !tickerLastUpdate) return;
+    const mins = Math.floor((Date.now() - tickerLastUpdate) / 60000);
+    el.textContent = mins < 1 ? "Last updated just now" : "Last updated " + mins + " min ago";
+  }, 60000);
 }
 
 async function fetchAllData(name) {
@@ -148,28 +206,22 @@ async function fetchAllData(name) {
       window._isoAlpha3 = c.cca3 || "";
       window.iso2Code = iso2Code;
       window.currencyCode = currencyCode;
-      document.getElementById("fact-pop").innerText =
-        (c.population / 1000000).toFixed(1) + "M";
-      document.getElementById("fact-cap").innerText = c.capital
-        ? c.capital[0]
-        : "N/A";
-      document.getElementById("fact-region").innerText = c.region || "--";
-      document.getElementById("fact-area").innerText = c.area.toLocaleString();
-      document.getElementById("fact-code").innerText =
-        c.idd.root + (c.idd.suffixes ? c.idd.suffixes[0] : "");
-      document.getElementById("fact-demonym").innerText =
-        c.demonyms?.eng?.m || "--";
-      document.getElementById("fact-gini").innerText = c.gini
-        ? Object.values(c.gini)[0]
-        : "N/A";
-      document.getElementById("fact-drive").innerText = c.car
-        ? c.car.side.toUpperCase()
-        : "--";
-      const flagEl = document.getElementById("sector-flag");
-      const nameEl = document.getElementById("sector-name");
-      const box = document.getElementById("active-sector-display");
+      setText("fact-pop", (c.population / 1000000).toFixed(1) + "M");
+      setText("fact-cap", c.capital ? c.capital[0] : "N/A");
+      setText("fact-region", c.region || "--");
+      setText("fact-area", c.area ? c.area.toLocaleString() : "--");
+      setText(
+        "fact-code",
+        c.idd ? (c.idd.root || "") + (c.idd.suffixes ? c.idd.suffixes[0] : "") : "--",
+      );
+      setText("fact-demonym", c.demonyms?.eng?.m || "--");
+      setText("fact-gini", c.gini ? Object.values(c.gini)[0] : "N/A");
+      setText("fact-drive", c.car ? c.car.side.toUpperCase() : "--");
+      const flagEl = safeEl("sector-flag");
+      const nameEl = safeEl("sector-name");
+      const box = safeEl("active-sector-display");
       if (flagEl && nameEl && box) {
-        flagEl.src = c.flags.svg;
+        flagEl.src = c.flags?.svg || "";
         nameEl.innerText = c.name.common;
         box.classList.remove("hidden");
       }
@@ -189,15 +241,10 @@ async function fetchAllData(name) {
       const capitalName = c.capital ? c.capital[0] : c.name.common;
       window._currentWeatherLocation = `${capitalName}, ${c.name.common}`;
       if (lat || lon) window.fetchWeather(lat, lon);
-      document.getElementById("fact-pop-2").innerText =
-        (c.population / 1000000).toFixed(1) + "M";
-      document.getElementById("fact-gini-2").innerText = c.gini
-        ? Object.values(c.gini)[0]
-        : "N/A";
-      document.getElementById("fact-demonym-2").innerText =
-        c.demonyms?.eng?.m || "--";
-      document.getElementById("fact-area-2").innerText =
-        c.area.toLocaleString() + " km²";
+      setText("fact-pop-2", (c.population / 1000000).toFixed(1) + "M");
+      setText("fact-gini-2", c.gini ? Object.values(c.gini)[0] : "N/A");
+      setText("fact-demonym-2", c.demonyms?.eng?.m || "--");
+      setText("fact-area-2", c.area ? c.area.toLocaleString() + " km²" : "--");
       window.fetchCurrency();
       window.fetchDetailedEconomics(c.name.common);
       window.fetchNews();
@@ -207,10 +254,14 @@ async function fetchAllData(name) {
   }
 }
 async function generateAIBriefing(loc) {
-  const box = document.getElementById("ai-briefing-box");
-  const text = document.getElementById("ai-briefing-text");
+  const box = safeEl("ai-briefing-box");
+  const text = safeEl("ai-briefing-text");
+  const loading = safeEl("ai-briefing-loading");
+  const actions = safeEl("ai-briefing-actions");
   if (box) box.classList.remove("hidden");
-  if (text) text.innerText = "Initializing deep-scan protocols...";
+  if (text) text.innerText = "";
+  if (loading) loading.classList.remove("hidden");
+  if (actions) actions.classList.add("hidden");
 
   if (window.myGlobe && projectionType !== "2d") {
     const feature = window.worldFeatures?.find(
@@ -249,17 +300,30 @@ async function generateAIBriefing(loc) {
       }),
     });
     const result = await res.json();
+    if (loading) loading.classList.add("hidden");
     if (text) {
       let rawText =
         result.candidates?.[0]?.content?.parts?.[0]?.text ||
         "Link stable. No intel found.";
       text.innerText = rawText.replace(/\*\*/g, "").trim();
     }
+    if (actions) actions.classList.remove("hidden");
     window.playTacticalSound("success");
+    if (window.showToast) window.showToast("Briefing generated", "success");
   } catch (e) {
+    if (loading) loading.classList.add("hidden");
     if (text) text.innerText = "Briefing handshake failed.";
+    if (window.showToast) window.showToast("Briefing failed. Try again.", "error");
   }
 }
+window.copyBriefingToClipboard = function () {
+  const text = safeEl("ai-briefing-text");
+  if (!text || !text.innerText) return;
+  navigator.clipboard.writeText(text.innerText).then(
+    () => { if (window.showToast) window.showToast("Briefing copied to clipboard", "success"); },
+    () => { if (window.showToast) window.showToast("Copy failed", "error"); }
+  );
+};
 window._airQualityActive = false;
 window._aqData = [];
 
@@ -271,6 +335,7 @@ window.toggleAirQuality = async function () {
   if (!window._airQualityActive) {
     window._hexLayers.aq = [];
     if (window.updateGlobeHexbins) window.updateGlobeHexbins();
+    if (window.updateLayerLegend) window.updateLayerLegend();
     return;
   }
 
@@ -290,6 +355,7 @@ window.toggleAirQuality = async function () {
   } catch (e) {
     console.warn("OpenAQ fetch failed", e);
   }
+  if (window.updateLayerLegend) window.updateLayerLegend();
 };
 
 window._cloudsActive = false;
@@ -321,7 +387,8 @@ window.myGlobe = null;
 
 function initMap(type) {
   projectionType = type;
-  const container = document.getElementById("map-container");
+  const container = safeEl("map-container");
+  if (!container) return;
   const width = container.clientWidth || 800;
   const height = container.clientHeight || 500;
   if (width < 50 || height < 50) {
@@ -338,11 +405,10 @@ function initMap(type) {
   mapContainer.selectAll("svg").remove();
 
   if (type === "2d") {
-    document.getElementById("projection-label").innerText =
-      "Orbital Interface: 2D Active";
-    const cloudsBtn = document.getElementById("clouds-toggle-btn");
+    setText("projection-label", "Orbital Interface: 2D Active");
+    const cloudsBtn = safeEl("clouds-toggle-btn");
     if (cloudsBtn) cloudsBtn.style.display = "none";
-    const windBtn = document.getElementById("wind-toggle-btn");
+    const windBtn = safeEl("wind-toggle-btn");
     if (windBtn) windBtn.style.display = "none";
     svg = mapContainer
       .append("svg")
@@ -449,11 +515,10 @@ function initMap(type) {
         });
     });
   } else {
-    document.getElementById("projection-label").innerText =
-      "Orbital Interface: 3D WebGL";
-    const cloudsBtn = document.getElementById("clouds-toggle-btn");
+    setText("projection-label", "Orbital Interface: 3D WebGL");
+    const cloudsBtn = safeEl("clouds-toggle-btn");
     if (cloudsBtn) cloudsBtn.style.display = "block";
-    const windBtn = document.getElementById("wind-toggle-btn");
+    const windBtn = safeEl("wind-toggle-btn");
     if (windBtn) windBtn.style.display = "block";
     currentProjection = () => [0, 0];
     window.syncMapOverlays = function () {};
@@ -518,8 +583,8 @@ function initMap(type) {
         .onPolygonHover((hoverD) => {
           if (hoverD === hoverObj) return;
 
-          const t = document.getElementById("map-tooltip");
-          if (hoverD) {
+      const t = safeEl("map-tooltip");
+      if (hoverD) {
             window.playTacticalSound("hover");
             showRichTooltip(
               { pageX: window.mouseX, pageY: window.mouseY },
@@ -655,32 +720,40 @@ function initMap(type) {
 
 const _tooltipCache = {};
 async function showRichTooltip(e, d) {
-  const t = document.getElementById("map-tooltip");
+  const t = safeEl("map-tooltip");
+  if (!t || !d?.properties) return;
+  const name = d.properties.name;
   t.style.left = e.pageX + 15 + "px";
   t.style.top = e.pageY - 15 + "px";
   t.classList.remove("hidden");
-  const name = d.properties.name;
-
-  document.getElementById("tooltip-name").innerText = name;
-  document.getElementById("tooltip-flag").src = "";
-  document.getElementById("tooltip-flag").classList.add("hidden");
-  document.getElementById("tooltip-label-1").innerText = "Capital";
-  document.getElementById("tooltip-label-2").innerText = "Pop.";
-  document.getElementById("tooltip-capital").innerText = "...";
-  document.getElementById("tooltip-pop").innerText = "...";
+  setText("tooltip-name", name);
+  setSrc("tooltip-flag", "");
+  const tooltipFlag = safeEl("tooltip-flag");
+  if (tooltipFlag) tooltipFlag.classList.add("hidden");
+  setText("tooltip-label-1", "Capital");
+  setText("tooltip-label-2", "Pop.");
+  setText("tooltip-capital", "...");
+  setText("tooltip-pop", "...");
   if (_tooltipCache[name]) {
     const c = _tooltipCache[name];
-    document.getElementById("tooltip-flag").src = c.flag;
-    document.getElementById("tooltip-flag").classList.remove("hidden");
-    document.getElementById("tooltip-capital").innerText = c.capital;
-    document.getElementById("tooltip-pop").innerText = c.pop;
+    setSrc("tooltip-flag", c.flag);
+    if (tooltipFlag) tooltipFlag.classList.remove("hidden");
+    setText("tooltip-capital", c.capital);
+    setText("tooltip-pop", c.pop);
     return;
   }
   try {
     const res = await fetch(
       `https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fullText=true&fields=name,flags,capital,population`,
     );
-    const [c] = await res.json();
+    if (!res.ok) throw new Error("RestCountries error");
+    const data = await res.json();
+    const c = Array.isArray(data) ? data[0] : null;
+    if (!c || !c.name) {
+      setText("tooltip-capital", "—");
+      setText("tooltip-pop", "—");
+      return;
+    }
     const entry = {
       flag: c.flags?.svg || c.flags?.png || "",
       capital: c.capital?.[0] || "—",
@@ -690,19 +763,15 @@ async function showRichTooltip(e, d) {
           : c.population?.toLocaleString() || "—",
     };
     _tooltipCache[name] = entry;
-
-    if (
-      !t.classList.contains("hidden") &&
-      document.getElementById("tooltip-name").innerText === name
-    ) {
-      document.getElementById("tooltip-flag").src = entry.flag;
-      document.getElementById("tooltip-flag").classList.remove("hidden");
-      document.getElementById("tooltip-capital").innerText = entry.capital;
-      document.getElementById("tooltip-pop").innerText = entry.pop;
+    if (!t.classList.contains("hidden") && safeEl("tooltip-name")?.innerText === name) {
+      setSrc("tooltip-flag", entry.flag);
+      if (tooltipFlag) tooltipFlag.classList.remove("hidden");
+      setText("tooltip-capital", entry.capital);
+      setText("tooltip-pop", entry.pop);
     }
   } catch (_) {
-    document.getElementById("tooltip-capital").innerText = "—";
-    document.getElementById("tooltip-pop").innerText = "—";
+    setText("tooltip-capital", "—");
+    setText("tooltip-pop", "—");
   }
 }
 async function handleCountryClick(event, d) {
@@ -715,10 +784,20 @@ async function handleCountryClick(event, d) {
   selectedCountry = d;
   window.selectedCountry = d;
   window.switchTab("intel");
-  document.getElementById("sidebar").scrollIntoView({ behavior: "smooth" });
+  const sidebar = safeEl("sidebar");
+  if (sidebar) sidebar.scrollIntoView({ behavior: "smooth" });
   if (d && d.properties) {
-    document.getElementById("selected-country-name").innerText =
-      d.properties.name;
+    setText("selected-country-name", d.properties.name);
+    const backWrap = safeEl("back-to-global-wrap");
+    if (backWrap) backWrap.classList.remove("hidden");
+    window.addRecentCountry(d.properties.name);
+    window.showMapHintOnce();
+    if (typeof window.innerWidth !== "undefined" && window.innerWidth < 1024) {
+      const sidebar = safeEl("sidebar");
+      if (sidebar) sidebar.classList.add("open");
+      const mobBtn = safeEl("sidebar-toggle-mobile");
+      if (mobBtn) mobBtn.querySelector("i").className = "fas fa-chevron-right";
+    }
     iso2Code = null;
     fetchAllData(d.properties.name);
     window.onCountrySelected(d.properties.name);
@@ -855,7 +934,8 @@ window.selectFromSearch = (name) => {
   );
   if (country) handleCountryClick(null, country);
   else fetchAllData(name);
-  document.getElementById("search-overlay").classList.add("hidden");
+  const searchOverlay = safeEl("search-overlay");
+  if (searchOverlay) searchOverlay.classList.add("hidden");
 };
 window.zoomMap = (f) => {
   window.playTacticalSound("click");
@@ -881,11 +961,12 @@ window.resetToGlobalCenter = () => {
   window.selectedCountry = null;
   countryUTCOffset = null;
   d3.selectAll(".country").classed("active", false);
-  document.getElementById("selected-country-name").innerText =
-    "GLOBAL SURVEILLANCE";
+  setText("selected-country-name", "GLOBAL SURVEILLANCE");
+  const backWrap = safeEl("back-to-global-wrap");
+  if (backWrap) backWrap.classList.add("hidden");
   if (window.generateAIBriefing) window.generateAIBriefing("Global Context");
   if (window.fetchGDELTEvents) window.fetchGDELTEvents("");
-  const flagBox = document.getElementById("active-sector-display");
+  const flagBox = safeEl("active-sector-display");
   if (flagBox) flagBox.classList.add("hidden");
   if (projectionType === "2d") {
     if (svg && zoom)
@@ -896,11 +977,11 @@ window.resetToGlobalCenter = () => {
   window.fetchNews();
   if (window.resetWeatherData) window.resetWeatherData();
 
-  const hp = document.getElementById("hierarchy-panel");
+  const hp = safeEl("hierarchy-panel");
   if (hp) hp.classList.add("hidden");
-  const stateEl = document.getElementById("state-selector");
+  const stateEl = safeEl("state-selector");
   if (stateEl) stateEl.classList.add("hidden");
-  const cityEl = document.getElementById("city-selector");
+  const cityEl = safeEl("city-selector");
   if (cityEl) cityEl.classList.add("hidden");
 
   if (window.initializeMarkets) window.initializeMarkets("Global");
@@ -984,16 +1065,23 @@ function setupEventListeners() {
       window.toggleSearch();
     }
     if (e.key === "Escape") {
-      document.getElementById("search-overlay").classList.add("hidden");
-      document.getElementById("about-overlay").classList.add("hidden");
+      const so = safeEl("search-overlay");
+      const ao = safeEl("about-overlay");
+      if (so) so.classList.add("hidden");
+      if (ao) ao.classList.add("hidden");
     }
   };
 }
 function updateSystemTime() {
   const now = new Date();
-  document.getElementById("system-time").innerText = now.toLocaleTimeString(
-    "en-US",
-    { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" },
+  setText(
+    "system-time",
+    now.toLocaleTimeString("en-US", {
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    }),
   );
   if (countryUTCOffset) {
     const utc = now.getTime() + now.getTimezoneOffset() * 60000;
@@ -1002,7 +1090,7 @@ function updateSystemTime() {
     if (match)
       off = parseInt(match[1]) * 60 + (match[2] ? parseInt(match[2]) : 0);
     const localDate = new Date(utc + 60000 * off);
-    const localEl = document.getElementById("local-time");
+    const localEl = safeEl("local-time");
     if (localEl)
       localEl.innerText = localDate.toLocaleTimeString("en-US", {
         hour12: false,
@@ -1033,6 +1121,7 @@ window.activateVoice = () => {
       .toLowerCase()
       .replace(".", "");
     btn.classList.remove("text-red-500", "animate-pulse");
+    if (window.showToast) window.showToast("Heard: " + command, "info");
     if (command.includes("go to"))
       window.selectFromSearch(command.replace("go to ", "").trim());
     else if (command.includes("analyze")) window.switchTab("intel");
@@ -1040,6 +1129,72 @@ window.activateVoice = () => {
   };
   recognition.onerror = () =>
     btn.classList.remove("text-red-500", "animate-pulse");
+};
+
+const RECENT_COUNTRIES_KEY = "newsatlas_recent_countries";
+const RECENT_COUNTRIES_MAX = 5;
+window.addRecentCountry = function (name) {
+  if (!name) return;
+  let list = [];
+  try {
+    list = JSON.parse(localStorage.getItem(RECENT_COUNTRIES_KEY) || "[]");
+  } catch (e) {}
+  list = list.filter((c) => c !== name);
+  list.unshift(name);
+  list = list.slice(0, RECENT_COUNTRIES_MAX);
+  try {
+    localStorage.setItem(RECENT_COUNTRIES_KEY, JSON.stringify(list));
+  } catch (e) {}
+};
+window.getRecentCountries = function () {
+  try {
+    return JSON.parse(localStorage.getItem(RECENT_COUNTRIES_KEY) || "[]");
+  } catch (e) {
+    return [];
+  }
+};
+
+window._mapHintShown = false;
+window.showMapHintOnce = function () {
+  if (window._mapHintShown) return;
+  window._mapHintShown = true;
+  const hint = safeEl("map-hint-click");
+  if (hint) {
+    hint.classList.remove("opacity-0");
+    hint.classList.add("opacity-70");
+    setTimeout(() => {
+      hint.classList.add("opacity-0");
+      hint.classList.remove("opacity-70");
+    }, 3000);
+  }
+};
+
+window.updateLayerLegend = function () {
+  const el = safeEl("layer-legend");
+  if (!el) return;
+  const active = [];
+  if (typeof _quakeActive !== "undefined" && _quakeActive) active.push({ label: "Earthquakes", color: "#f97316" });
+  if (typeof _aircraftActive !== "undefined" && _aircraftActive) active.push({ label: "Aircraft", color: "#3b82f6" });
+  if (window._airQualityActive) active.push({ label: "Air quality", color: "#10b981" });
+  if (typeof _gdeltActive !== "undefined" && _gdeltActive) active.push({ label: "Conflict", color: "#ef4444" });
+  if (active.length === 0) {
+    el.classList.add("hidden");
+    el.innerHTML = "";
+    return;
+  }
+  el.classList.remove("hidden");
+  el.innerHTML = active.map((a) => `<span style="color:${a.color}">● ${a.label}</span>`).join(" ");
+};
+
+window.toggleSidebarMobile = function () {
+  const sidebar = safeEl("sidebar");
+  const btn = safeEl("sidebar-toggle-mobile");
+  if (!sidebar) return;
+  sidebar.classList.toggle("open");
+  if (btn) {
+    btn.querySelector("i").className = sidebar.classList.contains("open") ? "fas fa-chevron-right" : "fas fa-chevron-left";
+    btn.setAttribute("aria-label", sidebar.classList.contains("open") ? "Close sidebar" : "Open sidebar");
+  }
 };
 window.personalizeSession = (user) => {
   const safeName = user.displayName || user.email.split("@")[0];
@@ -1084,12 +1239,20 @@ document.addEventListener(
   { once: true },
 );
 window.addEventListener("resize", () => {
-  const c = document.getElementById("map-container");
-  if (c) {
-    d3.select("#world-map").attr(
-      "viewBox",
-      `0 0 ${c.clientWidth} ${c.clientHeight}`,
-    );
+  const c = safeEl("map-container");
+  if (!c) return;
+  const w = c.clientWidth;
+  const h = c.clientHeight;
+  if (w < 50 || h < 50) return;
+  if (projectionType === "2d" && svg && currentProjection && worldFeatures.length) {
+    const path = d3.geoPath().projection(currentProjection);
+    currentProjection.scale(w / 9).translate([w / 2, h / 2]);
+    svg.attr("viewBox", `0 0 ${w} ${h}`);
+    if (g) g.selectAll("path").attr("d", path);
+    if (typeof window.syncMapOverlays === "function") window.syncMapOverlays();
+  } else if (projectionType === "3d" && window.myGlobe) {
+    window.myGlobe.width(w).height(h);
+  } else {
     initMap(projectionType);
   }
 });
@@ -1097,7 +1260,7 @@ window.addEventListener("resize", () => {
 window._chronosOffset = 0;
 window.updateChronos = function (val) {
   window._chronosOffset = parseInt(val, 10);
-  const display = document.getElementById("chronos-display");
+  const display = safeEl("chronos-display");
   if (display) {
     display.innerText =
       window._chronosOffset === 0
@@ -1192,37 +1355,35 @@ window.updateGlobeHexbins = function () {
       return magToHeight(pt.mag);
     })
     .onHexHover((hex) => {
-      const t = document.getElementById("map-tooltip");
+      const t = safeEl("map-tooltip");
+      const tooltipFlag = safeEl("tooltip-flag");
       if (hex && hex.points && hex.points.length > 0) {
         const pt = hex.points[0];
-        document.getElementById("tooltip-flag").classList.add("hidden");
+        if (tooltipFlag) tooltipFlag.classList.add("hidden");
         if (pt.type === "gdelt") {
-          document.getElementById("tooltip-name").innerText = `${pt.place}`;
-          document.getElementById("tooltip-label-1").innerText = "Type";
-          document.getElementById("tooltip-label-2").innerText = "Intensity";
-          document.getElementById("tooltip-capital").innerText =
-            "Armed Conflict";
-          document.getElementById("tooltip-pop").innerText =
-            pt.count + " Events";
+          setText("tooltip-name", `${pt.place}`);
+          setText("tooltip-label-1", "Type");
+          setText("tooltip-label-2", "Intensity");
+          setText("tooltip-capital", "Armed Conflict");
+          setText("tooltip-pop", pt.count + " Events");
         } else if (pt.type === "aq") {
-          document.getElementById("tooltip-name").innerText = "OpenAQ Sensor";
-          document.getElementById("tooltip-label-1").innerText = "Trace";
-          document.getElementById("tooltip-label-2").innerText = "PM2.5";
-          document.getElementById("tooltip-capital").innerText = "Air Quality";
-          document.getElementById("tooltip-pop").innerText =
-            pt.weight + " µg/m³";
+          setText("tooltip-name", "OpenAQ Sensor");
+          setText("tooltip-label-1", "Trace");
+          setText("tooltip-label-2", "PM2.5");
+          setText("tooltip-capital", "Air Quality");
+          setText("tooltip-pop", pt.weight + " µg/m³");
         } else {
-          document.getElementById("tooltip-name").innerText =
-            `M${pt.mag.toFixed(1)} — ${pt.place}`;
-          document.getElementById("tooltip-label-1").innerText = "Depth";
-          document.getElementById("tooltip-label-2").innerText = "Trigger";
-          document.getElementById("tooltip-capital").innerText =
-            `${pt.depth || "?"} km`;
-          document.getElementById("tooltip-pop").innerText = "Seismic Spike";
+          setText("tooltip-name", `M${pt.mag.toFixed(1)} — ${pt.place}`);
+          setText("tooltip-label-1", "Depth");
+          setText("tooltip-label-2", "Trigger");
+          setText("tooltip-capital", `${pt.depth || "?"} km`);
+          setText("tooltip-pop", "Seismic Spike");
         }
-        t.style.left = window.mouseX + 15 + "px";
-        t.style.top = window.mouseY - 15 + "px";
-        t.classList.remove("hidden");
+        if (t) {
+          t.style.left = window.mouseX + 15 + "px";
+          t.style.top = window.mouseY - 15 + "px";
+          t.classList.remove("hidden");
+        }
       } else if (t) {
         t.classList.add("hidden");
       }
@@ -1244,6 +1405,7 @@ window.toggleEarthquakeLayer = async function () {
       btn.classList.remove("active-amber");
       btn.title = "Earthquake Layer: OFF";
     }
+    if (window.updateLayerLegend) window.updateLayerLegend();
     return;
   }
   if (btn) {
@@ -1336,33 +1498,35 @@ window.toggleEarthquakeLayer = async function () {
         .attr("stroke-width", 1.5)
         .style("cursor", "pointer")
         .on("mouseover", function (event) {
-          const t = document.getElementById("map-tooltip");
+          const t = safeEl("map-tooltip");
           if (t) {
-            document.getElementById("tooltip-name").innerText =
-              `M${mag.toFixed(1)} — ${place}`;
-            document.getElementById("tooltip-flag").classList.add("hidden");
-            document.getElementById("tooltip-label-1").innerText = "Depth";
-            document.getElementById("tooltip-label-2").innerText = "Time";
-            document.getElementById("tooltip-capital").innerText =
-              `${f.geometry.coordinates[2]?.toFixed(0) ?? "?"} km`;
-            document.getElementById("tooltip-pop").innerText = new Date(
-              f.properties.time,
-            )
-              .toUTCString()
-              .slice(0, 22);
+            setText("tooltip-name", `M${mag.toFixed(1)} — ${place}`);
+            const tf = safeEl("tooltip-flag");
+            if (tf) tf.classList.add("hidden");
+            setText("tooltip-label-1", "Depth");
+            setText("tooltip-label-2", "Time");
+            setText(
+              "tooltip-capital",
+              `${f.geometry.coordinates[2]?.toFixed(0) ?? "?"} km`,
+            );
+            setText(
+              "tooltip-pop",
+              new Date(f.properties.time).toUTCString().slice(0, 22),
+            );
             t.style.left = event.pageX + 15 + "px";
             t.style.top = event.pageY - 15 + "px";
             t.classList.remove("hidden");
           }
         })
         .on("mouseleave", () => {
-          const t = document.getElementById("map-tooltip");
+          const t = safeEl("map-tooltip");
           if (t) t.classList.add("hidden");
         });
     });
   } catch (e) {
     console.error("USGS fetch failed", e);
   }
+  if (window.updateLayerLegend) window.updateLayerLegend();
 };
 
 let _aircraftActive = false,
@@ -1441,25 +1605,29 @@ async function renderAircraft() {
         .text("✈");
       gItem
         .on("mouseover", function (event) {
-          const t = document.getElementById("map-tooltip");
+          const t = safeEl("map-tooltip");
           if (t) {
             const data = d3.select(this).datum();
-            document.getElementById("tooltip-name").innerText =
-              callsign || "UNKNOWN";
-            document.getElementById("tooltip-flag").classList.add("hidden");
-            document.getElementById("tooltip-label-1").innerText = "Altitude";
-            document.getElementById("tooltip-label-2").innerText = "Velocity";
-            document.getElementById("tooltip-capital").innerText =
-              `${data.alt ? (data.alt * 3.28084).toFixed(0) : "N/A"} ft`;
-            document.getElementById("tooltip-pop").innerText =
-              `${data.vel ? (data.vel * 1.94384).toFixed(0) : "N/A"} kts`;
+            setText("tooltip-name", callsign || "UNKNOWN");
+            const tf = safeEl("tooltip-flag");
+            if (tf) tf.classList.add("hidden");
+            setText("tooltip-label-1", "Altitude");
+            setText("tooltip-label-2", "Velocity");
+            setText(
+              "tooltip-capital",
+              `${data.alt ? (data.alt * 3.28084).toFixed(0) : "N/A"} ft`,
+            );
+            setText(
+              "tooltip-pop",
+              `${data.vel ? (data.vel * 1.94384).toFixed(0) : "N/A"} kts`,
+            );
             t.style.left = event.pageX + 15 + "px";
             t.style.top = event.pageY - 15 + "px";
             t.classList.remove("hidden");
           }
         })
         .on("mouseleave", () => {
-          const t = document.getElementById("map-tooltip");
+          const t = safeEl("map-tooltip");
           if (t) t.classList.add("hidden");
         });
     });
@@ -1485,6 +1653,7 @@ window.toggleGDELTLayer = async function () {
       btn.classList.remove("active-red");
       btn.title = "Global Conflict Hexbins: OFF";
     }
+    if (window.updateLayerLegend) window.updateLayerLegend();
     return;
   }
 
@@ -1575,30 +1744,28 @@ window.toggleGDELTLayer = async function () {
           .attr("stroke-width", 0.5)
           .style("cursor", "pointer")
           .on("mouseover", function (event) {
-            const t = document.getElementById("map-tooltip");
+            const t = safeEl("map-tooltip");
             if (t) {
-              document.getElementById("tooltip-name").innerText =
-                f.properties.name || "Conflict Zone";
-              document.getElementById("tooltip-flag").classList.add("hidden");
-              document.getElementById("tooltip-label-1").innerText = "Type";
-              document.getElementById("tooltip-label-2").innerText =
-                "Intensity";
-              document.getElementById("tooltip-capital").innerText =
-                "Armed Conflict";
-              document.getElementById("tooltip-pop").innerText =
-                (f.properties.count || 50) + " Events";
+              setText("tooltip-name", f.properties.name || "Conflict Zone");
+              const tf = safeEl("tooltip-flag");
+              if (tf) tf.classList.add("hidden");
+              setText("tooltip-label-1", "Type");
+              setText("tooltip-label-2", "Intensity");
+              setText("tooltip-capital", "Armed Conflict");
+              setText("tooltip-pop", (f.properties.count || 50) + " Events");
               t.style.left = event.pageX + 15 + "px";
               t.style.top = event.pageY - 15 + "px";
               t.classList.remove("hidden");
             }
           })
           .on("mouseleave", () => {
-            const t = document.getElementById("map-tooltip");
+            const t = safeEl("map-tooltip");
             if (t) t.classList.add("hidden");
           });
       });
     }
   }
+  if (window.updateLayerLegend) window.updateLayerLegend();
 };
 
 window.toggleAircraftLayer = function () {
@@ -1618,6 +1785,7 @@ window.toggleAircraftLayer = function () {
       btn.classList.remove("active");
       btn.title = "Live Aircraft: OFF";
     }
+    if (window.updateLayerLegend) window.updateLayerLegend();
     return;
   }
   if (btn) {
@@ -1628,6 +1796,7 @@ window.toggleAircraftLayer = function () {
   _aircraftInterval = setInterval(() => {
     if (_aircraftActive) renderAircraft();
   }, 30000);
+  if (window.updateLayerLegend) window.updateLayerLegend();
 };
 
 window._issData = [{ lat: 0, lng: 0, alt: 0.1, name: "ISS" }];

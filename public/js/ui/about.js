@@ -39,18 +39,18 @@ function startAboutStats() {
   aboutStatsInterval = setInterval(() => {
     const cpu = Math.floor(Math.random() * 40) + 10;
     const mem = (Math.random() * 4 + 4).toFixed(1);
-    document.getElementById("cpu-bar").style.width = cpu + "%";
-    document.getElementById("cpu-val").innerText = cpu + "%";
-    document.getElementById("mem-bar").style.width = (mem / 16) * 100 + "%";
-    document.getElementById("mem-val").innerText = mem + "GB";
-    document.getElementById("net-down").innerText = (
-      Math.random() * 50 +
-      10
-    ).toFixed(1);
-    document.getElementById("net-up").innerText = (
-      Math.random() * 20 +
-      2
-    ).toFixed(1);
+    const cpuBar = document.getElementById("cpu-bar");
+    if (cpuBar) cpuBar.style.width = cpu + "%";
+    const cpuVal = document.getElementById("cpu-val");
+    if (cpuVal) cpuVal.innerText = cpu + "%";
+    const memBar = document.getElementById("mem-bar");
+    if (memBar) memBar.style.width = (mem / 16) * 100 + "%";
+    const memVal = document.getElementById("mem-val");
+    if (memVal) memVal.innerText = mem + "GB";
+    const netDown = document.getElementById("net-down");
+    if (netDown) netDown.innerText = (Math.random() * 50 + 10).toFixed(1);
+    const netUp = document.getElementById("net-up");
+    if (netUp) netUp.innerText = (Math.random() * 20 + 2).toFixed(1);
     sec++;
     const h = Math.floor(sec / 3600)
       .toString()

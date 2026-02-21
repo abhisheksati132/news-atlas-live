@@ -112,27 +112,28 @@ async function fetchWeather(lat, lon) {
     if (data.current) {
       const curr = data.current;
       const meta = getWeatherMeta(curr.weather_code, curr.is_day);
-      document.getElementById("atmo-temp").innerText =
-        `${Math.round(curr.temperature_2m)}°`;
-      document.getElementById("atmo-condition").innerText = meta.text;
+      const atmoTemp = document.getElementById("atmo-temp");
+      if (atmoTemp) atmoTemp.innerText = `${Math.round(curr.temperature_2m)}°`;
+      const atmoCondition = document.getElementById("atmo-condition");
+      if (atmoCondition) atmoCondition.innerText = meta.text;
       const iconEl = document.getElementById("atmo-main-icon");
       if (iconEl)
         iconEl.className = `fas ${meta.icon} text-9xl ${meta.color} opacity-80`;
-      if (document.getElementById("atmo-feels"))
-        document.getElementById("atmo-feels").innerText =
-          `${Math.round(curr.apparent_temperature)}°`;
-      if (document.getElementById("atmo-wind-speed"))
-        document.getElementById("atmo-wind-speed").innerText = Math.round(
-          curr.wind_speed_10m,
-        );
-      if (document.getElementById("atmo-wind-arrow"))
-        document.getElementById("atmo-wind-arrow").style.transform =
-          `rotate(${curr.wind_direction_10m}deg)`;
-      if (document.getElementById("atmo-humidity"))
-        document.getElementById("atmo-humidity").innerText =
-          `${curr.relative_humidity_2m}%`;
-      if (document.getElementById("atmo-pressure"))
-        document.getElementById("atmo-pressure").innerText = Math.round(
+      const atmoFeels = document.getElementById("atmo-feels");
+      if (atmoFeels)
+        atmoFeels.innerText = `${Math.round(curr.apparent_temperature)}°`;
+      const atmoWindSpeed = document.getElementById("atmo-wind-speed");
+      if (atmoWindSpeed)
+        atmoWindSpeed.innerText = Math.round(curr.wind_speed_10m);
+      const atmoWindArrow = document.getElementById("atmo-wind-arrow");
+      if (atmoWindArrow)
+        atmoWindArrow.style.transform = `rotate(${curr.wind_direction_10m}deg)`;
+      const atmoHumidity = document.getElementById("atmo-humidity");
+      if (atmoHumidity)
+        atmoHumidity.innerText = `${curr.relative_humidity_2m}%`;
+      const atmoPressure = document.getElementById("atmo-pressure");
+      if (atmoPressure)
+        atmoPressure.innerText = Math.round(
           curr.pressure_msl || curr.surface_pressure,
         );
       let estimatedCeiling = 8.0;
@@ -145,15 +146,14 @@ async function fetchWeather(lat, lon) {
       else if (code >= 71) estimatedCeiling = 0.9;
       else if (code >= 95) estimatedCeiling = 1.0;
       estimatedCeiling += Math.random() * 0.4 - 0.2;
-      if (document.getElementById("atmo-cloud-base"))
-        document.getElementById("atmo-cloud-base").innerText =
-          estimatedCeiling.toFixed(1);
+      const atmoCloudBase = document.getElementById("atmo-cloud-base");
+      if (atmoCloudBase) atmoCloudBase.innerText = estimatedCeiling.toFixed(1);
     }
     if (data.daily) {
       const todayHigh = data.daily.temperature_2m_max[0];
       const todayLow = data.daily.temperature_2m_min[0];
-      document.getElementById("atmo-hl").innerText =
-        `${Math.round(todayLow)}° / ${Math.round(todayHigh)}°`;
+      const atmoHl = document.getElementById("atmo-hl");
+      if (atmoHl) atmoHl.innerText = `${Math.round(todayLow)}° / ${Math.round(todayHigh)}°`;
       const sunrise = new Date(data.daily.sunrise[0]).toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -164,18 +164,23 @@ async function fetchWeather(lat, lon) {
         minute: "2-digit",
         hour12: false,
       });
-      document.getElementById("atmo-sunrise").innerText = sunrise;
-      document.getElementById("atmo-sunset").innerText = sunset;
+      const atmoSunrise = document.getElementById("atmo-sunrise");
+      if (atmoSunrise) atmoSunrise.innerText = sunrise;
+      const atmoSunset = document.getElementById("atmo-sunset");
+      if (atmoSunset) atmoSunset.innerText = sunset;
       const uvMax = data.daily.uv_index_max[0];
       const uvPercent = Math.min((uvMax / 11) * 100, 100);
-      document.getElementById("atmo-uv-val").innerText = uvMax;
-      document.getElementById("atmo-uv-bar").style.width = `${uvPercent}%`;
+      const atmoUvVal = document.getElementById("atmo-uv-val");
+      if (atmoUvVal) atmoUvVal.innerText = uvMax;
+      const atmoUvBar = document.getElementById("atmo-uv-bar");
+      if (atmoUvBar) atmoUvBar.style.width = `${uvPercent}%`;
       let uvText = "Low";
       if (uvMax > 2) uvText = "Moderate";
       if (uvMax > 5) uvText = "High";
       if (uvMax > 7) uvText = "Very High";
       if (uvMax > 10) uvText = "Extreme";
-      document.getElementById("atmo-uv-text").innerText = uvText;
+      const atmoUvText = document.getElementById("atmo-uv-text");
+      if (atmoUvText) atmoUvText.innerText = uvText;
     }
     if (data.hourly) {
       const hourlyContainer = document.getElementById("atmo-hourly-container");
@@ -213,21 +218,20 @@ async function fetchWeather(lat, lon) {
       const visKm = data.hourly.visibility
         ? data.hourly.visibility[new Date().getHours()] / 1000
         : 10;
-      if (document.getElementById("atmo-visibility"))
-        document.getElementById("atmo-visibility").innerText = visKm.toFixed(1);
+      const atmoVisibility = document.getElementById("atmo-visibility");
+      if (atmoVisibility) atmoVisibility.innerText = visKm.toFixed(1);
     }
     const moon = getMoonPhase();
-    if (document.getElementById("atmo-moon-text")) {
-      document.getElementById("atmo-moon-text").innerText = moon.t;
-      document.getElementById("atmo-moon-icon").className =
-        `fas ${moon.i} text-2xl text-indigo-300`;
-    }
+    const atmoMoonText = document.getElementById("atmo-moon-text");
+    const atmoMoonIcon = document.getElementById("atmo-moon-icon");
+    if (atmoMoonText) atmoMoonText.innerText = moon.t;
+    if (atmoMoonIcon) atmoMoonIcon.className = `fas ${moon.i} text-2xl text-indigo-300`;
     const precipTotal =
       data.daily && data.daily.precipitation_sum
         ? data.daily.precipitation_sum[0]
         : 0;
-    document.getElementById("atmo-precip-total").innerText =
-      precipTotal.toFixed(1);
+    const atmoPrecipTotal = document.getElementById("atmo-precip-total");
+    if (atmoPrecipTotal) atmoPrecipTotal.innerText = precipTotal.toFixed(1);
     const dailyContainer = document.getElementById("atmo-daily-container");
     if (dailyContainer && data.daily) {
       dailyContainer.innerHTML = "";

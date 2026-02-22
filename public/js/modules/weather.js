@@ -134,6 +134,18 @@ async function fetchWeather(lat, lon) {
         atmoPressure.innerText = Math.round(
           curr.pressure_msl || curr.surface_pressure,
         );
+      const atmoGusts = document.getElementById("atmo-gusts");
+      if (atmoGusts)
+        atmoGusts.innerText = curr.wind_gusts_10m !== undefined ? Math.round(curr.wind_gusts_10m) : "--";
+
+      const atmoCloudCover = document.getElementById("atmo-cloud-cover");
+      if (atmoCloudCover)
+        atmoCloudCover.innerText = curr.cloud_cover !== undefined ? curr.cloud_cover : "--";
+
+      const atmoDew = document.getElementById("atmo-dew");
+      if (atmoDew)
+        atmoDew.innerText = curr.dew_point_2m !== undefined ? `${Math.round(curr.dew_point_2m)}°` : "--°";
+
       let estimatedCeiling = 8.0;
       const code = curr.weather_code;
       if (code === 0 || code === 1) estimatedCeiling = 12.0;
@@ -146,6 +158,21 @@ async function fetchWeather(lat, lon) {
       estimatedCeiling += Math.random() * 0.4 - 0.2;
       const atmoCloudBase = document.getElementById("atmo-cloud-base");
       if (atmoCloudBase) atmoCloudBase.innerText = estimatedCeiling.toFixed(1);
+
+      const atmoAqi = document.getElementById("atmo-aqi");
+      if (atmoAqi) {
+        if (curr.aqi !== undefined) {
+          atmoAqi.innerText = curr.aqi;
+          // Color code AQI
+          atmoAqi.className = `text-2xl font-black leading-none ${curr.aqi <= 20 ? 'text-emerald-400' :
+            curr.aqi <= 50 ? 'text-yellow-400' :
+              curr.aqi <= 100 ? 'text-orange-400' : 'text-red-500'
+            }`;
+        } else {
+          atmoAqi.innerText = "--";
+          atmoAqi.className = "text-2xl font-black text-white leading-none";
+        }
+      }
     }
     if (data.daily) {
       const todayHigh = data.daily.temperature_2m_max[0];
@@ -204,14 +231,14 @@ async function fetchWeather(lat, lon) {
             hDiv.className =
               "flex flex-col items-center gap-2 min-w-[3.5rem] p-2 rounded-xl hover:bg-white/5 transition-colors cursor-default border border-transparent hover:border-white/5";
             hDiv.innerHTML = `
-                            <span class="text-[10px] text-slate-400 font-bold tracking-tight">${i === currentHour ? "Now" : timeStr}</span>
+                            <span class="text-sm text-slate-400 font-bold tracking-tight">${i === currentHour ? "Now" : timeStr}</span>
                             <i class="fas ${hMeta.icon} text-lg ${hMeta.color}"></i>
-                            <span class="text-[12px] font-bold text-white">${hTemp}°</span>
-                            ${hRain > 20 ? `<span class="text-[9px] text-blue-400 font-bold">${hRain}%</span>` : ""}
+                            <span class="text-sm font-bold text-white">${hTemp}°</span>
+                            ${hRain > 20 ? `<span class="text-[11px] text-blue-400 font-bold">${hRain}%</span>` : ""}
                         `;
             hourlyContainer.appendChild(hDiv);
           }
-        } catch (err) {}
+        } catch (err) { }
       }
       const visKm = data.hourly.visibility
         ? data.hourly.visibility[new Date().getHours()] / 1000
@@ -249,14 +276,14 @@ async function fetchWeather(lat, lon) {
         dRow.className =
           "px-6 py-3 flex items-center justify-between hover:bg-white/5 transition-colors group";
         dRow.innerHTML = `
-                    <span class="text-[12px] text-slate-300 font-bold w-24">${dayName}</span>
+                    <span class="text-sm text-slate-300 font-bold w-24">${dayName}</span>
                     <div class="flex items-center gap-3 w-32">
-                        <i class="fas ${dMeta.icon} ${dMeta.color} w-6 text-center"></i>
-                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider group-hover:text-blue-400 transition-colors">${dMeta.text}</span>
+                        <i class="fas ${dMeta.icon} ${dMeta.color} w-6 text-center text-lg"></i>
+                        <span class="text-xs text-slate-500 font-bold uppercase tracking-wider group-hover:text-blue-400 transition-colors">${dMeta.text}</span>
                     </div>
                     <div class="flex items-center gap-4 text-right flex-1 justify-end">
-                        ${dPrecipSum > 0 ? `<div class="flex items-center gap-1 text-[10px] text-blue-400 font-bold"><i class="fas fa-umbrella"></i> ${Math.round(dPrecipSum)}mm</div>` : ""}
-                        <div class="font-mono text-xs font-bold text-white"><span class="text-slate-500">${dMin}°</span> / ${dMax}°</div>
+                        ${dPrecipSum > 0 ? `<div class="flex items-center gap-1 text-[11px] text-blue-400 font-bold"><i class="fas fa-umbrella"></i> ${Math.round(dPrecipSum)}mm</div>` : ""}
+                        <div class="font-mono text-sm font-bold text-white"><span class="text-slate-500">${dMin}°</span> / ${dMax}°</div>
                     </div>
                 `;
         dailyContainer.appendChild(dRow);
@@ -283,12 +310,12 @@ async function fetchWeather(lat, lon) {
             : "--",
         forecast: data.daily
           ? data.daily.time.slice(1, 8).map((t, i) => ({
-              date: new Date(t).toLocaleDateString("en-US", {
-                weekday: "short",
-              }),
-              temp: Math.round(data.daily.temperature_2m_max[i + 1]),
-              condition: getWeatherMeta(data.daily.weather_code[i + 1], 1).text,
-            }))
+            date: new Date(t).toLocaleDateString("en-US", {
+              weekday: "short",
+            }),
+            temp: Math.round(data.daily.temperature_2m_max[i + 1]),
+            condition: getWeatherMeta(data.daily.weather_code[i + 1], 1).text,
+          }))
           : [],
       };
       generateWeatherAnalysis(
@@ -297,7 +324,7 @@ async function fetchWeather(lat, lon) {
           ? window.selectedCountry.properties.name
           : "this location",
       );
-    } catch (err) {}
+    } catch (err) { }
   } catch (e) {
     console.error("Atmosphere Error:", e);
   }
@@ -395,6 +422,10 @@ window.resetWeatherData = () => {
     "atmo-sunset",
     "atmo-uv-val",
     "atmo-uv-text",
+    "atmo-aqi",
+    "atmo-gusts",
+    "atmo-cloud-cover",
+    "atmo-dew"
   ];
   ids.forEach((id) => {
     const el = document.getElementById(id);

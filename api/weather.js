@@ -19,20 +19,28 @@ export default async function handler(req, res) {
     latitude: lat,
     longitude: lon,
     current:
-      "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m",
+      "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m,dew_point_2m",
     hourly:
       "temperature_2m,weather_code,visibility,uv_index,precipitation_probability",
     daily:
       "weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum",
     timezone: "auto",
   });
-  const url = `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+  const weatherUrl = `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+  const aqUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=european_aqi&timezone=auto`;
   try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error("Weather API failed");
+    const [weatherRes, aqRes] = await Promise.all([
+      fetch(weatherUrl),
+      fetch(aqUrl)
+    ]);
+    if (!weatherRes.ok) throw new Error("Weather API failed");
+    const data = await weatherRes.json();
+    if (aqRes.ok) {
+      const aqData = await aqRes.json();
+      if (aqData.current && aqData.current.european_aqi !== undefined) {
+        data.current.aqi = Math.round(aqData.current.european_aqi);
+      }
     }
-    const data = await response.json();
     res.status(200).json(data);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch weather telemetry" });

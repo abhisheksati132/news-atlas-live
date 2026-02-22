@@ -16,7 +16,6 @@ window._hexLayers = { seismic: [], gdelt: [], aq: [] };
 window._timeOffsetHours = 0;
 window._chronosOffset = 0;
 window._chronosActive = false;
-
 function magColor(m) {
   return m >= 7 ? "#ef4444" : m >= 6 ? "#f97316" : m >= 5 ? "#eab308" : "#10b981";
 }
@@ -405,7 +404,10 @@ window.toggleAirQuality = async function () {
 };
 
 window.myGlobe = null;
-function initMap(type) {
+window.toggleMapMode = function () {
+  window.initMap(window.projectionType === '2d' ? '3d' : '2d');
+};
+window.initMap = function (type) {
   projectionType = type;
   window.projectionType = type;
   const container = safeEl("map-container");
@@ -413,7 +415,7 @@ function initMap(type) {
   const width = container.clientWidth || 800;
   const height = container.clientHeight || 500;
   if (width < 50 || height < 50) {
-    setTimeout(() => initMap(type), 300);
+    setTimeout(() => window.initMap(type), 300);
     return;
   }
   if (window.myGlobe) {
@@ -422,16 +424,26 @@ function initMap(type) {
   }
   const mapContainer = d3.select("#map-container");
   mapContainer.selectAll("svg").remove();
-  const _pmIcon = safeEl("map-projection-icon");
-  const _pmLabel = safeEl("map-projection-mode");
-  if (_pmIcon) _pmIcon.className = type === "3d" ? "fas fa-globe text-[9px] text-blue-400" : "fas fa-map text-[9px] text-slate-500";
-  if (_pmLabel) { _pmLabel.textContent = type === "3d" ? "3D" : "2D"; _pmLabel.className = type === "3d" ? "text-[9px] font-black text-blue-400 uppercase tracking-widest font-mono" : "text-[9px] font-black text-slate-500 uppercase tracking-widest font-mono"; }
+
   const _themeBtn = safeEl("theme-toggle-btn");
   const _rotateBtn = safeEl("autorotate-toggle-btn");
   if (_themeBtn) _themeBtn.classList.toggle("hidden", type !== "3d");
   if (_rotateBtn) _rotateBtn.classList.toggle("hidden", type !== "3d");
   if (type === "2d") {
-    setText("projection-label", "Orbital Interface: 2D Active");
+    const slider = safeEl("toggle-slider");
+    const btn2d = safeEl("toggle-2d-btn");
+    const btn3d = safeEl("toggle-3d-btn");
+    if (btn2d && btn3d && slider) {
+      slider.style.transform = "translateX(0)";
+      slider.className = "absolute top-1 bottom-1 left-1 rounded-lg transition-all duration-300 ease-out pointer-events-none z-0 bg-blue-500/20 border border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.5)]";
+      btn2d.className = "relative flex-1 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors duration-300 flex items-center justify-center gap-2 z-10 w-28 text-white whitespace-nowrap";
+      btn3d.className = "relative flex-1 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors duration-300 flex items-center justify-center gap-2 z-10 w-28 text-slate-500 hover:text-slate-300 hover:bg-white/5 whitespace-nowrap";
+    }
+    const modeEl = safeEl("map-projection-mode");
+    const modeIcon = safeEl("map-projection-icon");
+    if (modeEl) modeEl.innerText = "2D";
+    if (modeIcon) modeIcon.className = "fas fa-map text-[11px] text-slate-500";
+
     svg = mapContainer
       .append("svg")
       .attr("id", "world-map")
@@ -448,6 +460,7 @@ function initMap(type) {
       .scaleExtent([1, 15])
       .on("zoom", (e) => g.attr("transform", e.transform));
     svg.call(zoom);
+
     window.syncMapOverlays = function () {
       if (
         typeof _quakeActive !== "undefined" &&
@@ -462,9 +475,12 @@ function initMap(type) {
             d3.select(this)
               .attr("cx", proj[0])
               .attr("cy", proj[1])
+              .style("animation", "pulseRadar 2s ease-out infinite")
               .style("display", null);
           } else {
-            d3.select(this).style("display", "none");
+            d3.select(this)
+              .style("animation", "none")
+              .style("display", "none");
           }
         });
       }
@@ -483,9 +499,12 @@ function initMap(type) {
                 "transform",
                 `translate(${proj[0]},${proj[1]}) rotate(${d.track - 90})`,
               )
+              .style("animation", "pulseRadar 3s ease-out infinite")
               .style("display", null);
           } else {
-            d3.select(this).style("display", "none");
+            d3.select(this)
+              .style("animation", "none")
+              .style("display", "none");
           }
         });
       }
@@ -522,11 +541,18 @@ function initMap(type) {
           showRichTooltip(e, d);
         })
         .on("mousemove", function (e) {
-          const t = document.getElementById("map-tooltip");
-          t.style.left = e.pageX + 15 + "px";
-          t.style.top = e.pageY - 15 + "px";
+          if (window._tooltipRaf) cancelAnimationFrame(window._tooltipRaf);
+          window._tooltipRaf = requestAnimationFrame(() => {
+            const t = document.getElementById("map-tooltip");
+            if (t) {
+              t.style.transform = `translate3d(${e.pageX + 15}px, ${e.pageY - 15}px, 0)`;
+              t.style.left = "0";
+              t.style.top = "0";
+            }
+          });
         })
         .on("mouseleave", function () {
+          if (window._tooltipRaf) cancelAnimationFrame(window._tooltipRaf);
           document.getElementById("map-tooltip").classList.add("hidden");
         })
         .on("click", function (event, d) {
@@ -534,117 +560,144 @@ function initMap(type) {
         });
     });
   } else {
-    setText("projection-label", "Orbital Interface: 3D WebGL");
-    currentProjection = () => [0, 0];
-    window.syncMapOverlays = function () { };
-    window.mouseX = 0;
-    window.mouseY = 0;
-    const updateTooltipPos = (e) => {
-      window.mouseX = e.pageX;
-      window.mouseY = e.pageY;
-      const t = document.getElementById("map-tooltip");
-      if (t && !t.classList.contains("hidden")) {
-        t.style.left = window.mouseX + 15 + "px";
-        t.style.top = window.mouseY - 15 + "px";
-      }
-    };
-    container.removeEventListener("mousemove", updateTooltipPos);
-    container.addEventListener("mousemove", updateTooltipPos);
-    window.myGlobe = Globe()(container)
-      .width(width)
-      .height(height)
-      .backgroundColor("rgba(0,0,0,0)")
-      .showAtmosphere(true)
-      .atmosphereColor("rgba(59, 130, 246, 0.4)")
-      .atmosphereAltitude(0.15)
-      .globeImageUrl(
-        window._globeTheme === "day"
-          ? "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-          : "//unpkg.com/three-globe/example/img/earth-night.jpg",
-      )
-      .bumpImageUrl("//unpkg.com/three-globe/example/img/earth-topology.png")
-      .ringColor((d) => d.color || "#3b82f6")
-      .ringMaxRadius((d) => d.r || 5)
-      .ringPropagationSpeed((d) => d.speed || 0.5)
-      .ringRepeatPeriod((d) => d.period || 1000);
-    const loadGlobeData = (features) => {
-      let hoverObj = null;
-      window.myGlobe
-        .polygonsData(features)
-        .polygonAltitude((d) => (d === hoverObj ? 0.06 : 0.01))
-        .polygonCapColor((d) => {
-          if (d === hoverObj) return "rgba(6, 182, 212, 0.5)";
-          return window._globeTheme === "day"
-            ? "rgba(59, 130, 246, 0.1)"
-            : "rgba(0, 0, 0, 0)";
-        })
-        .polygonSideColor((d) => {
-          if (d === hoverObj) return "rgba(6, 182, 212, 0.15)";
-          return window._globeTheme === "day"
-            ? "rgba(59, 130, 246, 0.05)"
-            : "rgba(0, 0, 0, 0)";
-        })
-        .polygonStrokeColor(() => "#3b82f6")
-        .polygonLabel(() => "")
-        .onPolygonHover((hoverD) => {
-          if (hoverD === hoverObj) return;
-          const t = safeEl("map-tooltip");
-          if (hoverD) {
-            window.playTacticalSound("hover");
-            showRichTooltip(
-              { pageX: window.mouseX, pageY: window.mouseY },
-              hoverD,
-            );
-          } else {
-            if (t) t.classList.add("hidden");
-          }
-          hoverObj = hoverD;
-          window.myGlobe.polygonAltitude(window.myGlobe.polygonAltitude());
-          window.myGlobe.polygonCapColor(window.myGlobe.polygonCapColor());
-          window.myGlobe.polygonSideColor(window.myGlobe.polygonSideColor());
-        })
-        .onPolygonClick((d) => {
-          if (d) handleCountryClick(null, d);
-        });
-      const ARC_REL_LEN = 0.4;
-      const arcData = [
-        { startLat: 40.7128, startLng: -74.006, endLat: 51.5074, endLng: -0.1276, color: ['#3b82f6', '#10b981'] },
-        { startLat: 51.5074, startLng: -0.1276, endLat: 35.6895, endLng: 139.6917, color: ['#10b981', '#f59e0b'] },
-        { startLat: 35.6895, startLng: 139.6917, endLat: 37.7749, endLng: -122.4194, color: ['#f59e0b', '#3b82f6'] },
-        { startLat: 37.7749, startLng: -122.4194, endLat: -33.8688, endLng: 151.2093, color: ['#3b82f6', '#ec4899'] },
-        { startLat: 25.2048, startLng: 55.2708, endLat: 51.5074, endLng: -0.1276, color: ['#f59e0b', '#10b981'] },
-        { startLat: 1.3521, startLng: 103.8198, endLat: 35.6895, endLng: 139.6917, color: ['#06b6d4', '#f59e0b'] },
-        { startLat: 19.0760, startLng: 72.8777, endLat: 25.2048, endLng: 55.2708, color: ['#8b5cf6', '#f59e0b'] },
-      ];
-      window.myGlobe
-        .arcsData(arcData)
-        .arcColor('color')
-        .arcDashLength(ARC_REL_LEN)
-        .arcDashGap(2)
-        .arcDashInitialGap(() => Math.random() * 5)
-        .arcDashAnimateTime(2500)
-        .arcAltitudeAutoScale(0.3);
-    };
-    if (!window.worldFeatures) {
-      d3.json(
-        "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json",
-      ).then((data) => {
-        window.worldFeatures = topojson.feature(
-          data,
-          data.objects.countries,
-        ).features;
-        worldFeatures = window.worldFeatures;
-        loadGlobeData(window.worldFeatures);
-      });
-    } else {
-      loadGlobeData(window.worldFeatures);
+    const slider = safeEl("toggle-slider");
+    const btn2d = safeEl("toggle-2d-btn");
+    const btn3d = safeEl("toggle-3d-btn");
+    if (btn2d && btn3d && slider) {
+      slider.style.transform = "translateX(calc(100% + 0.25rem))";
+      slider.className = "absolute top-1 bottom-1 left-1 rounded-lg transition-all duration-300 ease-out pointer-events-none z-0 bg-emerald-500/20 border border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.5)]";
+      btn3d.className = "relative flex-1 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors duration-300 flex items-center justify-center gap-2 z-10 w-28 text-white whitespace-nowrap";
+      btn2d.className = "relative flex-1 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors duration-300 flex items-center justify-center gap-2 z-10 w-28 text-slate-500 hover:text-slate-300 hover:bg-white/5 whitespace-nowrap";
     }
-    if (window.myGlobe.controls) {
-      window.myGlobe.controls().autoRotate = window._autoRotateActive !== false;
-      window.myGlobe.controls().autoRotateSpeed = 0.5;
+    const modeEl = safeEl("map-projection-mode");
+    const modeIcon = safeEl("map-projection-icon");
+    if (modeEl) modeEl.innerText = "3D";
+    if (modeIcon) modeIcon.className = "fas fa-globe-americas text-[11px] text-blue-400";
+    mapContainer.append("div").attr("id", "globe-tooltip").style("position", "absolute").style("pointer-events", "none").style("opacity", 0).style("z-index", "10");
+    try {
+      currentProjection = () => [0, 0];
+      window.syncMapOverlays = function () { };
+      window.mouseX = 0;
+      window.mouseY = 0;
+      const updateTooltipPos = (e) => {
+        window.mouseX = e.pageX;
+        window.mouseY = e.pageY;
+        if (window._globeTooltipRaf) cancelAnimationFrame(window._globeTooltipRaf);
+        window._globeTooltipRaf = requestAnimationFrame(() => {
+          const t = document.getElementById("map-tooltip");
+          if (t && !t.classList.contains("hidden")) {
+            t.style.transform = `translate3d(${window.mouseX + 15}px, ${window.mouseY - 15}px, 0)`;
+            t.style.left = "0";
+            t.style.top = "0";
+          }
+        });
+      };
+      container.removeEventListener("mousemove", updateTooltipPos);
+      container.addEventListener("mousemove", updateTooltipPos);
+      window.myGlobe = Globe()(container)
+        .width(width)
+        .height(height)
+        .backgroundColor("rgba(0,0,0,0)")
+        .backgroundImageUrl("//unpkg.com/three-globe/example/img/night-sky.png")
+        .showAtmosphere(true)
+        .atmosphereColor("rgba(59, 130, 246, 0.4)")
+        .atmosphereAltitude(0.15)
+        .globeImageUrl(
+          window._globeTheme === "day"
+            ? "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+            : "//unpkg.com/three-globe/example/img/earth-night.jpg",
+        )
+        .bumpImageUrl("//unpkg.com/three-globe/example/img/earth-topology.png")
+        .ringColor((d) => d.color || "#3b82f6")
+        .ringMaxRadius((d) => d.r || 5)
+        .ringPropagationSpeed((d) => d.speed || 0.5)
+        .ringRepeatPeriod((d) => d.period || 1000);
+      const loadGlobeData = (features) => {
+        let hoverObj = null;
+        window.myGlobe
+          .polygonsData(features)
+          .polygonAltitude((d) => (d === hoverObj ? 0.06 : 0.01))
+          .polygonCapColor((d) => {
+            if (d === hoverObj) return "rgba(6, 182, 212, 0.5)";
+            return window._globeTheme === "day"
+              ? "rgba(59, 130, 246, 0.1)"
+              : "rgba(0, 0, 0, 0)";
+          })
+          .polygonSideColor((d) => {
+            if (d === hoverObj) return "rgba(6, 182, 212, 0.15)";
+            return window._globeTheme === "day"
+              ? "rgba(59, 130, 246, 0.05)"
+              : "rgba(0, 0, 0, 0)";
+          })
+          .polygonStrokeColor(() => "#3b82f6")
+          .polygonLabel(() => "")
+          .onPolygonHover((hoverD) => {
+            if (hoverD === hoverObj) return;
+            const t = safeEl("map-tooltip");
+            if (hoverD) {
+              window.playTacticalSound("hover");
+              showRichTooltip(
+                { pageX: window.mouseX, pageY: window.mouseY },
+                hoverD,
+              );
+            } else {
+              if (t) t.classList.add("hidden");
+            }
+            hoverObj = hoverD;
+            window.myGlobe.polygonAltitude(window.myGlobe.polygonAltitude());
+            window.myGlobe.polygonCapColor(window.myGlobe.polygonCapColor());
+            window.myGlobe.polygonSideColor(window.myGlobe.polygonSideColor());
+          })
+          .onPolygonClick((d) => {
+            if (d) handleCountryClick(null, d);
+          });
+        const ARC_REL_LEN = 0.4;
+        const arcData = [
+          { startLat: 40.7128, startLng: -74.006, endLat: 51.5074, endLng: -0.1276, color: ['#3b82f6', '#10b981'] },
+          { startLat: 51.5074, startLng: -0.1276, endLat: 35.6895, endLng: 139.6917, color: ['#10b981', '#f59e0b'] },
+          { startLat: 35.6895, startLng: 139.6917, endLat: 37.7749, endLng: -122.4194, color: ['#f59e0b', '#3b82f6'] },
+          { startLat: 37.7749, startLng: -122.4194, endLat: -33.8688, endLng: 151.2093, color: ['#3b82f6', '#ec4899'] },
+          { startLat: 25.2048, startLng: 55.2708, endLat: 51.5074, endLng: -0.1276, color: ['#f59e0b', '#10b981'] },
+          { startLat: 1.3521, startLng: 103.8198, endLat: 35.6895, endLng: 139.6917, color: ['#06b6d4', '#f59e0b'] },
+          { startLat: 19.0760, startLng: 72.8777, endLat: 25.2048, endLng: 55.2708, color: ['#8b5cf6', '#f59e0b'] },
+        ];
+        window.myGlobe
+          .arcsData(arcData)
+          .arcColor('color')
+          .arcDashLength(ARC_REL_LEN)
+          .arcDashGap(2)
+          .arcDashInitialGap(() => Math.random() * 5)
+          .arcDashAnimateTime(2500)
+          .arcAltitudeAutoScale(0.3);
+      };
+      if (!window.worldFeatures) {
+        d3.json(
+          "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json",
+        ).then((data) => {
+          window.worldFeatures = topojson.feature(
+            data,
+            data.objects.countries,
+          ).features;
+          worldFeatures = window.worldFeatures;
+          loadGlobeData(window.worldFeatures);
+        });
+      } else {
+        loadGlobeData(window.worldFeatures);
+      }
+      if (window.myGlobe && window.myGlobe.controls) {
+        window.myGlobe.controls().autoRotate = window._autoRotateActive !== false;
+        window.myGlobe.controls().autoRotateSpeed = 0.5;
+        // Load at the same zoom as one click of the + button (altitude = 2.5 / 1.6)
+        setTimeout(() => {
+          if (window.myGlobe) window.myGlobe.pointOfView({ altitude: 1.56 }, 0);
+        }, 150);
+      }
+    } catch (err) {
+      console.error("Globe Initialization Error:", err);
     }
   }
 }
+
 const _countryNameForAPI = {
   "Central African Rep.": "Central African Republic",
   "Dem. Rep. Congo": "Democratic Republic of the Congo",
@@ -963,37 +1016,42 @@ function setupEventListeners() {
   });
   const input = document.getElementById("country-search");
   if (!input) return;
+  let searchTimeout;
   input.oninput = (e) => {
     const query = e.target.value.toLowerCase().trim();
     const resContainer = document.getElementById("search-results");
     if (!query) {
+      clearTimeout(searchTimeout);
       window.renderTrending();
       return;
     }
-    if (!globalSearchData || globalSearchData.length === 0) {
-      resContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 font-bold uppercase tracking-widest animate-pulse">Initializing Search Index...</div>`;
-      return;
-    }
-    const matched = globalSearchData
-      .filter((c) => c.name.common.toLowerCase().includes(query))
-      .slice(0, 8);
-    if (matched.length === 0) {
-      resContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 font-bold uppercase tracking-widest">Sector Not Found</div>`;
-      return;
-    }
-    resContainer.innerHTML = matched
-      .map(
-        (c) => `
-            <div class="p-4 hover:bg-blue-600/10 cursor-pointer flex items-center gap-4 border-b border-white/5 transition-all group" onclick="window.selectFromSearch('${c.name.common.replace(/'/g, "\\'")}')">
-                <div class="w-8 h-5 rounded shadow-sm overflow-hidden relative border border-white/10 group-hover:border-blue-400/50">
-                    <img src="${c.flags.svg}" class="w-full h-full object-cover">
-                </div>
-                <span class="font-bold text-white text-sm tracking-tight group-hover:text-blue-300 transition-colors">${c.name.common}</span>
-                <i class="fas fa-chevron-right ml-auto text-[10px] text-slate-600 group-hover:text-blue-400"></i>
-            </div>
-        `,
-      )
-      .join("");
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      if (!globalSearchData || globalSearchData.length === 0) {
+        resContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 font-bold uppercase tracking-widest animate-pulse">Initializing Search Index...</div>`;
+        return;
+      }
+      const matched = globalSearchData
+        .filter((c) => c.name.common.toLowerCase().includes(query))
+        .slice(0, 8);
+      if (matched.length === 0) {
+        resContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 font-bold uppercase tracking-widest">Sector Not Found</div>`;
+        return;
+      }
+      resContainer.innerHTML = matched
+        .map(
+          (c) => `
+              <div class="p-4 hover:bg-blue-600/10 cursor-pointer flex items-center gap-4 border-b border-white/5 transition-all group" onclick="window.selectFromSearch('${c.name.common.replace(/'/g, "\\'")}')">
+                  <div class="w-8 h-5 rounded shadow-sm overflow-hidden relative border border-white/10 group-hover:border-blue-400/50">
+                      <img src="${c.flags.svg}" class="w-full h-full object-cover">
+                  </div>
+                  <span class="font-bold text-white text-sm tracking-tight group-hover:text-blue-300 transition-colors">${c.name.common}</span>
+                  <i class="fas fa-chevron-right ml-auto text-[10px] text-slate-600 group-hover:text-blue-400"></i>
+              </div>
+          `,
+        )
+        .join("");
+    }, 250);
   };
   window.onkeydown = (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === "k") {
@@ -1159,9 +1217,11 @@ window.toggleSidebarMobile = function () {
   const btn = safeEl("sidebar-toggle-mobile");
   if (!sidebar) return;
   sidebar.classList.toggle("open");
+  const isOpen = sidebar.classList.contains("open");
+  document.body.classList.toggle("sidebar-open", isOpen);
   if (btn) {
-    btn.querySelector("i").className = sidebar.classList.contains("open") ? "fas fa-chevron-right" : "fas fa-chevron-left";
-    btn.setAttribute("aria-label", sidebar.classList.contains("open") ? "Close sidebar" : "Open sidebar");
+    btn.querySelector("i").className = isOpen ? "fas fa-chevron-right" : "fas fa-chevron-left";
+    btn.setAttribute("aria-label", isOpen ? "Close sidebar" : "Open sidebar");
   }
 };
 window.personalizeSession = (user) => {
@@ -1193,11 +1253,17 @@ window.personalizeSession = (user) => {
 };
 window.calculateRiskScore = function (countryName) {
   let risk = 50;
-  const code = Object.keys(window.countryMapping).find(k => window.countryMapping[k] === countryName);
-  if (code && window.globalSearchData && window.globalSearchData[code]) {
-    const cData = window.globalSearchData[code];
-    if (cData.metrics && typeof cData.metrics.eventCount === "number") {
-      risk += Math.min(40, (cData.metrics.eventCount / 100) * 40);
+  if (window._hexLayers && window._hexLayers.gdelt) {
+    const gdeltEvents = window._hexLayers.gdelt.filter(p => p.place && p.place.toLowerCase().includes((countryName || '').toLowerCase().split(' ')[0]));
+    if (gdeltEvents.length > 0) {
+      risk += Math.min(30, gdeltEvents.reduce((sum, e) => sum + (e.count || 1), 0) * 2);
+    }
+  }
+  if (window.globalSearchData && Array.isArray(window.globalSearchData)) {
+    const cData = window.globalSearchData.find(c => c.name?.common === countryName);
+    if (cData) {
+      if (cData.population > 5e8) risk += 5;
+      if (cData.population < 2e6) risk += 5;
     }
   }
   if (window.worldFeatures) {
@@ -1210,42 +1276,100 @@ window.calculateRiskScore = function (countryName) {
   }
   const today = new Date().toISOString().slice(0, 10);
   const hash = Array.from(countryName + today).reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const fuzz = (hash % 20) - 10;
-  risk += fuzz;
+  risk += (hash % 20) - 10;
   return Math.max(0, Math.min(100, Math.round(risk)));
 };
+
 let _riskIndexActive = false;
 window.toggleRiskIndex = function () {
+  if (!window.myGlobe) {
+    if (window.showToast) window.showToast("Switch to 3D Globe to use Risk Matrix (press P)", "warning");
+    return;
+  }
   _riskIndexActive = !_riskIndexActive;
   const btn = document.getElementById("risk-toggle-btn");
   if (btn) btn.classList.toggle("active", _riskIndexActive);
   if (_riskIndexActive) {
     window.setChoropleth(null);
     window._choroplethMode = "risk";
-    document.getElementById("color-by-select").value = "risk";
+    const selectEl = document.getElementById("color-by-select");
+    if (selectEl) selectEl.value = "risk";
     const interpolateRisk = d3.interpolateRgbBasis(["#10b981", "#f59e0b", "#ef4444"]);
-    window.myGlobe.polygonCapColor((d) => {
-      const score = window.calculateRiskScore(d.properties.name);
-      return interpolateRisk(score / 100);
-    }).polygonAltitude(0.02);
+    window.myGlobe
+      .polygonCapColor((d) => {
+        const score = window.calculateRiskScore(d.properties?.name || "");
+        return interpolateRisk(score / 100);
+      })
+      .polygonAltitude(0.02);
     window.showToast?.("Geopolitical Risk Matrix Active", "warning");
     const el = safeEl("map-legend");
     if (el) {
       el.classList.remove("hidden");
       el.innerHTML = `
-              <div class="text-[9px] text-slate-400 mb-1 font-bold tracking-wider">GEOPOLITICAL RISK (0-100)</div>
-              <div class="h-1.5 w-full rounded" style="background: linear-gradient(to right, #10b981, #f59e0b, #ef4444)"></div>
-              <div class="flex justify-between text-[9px] text-slate-500 mt-1"><span>STABLE</span><span>CRITICAL</span></div>
-          `;
+        <div
+          onclick="const d=this.nextElementSibling;const i=this.querySelector('.legend-chevron');d.classList.toggle('hidden');i.style.transform=d.classList.contains('hidden')?'':'rotate(180deg)';"
+          class="flex items-center justify-between gap-3 cursor-pointer select-none pb-2 border-b border-white/5"
+          style="margin-bottom:10px;"
+        >
+          <div class="flex items-center gap-2">
+            <i class="fas fa-globe-americas text-blue-400 text-[10px]"></i>
+            <span class="text-[9px] text-blue-400 font-black tracking-widest uppercase" style="font-family:'JetBrains Mono',monospace;">Geopolitical Risk</span>
+          </div>
+          <i class="fas fa-chevron-up text-slate-500 text-[8px] legend-chevron" style="transition:transform 0.2s;"></i>
+        </div>
+        <div>
+          <div class="h-2 w-full rounded-full" style="background:linear-gradient(to right,#10b981,#f59e0b,#ef4444);"></div>
+          <div class="flex justify-between mt-1" style="margin-bottom:10px;">
+            <span class="text-[9px] text-emerald-400 font-bold">STABLE</span>
+            <span class="text-[9px] text-slate-500">0 — 100</span>
+            <span class="text-[9px] text-red-400 font-bold">CRITICAL</span>
+          </div>
+          <div class="border-t border-white/5 pt-2" style="font-family:'JetBrains Mono',monospace;">
+            <div class="text-[9px] text-slate-400 font-bold mb-2">SCORE FACTORS</div>
+            <div class="space-y-1.5">
+              <div class="flex justify-between items-center gap-4">
+                <span class="text-[9px] text-slate-500"><i class="fas fa-crosshairs text-red-400 mr-1"></i>GDELT Conflicts</span>
+                <span class="text-[9px] text-red-400 font-bold">+0–30</span>
+              </div>
+              <div class="flex justify-between items-center gap-4">
+                <span class="text-[9px] text-slate-500"><i class="fas fa-arrow-down text-amber-400 mr-1"></i>GDP &lt; $50B</span>
+                <span class="text-[9px] text-amber-400 font-bold">+10</span>
+              </div>
+              <div class="flex justify-between items-center gap-4">
+                <span class="text-[9px] text-slate-500"><i class="fas fa-arrow-up text-emerald-400 mr-1"></i>GDP &gt; $1T</span>
+                <span class="text-[9px] text-emerald-400 font-bold">-10</span>
+              </div>
+              <div class="flex justify-between items-center gap-4">
+                <span class="text-[9px] text-slate-500"><i class="fas fa-users text-amber-400 mr-1"></i>Pop &gt; 500M</span>
+                <span class="text-[9px] text-amber-400 font-bold">+5</span>
+              </div>
+              <div class="flex justify-between items-center gap-4">
+                <span class="text-[9px] text-slate-500"><i class="fas fa-random text-slate-500 mr-1"></i>Daily Variance</span>
+                <span class="text-[9px] text-slate-400 font-bold">±10</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
     }
   } else {
     window.setChoropleth(null);
-    document.getElementById("color-by-select").value = "";
+    const selectEl = document.getElementById("color-by-select");
+    if (selectEl) selectEl.value = "";
+    const el = safeEl("map-legend");
+    if (el) el.classList.add("hidden");
+    if (window.myGlobe) {
+      window.myGlobe
+        .polygonCapColor(() =>
+          window._globeTheme === "day"
+            ? "rgba(59, 130, 246, 0.1)"
+            : "rgba(0, 0, 0, 0)"
+        )
+        .polygonAltitude(0.01);
+    }
     window.showToast?.("Risk Matrix Disabled", "info");
   }
 };
-
-// Core initialization sequence moved to end of file to ensure all dependencies load first.
 
 document.addEventListener(
   "click",
@@ -1960,6 +2084,38 @@ window.toggleAutoRotate = function () {
   if (window.myGlobe && window.myGlobe.controls()) {
     window.myGlobe.controls().autoRotate = window._autoRotateActive;
   }
+};
+window._globeZoomed = false;
+window.toggleGlobeZoom = function () {
+  if (!window.myGlobe || !window.myGlobe.controls()) return;
+  window._globeZoomed = !window._globeZoomed;
+  const btn = document.getElementById("globe-zoom-toggle-btn");
+  const camera = window.myGlobe.camera();
+  const controls = window.myGlobe.controls();
+  // Target distances: normal ~350, zoomed in ~220
+  const targetDist = window._globeZoomed ? 220 : 350;
+  if (btn) {
+    btn.classList.toggle("active", window._globeZoomed);
+    btn.title = window._globeZoomed ? "Globe Zoom: Closer" : "Globe Zoom: Normal";
+    const icon = btn.querySelector("i");
+    if (icon) icon.className = window._globeZoomed ? "fas fa-search-minus text-xs" : "fas fa-search-plus text-xs";
+  }
+  // Smooth zoom via camera position interpolation
+  const duration = 600;
+  const start = performance.now();
+  const pos = camera.position;
+  const currentDist = pos.length();
+  const dir = pos.clone().normalize();
+  function animateZoom(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    const dist = currentDist + (targetDist - currentDist) * eased;
+    camera.position.copy(dir.clone().multiplyScalar(dist));
+    controls.update();
+    if (t < 1) requestAnimationFrame(animateZoom);
+  }
+  requestAnimationFrame(animateZoom);
+  window.showToast?.(window._globeZoomed ? "Globe: Closer View" : "Globe: Normal View", "info");
 };
 window.toggleGlobeTheme = function () {
   window._globeTheme = window._globeTheme === "night" ? "day" : "night";

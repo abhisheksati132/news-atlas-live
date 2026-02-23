@@ -20,6 +20,79 @@ function magColor(m) {
   return m >= 7 ? "#ef4444" : m >= 6 ? "#f97316" : m >= 5 ? "#eab308" : "#10b981";
 }
 window.magColor = magColor;
+
+window._audioMuted = false;
+let audioCtx = null;
+window.playTacticalSound = function (type) {
+  if (window._audioMuted) return;
+  if (!audioCtx) {
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch { return; }
+  }
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+
+  const osc = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+  osc.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+
+  const t = audioCtx.currentTime;
+
+  if (type === "hover") {
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(800, t);
+    osc.frequency.exponentialRampToValueAtTime(1200, t + 0.05);
+    gainNode.gain.setValueAtTime(0, t);
+    gainNode.gain.linearRampToValueAtTime(0.05, t + 0.01);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+    osc.start(t);
+    osc.stop(t + 0.1);
+  } else if (type === "click" || type === "tab") {
+    osc.type = "square";
+    osc.frequency.setValueAtTime(400, t);
+    osc.frequency.exponentialRampToValueAtTime(200, t + 0.1);
+    gainNode.gain.setValueAtTime(0, t);
+    gainNode.gain.linearRampToValueAtTime(0.08, t + 0.01);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+    osc.start(t);
+    osc.stop(t + 0.1);
+  } else if (type === "success") {
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(600, t);
+    osc.frequency.setValueAtTime(800, t + 0.1);
+    osc.frequency.setValueAtTime(1000, t + 0.2);
+    gainNode.gain.setValueAtTime(0, t);
+    gainNode.gain.linearRampToValueAtTime(0.1, t + 0.05);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+    osc.start(t);
+    osc.stop(t + 0.3);
+  }
+};
+
+window.toggleGlobalAudio = function () {
+  window._audioMuted = !window._audioMuted;
+  if (window._audioMuted && window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+  }
+  const btn = document.getElementById("audio-icon");
+  const parentBtn = document.getElementById("audio-toggle-btn");
+  if (btn && parentBtn) {
+    if (window._audioMuted) {
+      btn.className = "fas fa-volume-mute text-2xl relative z-10";
+      parentBtn.classList.remove("text-emerald-400");
+      parentBtn.classList.add("text-red-400");
+    } else {
+      btn.className = "fas fa-volume-up text-2xl relative z-10";
+      parentBtn.classList.remove("text-red-400");
+      parentBtn.classList.add("text-emerald-400");
+      window.playTacticalSound("success");
+    }
+  }
+};
+
 function safeEl(id) {
   return document.getElementById(id);
 }
@@ -594,12 +667,14 @@ window.initMap = function (type) {
       };
       container.removeEventListener("mousemove", updateTooltipPos);
       container.addEventListener("mousemove", updateTooltipPos);
+      const isMobileDevice = window.innerWidth < 768;
+
       window.myGlobe = Globe()(container)
         .width(width)
         .height(height)
         .backgroundColor("rgba(0,0,0,0)")
-        .backgroundImageUrl("//unpkg.com/three-globe/example/img/night-sky.png")
-        .showAtmosphere(true)
+        .backgroundImageUrl(isMobileDevice ? null : "//unpkg.com/three-globe/example/img/night-sky.png")
+        .showAtmosphere(!isMobileDevice)
         .atmosphereColor("rgba(59, 130, 246, 0.4)")
         .atmosphereAltitude(0.15)
         .globeImageUrl(
@@ -607,11 +682,17 @@ window.initMap = function (type) {
             ? "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
             : "//unpkg.com/three-globe/example/img/earth-night.jpg",
         )
-        .bumpImageUrl("//unpkg.com/three-globe/example/img/earth-topology.png")
+        .bumpImageUrl(isMobileDevice ? null : "//unpkg.com/three-globe/example/img/earth-topology.png")
         .ringColor((d) => d.color || "#3b82f6")
         .ringMaxRadius((d) => d.r || 5)
         .ringPropagationSpeed((d) => d.speed || 0.5)
         .ringRepeatPeriod((d) => d.period || 1000);
+
+      // Downscale pixel ratio on mobile to drastically improve performance 
+      if (isMobileDevice && window.myGlobe.renderer) {
+        window.myGlobe.renderer().setPixelRatio(1);
+      }
+
       const loadGlobeData = (features) => {
         let hoverObj = null;
         window.myGlobe
@@ -687,9 +768,10 @@ window.initMap = function (type) {
       if (window.myGlobe && window.myGlobe.controls) {
         window.myGlobe.controls().autoRotate = window._autoRotateActive !== false;
         window.myGlobe.controls().autoRotateSpeed = 0.5;
-        // Load at the same zoom as one click of the + button (altitude = 2.5 / 1.6)
+        // Adjust zoom based on screen size (further away on mobile so it fits)
+        const isMobile = window.innerWidth < 768;
         setTimeout(() => {
-          if (window.myGlobe) window.myGlobe.pointOfView({ altitude: 1.56 }, 0);
+          if (window.myGlobe) window.myGlobe.pointOfView({ altitude: isMobile ? 3.0 : 1.56 }, 0);
         }, 150);
       }
     } catch (err) {
@@ -1074,11 +1156,12 @@ function updateSystemTime() {
   setText(
     "system-time",
     now.toLocaleTimeString("en-US", {
+      timeZone: "Asia/Kolkata",
       hour12: false,
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
-    }) + " UTC",
+    }) + " IST",
   );
   if (countryUTCOffset) {
     const utc = now.getTime() + now.getTimezoneOffset() * 60000;
@@ -1212,22 +1295,12 @@ window.updateLayerLegend = function () {
   el.classList.remove("hidden");
   el.innerHTML = active.map((a) => `<span style="color:${a.color}">● ${a.label}</span>`).join(" ");
 };
-window.toggleSidebarMobile = function () {
-  const sidebar = safeEl("sidebar");
-  const btn = safeEl("sidebar-toggle-mobile");
-  if (!sidebar) return;
-  sidebar.classList.toggle("open");
-  const isOpen = sidebar.classList.contains("open");
-  document.body.classList.toggle("sidebar-open", isOpen);
-  if (btn) {
-    btn.querySelector("i").className = isOpen ? "fas fa-chevron-right" : "fas fa-chevron-left";
-    btn.setAttribute("aria-label", isOpen ? "Close sidebar" : "Open sidebar");
-  }
-};
+
 window.personalizeSession = (user) => {
   const safeName = user.displayName || (user.email ? user.email.split("@")[0] : user.uid?.substring(0, 8) || "operator");
   const shortName = safeName.split(" ")[0];
   setTimeout(() => {
+    if (window._audioMuted) return;
     const speech = new SpeechSynthesisUtterance(
       `Identity confirmed. Welcome back, Commander ${shortName}`,
     );
@@ -2068,7 +2141,7 @@ if (!window._cyberInterval) {
 if (typeof window._globeTheme === "undefined") {
   window._globeTheme = "night";
 }
-window._autoRotateActive = true;
+window._autoRotateActive = false;
 window.toggleAutoRotate = function () {
   window._autoRotateActive = !window._autoRotateActive;
   const btn = document.getElementById("autorotate-toggle-btn");

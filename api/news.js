@@ -161,6 +161,31 @@ const COUNTRY_FEEDS = {
       category: "world",
       source: "Hindustan Times",
     },
+    {
+      url: "https://www.news18.com/rss/india.xml",
+      category: "world",
+      source: "News18",
+    },
+    {
+      url: "https://zeenews.india.com/rss/india-national-news.xml",
+      category: "world",
+      source: "Zee News",
+    },
+    {
+      url: "https://www.firstpost.com/commonfeeds/v1/rss/india.xml",
+      category: "world",
+      source: "Firstpost",
+    },
+    {
+      url: "https://theprint.in/feed/",
+      category: "world",
+      source: "The Print",
+    },
+    {
+      url: "https://news.abplive.com/home/feed",
+      category: "world",
+      source: "ABP News",
+    },
   ],
   us: [
     {

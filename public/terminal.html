@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>NewsAtlas | Global Intelligence Terminal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -143,8 +143,8 @@
       padding: 0 1.5rem;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
+      justify-content: flex-start;
+      gap: 1.5rem;
       position: fixed;
       top: 0;
       left: 0;
@@ -155,6 +155,15 @@
       box-shadow: 0 1px 40px rgba(0, 0, 0, 0.6);
       max-width: 100%;
       zoom: 0.9;
+      overflow-x: auto;
+      -ms-overflow-style: none;
+      /* IE and Edge */
+      scrollbar-width: none;
+      /* Firefox */
+    }
+
+    header::-webkit-scrollbar {
+      display: none;
     }
 
     .main-content {
@@ -1029,76 +1038,37 @@
     }
 
     @media (max-width: 1023px) {
-      .intel-sidebar {
-        position: fixed;
-        top: 100px;
-        right: 0;
-        bottom: 0;
-        width: min(100%, 360px);
-        z-index: 40;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-        box-shadow: -8px 0 24px rgba(0, 0, 0, 0.4);
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
+      html {
+        font-size: 80%;
+        /* Reduce overall size by 20% on mobile */
       }
 
-      .intel-sidebar.open {
-        transform: translateX(0);
+      header {
+        overflow-x: auto;
+        justify-content: flex-start;
+        -ms-overflow-style: none;
+        /* IE and Edge */
+        scrollbar-width: none;
+        /* Firefox */
       }
 
-      .intel-sidebar #sidebar-content {
-        flex: 1;
-        overflow-y: auto;
-        overflow-x: hidden;
-        min-height: 0;
+      header::-webkit-scrollbar {
+        display: none;
       }
 
-      .intel-sidebar .content-scroll-area {
-        overflow-y: auto;
-        overflow-x: hidden;
+      .map-box {
+        height: 50vh !important;
+        min-height: 350px !important;
       }
 
       .intel-sidebar .tab-content {
-        overflow-y: auto;
-        overflow-x: hidden;
-        padding-bottom: 5rem;
+        padding-bottom: 2rem;
       }
 
       .map-ctrl-btn {
         min-width: 44px;
         min-height: 44px;
       }
-    }
-
-    .sidebar-toggle-mobile {
-      position: fixed;
-      right: 1rem;
-      bottom: 6rem;
-      z-index: 50;
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      background: rgba(59, 130, 246, 0.2);
-      border: 1px solid rgba(59, 130, 246, 0.4);
-      color: #60a5fa;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      transition: right 0.3s ease, background 0.2s;
-    }
-
-    @media (min-width: 1024px) {
-      .sidebar-toggle-mobile {
-        display: none !important;
-      }
-    }
-
-    .sidebar-open .sidebar-toggle-mobile {
-      right: calc(min(100%, 360px) + 0.5rem);
-      background: rgba(59, 130, 246, 0.35);
     }
 
     .tab-ai-chat {
@@ -1697,7 +1667,7 @@
     </div>
   </div>
   <header>
-    <div class="flex items-center gap-4 cursor-pointer group" onclick="resetToGlobalCenter(true)">
+    <div class="flex items-center gap-4 cursor-pointer group shrink-0" onclick="resetToGlobalCenter(true)">
       <div class="relative w-14 h-14">
         <div
           class="absolute inset-0 rounded-xl flex items-center justify-center transition-transform group-hover:rotate-6"
@@ -1721,7 +1691,7 @@
         </p>
       </div>
     </div>
-    <div class="hidden lg:flex items-center gap-3 xl:gap-4 px-4 xl:px-6 h-[68px] rounded-xl" style="
+    <div class="hidden lg:flex items-center gap-3 xl:gap-4 px-4 xl:px-6 h-[68px] rounded-xl shrink-0" style="
           background: rgba(255, 255, 255, 0.02);
           border: 1px solid rgba(255, 255, 255, 0.06);
         ">
@@ -1743,7 +1713,7 @@
         </div>
       </div>
     </div>
-    <div class="flex items-center gap-3 xl:gap-5 px-4 xl:px-6 h-[68px] rounded-xl" style="
+    <div class="flex items-center gap-3 xl:gap-5 px-4 xl:px-6 h-[68px] rounded-xl shrink-0 ml-auto" style="
           background: rgba(255, 255, 255, 0.02);
           border: 1px solid rgba(255, 255, 255, 0.06);
         ">
@@ -1751,7 +1721,7 @@
         <span id="system-time" class="text-3xl font-black text-blue-400 tabular-nums leading-none whitespace-nowrap"
           style="font-family: &quot;JetBrains Mono&quot;, monospace">00:00:00</span>
         <span class="text-[11px] font-bold text-slate-600 uppercase mt-1 tracking-[.2em] whitespace-nowrap"
-          style="font-family: &quot;JetBrains Mono&quot;, monospace">UTC ·
+          style="font-family: &quot;JetBrains Mono&quot;, monospace">LOCAL ·
           <span id="local-time" class="text-slate-500">--:--:--</span></span>
       </div>
       <div class="h-10 w-px bg-slate-800"></div>
@@ -1772,13 +1742,17 @@
           title="Voice Command">
           <i class="fas fa-microphone text-2xl"></i>
         </button>
+        <button onclick="toggleGlobalAudio()" id="audio-toggle-btn"
+          class="text-emerald-400 hover:text-white transition-all tactical-btn" title="Toggle Global Audio">
+          <i id="audio-icon" class="fas fa-volume-up text-2xl relative z-10"></i>
+        </button>
         <button onclick="toggleAbout(true)" class="text-slate-500 hover:text-emerald-400 transition-all tactical-btn"
           title="About">
           <i class="fas fa-info-circle text-2xl"></i>
         </button>
       </div>
     </div>
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-4 shrink-0">
       <button onclick="goToIndiaHome()"
         class="flex items-center justify-center gap-2 px-4 xl:px-6 h-[68px] rounded-xl tactical-btn group transition-all"
         style="
@@ -1865,8 +1839,8 @@
               title="Globe Theme: NIGHT">
               <i class="fas fa-moon text-sm"></i>
             </button>
-            <button id="autorotate-toggle-btn" onclick="toggleAutoRotate()"
-              class="map-ctrl-btn text-blue-400 active hidden" title="Auto-Rotate: ON">
+            <button id="autorotate-toggle-btn" onclick="toggleAutoRotate()" class="map-ctrl-btn text-slate-400 hidden"
+              title="Auto-Rotate: OFF">
               <i class="fas fa-sync text-sm"></i>
             </button>
             <button onclick="resetToGlobalCenter()" class="map-ctrl-btn text-blue-400"
@@ -1939,11 +1913,7 @@
         </div>
       </div>
     </div>
-    <button type="button" id="sidebar-toggle-mobile" class="sidebar-toggle-mobile"
-      onclick="window.toggleSidebarMobile()" aria-label="Open sidebar"
-      title="Open sidebar (Intel, News, Markets, Atmosphere, Economic)">
-      <i class="fas fa-chevron-left"></i>
-    </button>
+
     <div id="sidebar" class="intel-sidebar glass-panel">
       <nav class="flex border-b border-white/6 w-full overflow-hidden" style="border-radius: 1rem 1rem 0 0"
         role="tablist" aria-label="Main sections">

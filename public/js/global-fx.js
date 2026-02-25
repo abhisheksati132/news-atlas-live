@@ -6,62 +6,67 @@ document.addEventListener('DOMContentLoaded', () => {
     cursor.id = 'custom-cursor';
     document.body.appendChild(cursor);
 
-    document.addEventListener('mousemove', (e) => {
-        cursor.style.left = e.clientX + 'px';
-        cursor.style.top = e.clientY + 'px';
+    let mouseX = 0, mouseY = 0;
+    let cursorX = 0, cursorY = 0;
 
-        const bgX = (e.clientX / window.innerWidth - 0.5) * -20;
-        const bgY = (e.clientY / window.innerHeight - 0.5) * -20;
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+
+        // Efficiently update globals for parallax
+        const bgX = (e.clientX / window.innerWidth - 0.5) * -15;
+        const bgY = (e.clientY / window.innerHeight - 0.5) * -15;
         document.documentElement.style.setProperty('--bg-mouse-x', bgX);
         document.documentElement.style.setProperty('--bg-mouse-y', bgY);
     });
 
+    const updateCursor = () => {
+        cursorX += (mouseX - cursorX) * 0.2;
+        cursorY += (mouseY - cursorY) * 0.2;
+        cursor.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0)`;
+        requestAnimationFrame(updateCursor);
+    };
+    updateCursor();
+
     const interactiveSelectors = 'a, button, input, .nav-tab, .map-box, .glass-glow-track, .shortcut-item, [onclick]';
-    document.querySelectorAll(interactiveSelectors).forEach(el => {
-        el.addEventListener('mouseenter', () => cursor.classList.add('cursor-hover'));
-        el.addEventListener('mouseleave', () => cursor.classList.remove('cursor-hover'));
-    });
+
+    const bindInteractive = (root) => {
+        const elements = root.querySelectorAll ? root.querySelectorAll(interactiveSelectors) : [];
+        elements.forEach(el => {
+            if (el._bound) return;
+            el.addEventListener('mouseenter', () => {
+                cursor.classList.add('cursor-hover');
+                if (window.playTacticalHover) window.playTacticalHover();
+            });
+            el.addEventListener('mouseleave', () => cursor.classList.remove('cursor-hover'));
+            el._bound = true;
+        });
+    };
 
     const observer = new MutationObserver(mutations => {
         mutations.forEach(mutation => {
             mutation.addedNodes.forEach(node => {
-                if (node.nodeType === 1) {
-                    const iteracts = node.matches && node.matches(interactiveSelectors) ? [node] : node.querySelectorAll(interactiveSelectors);
-                    if (iteracts) {
-                        iteracts.forEach(el => {
-                            el.addEventListener('mouseenter', () => cursor.classList.add('cursor-hover'));
-                            el.addEventListener('mouseleave', () => cursor.classList.remove('cursor-hover'));
-                        });
-                    }
-                }
+                if (node.nodeType === 1) bindInteractive(node);
             });
         });
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
-    const glowSyncObserver = new MutationObserver(() => applyGlowTracking());
-    glowSyncObserver.observe(document.body, { childList: true, subtree: true });
-
     const applyGlowTracking = () => {
-        const trackers = document.querySelectorAll('.glass-glow-track, .apple-glass, .glass-panel, div.rounded-2xl, div.rounded-3xl, footer, nav [class*="glass"]');
+        const trackers = document.querySelectorAll('.apple-glass, .glass-panel, nav [class*="glass"]');
         trackers.forEach(el => {
-
-            if (!el.classList.contains('glass-glow-track')) el.classList.add('glass-glow-track');
-
-            if (el.tagName.toLowerCase() !== 'footer') {
-                el.style.overflow = 'hidden';
-            }
-
+            if (el._glowBound) return;
             el.addEventListener('mousemove', (e) => {
                 const rect = el.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                el.style.setProperty('--mouse-x', x + 'px');
-                el.style.setProperty('--mouse-y', y + 'px');
-            });
+                el.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
+                el.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
+            }, { passive: true });
+            el._glowBound = true;
         });
     };
     applyGlowTracking();
+    // Re-apply tracking occasionally rather than on every mutation
+    setInterval(applyGlowTracking, 2000);
 
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
     window.scrambleText = function (element, finalString, duration = 1000) {

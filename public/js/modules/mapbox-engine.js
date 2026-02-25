@@ -46,7 +46,7 @@ class MapboxEngine {
         this.map.on('style.load', () => {
             this._applyAtmosphere();
             this._addTerrain();
-            
+
             this.initMapboxLayers();
 
             this._startDeckAnimation();
@@ -65,14 +65,14 @@ class MapboxEngine {
 
     _applyAtmosphere() {
         try {
-            
+
             this.map.setFog({
-                'color': 'rgb(4, 10, 28)',            
-                'high-color': 'rgb(2, 6, 23)',         
-                'horizon-blend': 0.04,                 
-                'space-color': 'rgb(0, 2, 10)',        
-                'star-intensity': 0.85,                
-                'range': [0.5, 10]                     
+                'color': 'rgb(4, 10, 28)',
+                'high-color': 'rgb(2, 6, 23)',
+                'horizon-blend': 0.04,
+                'space-color': 'rgb(0, 2, 10)',
+                'star-intensity': 0.85,
+                'range': [0.5, 10]
             });
         } catch (e) {
             console.warn('Fog API not available on this Mapbox version:', e.message);
@@ -96,7 +96,7 @@ class MapboxEngine {
                 }
             }]);
         } catch (e) {
-            
+
         }
     }
 
@@ -114,7 +114,7 @@ class MapboxEngine {
 
     _addDayNightTerminator() {
         const buildTerminatorGeoJSON = () => {
-            
+
             const now = new Date();
             const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
             const declination = -23.45 * Math.cos((2 * Math.PI / 365) * (dayOfYear + 10)) * (Math.PI / 180);
@@ -124,7 +124,7 @@ class MapboxEngine {
 
             const antiLon = sunLon + 180 > 180 ? sunLon - 180 : sunLon + 180;
             const antiLat = -sunLat;
-            const R = 90; 
+            const R = 90;
             const coords = [];
             for (let i = 0; i <= 360; i += 2) {
                 const angle = i * (Math.PI / 180);
@@ -162,7 +162,7 @@ class MapboxEngine {
         const zoom = this.map.getZoom();
         if (zoom >= 14 && !this._buildingsAdded) {
             this._buildingsAdded = true;
-            
+
             const layers = this.map.getStyle().layers;
             let labelLayerId;
             for (const layer of layers) {
@@ -204,7 +204,7 @@ class MapboxEngine {
         const isGlobeView = currentZoom < 3;
 
         if (isGlobeView) {
-            
+
             this.map.easeTo({ zoom: 1.8, pitch: 0, bearing: 0, duration: 600 });
             setTimeout(() => {
                 this.map.flyTo({
@@ -219,7 +219,7 @@ class MapboxEngine {
                 });
             }, 700);
         } else {
-            
+
             this.map.flyTo({
                 center: lngLat,
                 zoom,
@@ -246,7 +246,7 @@ class MapboxEngine {
     }
 
     onReady() {
-        
+
         window.mapEngine = this;
     }
 
@@ -338,7 +338,12 @@ class MapboxEngine {
 
             let hoveredId = null;
 
+            let lastMove = 0;
             this.map.on('mousemove', 'country-fills', (e) => {
+                const now = Date.now();
+                if (now - lastMove < 32) return;
+                lastMove = now;
+
                 if (!e.features.length) return;
                 this.map.getCanvas().style.cursor = 'crosshair';
                 if (hoveredId !== null) {
@@ -514,18 +519,26 @@ class MapboxEngine {
         this.map.addControl(this.deckOverlay);
 
         let timeOffset = 0;
-        const animateDeck = () => {
+        let lastUpdate = 0;
+        const animateDeck = (now) => {
             if (!this.map || !this.deckOverlay) return;
+
+            if (now - lastUpdate < 33) {
+                this._deckAnimId = requestAnimationFrame(animateDeck);
+                return;
+            }
+            lastUpdate = now;
+
             timeOffset += 0.05;
 
             const satellites = [];
-            for (let i = 0; i < 40; i++) {
-                const lon = (i * 35 + timeOffset * 2) % 360 - 180;
-                const lat = Math.sin(i * 0.1 + timeOffset * 0.01) * 70;
-                const alt = 1500000 + Math.cos(i) * 300000;
+            for (let i = 0; i < 20; i++) {
+                const lon = (i * 70 + timeOffset * 2) % 360 - 180;
+                const lat = Math.sin(i * 0.2 + timeOffset * 0.01) * 65;
+                const alt = 1200000 + Math.cos(i) * 200000;
                 satellites.push({
                     position: [lon, lat, alt],
-                    color: i % 5 === 0 ? [239, 68, 68] : [6, 182, 212]
+                    color: i % 4 === 0 ? [239, 68, 68] : [6, 182, 212]
                 });
             }
 
@@ -534,12 +547,12 @@ class MapboxEngine {
                 data: satellites,
                 getPosition: d => d.position,
                 getText: d => '◆',
-                getSize: 24,
+                getSize: 20,
                 getColor: d => d.color,
                 getAngle: d => d.position[0] * 2,
                 getTextAnchor: 'middle',
                 getAlignmentBaseline: 'center',
-                parameters: { depthTest: false } 
+                parameters: { depthTest: false }
             });
 
             this.deckOverlay.setProps({
@@ -548,7 +561,7 @@ class MapboxEngine {
 
             this._deckAnimId = requestAnimationFrame(animateDeck);
         };
-        animateDeck();
+        this._deckAnimId = requestAnimationFrame(animateDeck);
     }
 }
 

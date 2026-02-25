@@ -38,7 +38,6 @@ Global equity markets are exhibiting high variance due to shifting interest rate
     } else if (promptText.includes("weather") || promptText.includes("atmospheric") || promptText.includes("meteorological")) {
       responseText = `Atmospheric conditions are nominal across the designated sector. No severe meteorological anomalies detected in the immediate area. Visibility remains unobstructed for aerial reconnaissance and satellite telemetry. Ground mobility is unrestricted. Surface temperatures are holding within anticipated parameters. Proceed with standard operational guidelines.`;
     } else if (promptText.includes("briefing") || promptText.includes("tactical") || promptText.includes("intel") || isGlobal) {
-      const targetName = isGlobal ? "GLOBAL SURVEILLANCE" : "TARGET SECTOR";
       responseText = `[STRATEGIC METRICS DASHBOARD]
 
 [EXECUTIVE_SUMMARY]
@@ -46,7 +45,7 @@ ${isGlobal ? "Global metrics indicate a period of heightened geopolitical comple
 
 [GOV_STABILITY]
 Tactical Rating: ${isGlobal ? "7" : "6"}/10
-The executive branch is maintaining legislative control, but rising polarization suggests potential gridlock in the coming fiscal quarter. Bureaucratic efficiency remains nominal across core sectors.
+The executive branch is maintaining legislative control, but rising polarization suggests potential gridlock in the coming fiscal quarter.
 
 [BORDER_INTEGRITY]
 Tactical Rating: 8/10
@@ -54,15 +53,35 @@ Perimeter surveillance networks are operating at peak efficiency, utilizing a mu
 
 [CYBER_THREAT]
 Tactical Rating: 4/10
-Active state-sponsored probing has been detected targeting grid infrastructure and financial clearance protocols. Advanced persistent threats (APTs) are utilizing zero-day vulnerabilities in legacy logistics software.
+Active state-sponsored probing has been detected targeting grid infrastructure and financial clearance protocols.
+
+[CIVIL_UNREST]
+Tactical Rating: 3/10
+Domestic populations are exhibiting signs of fatigue, but active protest movements remain localized. Security response protocols are currently in secondary readiness.
 
 [MILITARY_READINESS]
 Tactical Rating: 9/10
-Combat capability is currently at peak readiness following localized joint-task maneuvers. Strategic assets, including orbital surveillance and long-range logistics, are fully integrated.
+Combat capability is currently at peak readiness following localized joint-task maneuvers. Strategic assets are fully integrated.
 
 [ENERGY_RESERVES]
 Tactical Rating: 5/10
-Strategic petroleum stockpiles are currently stabilized but remain vulnerable to global supply chain disruptions. Grid resilience is being tested by high seasonal demand.`;
+Strategic petroleum stockpiles are currently stabilized but remain vulnerable to global supply chain disruptions.
+
+[SUPPLY_CHAIN]
+Tactical Rating: 5/10
+Logistics corridors are facing increased friction due to regional bottlenecks. Trade flow remains operational but is trending toward higher latency.
+
+[INFLATION_PRESSURE]
+Tactical Rating: 7/10
+Monetary factors are exhibiting high variance. Consumer cost-of-living metrics are elevated, creating underlying systemic stress.
+
+[FOREIGN_RELATIONS]
+Tactical Rating: 6/10
+Diplomatic channels remain active but tense. Alliance structures are being renegotiated in response to shifting economic gravity.
+
+[INFRASTRUCTURE]
+Tactical Rating: 8/10
+Core telecommunications and transport backbones are robust. Resilience upgrades are being prioritized for digital grid nodes.`;
     } else {
       responseText = "Uplink nominal. Intelligence matrix is currently operating in simulation mode. Sector analysis indicates stable geopolitical parameters for the selected coordinate stack. Monitoring for shifts in local atmospheric or tactical metrics.";
     }

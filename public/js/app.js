@@ -367,33 +367,55 @@ function renderBriefingCards(rawText) {
 
     const key = headerMatch[1].trim();
     const bodyRaw = block.slice(block.indexOf(']') + 1).trim();
-    const ratingMatch = bodyRaw.match(/Tactical Rating:\s*(\d+)\/10/i);
+    const ratingMatch = bodyRaw.match(/Tactical Rating:\s*(\d+)\s*\/\s*10/i);
     const rating = ratingMatch ? parseInt(ratingMatch[1]) : null;
-    const paragraph = bodyRaw.replace(/Tactical Rating:\s*\d+\/10\n?/i, '').trim();
+    const paragraph = bodyRaw.replace(/Tactical Rating:\s*(\d+)\s*\/\s*10\n?/i, '').trim();
 
     if (!paragraph && !rating) return;
 
-    const rc = rating >= 8 ? '#10b981' : rating >= 5 ? '#f59e0b' : rating ? '#ef4444' : '#60a5fa';
+    const isExec = key.includes('EXECUTIVE');
+    const color = isExec ? '#3b82f6' : (rating >= 8 ? '#10b981' : rating >= 5 ? '#f59e0b' : rating ? '#ef4444' : '#3b82f6');
     const iconMap = { GOV: 'fa-landmark', BORDER: 'fa-map-marked-alt', CYBER: 'fa-shield-alt', CIVIL: 'fa-users', MILITARY: 'fa-fighter-jet', ENERGY: 'fa-bolt', SUPPLY: 'fa-truck', INFLATION: 'fa-chart-line', FOREIGN: 'fa-handshake', INFRA: 'fa-network-wired', EXECUTIVE: 'fa-satellite-dish' };
     const iconKey = Object.keys(iconMap).find(k => key.includes(k)) || 'EXECUTIVE';
     const icon = iconMap[iconKey] || 'fa-crosshairs';
     const displayName = key.replace(/_/g, ' ');
 
-    html += `<div style="background:rgba(15, 23, 42, 0.4); border:1px solid rgba(255,255,255,0.1); border-radius:1rem; padding:14px; margin-bottom:12px; backdrop-filter:blur(10px);">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <div style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:800; color:${rc}; text-transform:uppercase; letter-spacing:0.1em; display:flex; align-items:center; gap:8px;">
-          <i class="fas ${icon}"></i> ${displayName}
+    html += `
+      <div class="apple-glass group p-5 mb-4 relative overflow-hidden transition-all duration-300 hover:bg-white/[0.05] hover:shadow-[0_0_30px_${color}33] hover:border-${color}/40">
+        <div class="absolute -inset-[1px] bg-gradient-to-br from-white/10 to-transparent opacity-30 pointer-events-none"></div>
+        
+        <div class="flex justify-between items-start mb-4 relative z-10">
+          <div class="flex items-center gap-4">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white" 
+                 style="background: ${color}44; border: 1px solid ${color}66; box-shadow: 0 0 15px ${color}33;">
+              <i class="fas ${icon} text-[18px]"></i>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[11px] font-black uppercase tracking-[0.3em] text-blue-400">Sector Analysis</span>
+              <span class="text-[17px] font-black text-white uppercase tracking-widest font-syne">${displayName}</span>
+            </div>
+          </div>
+          ${rating ? `
+            <div class="bg-black/40 border border-${color}/40 rounded-xl px-4 py-2 flex flex-col items-center">
+              <span class="text-[20px] font-black font-mono leading-none" style="color: ${color};">${rating}<span class="text-[12px] opacity-40">/10</span></span>
+              <div class="w-14 h-1 bg-white/10 rounded-full mt-2 overflow-hidden">
+                <div class="h-full" style="width: ${rating * 10}%; background: ${color}; shadow: 0 0 10px ${color};"></div>
+              </div>
+            </div>
+          ` : ''}
         </div>
-        ${rating ? `<div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:900; color:${rc}; background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:4px; border:1px solid ${rc}44;">${rating}/10</div>` : ''}
+        
+        <p class="text-[14.5px] text-white/90 leading-relaxed font-mono relative z-10" style="font-weight: 400; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+          ${paragraph}
+        </p>
       </div>
-      <p style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#cbd5e1; line-height:1.6; margin:0;">${paragraph}</p>
-    </div>`;
+    `;
   });
 
   if (html) {
     container.innerHTML = html;
   } else {
-    container.innerHTML = `<p style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#cbd5e1; line-height:1.6;">${clean.replace(/\n/g, '<br>')}</p>`;
+    container.innerHTML = `<div class="apple-glass p-6 text-[13px] text-slate-400 font-mono leading-relaxed">${clean.replace(/\n/g, '<br>')}</div>`;
   }
 }
 
@@ -423,12 +445,12 @@ Provide a comprehensive, high-density tactical analysis.
 
 FORMATTING RULES:
 1. You MUST start with the [EXECUTIVE_SUMMARY] header.
-2. Follow with exactly 6 categories from the list below, each with its own [CATEGORY_NAME] header.
+2. Follow with exactly 10 categories from the list below, each with its own [CATEGORY_NAME] header.
 3. For EVERY category, you MUST include 'Tactical Rating: X/10' on the very first line after the header.
 4. Ensure headers use square brackets like [GOV_STABILITY].
 
-CATEGORIES TO USE:
-- [GOV_STABILITY], [BORDER_INTEGRITY], [CYBER_THREAT], [MILITARY_READINESS], [ENERGY_RESERVES], [SUPPLY_CHAIN].
+CATEGORIES TO USE (INCLUDE ALL 10):
+[GOV_STABILITY], [BORDER_INTEGRITY], [CYBER_THREAT], [CIVIL_UNREST], [MILITARY_READINESS], [ENERGY_RESERVES], [SUPPLY_CHAIN], [INFLATION_PRESSURE], [FOREIGN_RELATIONS], [INFRASTRUCTURE].
 
 TONE: Strict, authoritative military/intelligence analyst. Use high-fidelity technical terminology. Ensure paragraphs are substantial.`;
   try {

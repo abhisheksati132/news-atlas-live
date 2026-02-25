@@ -101,7 +101,7 @@ window.toggleCLI = function () {
     if (panel.classList.contains("cli-locked")) {
         window.openCLI();
     } else {
-        
+
         _cliExpanded = !_cliExpanded;
         const body = document.getElementById("floating-cli-body");
         const chev = document.getElementById("floating-cli-chevron");
@@ -243,7 +243,7 @@ async function processCLICommand(raw) {
         window._cliMsgHistory.push({ role: "assistant", content: reply });
         if (window._cliMsgHistory.length > 6) window._cliMsgHistory = window._cliMsgHistory.slice(-6);
         document.getElementById(thinkId)?.remove();
-        cliPrint([`<span class="cli-ai">AI ></span> <span class="cli-reply">${escH(reply.replace(/\*\*/g, "").trim())}</span>`]);
+        cliPrint([`<span class="cli-ai">AI -</span> <span class="cli-reply">${escH(reply.replace(/\*\*/g, "").trim())}</span>`]);
         window.playTacticalSound?.("success");
     } catch {
         const el = document.getElementById(thinkId);

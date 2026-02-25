@@ -29,11 +29,7 @@ body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background: repeating-linear-gradient(0deg,
-      transparent,
-      transparent 2px,
-      rgba(0, 0, 0, 0.12) 2px,
-      rgba(0, 0, 0, 0.12) 4px);
+  background: linear-gradient(rgba(15, 23, 42, 0) 0%, rgba(0, 0, 0, 0.4) 100%);
   pointer-events: none;
   z-index: 9999;
   opacity: 0.5;
@@ -101,11 +97,21 @@ mono {
 
 .apple-glass {
   border-radius: 1.25rem;
-  background: rgba(4, 10, 25, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(31, 50, 100, 0.37);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  background: rgba(15, 23, 42, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  transition: all 0.3s ease-out;
+  transform: translate3d(0, 0, 0);
+  will-change: transform, background-color, border-color, box-shadow;
+}
+
+.apple-glass:hover {
+  background: rgba(15, 23, 42, 0.3);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  transform: translate3d(0, -2px, 0);
+  box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.5), 0 0 15px rgba(59, 130, 246, 0.2);
 }
 
 .glass {

@@ -29,7 +29,7 @@ async function displayPreciousMetals() {
       const changeIcon = (data.change || 0) >= 0 ? "▲" : "▼";
       const card = document.createElement("div");
       card.className =
-        "bg-black/20 rounded-xl p-3 border border-white/5 relative overflow-hidden group";
+        "apple-glass rounded-2xl p-4 border border-white/10 relative overflow-hidden group hover:border-white/20 transition-all shadow-lg";
       card.innerHTML = `
                 <div class="flex items-center justify-between mb-2">
                   <span class="text-2xl">${data.icon || "🪙"}</span>
@@ -72,7 +72,7 @@ async function displayCountryIndices(countryName) {
       const changeIcon = (data.change || 0) >= 0 ? "▲" : "▼";
       const card = document.createElement("div");
       card.className =
-        "bg-black/20 rounded-xl p-3 border border-white/5 relative overflow-hidden group";
+        "apple-glass rounded-2xl p-4 border border-white/10 relative overflow-hidden group hover:border-white/20 transition-all shadow-lg";
       card.innerHTML = `
                 <div class="flex items-center justify-between mb-2">
                   <span class="text-xl">📈</span>
@@ -108,7 +108,7 @@ async function displayCrypto() {
       const changeIcon = (data.change || 0) >= 0 ? "▲" : "▼";
       const card = document.createElement("div");
       card.className =
-        "bg-black/20 rounded-xl p-3 border border-white/5 relative overflow-hidden group";
+        "apple-glass rounded-2xl p-4 border border-white/10 relative overflow-hidden group hover:border-white/20 transition-all shadow-lg";
       card.innerHTML = `
                 <div class="flex items-center justify-between mb-2">
                   <img src="${data.image}" alt="${data.name}" class="w-6 h-6 rounded-full" onerror="this.style.display='none'">
@@ -141,7 +141,7 @@ async function displayForex() {
       .forEach(([pair, rate]) => {
         const card = document.createElement("div");
         card.className =
-          "bg-black/20 rounded-xl p-3 border border-white/5 flex justify-between items-center";
+          "apple-glass rounded-2xl p-4 border border-white/10 flex justify-between items-center hover:border-white/20 transition-all shadow-lg";
         card.innerHTML = `
                 <div>
                   <div class="text-sm font-black text-white">${base}/${pair}</div>
@@ -172,7 +172,7 @@ async function displayCommodities() {
       const changeIcon = (data.change || 0) >= 0 ? "▲" : "▼";
       const card = document.createElement("div");
       card.className =
-        "bg-black/20 rounded-xl p-3 border border-white/5 relative overflow-hidden group";
+        "apple-glass rounded-2xl p-4 border border-white/10 relative overflow-hidden group hover:border-white/20 transition-all shadow-lg";
       card.innerHTML = `
                 <div class="flex items-center justify-between mb-2">
                   <span class="text-xl">${data.icon || "📦"}</span>
@@ -223,7 +223,7 @@ async function displayCoinGeckoTrending() {
       const changeIcon = change >= 0 ? "▲" : "▼";
       const card = document.createElement("div");
       card.className =
-        "bg-black/20 rounded-xl p-3 border border-white/5 relative overflow-hidden group";
+        "apple-glass rounded-2xl p-4 border border-white/10 relative overflow-hidden group hover:border-white/20 transition-all shadow-lg flex items-center gap-3";
       card.innerHTML = `
                 <img src="${c.large}" class="w-7 h-7 rounded-full" onerror="this.style.display='none'">
                 <div class="flex-1 min-w-0">

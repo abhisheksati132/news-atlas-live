@@ -67,7 +67,10 @@ async function fetchDetailedEconomics(country) {
       ecoEl("eco-exports").innerHTML = eco.major_exports
         .map(
           (item) =>
-            `<div class="flex items-center gap-2"><div class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div><span class="text-sm text-slate-300 font-bold uppercase">${item}</span></div>`,
+            `<div class="apple-glass px-3 py-1.5 border border-blue-500/20 flex items-center gap-2 rounded-full">
+               <div class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></div>
+               <span class="text-[10px] text-white font-black uppercase tracking-wider">${item}</span>
+             </div>`,
         )
         .join("");
     }

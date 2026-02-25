@@ -171,8 +171,9 @@ function displayNewsArticles(articles) {
     const faviconHtml = favicon
       ? `<img src="${favicon}" alt="" class="w-4 h-4 rounded object-cover shrink-0" onerror="this.style.display='none'">`
       : `<i class="fas fa-newspaper text-[10px] text-slate-500"></i>`;
-    const imgHtml = art.image_url && isFeatured
-      ? `<div class="h-40 w-full mb-4 rounded-lg bg-cover bg-center border border-white/8 overflow-hidden" style="background-image:url('${art.image_url}')"></div>`
+    const imgHtml = art.image_url
+      ? `<div class="w-full mb-3 rounded-lg bg-cover bg-center border border-white/8 overflow-hidden" 
+              style="background-image:url('${art.image_url}'); height: ${isFeatured ? '160px' : '120px'};"></div>`
       : "";
     card.className = `dossier-card news-card-animate mb-4 ${isFeatured ? "news-card-featured" : ""}`;
     card.style.animationDelay = `${i * 45}ms`;

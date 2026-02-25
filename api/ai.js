@@ -19,7 +19,9 @@ export default async function handler(req, res) {
 
   const returnSimulation = (returnTextOnly = false) => {
     let responseText = "";
-    if (promptText.includes("market") || promptText.includes("indices") || promptText.includes("financial")) {
+    const isGlobal = promptText.includes("global") || promptText.includes("world") || promptText.includes("coordinate stack");
+
+    if (promptText.includes("market") || promptText.includes("indices") || promptText.includes("financial") || (isGlobal && (promptText.includes("economy") || promptText.includes("business")))) {
       responseText = `[GLOBAL INDICES]
 * S&P 500: 5,203.45 (+0.5%) - Tech & Semis Leading
 * NASDAQ: 16,420.10 (+0.8%) - AI Sector Breakout
@@ -35,15 +37,16 @@ export default async function handler(req, res) {
 Global equity markets are exhibiting high variance due to shifting interest rate expectations. The technology sector remains the primary driver of liquidity, obscuring weaknesses in traditional manufacturing. Geopolitical friction in energy-producing regions is creating upward pressure on crude futures, signaling potential inflationary headwinds next quarter.`;
     } else if (promptText.includes("weather") || promptText.includes("atmospheric") || promptText.includes("meteorological")) {
       responseText = `Atmospheric conditions are nominal across the designated sector. No severe meteorological anomalies detected in the immediate area. Visibility remains unobstructed for aerial reconnaissance and satellite telemetry. Ground mobility is unrestricted. Surface temperatures are holding within anticipated parameters. Proceed with standard operational guidelines.`;
-    } else if (promptText.includes("briefing") || promptText.includes("tactical") || promptText.includes("intel")) {
+    } else if (promptText.includes("briefing") || promptText.includes("tactical") || promptText.includes("intel") || isGlobal) {
+      const targetName = isGlobal ? "GLOBAL SURVEILLANCE" : "TARGET SECTOR";
       responseText = `[STRATEGIC METRICS DASHBOARD]
 
 [EXECUTIVE_SUMMARY]
-The target sector is currently undergoing a period of significant geopolitical recalibration. Strategic alliances are being tested by shifting trade priorities and energy dependency. Regional security remains the primary concern as borders face increased scrutiny and defense spending reaches a five-year high.
+${isGlobal ? "Global metrics indicate a period of heightened geopolitical complexity. Polarization between major powers is impacting international trade routes and energy security protocols." : "The target sector is currently undergoing a period of significant geopolitical recalibration. Strategic alliances are being tested by shifting trade priorities and energy dependency."} Regional security remains the primary concern as borders face increased scrutiny and defense spending reaches a five-year high.
 
 [GOV_STABILITY]
-Tactical Rating: 6/10
-The executive branch is maintaining legislative control, but rising polarization within the assembly suggests potential gridlock in the coming fiscal quarter. Bureaucratic efficiency remains nominal across core sectors.
+Tactical Rating: ${isGlobal ? "7" : "6"}/10
+The executive branch is maintaining legislative control, but rising polarization suggests potential gridlock in the coming fiscal quarter. Bureaucratic efficiency remains nominal across core sectors.
 
 [BORDER_INTEGRITY]
 Tactical Rating: 8/10
@@ -60,18 +63,6 @@ Combat capability is currently at peak readiness following localized joint-task 
 [ENERGY_RESERVES]
 Tactical Rating: 5/10
 Strategic petroleum stockpiles are currently stabilized but remain vulnerable to global supply chain disruptions. Grid resilience is being tested by high seasonal demand.`;
-    } else if (promptText.includes("json") || promptText.includes("economy")) {
-      responseText = JSON.stringify({
-        gdp_billions: "2900",
-        gdp_growth_percent: "2.1",
-        gdp_per_capita: "2400",
-        inflation_rate: "4.2",
-        unemployment_rate: "3.8",
-        interest_rate: "6.5",
-        debt_to_gdp: "84",
-        major_exports: ["Technology", "Refined Petroleum", "Pharmaceuticals"],
-        market_summary: "Market volatility has increased significantly. Investors are pivoting toward defensive assets as global trade tensions escalate."
-      }, null, 2);
     } else {
       responseText = "Uplink nominal. Intelligence matrix is currently operating in simulation mode. Sector analysis indicates stable geopolitical parameters for the selected coordinate stack. Monitoring for shifts in local atmospheric or tactical metrics.";
     }
@@ -99,7 +90,7 @@ Strategic petroleum stockpiles are currently stabilized but remain vulnerable to
   const apiURL = "https://api.groq.com/openai/v1/chat/completions";
 
   try {
-    let systemInstruction = "You are a tactical military intelligence interface. Be concise, professional, and data-driven.";
+    let systemInstruction = "You are a tactical military intelligence interface. Be concise, professional, and data-driven. \n\nFORMATTING RULES:\n1. Start with [EXECUTIVE_SUMMARY]\n2. Follow with category headers in brackets like [GOV_STABILITY]\n3. For each category, include 'Tactical Rating: X/10' on its own line.\n4. Avoid markdown bold/italics.";
     if (promptText.includes("json") || promptText.includes("economy")) {
       systemInstruction += " You MUST return ONLY valid JSON.";
     }

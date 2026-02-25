@@ -429,7 +429,12 @@ export default async function handler(req, res) {
           country: [iso2 || "global"],
           category: [feed.category],
           description: item.contentSnippet || item.content || "",
-          image_url: item.media?.["$"]?.url || item.enclosure?.url || null,
+          image_url: item.media?.["$"]?.url ||
+            item.enclosure?.url ||
+            (item.content?.match(/<img[^>]+src="([^">]+)"/) ? item.content.match(/<img[^>]+src="([^">]+)"/)[1] : null) ||
+            (item["media:content"]?.["$"]?.url) ||
+            (item["media:thumbnail"]?.["$"]?.url) ||
+            null,
         }));
       } catch (err) {
         console.error(`Failed to parse feed ${feed.url}:`, err.message);

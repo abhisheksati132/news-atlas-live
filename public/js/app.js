@@ -301,7 +301,7 @@ async function fetchAllData(name) {
       setText("fact-demonym", c.demonyms?.eng?.m || "--");
       setText("fact-gini", c.gini ? Object.values(c.gini)[0] : "N/A");
       setText("fact-drive", c.car ? c.car.side.toUpperCase() : "--");
-      const flagEl = safeEl("sector-flag"); 
+      const flagEl = safeEl("sector-flag");
       const nameEl = safeEl("sector-name");
       const box = safeEl("active-sector-display");
       if (flagEl && nameEl && box) {
@@ -352,48 +352,49 @@ async function fetchAllData(name) {
 function renderBriefingCards(rawText) {
   const container = safeEl("ai-briefing-text");
   if (!container) return;
-  
+
   let clean = rawText
     .replace(/\[STRATEGIC METRICS DASHBOARD\]\s*/gi, '')
     .replace(/\*\*/g, '')
-    .replace(/^[ \t]+/gm, '')
     .trim();
 
-  const parts = clean.split(/(?=\[[A-Z_]+\])/);
+  const parts = clean.split(/(?=\[[A-Z_ ]+\])/);
   let html = '';
 
   parts.forEach(block => {
-    const headerMatch = block.match(/^\[([A-Z_]+)\]/);
+    const headerMatch = block.match(/\[([A-Z_ ]+)\]/);
     if (!headerMatch) return;
-    const key = headerMatch[1];
-    const body = block.slice(headerMatch[0].length).trim();
-    const ratingMatch = body.match(/Tactical Rating:\s*(\d+)\/10/);
-    const rating = ratingMatch ? parseInt(ratingMatch[1]) : null;
-    const paragraph = body.replace(/Tactical Rating:\s*\d+\/10\n?/, '').trim();
 
-    const isExec = key === 'EXECUTIVE_SUMMARY' || key === 'STRATEGIC_METRICS_DASHBOARD';
+    const key = headerMatch[1].trim();
+    const bodyRaw = block.slice(block.indexOf(']') + 1).trim();
+    const ratingMatch = bodyRaw.match(/Tactical Rating:\s*(\d+)\/10/i);
+    const rating = ratingMatch ? parseInt(ratingMatch[1]) : null;
+    const paragraph = bodyRaw.replace(/Tactical Rating:\s*\d+\/10\n?/i, '').trim();
+
+    if (!paragraph && !rating) return;
+
     const rc = rating >= 8 ? '#10b981' : rating >= 5 ? '#f59e0b' : rating ? '#ef4444' : '#60a5fa';
-    const bc = rating >= 8 ? 'rgba(16,185,129,0.18)' : rating >= 5 ? 'rgba(245,158,11,0.18)' : rating ? 'rgba(239,68,68,0.18)' : 'rgba(59,130,246,0.18)';
-    const bg = rating >= 8 ? 'rgba(16,185,129,0.05)' : rating >= 5 ? 'rgba(245,158,11,0.05)' : rating ? 'rgba(239,68,68,0.05)' : 'rgba(59,130,246,0.07)';
     const iconMap = { GOV: 'fa-landmark', BORDER: 'fa-map-marked-alt', CYBER: 'fa-shield-alt', CIVIL: 'fa-users', MILITARY: 'fa-fighter-jet', ENERGY: 'fa-bolt', SUPPLY: 'fa-truck', INFLATION: 'fa-chart-line', FOREIGN: 'fa-handshake', INFRA: 'fa-network-wired', EXECUTIVE: 'fa-satellite-dish' };
-    const iconKey = Object.keys(iconMap).find(k => key.includes(k)) || (isExec ? 'EXECUTIVE' : null);
+    const iconKey = Object.keys(iconMap).find(k => key.includes(k)) || 'EXECUTIVE';
     const icon = iconMap[iconKey] || 'fa-crosshairs';
     const displayName = key.replace(/_/g, ' ');
-    const barHtml = rating ? `<div style="background:rgba(255,255,255,0.07);border-radius:4px;height:4px;margin:8px 0 10px;overflow:hidden;"><div style="width:${rating * 10}%;background:${rc};height:100%;border-radius:4px;transition:width 0.8s ease;"></div></div>` : '';
 
-    html += `<div style="background:rgba(4, 10, 25, 0.4);border:1px solid rgba(255, 255, 255, 0.08);border-radius:1.25rem;padding:12px 14px;box-shadow:0 8px 32px 0 rgba(31, 50, 100, 0.15);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:900;color:${rc};text-transform:uppercase;letter-spacing:.15em;display:flex;align-items:center;gap:6px;">
-          <i class="fas ${icon}" style="font-size:10px;"></i>${displayName}
+    html += `<div style="background:rgba(15, 23, 42, 0.4); border:1px solid rgba(255,255,255,0.1); border-radius:1rem; padding:14px; margin-bottom:12px; backdrop-filter:blur(10px);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:800; color:${rc}; text-transform:uppercase; letter-spacing:0.1em; display:flex; align-items:center; gap:8px;">
+          <i class="fas ${icon}"></i> ${displayName}
         </div>
-        ${rating ? `<div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:900;color:${rc};background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);padding:2px 10px;border-radius:20px;">${rating}<span style="opacity:0.5;font-size:9px;">/10</span></div>` : ''}
+        ${rating ? `<div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:900; color:${rc}; background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:4px; border:1px solid ${rc}44;">${rating}/10</div>` : ''}
       </div>
-      ${barHtml}
-      <p style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#94a3b8;line-height:1.7;margin:0;">${paragraph}</p>
+      <p style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#cbd5e1; line-height:1.6; margin:0;">${paragraph}</p>
     </div>`;
   });
 
-  container.innerHTML = html || `<p style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#64748b;">${clean.replace(/\n/g, '<br>')}</p>`;
+  if (html) {
+    container.innerHTML = html;
+  } else {
+    container.innerHTML = `<p style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#cbd5e1; line-height:1.6;">${clean.replace(/\n/g, '<br>')}</p>`;
+  }
 }
 
 async function generateAIBriefing(loc) {
@@ -409,38 +410,27 @@ async function generateAIBriefing(loc) {
   if (text) {
     let _cursorOn = true;
     _cursorInterval = setInterval(() => {
-      
+
       if (!text.__streaming && text.children.length === 1 && text.children[0]?.style.color === 'rgb(71, 85, 105)') {
-        
+
       }
     }, 400);
   }
-  
-  const briefingPrompt = `Target Sector: ${loc}.
+
+  const briefingPrompt = `Target Sector: ${loc || 'Global Surveillance'}.
 Initiate Deep-Scan Strategic Intelligence Dossier.
 Provide a comprehensive, high-density tactical analysis. 
 
-STRUCTURE REQUIREMENT:
-First, deliver a detailed Executive Summary paragraph detailing the current geopolitical context.
+FORMATTING RULES:
+1. You MUST start with the [EXECUTIVE_SUMMARY] header.
+2. Follow with exactly 6 categories from the list below, each with its own [CATEGORY_NAME] header.
+3. For EVERY category, you MUST include 'Tactical Rating: X/10' on the very first line after the header.
+4. Ensure headers use square brackets like [GOV_STABILITY].
 
-Then, for EACH of the following 10 factors, provide exactly:
-- A [CATEGORY_NAME] header
-- A Tactical Rating (X/10) representing stability or capability
-- A thorough, descriptive paragraph (3-4 sentences) analyzing current conditions, recent maneuvers, and projected risks.
+CATEGORIES TO USE:
+- [GOV_STABILITY], [BORDER_INTEGRITY], [CYBER_THREAT], [MILITARY_READINESS], [ENERGY_RESERVES], [SUPPLY_CHAIN].
 
-FACTORS TO ANALYZE:
-1. [GOV_STABILITY] - Executive/Legislative strength
-2. [BORDER_INTEGRITY] - Perimeter security and surveillance
-3. [CYBER_THREAT] - Infrastructure vulnerability and state probing
-4. [CIVIL_UNREST] - Domestic protest and security response
-5. [MILITARY_READINESS] - Combat capability and deployment status
-6. [ENERGY_RESERVES] - Strategic stockpiles and grid resilience
-7. [SUPPLY_CHAIN] - Logistics flow and trade bottlenecks
-8. [INFLATION_PRESSURE] - Monetary stability and consumer impacts
-9. [FOREIGN_RELATIONS] - Diplomatic tension and alliance status
-10. [INFRASTRUCTURE] - Telecommunications and logistical backbone
-
-TONE: Strict, authoritative military/intelligence analyst. Use high-fidelity technical terminology. Ensure paragraphs are substantial, not single lines.`;
+TONE: Strict, authoritative military/intelligence analyst. Use high-fidelity technical terminology. Ensure paragraphs are substantial.`;
   try {
     const res = await fetch("/api/ai?stream=true", {
       method: "POST",
@@ -468,7 +458,7 @@ TONE: Strict, authoritative military/intelligence analyst. Use high-fidelity tec
           const token = parsed?.choices?.[0]?.delta?.content || "";
           if (token) {
             accumulated += token;
-            
+
             if (text) text.innerText = accumulated.replace(/\*\*/g, "").trim();
           }
         } catch { }
@@ -580,11 +570,11 @@ window.toggleAirQuality = async function () {
         'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 9, 3],
         'heatmap-color': [
           'interpolate', ['linear'], ['heatmap-density'],
-          0, 'rgba(16, 185, 129, 0)', 
+          0, 'rgba(16, 185, 129, 0)',
           0.2, 'rgba(16, 185, 129, 0.4)',
-          0.5, 'rgba(250, 204, 21, 0.6)', 
-          0.8, 'rgba(249, 115, 22, 0.8)', 
-          1, 'rgba(220, 38, 38, 0.9)'     
+          0.5, 'rgba(250, 204, 21, 0.6)',
+          0.8, 'rgba(249, 115, 22, 0.8)',
+          1, 'rgba(220, 38, 38, 0.9)'
         ],
         'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 15, 9, 45],
         'heatmap-opacity': 0.7
@@ -600,11 +590,11 @@ window.toggleAirQuality = async function () {
         'circle-radius': 4,
         'circle-color': [
           'step', ['get', 'aqi'],
-          '#10b981', 
-          50, '#facc15', 
-          100, '#f97316', 
-          150, '#ef4444', 
-          200, '#991b1b'  
+          '#10b981',
+          50, '#facc15',
+          100, '#f97316',
+          150, '#ef4444',
+          200, '#991b1b'
         ],
         'circle-stroke-color': '#020617',
         'circle-stroke-width': 1
@@ -791,7 +781,7 @@ window.mapSearchFocus = function (on) {
     container.style.boxShadow = "0 0 18px 2px rgba(59,130,246,0.22), 0 0 0 1px rgba(59,130,246,0.15)";
     const inp = document.getElementById("map-search-input");
     if (inp && !inp.value.trim()) {
-      window.handleMapSearch(""); 
+      window.handleMapSearch("");
     }
   } else {
     container.style.border = "1px solid rgba(59,130,246,0.25)";
@@ -823,7 +813,7 @@ window.handleMapSearch = function (query) {
 
   if (!query || query.length < 2) {
     if (!query) {
-      
+
       const trending = ["India", "United States", "Japan", "Russia", "United Kingdom"];
       const data = window.globalSearchData || [];
       _mapSearchResults = trending.map(name => {
@@ -1121,7 +1111,7 @@ window._mapHintShown = false;
 window.showMapHintOnce = function () {
   if (window._mapHintShown) return;
   window._mapHintShown = true;
-  
+
   if (window.showToast) window.showToast("Click any country for intelligence briefing", "info");
 };
 window.updateLayerLegend = function () {
@@ -1218,7 +1208,7 @@ window.zoomMap = (factor) => {
   window.playTacticalSound("click");
   if (window.mapEngine && window.mapEngine.map) {
     const currentZoom = window.mapEngine.map.getZoom();
-    
+
     const targetZoom = factor > 1 ? currentZoom + 1 : currentZoom - 1;
     window.mapEngine.map.zoomTo(targetZoom, { duration: 400 });
   }
@@ -1270,7 +1260,7 @@ window.goToIndiaHome = () => {
   window.playTacticalSound("click");
   const mockFeature = { properties: { name: "India" } };
   if (window.handleCountryClick) {
-    
+
     const mockEvent = { lngLat: [78.9629, 20.5937] };
     window.handleCountryClick(mockEvent, mockFeature);
   }
@@ -1330,7 +1320,7 @@ window.addEventListener("resize", () => {
   } else if (projectionType === "3d" && window.myGlobe) {
     window.myGlobe.width(w).height(h);
   } else {
-    
+
     if (window.mapEngine && window.mapEngine.map) {
       window.mapEngine.map.resize();
     }
@@ -1517,9 +1507,9 @@ window.toggleEarthquakeLayer = async function () {
           ],
           'circle-color': [
             'step', ['coalesce', ['get', 'mag'], 3],
-            '#fbbf24', 
-            5, '#f97316', 
-            6, '#ef4444'  
+            '#fbbf24',
+            5, '#f97316',
+            6, '#ef4444'
           ],
           'circle-opacity': 0.2,
           'circle-stroke-width': 0
@@ -1550,7 +1540,7 @@ window.toggleEarthquakeLayer = async function () {
       map.on('mouseenter', 'seismic-core', (e) => {
         map.getCanvas().style.cursor = 'crosshair';
         const props = e.features[0].properties;
-        const coords = e.features[0].geometry.coordinates; 
+        const coords = e.features[0].geometry.coordinates;
         const t = safeEl("map-tooltip");
         if (t) {
           setText("tooltip-name", `M${props.mag.toFixed(1)} — ${props.place}`);
@@ -1624,7 +1614,7 @@ async function renderAircraft() {
           'text-allow-overlap': true
         },
         paint: {
-          'text-color': '#60a5fa', 
+          'text-color': '#60a5fa',
           'text-halo-color': '#1e3a8a',
           'text-halo-width': 1
         }
@@ -1691,7 +1681,7 @@ window.toggleRiskIndex = async function () {
   }
 
   if (!map.getLayer('risk-layer')) {
-    
+
     map.addLayer({
       id: 'risk-layer',
       type: 'fill',
@@ -1871,7 +1861,7 @@ window.toggleWindLayer = function () {
 
   window._windInterval = setInterval(() => {
     particles.forEach(p => {
-      p.geometry.coordinates[0] += p.properties.v; 
+      p.geometry.coordinates[0] += p.properties.v;
       if (p.geometry.coordinates[0] > 180) p.geometry.coordinates[0] = -180;
     });
     map.getSource('wind-data').setData(windData);
@@ -1906,7 +1896,7 @@ window.toggleMapStyle = function () {
   }
 
   map.once('style.load', () => {
-    
+
     if (window.mapEngine && window.mapEngine.initMapboxLayers) {
       window.mapEngine.initMapboxLayers();
     }
@@ -1960,7 +1950,8 @@ window.toggleGDELTLayer = async function () {
   }
 
   try {
-    const res = await fetch("https://api.gdeltproject.org/api/v2/geo/geo?query=conflict&format=geojson&timespan=12H", { signal: AbortSignal.timeout(5000) });
+    const url = `/api/gdelt?mode=geo&query=conflict&format=geojson&timespan=12H`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
     if (!res.ok) throw new Error("GDELT fetch failed");
     const data = await res.json();
     processGDELTData(data.features || []);
@@ -1981,7 +1972,7 @@ window.toggleGDELTLayer = async function () {
     const geoData = {
       type: 'FeatureCollection',
       features: features.map(f => {
-        
+
         if (f.type !== "Feature") {
           return {
             type: 'Feature',
@@ -2001,10 +1992,10 @@ window.toggleAircraftLayer = function () {
   _aircraftActive = !_aircraftActive;
   const btn = document.getElementById("aircraft-toggle-btn");
   if (!_aircraftActive) {
-    
+
     clearInterval(_aircraftInterval);
     _aircraftInterval = null;
-    
+
     if (window.mapEngine && window.mapEngine.map) {
       const map = window.mapEngine.map;
       if (map.getLayer('aircraft-layer')) map.removeLayer('aircraft-layer');
@@ -2081,7 +2072,7 @@ window.updateISS = async function () {
         .setLngLat([data.longitude, data.latitude])
         .addTo(map);
     } else {
-      
+
       window._issMarker.setLngLat([data.longitude, data.latitude]);
     }
 
@@ -2162,11 +2153,11 @@ async function fetchGlobalSearchData() {
     if (!res.ok) throw new Error("Index relay failed");
     window.globalSearchData = await res.json();
     console.log(`Global Registry Online: ${window.globalSearchData.length} sectors indexed.`);
-    
+
     if (window.renderTrending) window.renderTrending();
   } catch (e) {
     console.error("Critical: Global Registry Link Failure", e);
-    
+
     window.globalSearchData = [];
   }
 }

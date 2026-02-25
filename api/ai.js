@@ -18,29 +18,14 @@ export default async function handler(req, res) {
   } catch (e) {
     return res.status(400).json({ error: "Invalid JSON" });
   }
-  const prompt = (body?.prompt || "").toLowerCase();
-  const returnSimulation = () => {
+  const promptText = (body?.prompt || "").toLowerCase();
+  const returnSimulation = (returnTextOnly = false) => {
     let responseText = "";
     if (
-      prompt.includes("briefing") ||
-      prompt.includes("tactical") ||
-      prompt.includes("intel")
-    ) {
-      responseText = `[STRATEGIC METRICS DASHBOARD]
-    1. [GOV_STABILITY]: 68/100 (Moderate) - Executive branch facing legislative gridlock.
-    2. [BORDER_INTEGRITY]: 92% - Surveillance nominal, minor infractions in Sector 4.
-    3. [CYBER_THREAT]: HIGH - Active state-sponsored probing on grid infrastructure.
-    4. [CIVIL_UNREST]: LOW - Isolated protests restricted to metropolitan centers.
-    5. [MILITARY_READINESS]: DEFCON 4 - Standard peacetime operations; naval exercises ongoing.
-    6. [ENERGY_RESERVES]: 85% - Strategic petroleum stockpiles above seasonal average.
-    7. [SUPPLY_CHAIN]: STRESSED - Semiconductor imports delayed by 2 weeks.
-    8. [INFLATION_PRESSURE]: RISING - CPI projections adjusted upward to 4.5%.
-    9. [FOREIGN_RELATIONS]: STRAINED - Diplomatic channels with trade partners are tense.
-    10. [INFRASTRUCTURE]: NOMINAL - Power and logistics networks operating at 98% efficiency.`;
-    } else if (
-      prompt.includes("stock market") ||
-      prompt.includes("indices") ||
-      prompt.includes("market")
+      promptText.includes("stock market") ||
+      promptText.includes("indices") ||
+      promptText.includes("market") ||
+      promptText.includes("financial")
     ) {
       responseText = `[GLOBAL INDICES]
     • S&P 500: 5,203.45 (+0.5%) - Tech & Semis Leading
@@ -55,6 +40,61 @@ export default async function handler(req, res) {
     • EUR/USD: 1.085 (Neutral)
     [STRATEGIC ANALYSIS]
     Global equity markets are exhibiting high variance due to shifting interest rate expectations. The technology sector remains the primary driver of liquidity, obscuring weaknesses in traditional manufacturing. Geopolitical friction in energy-producing regions is creating upward pressure on crude futures, signaling potential inflationary headwinds next quarter.`;
+    } else if (
+      promptText.includes("weather") ||
+      promptText.includes("atmospheric") ||
+      promptText.includes("meteorological")
+    ) {
+      responseText = `Atmospheric conditions are nominal across the designated sector. No severe meteorological anomalies detected in the immediate area. Visibility remains unobstructed for aerial reconnaissance and satellite telemetry. Ground mobility is unrestricted. Surface temperatures are holding within anticipated parameters. Proceed with standard operational guidelines.`;
+    } else if (
+      promptText.includes("briefing") ||
+      promptText.includes("tactical") ||
+      promptText.includes("intel")
+    ) {
+      responseText = `[STRATEGIC METRICS DASHBOARD]
+
+      [EXECUTIVE_SUMMARY]
+      The target sector is currently undergoing a period of significant geopolitical recalibration. Strategic alliances are being tested by shifting trade priorities and energy dependency. Regional security remains the primary concern as borders face increased scrutiny and defense spending reaches a five-year high.
+
+      [GOV_STABILITY]
+      Tactical Rating: 6/10
+      The executive branch is maintaining legislative control, but rising polarization within the assembly suggests potential gridlock in the coming fiscal quarter. Bureaucratic efficiency remains nominal across core sectors, though judicial independence is facing minor administrative pressures. Immediate risk remains low but requires persistent monitoring.
+
+      [BORDER_INTEGRITY]
+      Tactical Rating: 8/10
+      Perimeter surveillance networks are operating at peak efficiency, utilizing a multi-layered sensor mesh across terrestrial and maritime boundaries. Minor infractions have been reported in the northern corridors, likely due to increased seasonal migration patterns. Deployment of automated response units is being considered for high-traffic sectors.
+
+      [CYBER_THREAT]
+      Tactical Rating: 4/10
+      Active state-sponsored probing has been detected targeting grid infrastructure and financial clearance protocols. Advanced persistent threats (APTs) are utilizing zero-day vulnerabilities in legacy logistics software. Defensive countermeasures are being upgraded to a hardened neural-firewall architecture to prevent large-scale data exfiltration.
+
+      [CIVIL_UNREST]
+      Tactical Rating: 7/10
+      Internal security maintains a stable posture, with domestic protests restricted to localized urban centers. Economic grievances regarding inflation remain the primary catalyst for public discourse, but organized subversion remains minimal. Law enforcement readiness is at Code Yellow, focusing on critical utility protection.
+
+      [MILITARY_READINESS]
+      Tactical Rating: 9/10
+      Combat capability is currently at peak readiness following localized joint-task maneuvers. Strategic assets, including orbital surveillance and long-range logistics, are fully integrated into the defense command. Supply chains for munitions and fuel are stockpiled for a 60-day high-intensity operational window.
+
+      [ENERGY_RESERVES]
+      Tactical Rating: 5/10
+      Strategic petroleum stockpiles are currently stabilized but remain vulnerable to global supply chain disruptions. Grid resilience is being tested by high seasonal demand, leading to occasional load-balancing maneuvers in industrial zones. Diversification into alternative energetic sources is progressing but remains below required capacity.
+
+      [SUPPLY_CHAIN]
+      Tactical Rating: 5/10
+      Critical logistics flow is facing several bottlenecks due to maritime port congestion and semiconductor import delays. Just-in-time manufacturing models are being deprioritized in favor of regional warehousing strategies. Trade vulnerabilities are most acute in the high-tech and raw material sectors.
+
+      [INFLATION_PRESSURE]
+      Tactical Rating: 3/10
+      Monetary stability is facing headwinds as consumer price indices reach a decade-high. Core commodity costs are driving a broad-based inflationary spiral, requiring aggressive central bank intervention. Currency valuations are exhibiting increased volatility against global reserve assets.
+
+      [FOREIGN_RELATIONS]
+      Tactical Rating: 6/10
+      Diplomatic tension between key regional partners is currently high, following disagreements over maritime trade routes. Multi-lateral treaty compliance remains active, but informal alliances are shifting toward more transactional arrangements. Negotiation channels remain open but are becoming increasingly performative.
+
+      [INFRASTRUCTURE]
+      Tactical Rating: 7/10
+      Telecommunications networks and logistical backbones are maintaining 98% efficiency across primary metro hubs. Rural sectors continue to lag in high-speed data integration, creating a digital divide that impacts decentralized governance. Modernization of the rail and waterway systems is currently underway but underfunded.`;
     } else {
       const jsonResponse = {
         gdp_billions: "2900",
@@ -70,6 +110,11 @@ export default async function handler(req, res) {
       };
       responseText = JSON.stringify(jsonResponse);
     }
+
+    if (returnTextOnly) {
+      return responseText;
+    }
+
     return res.status(200).json({
       candidates: [
         {
@@ -112,8 +157,8 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
         messages: messages,
-        temperature: 0.5,
-        max_tokens: 800,
+        temperature: 0.6,
+        max_tokens: 2000,
         stream: isStream,
       }),
     });

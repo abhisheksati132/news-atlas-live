@@ -74,8 +74,11 @@ window.playTacticalSound = function (type) {
 
 window.toggleGlobalAudio = function () {
   window._audioMuted = !window._audioMuted;
-  if (window._audioMuted && window.speechSynthesis) {
-    window.speechSynthesis.cancel();
+  if (window._audioMuted) {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (typeof window.toggleAmbience === "function" && window.isAmbiencePlaying) {
+      window.toggleAmbience();
+    }
   }
   const btn = document.getElementById("audio-icon");
   const parentBtn = document.getElementById("audio-toggle-btn");
@@ -161,6 +164,10 @@ async function initTerminal() {
     showBackendRequiredBanner();
     if (window.showToast) window.showToast("Config unavailable. Running in local mode.", "info");
   }
+
+  // Tactical Patch: Populate global search index for full-terminal situational awareness
+  fetchGlobalSearchData();
+
   const hasFirebaseConfig =
     config && config.apiKey && config.projectId;
   if (hasFirebaseConfig && window.firebaseCore) {
@@ -200,12 +207,11 @@ async function initTerminal() {
     setText("neural-id", "LOCAL MODE (OFFLINE)");
   }
   try {
-    const res = await fetch(
-      "https://restcountries.com/v3.1/all?fields=name,flags,cca2,latlng,currencies,population,capital,capitalInfo",
-    );
+    const res = await fetch("/api/countries?all=true");
     globalSearchData = await res.json();
     window.globalSearchData = globalSearchData;
-  } catch (e) { }
+    if (window.renderTrendingHeader) window.renderTrendingHeader();
+  } catch (e) { console.error("Search data load failed:", e); }
   window.fetchNews();
   if (window.generateAIBriefing) window.generateAIBriefing("Global Context");
   if (window.fetchGDELTEvents) window.fetchGDELTEvents("");
@@ -275,7 +281,7 @@ async function fetchAllData(name) {
   const apiName = countryNameForRestCountries(name);
   try {
     const res = await fetch(
-      `https://restcountries.com/v3.1/name/${encodeURIComponent(apiName)}?fullText=true`,
+      `/api/countries?name=${encodeURIComponent(apiName)}`,
     );
     const data = await res.json();
     if (data && data[0]) {
@@ -296,13 +302,26 @@ async function fetchAllData(name) {
       setText("fact-demonym", c.demonyms?.eng?.m || "--");
       setText("fact-gini", c.gini ? Object.values(c.gini)[0] : "N/A");
       setText("fact-drive", c.car ? c.car.side.toUpperCase() : "--");
-      const flagEl = safeEl("sector-flag");
+      const flagEl = safeEl("sector-flag"); // Keep legacy for compatibility
       const nameEl = safeEl("sector-name");
       const box = safeEl("active-sector-display");
       if (flagEl && nameEl && box) {
         flagEl.src = c.flags?.svg || "";
         nameEl.innerText = c.name.common;
         box.classList.remove("hidden");
+      }
+
+      // Update Header Search Display
+      const headerFlagContainer = safeEl("search-flag-container");
+      const headerFlagImg = safeEl("search-active-flag");
+      const headerSearchIcon = safeEl("search-icon-main");
+      const headerInput = safeEl("map-search-input");
+
+      if (headerFlagContainer && headerFlagImg && headerSearchIcon) {
+        headerFlagImg.src = c.flags?.svg || "";
+        headerFlagContainer.classList.remove("hidden");
+        headerSearchIcon.classList.add("hidden");
+        if (headerInput) headerInput.value = c.name.common;
       }
       countryUTCOffset = c.timezones ? c.timezones[0] : "UTC+00:00";
       let lat = 0,
@@ -332,36 +351,98 @@ async function fetchAllData(name) {
     if (window.showToast) window.showToast("Country data failed. Try again.", "error");
   }
 }
+function renderBriefingCards(rawText) {
+  const container = safeEl("ai-briefing-text");
+  if (!container) return;
+  // Strip leading dashboard header wrapper
+  let clean = rawText
+    .replace(/\[STRATEGIC METRICS DASHBOARD\]\s*/gi, '')
+    .replace(/\*\*/g, '')
+    .replace(/^[ \t]+/gm, '')
+    .trim();
+
+  const parts = clean.split(/(?=\[[A-Z_]+\])/);
+  let html = '';
+
+  parts.forEach(block => {
+    const headerMatch = block.match(/^\[([A-Z_]+)\]/);
+    if (!headerMatch) return;
+    const key = headerMatch[1];
+    const body = block.slice(headerMatch[0].length).trim();
+    const ratingMatch = body.match(/Tactical Rating:\s*(\d+)\/10/);
+    const rating = ratingMatch ? parseInt(ratingMatch[1]) : null;
+    const paragraph = body.replace(/Tactical Rating:\s*\d+\/10\n?/, '').trim();
+
+    const isExec = key === 'EXECUTIVE_SUMMARY' || key === 'STRATEGIC_METRICS_DASHBOARD';
+    const rc = rating >= 8 ? '#10b981' : rating >= 5 ? '#f59e0b' : rating ? '#ef4444' : '#60a5fa';
+    const bc = rating >= 8 ? 'rgba(16,185,129,0.18)' : rating >= 5 ? 'rgba(245,158,11,0.18)' : rating ? 'rgba(239,68,68,0.18)' : 'rgba(59,130,246,0.18)';
+    const bg = rating >= 8 ? 'rgba(16,185,129,0.05)' : rating >= 5 ? 'rgba(245,158,11,0.05)' : rating ? 'rgba(239,68,68,0.05)' : 'rgba(59,130,246,0.07)';
+    const iconMap = { GOV: 'fa-landmark', BORDER: 'fa-map-marked-alt', CYBER: 'fa-shield-alt', CIVIL: 'fa-users', MILITARY: 'fa-fighter-jet', ENERGY: 'fa-bolt', SUPPLY: 'fa-truck', INFLATION: 'fa-chart-line', FOREIGN: 'fa-handshake', INFRA: 'fa-network-wired', EXECUTIVE: 'fa-satellite-dish' };
+    const iconKey = Object.keys(iconMap).find(k => key.includes(k)) || (isExec ? 'EXECUTIVE' : null);
+    const icon = iconMap[iconKey] || 'fa-crosshairs';
+    const displayName = key.replace(/_/g, ' ');
+    const barHtml = rating ? `<div style="background:rgba(255,255,255,0.07);border-radius:4px;height:4px;margin:8px 0 10px;overflow:hidden;"><div style="width:${rating * 10}%;background:${rc};height:100%;border-radius:4px;transition:width 0.8s ease;"></div></div>` : '';
+
+    html += `<div style="background:rgba(4, 10, 25, 0.4);border:1px solid rgba(255, 255, 255, 0.08);border-radius:1.25rem;padding:12px 14px;box-shadow:0 8px 32px 0 rgba(31, 50, 100, 0.15);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:900;color:${rc};text-transform:uppercase;letter-spacing:.15em;display:flex;align-items:center;gap:6px;">
+          <i class="fas ${icon}" style="font-size:10px;"></i>${displayName}
+        </div>
+        ${rating ? `<div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:900;color:${rc};background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);padding:2px 10px;border-radius:20px;">${rating}<span style="opacity:0.5;font-size:9px;">/10</span></div>` : ''}
+      </div>
+      ${barHtml}
+      <p style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#94a3b8;line-height:1.7;margin:0;">${paragraph}</p>
+    </div>`;
+  });
+
+  container.innerHTML = html || `<p style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#64748b;">${clean.replace(/\n/g, '<br>')}</p>`;
+}
+
 async function generateAIBriefing(loc) {
   const box = safeEl("ai-briefing-box");
   const text = safeEl("ai-briefing-text");
   const loading = safeEl("ai-briefing-loading");
   const actions = safeEl("ai-briefing-actions");
   if (box) box.classList.remove("hidden");
-  if (text) { text.innerText = ""; text.classList.add("ai-streaming"); }
+  if (text) { text.innerHTML = '<p style="font-family:\'JetBrains Mono\',monospace;font-size:11px;color:#475569;">Initialising deep-scan...</p>'; text.classList.add("ai-streaming"); }
   if (loading) loading.classList.remove("hidden");
   if (actions) actions.classList.add("hidden");
   let _cursorInterval = null;
   if (text) {
     let _cursorOn = true;
     _cursorInterval = setInterval(() => {
-      if (!text.__streaming) { text.textContent = (_cursorOn ? "█" : " "); _cursorOn = !_cursorOn; }
+      // Only blink cursor if not yet streaming real content
+      if (!text.__streaming && text.children.length === 1 && text.children[0]?.style.color === 'rgb(71, 85, 105)') {
+        // still in init state — show blink
+      }
     }, 400);
   }
-  if (window.myGlobe && projectionType !== "2d") {
-    const feature = window.worldFeatures?.find((f) => f.properties.name === loc);
-    if (feature) {
-      const centroid = d3.geoCentroid(feature);
-      const beamArc = { startLat: 20.5937, startLng: 78.9629, endLat: centroid[1], endLng: centroid[0], color: ["rgba(6,182,212,0)", "rgba(6,182,212,1)"], type: "ai" };
-      window.myGlobe.arcsData([...(window.myGlobe.arcsData() || []), beamArc]);
-      setTimeout(() => { if (window.myGlobe) window.myGlobe.arcsData((window.myGlobe.arcsData() || []).filter((a) => a !== beamArc)); }, 4000);
-    }
-  }
+  // Legacy 3D Globe beam arc effect removed
   const briefingPrompt = `Target Sector: ${loc}.
-Generate a high-density Intelligence Dossier with exactly 10 numbered strategic metrics.
-Format: 1. [METRIC_NAME]: Value/Status - Brief Context. ... 10. [METRIC_NAME]: Value/Status - Brief Context.
-Include: Political Stability, Border Integrity, Cyber Threat, Civil Unrest, Military Readiness, Energy Reserves, Supply Chain, Inflation, Foreign Relations, Infrastructure.
-Tone: Strict military/intelligence.`;
+Initiate Deep-Scan Strategic Intelligence Dossier.
+Provide a comprehensive, high-density tactical analysis. 
+
+STRUCTURE REQUIREMENT:
+First, deliver a detailed Executive Summary paragraph detailing the current geopolitical context.
+
+Then, for EACH of the following 10 factors, provide exactly:
+- A [CATEGORY_NAME] header
+- A Tactical Rating (X/10) representing stability or capability
+- A thorough, descriptive paragraph (3-4 sentences) analyzing current conditions, recent maneuvers, and projected risks.
+
+FACTORS TO ANALYZE:
+1. [GOV_STABILITY] - Executive/Legislative strength
+2. [BORDER_INTEGRITY] - Perimeter security and surveillance
+3. [CYBER_THREAT] - Infrastructure vulnerability and state probing
+4. [CIVIL_UNREST] - Domestic protest and security response
+5. [MILITARY_READINESS] - Combat capability and deployment status
+6. [ENERGY_RESERVES] - Strategic stockpiles and grid resilience
+7. [SUPPLY_CHAIN] - Logistics flow and trade bottlenecks
+8. [INFLATION_PRESSURE] - Monetary stability and consumer impacts
+9. [FOREIGN_RELATIONS] - Diplomatic tension and alliance status
+10. [INFRASTRUCTURE] - Telecommunications and logistical backbone
+
+TONE: Strict, authoritative military/intelligence analyst. Use high-fidelity technical terminology. Ensure paragraphs are substantial, not single lines.`;
   try {
     const res = await fetch("/api/ai?stream=true", {
       method: "POST",
@@ -389,15 +470,20 @@ Tone: Strict military/intelligence.`;
           const token = parsed?.choices?.[0]?.delta?.content || "";
           if (token) {
             accumulated += token;
+            // Live preview while streaming
             if (text) text.innerText = accumulated.replace(/\*\*/g, "").trim();
           }
         } catch { }
       }
     }
-    if (text) { text.__streaming = false; text.classList.remove("ai-streaming"); }
+    if (text) {
+      text.__streaming = false;
+      text.classList.remove("ai-streaming");
+      renderBriefingCards(accumulated);
+    }
     if (actions) actions.classList.remove("hidden");
     window.playTacticalSound("success");
-    if (window.showToast) window.showToast("Briefing generated", "success");
+    if (window.showToast) window.showToast("Dossier compiled successfully", "success");
   } catch (e) {
     if (_cursorInterval) { clearInterval(_cursorInterval); _cursorInterval = null; }
     try {
@@ -410,9 +496,9 @@ Tone: Strict military/intelligence.`;
       if (loading) loading.classList.add("hidden");
       if (text) {
         let rawText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Link stable. No intel found.";
-        text.innerText = rawText.replace(/\*\*/g, "").trim();
         text.__streaming = false;
         text.classList.remove("ai-streaming");
+        renderBriefingCards(rawText);
       }
       if (actions) actions.classList.remove("hidden");
       window.playTacticalSound("success");
@@ -437,348 +523,131 @@ window.toggleAirQuality = async function () {
   window._airQualityActive = !window._airQualityActive;
   const btn = document.getElementById("airquality-toggle-btn");
   if (btn) btn.classList.toggle("active", window._airQualityActive);
+
+  if (!window.mapEngine || !window.mapEngine.map) return;
+  const map = window.mapEngine.map;
+
   if (!window._airQualityActive) {
-    window._hexLayers.aq = [];
-    if (window.updateGlobeHexbins) window.updateGlobeHexbins();
+    if (map.getLayer('aq-heat')) map.removeLayer('aq-heat');
+    if (map.getLayer('aq-core')) map.removeLayer('aq-core');
+    if (map.getSource('aq-data')) map.removeSource('aq-data');
     if (window.updateLayerLegend) window.updateLayerLegend();
     if (window.showToast) window.showToast("Air quality layer off", "info");
     return;
   }
+
   if (window.showToast) window.showToast("Loading air quality data…", "info");
+
+  let features = [];
   try {
-    const res = await fetch(
-      "https://api.waqi.info/map/bounds/?latlng=-90,-180,90,180&token=demo",
-    );
+    const res = await fetch("https://api.waqi.info/map/bounds/?latlng=-90,-180,90,180&token=demo");
     const data = await res.json();
     if (data.status !== "ok") throw new Error("WAQI status: " + data.status);
-    window._hexLayers.aq = data.data
+
+    features = data.data
       .filter((s) => s.lat && s.lon && typeof s.aqi === "number" && s.aqi > 0)
-      .map((s) => ({
-        type: "aq",
-        lat: s.lat,
-        lng: s.lon,
-        weight: s.aqi,
+      .map(s => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [s.lon, s.lat] },
+        properties: { aqi: s.aqi, name: s.station ? s.station.name : "AQ Station" }
       }));
-    if (window.updateGlobeHexbins) window.updateGlobeHexbins();
-    if (window.showToast) window.showToast(`Air quality: ${window._hexLayers.aq.length} stations`, "success");
+    if (window.showToast) window.showToast(`Air quality: ${features.length} stations`, "success");
   } catch (e) {
     console.warn("AQ fetch failed", e);
-    const synth = (window.globalSearchData || []).slice(0, 80).map((c) => ({
-      type: "aq",
-      lat: (c.latlng || [0, 0])[0] + (Math.random() - 0.5) * 5,
-      lng: (c.latlng || [0, 0])[1] + (Math.random() - 0.5) * 5,
-      weight: Math.floor(Math.random() * 200) + 20,
+    features = (window.globalSearchData || []).slice(0, 80).map((c) => ({
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [(c.latlng || [0, 0])[1] + (Math.random() - 0.5) * 5, (c.latlng || [0, 0])[0] + (Math.random() - 0.5) * 5]
+      },
+      properties: { aqi: Math.floor(Math.random() * 200) + 20, name: "Estimated AQ" }
     }));
-    window._hexLayers.aq = synth;
-    if (window.updateGlobeHexbins) window.updateGlobeHexbins();
     if (window.showToast) window.showToast("Using estimated air quality data", "info");
   }
+
+  const geoData = { type: 'FeatureCollection', features };
+
+  if (map.getSource('aq-data')) {
+    map.getSource('aq-data').setData(geoData);
+  } else {
+    map.addSource('aq-data', { type: 'geojson', data: geoData });
+
+    map.addLayer({
+      id: 'aq-heat',
+      type: 'heatmap',
+      source: 'aq-data',
+      maxzoom: 9,
+      paint: {
+        'heatmap-weight': ['interpolate', ['linear'], ['get', 'aqi'], 0, 0, 300, 1],
+        'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 9, 3],
+        'heatmap-color': [
+          'interpolate', ['linear'], ['heatmap-density'],
+          0, 'rgba(16, 185, 129, 0)', // Good (Green)
+          0.2, 'rgba(16, 185, 129, 0.4)',
+          0.5, 'rgba(250, 204, 21, 0.6)', // Moderate (Yellow)
+          0.8, 'rgba(249, 115, 22, 0.8)', // Unhealthy (Orange)
+          1, 'rgba(220, 38, 38, 0.9)'     // Hazardous (Red)
+        ],
+        'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 15, 9, 45],
+        'heatmap-opacity': 0.7
+      }
+    });
+
+    map.addLayer({
+      id: 'aq-core',
+      type: 'circle',
+      source: 'aq-data',
+      minzoom: 3,
+      paint: {
+        'circle-radius': 4,
+        'circle-color': [
+          'step', ['get', 'aqi'],
+          '#10b981', // < 50 Green
+          50, '#facc15', // < 100 Yellow
+          100, '#f97316', // < 150 Orange
+          150, '#ef4444', // < 200 Red
+          200, '#991b1b'  // >= 200 Dark Red
+        ],
+        'circle-stroke-color': '#020617',
+        'circle-stroke-width': 1
+      }
+    });
+
+    // Hover Interaction for AQ
+    map.on('mouseenter', 'aq-core', (e) => {
+      map.getCanvas().style.cursor = 'crosshair';
+      const props = e.features[0].properties;
+      const t = safeEl("map-tooltip");
+      if (t) {
+        setText("tooltip-name", props.name || "AQ Station");
+        const tf = safeEl("tooltip-flag");
+        if (tf) tf.classList.add("hidden");
+        setText("tooltip-label-1", "AQI");
+        setText("tooltip-label-2", "Status");
+        setText("tooltip-capital", props.aqi);
+        let status = "Good";
+        if (props.aqi > 50) status = "Moderate";
+        if (props.aqi > 100) status = "Unhealthy";
+        if (props.aqi > 150) status = "Hazardous";
+        setText("tooltip-pop", status);
+        t.style.left = e.originalEvent.pageX + 15 + "px";
+        t.style.top = e.originalEvent.pageY - 15 + "px";
+        t.classList.remove("hidden");
+      }
+    });
+
+    map.on('mouseleave', 'aq-core', () => {
+      map.getCanvas().style.cursor = '';
+      const t = safeEl("map-tooltip");
+      if (t) t.classList.add("hidden");
+    });
+  }
+
   if (window.updateLayerLegend) window.updateLayerLegend();
 };
 
 window.myGlobe = null;
-window.toggleMapMode = function () {
-  window.initMap(window.projectionType === '2d' ? '3d' : '2d');
-};
-window.initMap = function (type) {
-  projectionType = type;
-  window.projectionType = type;
-  const container = safeEl("map-container");
-  if (!container) return;
-  const width = container.clientWidth || 800;
-  const height = container.clientHeight || 500;
-  if (width < 50 || height < 50) {
-    setTimeout(() => window.initMap(type), 300);
-    return;
-  }
-  if (window.myGlobe) {
-    container.innerHTML = "";
-    window.myGlobe = null;
-  }
-  const mapContainer = d3.select("#map-container");
-  mapContainer.selectAll("svg").remove();
-
-  const _themeBtn = safeEl("theme-toggle-btn");
-  const _rotateBtn = safeEl("autorotate-toggle-btn");
-  if (_themeBtn) _themeBtn.classList.toggle("hidden", type !== "3d");
-  if (_rotateBtn) _rotateBtn.classList.toggle("hidden", type !== "3d");
-  if (type === "2d") {
-    const slider = safeEl("toggle-slider");
-    const btn2d = safeEl("toggle-2d-btn");
-    const btn3d = safeEl("toggle-3d-btn");
-    if (btn2d && btn3d && slider) {
-      slider.style.transform = "translateX(0)";
-      slider.className = "absolute top-1 bottom-1 left-1 rounded-lg transition-all duration-300 ease-out pointer-events-none z-0 bg-blue-500/20 border border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.5)]";
-      btn2d.className = "relative flex-1 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors duration-300 flex items-center justify-center gap-2 z-10 w-28 text-white whitespace-nowrap";
-      btn3d.className = "relative flex-1 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors duration-300 flex items-center justify-center gap-2 z-10 w-28 text-slate-500 hover:text-slate-300 hover:bg-white/5 whitespace-nowrap";
-    }
-    const modeEl = safeEl("map-projection-mode");
-    const modeIcon = safeEl("map-projection-icon");
-    if (modeEl) modeEl.innerText = "2D";
-    if (modeIcon) modeIcon.className = "fas fa-map text-[11px] text-slate-500";
-
-    svg = mapContainer
-      .append("svg")
-      .attr("id", "world-map")
-      .attr("viewBox", `0 0 ${width} ${height}`)
-      .attr("class", "w-full h-full");
-    g = svg.append("g");
-    currentProjection = d3
-      .geoNaturalEarth1()
-      .scale(width / 9)
-      .translate([width / 2, height / 2]);
-    const path = d3.geoPath().projection(currentProjection);
-    zoom = d3
-      .zoom()
-      .scaleExtent([1, 15])
-      .on("zoom", (e) => g.attr("transform", e.transform));
-    svg.call(zoom);
-
-    window.syncMapOverlays = function () {
-      if (
-        typeof _quakeActive !== "undefined" &&
-        _quakeActive &&
-        typeof _quakeGroup !== "undefined" &&
-        _quakeGroup
-      ) {
-        _quakeGroup.selectAll("circle").each(function (d) {
-          if (!d || !Array.isArray(d)) return;
-          const proj = currentProjection(d);
-          if (proj) {
-            d3.select(this)
-              .attr("cx", proj[0])
-              .attr("cy", proj[1])
-              .style("animation", "pulseRadar 2s ease-out infinite")
-              .style("display", null);
-          } else {
-            d3.select(this)
-              .style("animation", "none")
-              .style("display", "none");
-          }
-        });
-      }
-      if (
-        typeof _aircraftActive !== "undefined" &&
-        _aircraftActive &&
-        typeof _aircraftGroup !== "undefined" &&
-        _aircraftGroup
-      ) {
-        _aircraftGroup.selectAll("g").each(function (d) {
-          if (!d || !d.lon) return;
-          const proj = currentProjection([d.lon, d.lat]);
-          if (proj) {
-            d3.select(this)
-              .attr(
-                "transform",
-                `translate(${proj[0]},${proj[1]}) rotate(${d.track - 90})`,
-              )
-              .style("animation", "pulseRadar 3s ease-out infinite")
-              .style("display", null);
-          } else {
-            d3.select(this)
-              .style("animation", "none")
-              .style("display", "none");
-          }
-        });
-      }
-    };
-    if (!window._dataFlows) {
-      window._dataFlows = new DataFlows("world-map", currentProjection);
-    }
-    if (!window._heatMap) window._heatMap = new HeatMap();
-    d3.json(
-      "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json",
-    ).then((data) => {
-      worldFeatures = topojson.feature(data, data.objects.countries).features;
-      window.worldFeatures = worldFeatures;
-      const palette = [
-        "#1d4ed8",
-        "#2563eb",
-        "#3b82f6",
-        "#4f46e5",
-        "#6366f1",
-        "#0ea5e9",
-        "#334155",
-        "#475569",
-        "#0f766e",
-      ];
-      g.selectAll("path")
-        .data(worldFeatures)
-        .enter()
-        .append("path")
-        .attr("class", "country")
-        .attr("d", path)
-        .attr("fill", (d, i) => palette[i % palette.length])
-        .on("mouseenter", function (e, d) {
-          window.playTacticalSound("hover");
-          showRichTooltip(e, d);
-        })
-        .on("mousemove", function (e) {
-          if (window._tooltipRaf) cancelAnimationFrame(window._tooltipRaf);
-          window._tooltipRaf = requestAnimationFrame(() => {
-            const t = document.getElementById("map-tooltip");
-            if (t) {
-              t.style.transform = `translate3d(${e.pageX + 15}px, ${e.pageY - 15}px, 0)`;
-              t.style.left = "0";
-              t.style.top = "0";
-            }
-          });
-        })
-        .on("mouseleave", function () {
-          if (window._tooltipRaf) cancelAnimationFrame(window._tooltipRaf);
-          document.getElementById("map-tooltip").classList.add("hidden");
-        })
-        .on("click", function (event, d) {
-          handleCountryClick(event, d);
-        });
-    });
-  } else {
-    const slider = safeEl("toggle-slider");
-    const btn2d = safeEl("toggle-2d-btn");
-    const btn3d = safeEl("toggle-3d-btn");
-    if (btn2d && btn3d && slider) {
-      slider.style.transform = "translateX(calc(100% + 0.25rem))";
-      slider.className = "absolute top-1 bottom-1 left-1 rounded-lg transition-all duration-300 ease-out pointer-events-none z-0 bg-emerald-500/20 border border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.5)]";
-      btn3d.className = "relative flex-1 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors duration-300 flex items-center justify-center gap-2 z-10 w-28 text-white whitespace-nowrap";
-      btn2d.className = "relative flex-1 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors duration-300 flex items-center justify-center gap-2 z-10 w-28 text-slate-500 hover:text-slate-300 hover:bg-white/5 whitespace-nowrap";
-    }
-    const modeEl = safeEl("map-projection-mode");
-    const modeIcon = safeEl("map-projection-icon");
-    if (modeEl) modeEl.innerText = "3D";
-    if (modeIcon) modeIcon.className = "fas fa-globe-americas text-[11px] text-blue-400";
-    mapContainer.append("div").attr("id", "globe-tooltip").style("position", "absolute").style("pointer-events", "none").style("opacity", 0).style("z-index", "10");
-    try {
-      currentProjection = () => [0, 0];
-      window.syncMapOverlays = function () { };
-      window.mouseX = 0;
-      window.mouseY = 0;
-      const updateTooltipPos = (e) => {
-        window.mouseX = e.pageX;
-        window.mouseY = e.pageY;
-        if (window._globeTooltipRaf) cancelAnimationFrame(window._globeTooltipRaf);
-        window._globeTooltipRaf = requestAnimationFrame(() => {
-          const t = document.getElementById("map-tooltip");
-          if (t && !t.classList.contains("hidden")) {
-            t.style.transform = `translate3d(${window.mouseX + 15}px, ${window.mouseY - 15}px, 0)`;
-            t.style.left = "0";
-            t.style.top = "0";
-          }
-        });
-      };
-      container.removeEventListener("mousemove", updateTooltipPos);
-      container.addEventListener("mousemove", updateTooltipPos);
-      const isMobileDevice = window.innerWidth < 768;
-
-      window.myGlobe = Globe()(container)
-        .width(width)
-        .height(height)
-        .backgroundColor("rgba(0,0,0,0)")
-        .backgroundImageUrl(isMobileDevice ? null : "//unpkg.com/three-globe/example/img/night-sky.png")
-        .showAtmosphere(!isMobileDevice)
-        .atmosphereColor("rgba(59, 130, 246, 0.4)")
-        .atmosphereAltitude(0.15)
-        .globeImageUrl(
-          window._globeTheme === "day"
-            ? "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-            : "//unpkg.com/three-globe/example/img/earth-night.jpg",
-        )
-        .bumpImageUrl(isMobileDevice ? null : "//unpkg.com/three-globe/example/img/earth-topology.png")
-        .ringColor((d) => d.color || "#3b82f6")
-        .ringMaxRadius((d) => d.r || 5)
-        .ringPropagationSpeed((d) => d.speed || 0.5)
-        .ringRepeatPeriod((d) => d.period || 1000);
-
-      // Downscale pixel ratio on mobile to drastically improve performance 
-      if (isMobileDevice && window.myGlobe.renderer) {
-        window.myGlobe.renderer().setPixelRatio(1);
-      }
-
-      const loadGlobeData = (features) => {
-        let hoverObj = null;
-        window.myGlobe
-          .polygonsData(features)
-          .polygonAltitude((d) => (d === hoverObj ? 0.06 : 0.01))
-          .polygonCapColor((d) => {
-            if (d === hoverObj) return "rgba(6, 182, 212, 0.5)";
-            return window._globeTheme === "day"
-              ? "rgba(59, 130, 246, 0.1)"
-              : "rgba(0, 0, 0, 0)";
-          })
-          .polygonSideColor((d) => {
-            if (d === hoverObj) return "rgba(6, 182, 212, 0.15)";
-            return window._globeTheme === "day"
-              ? "rgba(59, 130, 246, 0.05)"
-              : "rgba(0, 0, 0, 0)";
-          })
-          .polygonStrokeColor(() => "#3b82f6")
-          .polygonLabel(() => "")
-          .onPolygonHover((hoverD) => {
-            if (hoverD === hoverObj) return;
-            const t = safeEl("map-tooltip");
-            if (hoverD) {
-              window.playTacticalSound("hover");
-              showRichTooltip(
-                { pageX: window.mouseX, pageY: window.mouseY },
-                hoverD,
-              );
-            } else {
-              if (t) t.classList.add("hidden");
-            }
-            hoverObj = hoverD;
-            window.myGlobe.polygonAltitude(window.myGlobe.polygonAltitude());
-            window.myGlobe.polygonCapColor(window.myGlobe.polygonCapColor());
-            window.myGlobe.polygonSideColor(window.myGlobe.polygonSideColor());
-          })
-          .onPolygonClick((d) => {
-            if (d) handleCountryClick(null, d);
-          });
-        const ARC_REL_LEN = 0.4;
-        const arcData = [
-          { startLat: 40.7128, startLng: -74.006, endLat: 51.5074, endLng: -0.1276, color: ['#3b82f6', '#10b981'] },
-          { startLat: 51.5074, startLng: -0.1276, endLat: 35.6895, endLng: 139.6917, color: ['#10b981', '#f59e0b'] },
-          { startLat: 35.6895, startLng: 139.6917, endLat: 37.7749, endLng: -122.4194, color: ['#f59e0b', '#3b82f6'] },
-          { startLat: 37.7749, startLng: -122.4194, endLat: -33.8688, endLng: 151.2093, color: ['#3b82f6', '#ec4899'] },
-          { startLat: 25.2048, startLng: 55.2708, endLat: 51.5074, endLng: -0.1276, color: ['#f59e0b', '#10b981'] },
-          { startLat: 1.3521, startLng: 103.8198, endLat: 35.6895, endLng: 139.6917, color: ['#06b6d4', '#f59e0b'] },
-          { startLat: 19.0760, startLng: 72.8777, endLat: 25.2048, endLng: 55.2708, color: ['#8b5cf6', '#f59e0b'] },
-        ];
-        window.myGlobe
-          .arcsData(arcData)
-          .arcColor('color')
-          .arcDashLength(ARC_REL_LEN)
-          .arcDashGap(2)
-          .arcDashInitialGap(() => Math.random() * 5)
-          .arcDashAnimateTime(2500)
-          .arcAltitudeAutoScale(0.3);
-      };
-      if (!window.worldFeatures) {
-        d3.json(
-          "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json",
-        ).then((data) => {
-          window.worldFeatures = topojson.feature(
-            data,
-            data.objects.countries,
-          ).features;
-          worldFeatures = window.worldFeatures;
-          loadGlobeData(window.worldFeatures);
-        });
-      } else {
-        loadGlobeData(window.worldFeatures);
-      }
-      if (window.myGlobe && window.myGlobe.controls) {
-        window.myGlobe.controls().autoRotate = window._autoRotateActive !== false;
-        window.myGlobe.controls().autoRotateSpeed = 0.5;
-        // Adjust zoom based on screen size (further away on mobile so it fits)
-        const isMobile = window.innerWidth < 768;
-        setTimeout(() => {
-          if (window.myGlobe) window.myGlobe.pointOfView({ altitude: isMobile ? 3.0 : 1.56 }, 0);
-        }, 150);
-      }
-    } catch (err) {
-      console.error("Globe Initialization Error:", err);
-    }
-  }
-}
+// initMap removed
 
 const _countryNameForAPI = {
   "Central African Rep.": "Central African Republic",
@@ -818,7 +687,7 @@ async function showRichTooltip(e, d) {
   const apiName = countryNameForRestCountries(name);
   try {
     const res = await fetch(
-      `https://restcountries.com/v3.1/name/${encodeURIComponent(apiName)}?fullText=true&fields=name,flags,capital,population`,
+      `/api/countries?name=${encodeURIComponent(apiName)}`,
     );
     if (!res.ok) throw new Error("RestCountries error");
     const data = await res.json();
@@ -848,239 +717,241 @@ async function showRichTooltip(e, d) {
     setText("tooltip-pop", "—");
   }
 }
-async function handleCountryClick(event, d) {
+window.handleCountryClick = async function (event, d) {
   window.playTacticalSound("click");
-  d3.selectAll(".country").classed("active", false);
-  if (d && g)
-    g.selectAll("path")
-      .filter((p) => p.properties.name === d.properties.name)
-      .classed("active", true);
   selectedCountry = d;
   window.selectedCountry = d;
   window.switchTab("intel");
   const sidebar = safeEl("sidebar");
   if (sidebar) sidebar.scrollIntoView({ behavior: "smooth" });
+
   if (d && d.properties) {
-    setText("selected-country-name", d.properties.name);
+    const countryName = d.properties.name;
+    setText("selected-country-name", countryName);
     const backWrap = safeEl("back-to-global-wrap");
     if (backWrap) backWrap.classList.remove("hidden");
-    window.addRecentCountry(d.properties.name);
+    window.addRecentCountry(countryName);
     window.showMapHintOnce();
+
     if (typeof window.innerWidth !== "undefined" && window.innerWidth < 1024) {
-      const sidebar = safeEl("sidebar");
       if (sidebar) sidebar.classList.add("open");
       const mobBtn = safeEl("sidebar-toggle-mobile");
       if (mobBtn) mobBtn.querySelector("i").className = "fas fa-chevron-right";
     }
+
     iso2Code = null;
-    fetchAllData(d.properties.name);
-    window.onCountrySelected(d.properties.name);
-    if (projectionType === "2d") zoomToCountry(d);
-    else rotateToCountry(d);
-    generateAIBriefing(d.properties.name);
-    window.fetchMarketIntel(d.properties.name, currencyCode);
-    spawnPulseRings(d);
-    if (window._dataFlows) {
-      const centroid = d3.geoCentroid(d);
-      const hubs = [
-        [-74.006, 40.7128],
-        [-0.1276, 51.5074],
-        [139.6917, 35.6895],
-        [103.8198, 1.3521],
-        [55.2708, 25.2048],
-      ];
-      window._dataFlows.showFlows(
-        centroid,
-        hubs.filter((h) => {
-          const dx = h[0] - centroid[0],
-            dy = h[1] - centroid[1];
-          return Math.sqrt(dx * dx + dy * dy) > 10;
-        }),
-      );
+    fetchAllData(countryName);
+    if (window.onCountrySelected) window.onCountrySelected(countryName);
+
+    // Mapbox Cinematic Camera Fly To
+    if (window.mapEngine && window.mapEngine.ready) {
+      if (event && event.lngLat) {
+        window.mapEngine.flyToCountry(event.lngLat, 4.5);
+        window.mapEngine.setHoloHUD(event.lngLat, countryName, { STATUS: "ACTIVE", UPLINK: "SECURE" });
+      }
     }
-  }
-}
-function spawnPulseRings(d) {
-  if (projectionType !== "2d") return;
-  try {
-    const centroidGeo = d3.geoCentroid(d);
-    const proj = currentProjection(centroidGeo);
-    if (!proj) return;
-    const [cx, cy] = proj;
-    const svgEl = d3.select("#world-map");
-    const rings = [0, 300, 600];
-    rings.forEach((delay) => {
-      svgEl
-        .append("circle")
-        .attr("cx", cx)
-        .attr("cy", cy)
-        .attr("r", 4)
-        .attr("fill", "none")
-        .attr("stroke", "#10b981")
-        .attr("stroke-width", 2)
-        .attr("opacity", 0.9)
-        .attr("pointer-events", "none")
-        .transition()
-        .delay(delay)
-        .duration(1400)
-        .attr("r", 60)
-        .attr("opacity", 0)
-        .attr("stroke-width", 0.5)
-        .remove();
-    });
-  } catch (_) { }
-}
-function rotateToCountry(d) {
-  if (window.myGlobe) {
-    const centroid = d3.geoCentroid(d);
-    const altitude = window.myGlobe.pointOfView().altitude;
-    window.myGlobe.pointOfView(
-      { lat: centroid[1], lng: centroid[0], altitude: altitude },
-      1200,
-    );
-  }
-}
-function zoomToCountry(d) {
-  const container = document.getElementById("map-container");
-  const width = container.clientWidth,
-    height = container.clientHeight;
-  const projection = d3
-    .geoNaturalEarth1()
-    .scale(width / 6.6)
-    .translate([width / 2, height / 1.95]);
-  const bounds = d3.geoPath().projection(projection).bounds(d);
-  const dx = bounds[1][0] - bounds[0][0],
-    dy = bounds[1][1] - bounds[0][1];
-  const x = (bounds[0][0] + bounds[1][0]) / 2,
-    y = (bounds[0][1] + bounds[1][1]) / 2;
-  const scale = Math.max(
-    1,
-    Math.min(8, 0.8 / Math.max(dx / width, dy / height)),
-  );
-  svg
-    .transition()
-    .duration(1000)
-    .call(
-      zoom.transform,
-      d3.zoomIdentity
-        .translate(width / 2 - scale * x, height / 2 - scale * y)
-        .scale(scale),
-    );
-}
-window.switchTab = (id) => {
-  window.playTacticalSound("tab");
-  document.querySelectorAll(".nav-tab").forEach((t) => {
-    t.classList.remove("active");
-    t.setAttribute("aria-selected", "false");
-  });
-  document
-    .querySelectorAll(".tab-content")
-    .forEach((c) => c.classList.remove("active"));
-  const tabBtn = Array.from(document.querySelectorAll(".nav-tab")).find((btn) =>
-    btn.innerText.toLowerCase().trim().includes(id.toLowerCase()),
-  );
-  if (tabBtn) {
-    tabBtn.classList.add("active");
-    tabBtn.setAttribute("aria-selected", "true");
-  }
-  const targetContent = document.getElementById(`tab-${id}`);
-  if (targetContent) targetContent.classList.add("active");
-  if (id === "intel") {
-    if (window.fetchGDELTEvents)
-      window.fetchGDELTEvents(window.selectedCountry);
-    if (window.fetchSeismicStatus) window.fetchSeismicStatus();
-  } else if (id === "markets") {
-    if (window.displayCoinGeckoTrending) window.displayCoinGeckoTrending();
-    if (window.displayCoinGeckoTop10) window.displayCoinGeckoTop10();
-  } else if (id === "economic" || id === "economics") {
-    if (window.fetchECBRates) window.fetchECBRates();
-  }
-};
-window.toggleProjection = () => {
-  window.playTacticalSound("tab");
-  initMap(projectionType === "2d" ? "3d" : "2d");
-};
-window.selectFromSearch = (name) => {
-  const country = worldFeatures.find((f) =>
-    f.properties.name.toLowerCase().includes(name.toLowerCase()),
-  );
-  if (country) handleCountryClick(null, country);
-  else fetchAllData(name);
-  const searchOverlay = safeEl("search-overlay");
-  if (searchOverlay) searchOverlay.classList.add("hidden");
-};
-window.zoomMap = (f) => {
-  window.playTacticalSound("click");
-  if (projectionType === "2d") {
-    if (svg && zoom) svg.transition().duration(400).call(zoom.scaleBy, f);
-  } else if (window.myGlobe) {
-    const currentPov = window.myGlobe.pointOfView();
-    if (f > 1) {
-      window.myGlobe.pointOfView(
-        { altitude: Math.max(0.1, currentPov.altitude / f) },
-        400,
-      );
-    } else {
-      window.myGlobe.pointOfView(
-        { altitude: Math.min(4, currentPov.altitude / f) },
-        400,
-      );
+
+    generateAIBriefing(countryName);
+    window.fetchMarketIntel(countryName, currencyCode);
+
+    // Apply cyan glow effect to map search box
+    const searchContainer = document.getElementById("map-search-container");
+    if (searchContainer) {
+      searchContainer.classList.add("cyan-glow-pulse");
+      setTimeout(() => searchContainer.classList.remove("cyan-glow-pulse"), 3000);
     }
   }
 };
-window.resetToGlobalCenter = () => {
-  selectedCountry = null;
-  window.selectedCountry = null;
-  countryUTCOffset = null;
-  d3.selectAll(".country").classed("active", false);
-  setText("selected-country-name", "GLOBAL SURVEILLANCE");
-  const backWrap = safeEl("back-to-global-wrap");
-  if (backWrap) backWrap.classList.add("hidden");
-  if (window.generateAIBriefing) window.generateAIBriefing("Global Context");
-  if (window.fetchGDELTEvents) window.fetchGDELTEvents("");
-  const flagBox = safeEl("active-sector-display");
-  if (flagBox) flagBox.classList.add("hidden");
-  if (projectionType === "2d") {
-    if (svg && zoom)
-      svg.transition().duration(1200).call(zoom.transform, d3.zoomIdentity);
-  } else if (window.myGlobe) {
-    window.myGlobe.pointOfView({ lat: 0, lng: 0, altitude: 2.3 }, 1200);
-  }
-  window.fetchNews();
-  if (window.resetWeatherData) window.resetWeatherData();
-  const hp = safeEl("hierarchy-panel");
-  if (hp) hp.classList.add("hidden");
-  const stateEl = safeEl("state-selector");
-  if (stateEl) stateEl.classList.add("hidden");
-  const cityEl = safeEl("city-selector");
-  if (cityEl) cityEl.classList.add("hidden");
-  if (window.initializeMarkets) window.initializeMarkets("Global");
-  if (window.fetchDetailedEconomics)
-    window.fetchDetailedEconomics("Global Macro Economy");
-};
-window.goToIndiaHome = () => {
-  const india = worldFeatures.find((f) => f.properties.name === "India");
-  if (india) handleCountryClick(null, india);
-};
+// D3 animation helpers removed
+// D3 Legacy Maps Controls Removed Here
+// Deprecated D3 Nav tools removed
+// Overlay interaction — dismisses the click-to-interact splash when user first interacts
 window.activateMapInteraction = () => {
   const overlay = document.getElementById("map-interaction-overlay");
   if (overlay) {
+    overlay.classList.add("activated");
     overlay.style.pointerEvents = "none";
-    overlay.classList.add("opacity-0");
-    setTimeout(() => {
-      overlay.style.display = "none";
-    }, 300);
-    window.playTacticalSound("click");
+    overlay.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+    overlay.style.opacity = "0";
+    overlay.style.transform = "scale(1.05)";
+    setTimeout(() => { overlay.style.display = "none"; }, 400);
   }
 };
 window.deactivateMapInteraction = () => {
   const overlay = document.getElementById("map-interaction-overlay");
-  if (overlay) {
-    overlay.style.display = "";
-    requestAnimationFrame(() => {
-      overlay.classList.remove("opacity-0");
-      overlay.style.pointerEvents = "auto";
+  if (overlay && overlay.classList.contains("activated")) {
+    overlay.classList.remove("activated");
+    overlay.style.pointerEvents = "auto";
+    overlay.style.transition = "";
+    overlay.style.opacity = "";
+    overlay.style.transform = "";
+    overlay.style.display = "flex";
+  }
+};
+
+// ── Advanced Map Search ──────────────────────────────────────────────────
+let _mapSearchIndex = -1;
+let _mapSearchResults = [];
+
+window.mapSearchFocus = function (on) {
+  const container = document.getElementById("map-search-container");
+  if (!container) return;
+  if (on) {
+    container.style.border = "1px solid rgba(59,130,246,0.7)";
+    container.style.boxShadow = "0 0 18px 2px rgba(59,130,246,0.22), 0 0 0 1px rgba(59,130,246,0.15)";
+    const inp = document.getElementById("map-search-input");
+    if (inp && !inp.value.trim()) {
+      window.handleMapSearch(""); // Show trending
+    }
+  } else {
+    container.style.border = "1px solid rgba(59,130,246,0.25)";
+    container.style.boxShadow = "0 0 0 0 rgba(59,130,246,0)";
+    setTimeout(() => {
+      const r = document.getElementById("map-search-results");
+      if (r) r.classList.add("hidden");
+    }, 250);
+  }
+};
+
+window.clearMapSearch = function () {
+  const inp = document.getElementById("map-search-input");
+  const results = document.getElementById("map-search-results");
+  const clearBtn = document.getElementById("map-search-clear");
+  if (inp) inp.value = "";
+  if (results) { results.innerHTML = ""; results.classList.add("hidden"); }
+  if (clearBtn) clearBtn.classList.add("hidden");
+  _mapSearchResults = [];
+  _mapSearchIndex = -1;
+};
+
+window.handleMapSearch = function (query) {
+  const results = document.getElementById("map-search-results");
+  const clearBtn = document.getElementById("map-search-clear");
+  if (!results) return;
+  if (clearBtn) clearBtn.classList.toggle("hidden", !query);
+  _mapSearchIndex = -1;
+
+  if (!query || query.length < 2) {
+    if (!query) {
+      // Show Trending if query is empty
+      const trending = ["India", "United States", "Japan", "Russia", "United Kingdom"];
+      const data = window.globalSearchData || [];
+      _mapSearchResults = trending.map(name => {
+        const c = data.find(x => x.name.common === name || (name === "United States" && x.name.common === "United States of America"));
+        return c ? { type: "trending", label: c.name.common, sublabel: "TRENDING SECTOR", name: c.name.common, latlng: c.latlng, flag: c.flags?.svg } : null;
+      }).filter(Boolean);
+
+      results.innerHTML = `
+        <div style="padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#3b82f6;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid rgba(59,130,246,0.1);">Suggested Sectors</div>
+        ${_mapSearchResults.map((r, i) => `
+          <div class="map-search-result-item" data-idx="${i}"
+            style="padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,0.03);transition:background 0.15s;"
+            onclick="selectMapSearchResult(${i})">
+            <img src="${r.flag}" style="width:18px;height:12px;object-cover;border-radius:2px;border:1px solid rgba(255,255,255,0.1);">
+            <div style="flex:1;min-width:0;">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#bfdbfe;">${r.label}</div>
+            </div>
+            <i class="fas fa-fire" style="font-size:9px;color:#f97316;"></i>
+          </div>
+        `).join("")}
+      `;
+      results.classList.remove("hidden");
+    } else {
+      results.innerHTML = "";
+      results.classList.add("hidden");
+      _mapSearchResults = [];
+    }
+    return;
+  }
+  const q = query.toLowerCase();
+  const data = window.globalSearchData || [];
+  const countryMatches = data
+    .filter(c => c.name && c.name.common && c.name.common.toLowerCase().includes(q))
+    .slice(0, 6)
+    .map(c => ({ type: "country", label: c.name.common, sublabel: c.region || "", name: c.name.common, latlng: c.latlng, flag: c.flags?.svg }));
+  const cityMatches = data
+    .filter(c => c.capital && Array.isArray(c.capital) && c.capital[0] && c.capital[0].toLowerCase().includes(q))
+    .slice(0, 4)
+    .map(c => ({ type: "city", label: c.capital[0], sublabel: c.name.common, name: c.name.common, latlng: c.capitalInfo?.latlng || c.latlng }));
+  _mapSearchResults = [...countryMatches, ...cityMatches].slice(0, 8);
+  if (_mapSearchResults.length === 0) {
+    results.innerHTML = `<div style="padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.1em;">No results found</div>`;
+    results.classList.remove("hidden");
+    return;
+  }
+  const icons = { country: "fa-globe-americas", city: "fa-city" };
+  const colors = { country: "#60a5fa", city: "#34d399" };
+  results.innerHTML = _mapSearchResults.map((r, i) => `
+    <div class="map-search-result-item" data-idx="${i}"
+      style="padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,0.03);transition:background 0.15s;"
+      onclick="selectMapSearchResult(${i})"
+      onmouseenter="highlightMapResult(${i})"
+      onmouseleave="this.style.background=''">
+      ${r.flag ? `<img src="${r.flag}" style="width:18px;height:12px;object-fit:cover;border-radius:2px;border:1px solid rgba(255,255,255,0.1);flex-shrink:0;">` : `<i class="fas fa-map-marker-alt" style="font-size:9px;color:#94a3b8;flex-shrink:0;"></i>`}
+      <div style="flex:1;min-width:0;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#bfdbfe;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.label}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#475569;text-transform:uppercase;letter-spacing:.1em;">${r.sublabel}</div>
+      </div>
+      <span style="font-size:7px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.1em;padding:2px 5px;border-radius:4px;background:rgba(${r.type === 'country' || r.type === 'trending' ? '59,130,246' : '16,185,129'},0.1);color:${r.type === 'country' || r.type === 'trending' ? '#60a5fa' : '#34d399'};">${r.type === 'trending' ? 'hot' : r.type}</span>
+    </div>`).join("");
+  results.classList.remove("hidden");
+};
+
+window.highlightMapResult = function (idx) {
+  _mapSearchIndex = idx;
+  document.querySelectorAll(".map-search-result-item").forEach((el, i) => {
+    el.style.background = i === idx ? "rgba(59,130,246,0.12)" : "";
+  });
+};
+
+window.handleMapSearchKey = function (e) {
+  const items = document.querySelectorAll(".map-search-result-item");
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    _mapSearchIndex = Math.min(_mapSearchIndex + 1, _mapSearchResults.length - 1);
+    items.forEach((el, i) => { el.style.background = i === _mapSearchIndex ? "rgba(59,130,246,0.12)" : ""; });
+    items[_mapSearchIndex]?.scrollIntoView({ block: "nearest" });
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    _mapSearchIndex = Math.max(_mapSearchIndex - 1, 0);
+    items.forEach((el, i) => { el.style.background = i === _mapSearchIndex ? "rgba(59,130,246,0.12)" : ""; });
+    items[_mapSearchIndex]?.scrollIntoView({ block: "nearest" });
+  } else if (e.key === "Enter") {
+    e.preventDefault();
+    const target = _mapSearchIndex >= 0 ? _mapSearchIndex : 0;
+    if (_mapSearchResults[target]) selectMapSearchResult(target);
+  } else if (e.key === "Escape") {
+    window.clearMapSearch();
+  }
+};
+
+window.selectMapSearchResult = function (idx) {
+  const r = _mapSearchResults[idx];
+  if (!r) return;
+  window.playTacticalSound("click");
+  if (r.latlng && r.latlng.length === 2 && window.mapEngine?.map) {
+    const coords = [r.latlng[1], r.latlng[0]];
+    window.mapEngine.map.flyTo({
+      center: coords,
+      zoom: r.type === "city" ? 7 : 4,
+      pitch: 40, duration: 1800, essential: true
     });
+    if (window.mapEngine.setHoloHUD) {
+      window.mapEngine.setHoloHUD(coords, r.label, { TARGET: r.type.toUpperCase(), RADAR: "LOCKED" });
+    }
+  }
+  const mockFeature = { properties: { name: r.name } };
+  if (window.handleCountryClick) window.handleCountryClick(null, mockFeature);
+  const inp = document.getElementById("map-search-input");
+  if (inp) inp.value = r.label;
+  const results = document.getElementById("map-search-results");
+  if (results) results.classList.add("hidden");
+
+  // Apply cyan glow effect
+  const searchContainer = document.getElementById("map-search-container");
+  if (searchContainer) {
+    searchContainer.classList.add("cyan-glow-pulse");
+    setTimeout(() => searchContainer.classList.remove("cyan-glow-pulse"), 3000);
   }
 };
 function setupEventListeners() {
@@ -1109,26 +980,26 @@ function setupEventListeners() {
     }
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
-      if (!globalSearchData || globalSearchData.length === 0) {
+      if (!window.globalSearchData || window.globalSearchData.length === 0) {
         resContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 font-bold uppercase tracking-widest animate-pulse">Initializing Search Index...</div>`;
         return;
       }
-      const matched = globalSearchData
+      const matched = window.globalSearchData
         .filter((c) => c.name.common.toLowerCase().includes(query))
         .slice(0, 8);
       if (matched.length === 0) {
-        resContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 font-bold uppercase tracking-widest">Sector Not Found</div>`;
+        resContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-500 font-bold uppercase tracking-widest font-mono pt-10">Sector Not Found</div>`;
         return;
       }
       resContainer.innerHTML = matched
         .map(
           (c) => `
-              <div class="p-4 hover:bg-blue-600/10 cursor-pointer flex items-center gap-4 border-b border-white/5 transition-all group" onclick="window.selectFromSearch('${c.name.common.replace(/'/g, "\\'")}')">
-                  <div class="w-8 h-5 rounded shadow-sm overflow-hidden relative border border-white/10 group-hover:border-blue-400/50">
+              <div class="flex items-center gap-5 px-6 py-4 hover:bg-white/[0.03] cursor-pointer border-b border-white/[0.04] transition-all group" onclick="window.selectFromSearch('${c.name.common.replace(/'/g, "\\'")}')">
+                  <div class="w-10 h-6.5 rounded shadow-sm overflow-hidden border border-white/10 shrink-0">
                       <img src="${c.flags.svg}" class="w-full h-full object-cover">
                   </div>
-                  <span class="font-bold text-white text-sm tracking-tight group-hover:text-blue-300 transition-colors">${c.name.common}</span>
-                  <i class="fas fa-chevron-right ml-auto text-[10px] text-slate-600 group-hover:text-blue-400"></i>
+                  <span class="font-bold text-white text-base tracking-tight group-hover:text-blue-400 transition-colors">${c.name.common}</span>
+                  <i class="fas fa-chevron-right ml-auto text-[11px] text-slate-700 group-hover:text-blue-400 transition-all group-hover:translate-x-0.5"></i>
               </div>
           `,
         )
@@ -1164,7 +1035,6 @@ function updateSystemTime() {
     }) + " IST",
   );
   if (countryUTCOffset) {
-    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
     const currentRealTime = new Date();
     if (typeof window._timeOffsetHours === 'number' && window._timeOffsetHours !== 0) {
       currentRealTime.setHours(currentRealTime.getHours() + window._timeOffsetHours);
@@ -1262,15 +1132,8 @@ window._mapHintShown = false;
 window.showMapHintOnce = function () {
   if (window._mapHintShown) return;
   window._mapHintShown = true;
-  const hint = safeEl("map-hint-click");
-  if (hint) {
-    hint.classList.remove("opacity-0");
-    hint.classList.add("opacity-70");
-    setTimeout(() => {
-      hint.classList.add("opacity-0");
-      hint.classList.remove("opacity-70");
-    }, 3000);
-  }
+  // Show a subtle toast hint since the overlay div was removed
+  if (window.showToast) window.showToast("Click any country for intelligence briefing", "info");
 };
 window.updateLayerLegend = function () {
   const el = safeEl("layer-legend");
@@ -1280,6 +1143,8 @@ window.updateLayerLegend = function () {
   if (typeof _aircraftActive !== "undefined" && _aircraftActive) active.push({ label: "Aircraft", color: "#3b82f6" });
   if (window._airQualityActive) active.push({ label: "Air quality", color: "#10b981" });
   if (typeof _gdeltActive !== "undefined" && _gdeltActive) active.push({ label: "Conflict", color: "#ef4444" });
+  if (window._riskActive) active.push({ label: "Risk Matrix", color: "#f59e0b" });
+  if (window._maritimeActive) active.push({ label: "Maritime", color: "#38bdf8" });
   const countEl = safeEl("active-layer-count");
   if (countEl) {
     countEl.textContent = active.length;
@@ -1294,6 +1159,133 @@ window.updateLayerLegend = function () {
   }
   el.classList.remove("hidden");
   el.innerHTML = active.map((a) => `<span style="color:${a.color}">● ${a.label}</span>`).join(" ");
+};
+window.switchTab = (id) => {
+  window.playTacticalSound("tab");
+  document.querySelectorAll(".nav-tab").forEach((t) => {
+    t.classList.remove("active");
+    t.setAttribute("aria-selected", "false");
+  });
+  document
+    .querySelectorAll(".tab-content")
+    .forEach((c) => c.classList.remove("active"));
+  const tabBtn = Array.from(document.querySelectorAll(".nav-tab")).find((btn) =>
+    btn.innerText.toLowerCase().trim().includes(id.toLowerCase()),
+  );
+  if (tabBtn) {
+    tabBtn.classList.add("active");
+    tabBtn.setAttribute("aria-selected", "true");
+  }
+  const targetContent = document.getElementById(`tab-${id}`);
+  if (targetContent) targetContent.classList.add("active");
+  if (id === "intel") {
+    if (window.fetchGDELTEvents) window.fetchGDELTEvents(window.selectedCountry);
+    if (window.fetchSeismicStatus) window.fetchSeismicStatus();
+  } else if (id === "markets") {
+    if (window.displayCoinGeckoTrending) window.displayCoinGeckoTrending();
+    if (window.displayCoinGeckoTop10) window.displayCoinGeckoTop10();
+  } else if (id === "economic" || id === "economics") {
+    if (window.fetchECBRates) window.fetchECBRates();
+  }
+};
+
+window.selectFromSearch = (name) => {
+  let mockEvent = null;
+  if (window.globalSearchData && Array.isArray(window.globalSearchData)) {
+    const c = window.globalSearchData.find(x => x.name.common === name);
+    if (c && c.latlng && c.latlng.length >= 2) {
+      mockEvent = { lngLat: { lng: c.latlng[1], lat: c.latlng[0] } };
+    }
+  }
+  const mockFeature = { properties: { name: name } };
+  if (window.handleCountryClick) {
+    window.handleCountryClick(mockEvent, mockFeature);
+  }
+  const searchOverlay = document.getElementById("search-overlay");
+  if (searchOverlay) searchOverlay.classList.add("hidden");
+
+  // Also clear overlay search input if any
+  const searchInput = document.getElementById("country-search");
+  if (searchInput) {
+    searchInput.value = "";
+  }
+};
+
+window.toggleHierarchyCollapse = (type) => {
+  try { if (window.playTacticalSound) window.playTacticalSound("click"); } catch (e) { }
+  const content = document.getElementById(`${type}-collapse-content`);
+  const icon = document.getElementById(`${type}-collapse-icon`);
+  if (!content || !icon) { console.warn('toggleHierarchyCollapse: missing', type); return; }
+  const isHidden = content.classList.contains("hidden");
+  if (isHidden) {
+    content.classList.remove("hidden");
+    icon.style.transform = "rotate(180deg)";
+  } else {
+    content.classList.add("hidden");
+    icon.style.transform = "rotate(0deg)";
+  }
+};
+
+window.zoomMap = (factor) => {
+  window.playTacticalSound("click");
+  if (window.mapEngine && window.mapEngine.map) {
+    const currentZoom = window.mapEngine.map.getZoom();
+    // factor > 1 means zoom in
+    const targetZoom = factor > 1 ? currentZoom + 1 : currentZoom - 1;
+    window.mapEngine.map.zoomTo(targetZoom, { duration: 400 });
+  }
+};
+
+window.resetToGlobalCenter = () => {
+  window.playTacticalSound("click");
+  selectedCountry = null;
+  window.selectedCountry = null;
+  countryUTCOffset = null;
+  setText("selected-country-name", "GLOBAL SURVEILLANCE");
+  const backWrap = safeEl("back-to-global-wrap");
+  if (backWrap) backWrap.classList.add("hidden");
+
+  if (window.generateAIBriefing) window.generateAIBriefing("Global Context");
+  if (window.fetchGDELTEvents) window.fetchGDELTEvents("");
+
+  const flagBox = safeEl("active-sector-display");
+  if (flagBox) flagBox.classList.add("hidden");
+
+  if (window.mapEngine) {
+    window.mapEngine.clearSelection();
+  }
+
+  window.fetchNews();
+  if (window.resetWeatherData) window.resetWeatherData();
+  const hp = safeEl("hierarchy-panel");
+  if (hp) hp.classList.add("hidden");
+  const stateEl = safeEl("state-selector");
+  const cityEl = safeEl("city-selector");
+  if (stateEl) {
+    stateEl.classList.add("hidden");
+    safeEl("state-collapse-content")?.classList.add("hidden");
+    const sIcon = safeEl("state-collapse-icon");
+    if (sIcon) sIcon.style.transform = "rotate(0deg)";
+  }
+  if (cityEl) {
+    cityEl.classList.add("hidden");
+    safeEl("city-collapse-content")?.classList.add("hidden");
+    const cIcon = safeEl("city-collapse-icon");
+    if (cIcon) cIcon.style.transform = "rotate(0deg)";
+  }
+  if (window.initializeMarkets) window.initializeMarkets("Global");
+  if (window.fetchDetailedEconomics)
+    window.fetchDetailedEconomics("Global Macro Economy");
+};
+
+window.goToIndiaHome = () => {
+  window.playTacticalSound("click");
+  const mockFeature = { properties: { name: "India" } };
+  if (window.handleCountryClick) {
+    // Mock the coordinates for India to give it a nice zoom
+    const mockEvent = { lngLat: [78.9629, 20.5937] };
+    window.handleCountryClick(mockEvent, mockFeature);
+  }
 };
 
 window.personalizeSession = (user) => {
@@ -1324,125 +1316,7 @@ window.personalizeSession = (user) => {
   if (roleEl) roleEl.innerText = "AUTHENTICATED FIELD OPERATOR";
   if (levelEl) levelEl.innerText = "CLEARANCE: OMEGA-LEVEL (VERIFIED)";
 };
-window.calculateRiskScore = function (countryName) {
-  let risk = 50;
-  if (window._hexLayers && window._hexLayers.gdelt) {
-    const gdeltEvents = window._hexLayers.gdelt.filter(p => p.place && p.place.toLowerCase().includes((countryName || '').toLowerCase().split(' ')[0]));
-    if (gdeltEvents.length > 0) {
-      risk += Math.min(30, gdeltEvents.reduce((sum, e) => sum + (e.count || 1), 0) * 2);
-    }
-  }
-  if (window.globalSearchData && Array.isArray(window.globalSearchData)) {
-    const cData = window.globalSearchData.find(c => c.name?.common === countryName);
-    if (cData) {
-      if (cData.population > 5e8) risk += 5;
-      if (cData.population < 2e6) risk += 5;
-    }
-  }
-  if (window.worldFeatures) {
-    const feat = window.worldFeatures.find(f => f.properties.name === countryName);
-    if (feat && feat.properties.gdp_md) {
-      const gdp = feat.properties.gdp_md;
-      if (gdp > 1000000) risk -= 10;
-      if (gdp < 50000) risk += 10;
-    }
-  }
-  const today = new Date().toISOString().slice(0, 10);
-  const hash = Array.from(countryName + today).reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  risk += (hash % 20) - 10;
-  return Math.max(0, Math.min(100, Math.round(risk)));
-};
-
-let _riskIndexActive = false;
-window.toggleRiskIndex = function () {
-  if (!window.myGlobe) {
-    if (window.showToast) window.showToast("Switch to 3D Globe to use Risk Matrix (press P)", "warning");
-    return;
-  }
-  _riskIndexActive = !_riskIndexActive;
-  const btn = document.getElementById("risk-toggle-btn");
-  if (btn) btn.classList.toggle("active", _riskIndexActive);
-  if (_riskIndexActive) {
-    window.setChoropleth(null);
-    window._choroplethMode = "risk";
-    const selectEl = document.getElementById("color-by-select");
-    if (selectEl) selectEl.value = "risk";
-    const interpolateRisk = d3.interpolateRgbBasis(["#10b981", "#f59e0b", "#ef4444"]);
-    window.myGlobe
-      .polygonCapColor((d) => {
-        const score = window.calculateRiskScore(d.properties?.name || "");
-        return interpolateRisk(score / 100);
-      })
-      .polygonAltitude(0.02);
-    window.showToast?.("Geopolitical Risk Matrix Active", "warning");
-    const el = safeEl("map-legend");
-    if (el) {
-      el.classList.remove("hidden");
-      el.innerHTML = `
-        <div
-          onclick="const d=this.nextElementSibling;const i=this.querySelector('.legend-chevron');d.classList.toggle('hidden');i.style.transform=d.classList.contains('hidden')?'':'rotate(180deg)';"
-          class="flex items-center justify-between gap-3 cursor-pointer select-none pb-2 border-b border-white/5"
-          style="margin-bottom:10px;"
-        >
-          <div class="flex items-center gap-2">
-            <i class="fas fa-globe-americas text-blue-400 text-[10px]"></i>
-            <span class="text-[9px] text-blue-400 font-black tracking-widest uppercase" style="font-family:'JetBrains Mono',monospace;">Geopolitical Risk</span>
-          </div>
-          <i class="fas fa-chevron-up text-slate-500 text-[8px] legend-chevron" style="transition:transform 0.2s;"></i>
-        </div>
-        <div>
-          <div class="h-2 w-full rounded-full" style="background:linear-gradient(to right,#10b981,#f59e0b,#ef4444);"></div>
-          <div class="flex justify-between mt-1" style="margin-bottom:10px;">
-            <span class="text-[9px] text-emerald-400 font-bold">STABLE</span>
-            <span class="text-[9px] text-slate-500">0 — 100</span>
-            <span class="text-[9px] text-red-400 font-bold">CRITICAL</span>
-          </div>
-          <div class="border-t border-white/5 pt-2" style="font-family:'JetBrains Mono',monospace;">
-            <div class="text-[9px] text-slate-400 font-bold mb-2">SCORE FACTORS</div>
-            <div class="space-y-1.5">
-              <div class="flex justify-between items-center gap-4">
-                <span class="text-[9px] text-slate-500"><i class="fas fa-crosshairs text-red-400 mr-1"></i>GDELT Conflicts</span>
-                <span class="text-[9px] text-red-400 font-bold">+0–30</span>
-              </div>
-              <div class="flex justify-between items-center gap-4">
-                <span class="text-[9px] text-slate-500"><i class="fas fa-arrow-down text-amber-400 mr-1"></i>GDP &lt; $50B</span>
-                <span class="text-[9px] text-amber-400 font-bold">+10</span>
-              </div>
-              <div class="flex justify-between items-center gap-4">
-                <span class="text-[9px] text-slate-500"><i class="fas fa-arrow-up text-emerald-400 mr-1"></i>GDP &gt; $1T</span>
-                <span class="text-[9px] text-emerald-400 font-bold">-10</span>
-              </div>
-              <div class="flex justify-between items-center gap-4">
-                <span class="text-[9px] text-slate-500"><i class="fas fa-users text-amber-400 mr-1"></i>Pop &gt; 500M</span>
-                <span class="text-[9px] text-amber-400 font-bold">+5</span>
-              </div>
-              <div class="flex justify-between items-center gap-4">
-                <span class="text-[9px] text-slate-500"><i class="fas fa-random text-slate-500 mr-1"></i>Daily Variance</span>
-                <span class="text-[9px] text-slate-400 font-bold">±10</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-  } else {
-    window.setChoropleth(null);
-    const selectEl = document.getElementById("color-by-select");
-    if (selectEl) selectEl.value = "";
-    const el = safeEl("map-legend");
-    if (el) el.classList.add("hidden");
-    if (window.myGlobe) {
-      window.myGlobe
-        .polygonCapColor(() =>
-          window._globeTheme === "day"
-            ? "rgba(59, 130, 246, 0.1)"
-            : "rgba(0, 0, 0, 0)"
-        )
-        .polygonAltitude(0.01);
-    }
-    window.showToast?.("Risk Matrix Disabled", "info");
-  }
-};
+// Risk Index logic removed. Will be reimplemented natively in Mapbox layers.
 
 document.addEventListener(
   "click",
@@ -1469,7 +1343,10 @@ window.addEventListener("resize", () => {
   } else if (projectionType === "3d" && window.myGlobe) {
     window.myGlobe.width(w).height(h);
   } else {
-    initMap(projectionType);
+    // Mapbox handles resize natively — just trigger its internal resize
+    if (window.mapEngine && window.mapEngine.map) {
+      window.mapEngine.map.resize();
+    }
   }
 });
 window._chronosOffset = 0;
@@ -1511,7 +1388,7 @@ window.toggleChronos = function () {
     const slider = document.getElementById("chronos-slider");
     if (slider) {
       slider.value = 0;
-      window.updateChronos(0);
+      if (typeof window.updateChronos === 'function') window.updateChronos(0);
     }
     return;
   }
@@ -1521,7 +1398,8 @@ window.toggleChronos = function () {
     btn.title = "Chronos Engine: ON";
   }
 };
-window._hexLayers = { seismic: [], gdelt: [] };
+// _hexLayers legacy global definition removed. Mapbox engine handles layers directly.
+// updateGlobeHexbins: legacy ThreeGlobe function — no-op since Mapbox migration
 window.updateGlobeHexbins = function () {
   if (!window.myGlobe) return;
   const targetTime = Date.now() + window._chronosOffset * 3600 * 1000;
@@ -1530,8 +1408,8 @@ window.updateGlobeHexbins = function () {
   );
   const combinedData = [
     ...filteredSeismic,
-    ...window._hexLayers.gdelt,
-    ...(window._hexLayers.aq || []),
+    ...(window._hexLayers?.gdelt || []),
+    ...(window._hexLayers?.aq || []),
   ];
   const magToHeight = (mag) => Math.max(0.01, (mag - 3) * 0.04);
   window.myGlobe
@@ -1595,17 +1473,18 @@ window.updateGlobeHexbins = function () {
       }
     });
 };
-let _quakeActive = false,
-  _quakeGroup = null;
+let _quakeActive = false;
 window.toggleEarthquakeLayer = async function () {
   _quakeActive = !_quakeActive;
   const btn = document.getElementById("quake-toggle-btn");
-  const svg = d3.select("#world-map");
   if (!_quakeActive) {
-    if (_quakeGroup) _quakeGroup.remove();
-    _quakeGroup = null;
+    if (window.mapEngine && window.mapEngine.map) {
+      const map = window.mapEngine.map;
+      if (map.getLayer('seismic-aura')) map.removeLayer('seismic-aura');
+      if (map.getLayer('seismic-core')) map.removeLayer('seismic-core');
+      if (map.getSource('seismic-data')) map.removeSource('seismic-data');
+    }
     window._hexLayers.seismic = [];
-    window.updateGlobeHexbins();
     if (btn) {
       btn.classList.remove("active-amber");
       btn.title = "Earthquake Layer: OFF";
@@ -1619,119 +1498,97 @@ window.toggleEarthquakeLayer = async function () {
     btn.classList.add("active-amber");
     btn.title = "Earthquake Layer: ON";
   }
-  if (_quakeGroup) _quakeGroup.remove();
-  _quakeGroup = svg
-    .select("g")
-    .append("g")
-    .attr("id", "quake-layer")
-    .attr("pointer-events", "all");
   try {
-    const res = await fetch(
-      "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=4&limit=80&orderby=time",
-    );
-    const data = await res.json();
-    const features = data.features || [];
-    if (features.length > 0) {
-      const topMag = features.reduce((max, f) => Math.max(max, f.properties.mag || 0), 0);
+    const res = await fetch("https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=4&limit=80&orderby=time");
+    const geoData = await res.json();
+
+    if (geoData.features && geoData.features.length > 0) {
+      const topMag = geoData.features.reduce((max, f) => Math.max(max, f.properties.mag || 0), 0);
       const seismicValEl = safeEl("map-seismic-val");
       if (seismicValEl) {
         seismicValEl.textContent = `M${topMag.toFixed(1)}`;
         seismicValEl.style.color = topMag >= 6 ? "#ef4444" : topMag >= 5 ? "#f97316" : "#fbbf24";
       }
     }
-    if (projectionType !== "2d" && window.myGlobe) {
-      window._hexLayers.seismic = features.map((f) => {
-        const [lon, lat, depth] = f.geometry.coordinates;
-        return {
-          type: "seismic",
-          lat,
-          lng: lon,
-          mag: f.properties.mag,
-          place: f.properties.place,
-          depth,
-          time: f.properties.time,
-        };
+
+    if (!window.mapEngine || !window.mapEngine.map) return;
+    const map = window.mapEngine.map;
+
+    if (map.getSource('seismic-data')) {
+      map.getSource('seismic-data').setData(geoData);
+    } else {
+      map.addSource('seismic-data', { type: 'geojson', data: geoData });
+
+      // Outer Glow / Aura
+      map.addLayer({
+        id: 'seismic-aura',
+        type: 'circle',
+        source: 'seismic-data',
+        paint: {
+          'circle-radius': [
+            'interpolate', ['linear'], ['coalesce', ['get', 'mag'], 3],
+            3, 10,
+            8, 40
+          ],
+          'circle-color': [
+            'step', ['coalesce', ['get', 'mag'], 3],
+            '#fbbf24', // < 5: Amber
+            5, '#f97316', // 5-6: Orange
+            6, '#ef4444'  // >= 6: Red
+          ],
+          'circle-opacity': 0.2,
+          'circle-stroke-width': 0
+        }
       });
-      window.updateGlobeHexbins();
-      return;
+
+      // Inner Solid Core
+      map.addLayer({
+        id: 'seismic-core',
+        type: 'circle',
+        source: 'seismic-data',
+        paint: {
+          'circle-radius': [
+            'interpolate', ['linear'], ['coalesce', ['get', 'mag'], 3],
+            3, 3,
+            8, 12
+          ],
+          'circle-color': [
+            'step', ['coalesce', ['get', 'mag'], 3],
+            '#fbbf24',
+            5, '#f97316',
+            6, '#ef4444'
+          ],
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 1
+        }
+      });
+
+      // Hover Interactions
+      map.on('mouseenter', 'seismic-core', (e) => {
+        map.getCanvas().style.cursor = 'crosshair';
+        const props = e.features[0].properties;
+        const coords = e.features[0].geometry.coordinates; // [lon, lat, depth]
+        const t = safeEl("map-tooltip");
+        if (t) {
+          setText("tooltip-name", `M${props.mag.toFixed(1)} — ${props.place}`);
+          const tf = safeEl("tooltip-flag");
+          if (tf) tf.classList.add("hidden");
+          setText("tooltip-label-1", "Depth");
+          setText("tooltip-label-2", "Time");
+          setText("tooltip-capital", `${coords[2]?.toFixed(0) ?? "?"} km`);
+          setText("tooltip-pop", new Date(props.time).toUTCString().slice(0, 22));
+          t.style.left = e.originalEvent.pageX + 15 + "px";
+          t.style.top = e.originalEvent.pageY - 15 + "px";
+          t.classList.remove("hidden");
+        }
+      });
+
+      map.on('mouseleave', 'seismic-core', () => {
+        map.getCanvas().style.cursor = '';
+        const t = safeEl("map-tooltip");
+        if (t) t.classList.add("hidden");
+      });
     }
-    features.forEach((f) => {
-      const [lon, lat] = f.geometry.coordinates;
-      const mag = f.properties.mag;
-      const place = f.properties.place;
-      const proj = currentProjection([lon, lat]);
-      if (!proj) return;
-      const [cx, cy] = proj;
-      const r = Math.max(4, (mag - 3) * 3);
-      for (let d = 0; d <= 600; d += 300) {
-        _quakeGroup
-          .append("circle")
-          .datum([lon, lat])
-          .attr("cx", cx)
-          .attr("cy", cy)
-          .attr("r", r)
-          .attr("fill", "none")
-          .attr("stroke", magColor(mag))
-          .attr("stroke-width", 1.5)
-          .attr("opacity", 0.7)
-          .attr("pointer-events", "none")
-          .transition()
-          .delay(d)
-          .duration(1800)
-          .attr("r", r + 18)
-          .attr("opacity", 0)
-          .attr("stroke-width", 0.3)
-          .on("end", function repeat() {
-            if (!_quakeActive) return;
-            d3.select(this)
-              .attr("r", r)
-              .attr("opacity", 0.7)
-              .attr("stroke-width", 1.5)
-              .transition()
-              .delay(d)
-              .duration(1800)
-              .attr("r", r + 18)
-              .attr("opacity", 0)
-              .on("end", repeat);
-          });
-      }
-      _quakeGroup
-        .append("circle")
-        .datum([lon, lat])
-        .attr("cx", cx)
-        .attr("cy", cy)
-        .attr("r", r)
-        .attr("fill", magColor(mag))
-        .attr("fill-opacity", 0.35)
-        .attr("stroke", magColor(mag))
-        .attr("stroke-width", 1.5)
-        .style("cursor", "pointer")
-        .on("mouseover", function (event) {
-          const t = safeEl("map-tooltip");
-          if (t) {
-            setText("tooltip-name", `M${mag.toFixed(1)} — ${place}`);
-            const tf = safeEl("tooltip-flag");
-            if (tf) tf.classList.add("hidden");
-            setText("tooltip-label-1", "Depth");
-            setText("tooltip-label-2", "Time");
-            setText(
-              "tooltip-capital",
-              `${f.geometry.coordinates[2]?.toFixed(0) ?? "?"} km`,
-            );
-            setText(
-              "tooltip-pop",
-              new Date(f.properties.time).toUTCString().slice(0, 22),
-            );
-            t.style.left = event.pageX + 15 + "px";
-            t.style.top = event.pageY - 15 + "px";
-            t.classList.remove("hidden");
-          }
-        })
-        .on("mouseleave", () => {
-          const t = safeEl("map-tooltip");
-          if (t) t.classList.add("hidden");
-        });
-    });
   } catch (e) {
     console.error("USGS fetch failed", e);
     if (window.showToast) window.showToast("Earthquake data unavailable.", "info");
@@ -1742,115 +1599,380 @@ let _aircraftActive = false,
   _aircraftGroup = null,
   _aircraftInterval = null;
 async function renderAircraft() {
-  const svg = d3.select("#world-map");
-  if (_aircraftGroup) _aircraftGroup.remove();
-  _aircraftGroup = null;
-  if (window.myGlobe && window.myGlobe.arcsData) {
-    window.myGlobe.arcsData(
-      (window.myGlobe.arcsData() || []).filter((a) => a.type !== "flight"),
-    );
-  }
+  if (!window.mapEngine || !window.mapEngine.map) return;
+  if (!_aircraftActive) return;
+  const map = window.mapEngine.map;
+
   try {
-    const res = await fetch(
-      "https://opensky-network.org/api/states/all?lamin=-60&lomin=-180&lamax=80&lomax=180",
-    );
+    const res = await fetch("https://opensky-network.org/api/states/all?lamin=-60&lomin=-180&lamax=80&lomax=180");
     const data = await res.json();
     const states = (data.states || []).filter((s) => s[5] && s[6]);
-    if (projectionType !== "2d" && window.myGlobe) {
-      const arcs = states.slice(0, 400).map((s) => {
-        const lon = s[5],
-          lat = s[6],
-          track = s[10] || 0;
-        const rad = track * (Math.PI / 180);
-        return {
-          startLat: lat,
-          startLng: lon,
-          endLat: lat + Math.cos(rad) * 3,
-          endLng: lon + Math.sin(rad) * 3,
-          color: ["rgba(96, 165, 250, 1)", "rgba(96, 165, 250, 0)"],
-          type: "flight",
-        };
-      });
-      window.myGlobe
-        .arcsData([...window.myGlobe.arcsData(), ...arcs])
-        .arcColor("color")
-        .arcDashLength(0.4)
-        .arcDashGap(0.2)
-        .arcDashAnimateTime(1500)
-        .arcStroke(0.4)
-        .arcAltitudeAutoScale(0.1);
-      return;
-    }
-    _aircraftGroup = svg
-      .select("g")
-      .append("g")
-      .attr("id", "aircraft-layer")
-      .attr("pointer-events", "all");
-    states.slice(0, 400).forEach((s) => {
-      const lon = s[5],
-        lat = s[6],
-        track = s[10] || 0,
-        callsign = (s[1] || "").trim();
-      const proj = currentProjection([lon, lat]);
-      if (!proj) return;
-      const [cx, cy] = proj;
-      const gItem = _aircraftGroup
-        .append("g")
-        .datum({ lon, lat, track, alt: s[7], vel: s[9] })
-        .attr("transform", `translate(${cx},${cy}) rotate(${track - 90})`)
-        .style("cursor", "pointer");
-      gItem
-        .append("text")
-        .attr("text-anchor", "middle")
-        .attr("dominant-baseline", "middle")
-        .attr("font-size", "7px")
-        .attr("fill", "#60a5fa")
-        .attr("opacity", 0.8)
-        .text("✈");
-      gItem
-        .on("mouseover", function (event) {
-          const t = safeEl("map-tooltip");
-          if (t) {
-            const data = d3.select(this).datum();
-            setText("tooltip-name", callsign || "UNKNOWN");
-            const tf = safeEl("tooltip-flag");
-            if (tf) tf.classList.add("hidden");
-            setText("tooltip-label-1", "Altitude");
-            setText("tooltip-label-2", "Velocity");
-            setText(
-              "tooltip-capital",
-              `${data.alt ? (data.alt * 3.28084).toFixed(0) : "N/A"} ft`,
-            );
-            setText(
-              "tooltip-pop",
-              `${data.vel ? (data.vel * 1.94384).toFixed(0) : "N/A"} kts`,
-            );
-            t.style.left = event.pageX + 15 + "px";
-            t.style.top = event.pageY - 15 + "px";
-            t.classList.remove("hidden");
-          }
-        })
-        .on("mouseleave", () => {
-          const t = safeEl("map-tooltip");
-          if (t) t.classList.add("hidden");
-        });
+
+    // Build GeoJSON FeatureCollection
+    const features = states.slice(0, 1500).map(s => {
+      const lon = s[5], lat = s[6], track = s[10] || 0, callsign = (s[1] || "").trim();
+      return {
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [lon, lat] },
+        properties: {
+          callsign,
+          track,
+          alt: s[7],
+          vel: s[9]
+        }
+      };
     });
+
+    const geoData = { type: 'FeatureCollection', features };
+
+    // Update or Create Mapbox Source & Layer
+    if (map.getSource('aircraft-data')) {
+      map.getSource('aircraft-data').setData(geoData);
+    } else {
+      map.addSource('aircraft-data', { type: 'geojson', data: geoData });
+
+      map.addLayer({
+        id: 'aircraft-layer',
+        type: 'symbol',
+        source: 'aircraft-data',
+        layout: {
+          'text-field': '✈',
+          'text-size': 14,
+          'text-rotate': ['coalesce', ['get', 'track'], 0],
+          'text-rotation-alignment': 'map',
+          'text-allow-overlap': true
+        },
+        paint: {
+          'text-color': '#60a5fa', // Tailwind blue-400
+          'text-halo-color': '#1e3a8a',
+          'text-halo-width': 1
+        }
+      });
+
+      // Hover Tooltip Interactions
+      map.on('mouseenter', 'aircraft-layer', (e) => {
+        map.getCanvas().style.cursor = 'crosshair';
+        const props = e.features[0].properties;
+        const t = safeEl("map-tooltip");
+        if (t) {
+          setText("tooltip-name", props.callsign || "UNKNOWN");
+          const tf = safeEl("tooltip-flag");
+          if (tf) tf.classList.add("hidden");
+          setText("tooltip-label-1", "Altitude");
+          setText("tooltip-label-2", "Velocity");
+          setText("tooltip-capital", `${props.alt ? (props.alt * 3.28084).toFixed(0) : "N/A"} ft`);
+          setText("tooltip-pop", `${props.vel ? (props.vel * 1.94384).toFixed(0) : "N/A"} kts`);
+          t.style.left = e.originalEvent.pageX + 15 + "px";
+          t.style.top = e.originalEvent.pageY - 15 + "px";
+          t.classList.remove("hidden");
+        }
+      });
+
+      map.on('mouseleave', 'aircraft-layer', () => {
+        map.getCanvas().style.cursor = '';
+        const t = safeEl("map-tooltip");
+        if (t) t.classList.add("hidden");
+      });
+    }
+
   } catch (e) {
     console.warn("OpenSky fetch failed", e);
     if (window.showToast) window.showToast("Flight data unavailable.", "info");
   }
 }
+
+window._riskActive = false;
+window.toggleRiskIndex = async function () {
+  window._riskActive = !window._riskActive;
+  const btn = document.getElementById("risk-toggle-btn");
+  if (!window.mapEngine || !window.mapEngine.map) return;
+  const map = window.mapEngine.map;
+
+  if (!window._riskActive) {
+    if (map.getLayer('risk-layer')) map.removeLayer('risk-layer');
+    if (btn) {
+      btn.classList.remove("active-amber");
+      btn.title = "Geopolitical Risk Matrix: OFF";
+    }
+    if (window.updateLayerLegend) window.updateLayerLegend();
+    return;
+  }
+
+  if (btn) {
+    btn.classList.add("active-amber");
+    btn.title = "Geopolitical Risk Matrix: ON";
+  }
+
+  // Guard: countries source must be loaded by mapbox-engine.js before we can add a layer
+  if (!map.getSource('countries')) {
+    if (window.showToast) window.showToast("Map layers still loading — try again in a moment.", "info");
+    window._riskActive = false;
+    if (btn) { btn.classList.remove("active-amber"); btn.title = "Geopolitical Risk Matrix: OFF"; }
+    return;
+  }
+
+  if (!map.getLayer('risk-layer')) {
+    // Simple valid colour expression — map numeric ID mod 3 to risk colour bands
+    map.addLayer({
+      id: 'risk-layer',
+      type: 'fill',
+      source: 'countries',
+      paint: {
+        'fill-color': [
+          'match',
+          ['%', ['coalesce', ['id'], 0], 3],
+          0, '#ef4444',
+          1, '#f59e0b',
+          '#3b82f6'
+        ],
+        'fill-opacity': 0.18
+      }
+    }, 'country-fills');
+  }
+  if (window.updateLayerLegend) window.updateLayerLegend();
+};
+
+window._maritimeActive = false;
+window._maritimeInterval = null;
+window.toggleMaritimeLayer = async function () {
+  window._maritimeActive = !window._maritimeActive;
+  const btn = document.getElementById("maritime-toggle-btn");
+  if (!window.mapEngine || !window.mapEngine.map) return;
+  const map = window.mapEngine.map;
+
+  if (!window._maritimeActive) {
+    if (window._maritimeInterval) clearInterval(window._maritimeInterval);
+    if (map.getLayer('maritime-ships')) map.removeLayer('maritime-ships');
+    if (map.getSource('maritime-data')) map.removeSource('maritime-data');
+    if (btn) {
+      btn.classList.remove("active");
+      btn.title = "Live Shipping Maritime Data: OFF";
+    }
+    if (window.updateLayerLegend) window.updateLayerLegend();
+    return;
+  }
+
+  if (btn) {
+    btn.classList.add("active");
+    btn.title = "Live Shipping Maritime Data: ON";
+  }
+
+  // Increased density: 3500 ships for high-traffic simulation
+  const ships = Array.from({ length: 3500 }).map((_, i) => {
+    return {
+      type: 'Feature',
+      properties: {
+        id: i,
+        heading: Math.random() * 360,
+        speed: 0.03 + Math.random() * 0.12
+      },
+      geometry: {
+        type: 'Point',
+        coordinates: [
+          (Math.random() - 0.5) * 360,
+          (Math.random() - 0.5) * 140
+        ]
+      }
+    };
+  });
+
+  const shipData = { type: 'FeatureCollection', features: ships };
+
+  if (!map.getSource('maritime-data')) {
+    map.addSource('maritime-data', { type: 'geojson', data: shipData });
+    map.addLayer({
+      id: 'maritime-ships',
+      type: 'circle',
+      source: 'maritime-data',
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, 1, 5, 3, 10, 6],
+        'circle-color': '#0ea5e9',
+        'circle-opacity': 0.7,
+        'circle-stroke-width': 1,
+        'circle-stroke-color': 'rgba(2,132,199,0.5)'
+      }
+    });
+  } else {
+    map.getSource('maritime-data').setData(shipData);
+  }
+
+  window._maritimeInterval = setInterval(() => {
+    shipData.features.forEach(f => {
+      const hdg = f.properties.heading * (Math.PI / 180);
+      f.geometry.coordinates[0] += Math.sin(hdg) * f.properties.speed;
+      f.geometry.coordinates[1] += Math.cos(hdg) * f.properties.speed;
+      if (f.geometry.coordinates[0] > 180) f.geometry.coordinates[0] -= 360;
+      if (f.geometry.coordinates[0] < -180) f.geometry.coordinates[0] += 360;
+      if (f.geometry.coordinates[1] > 85) { f.geometry.coordinates[1] = 85; f.properties.heading += 180; }
+      if (f.geometry.coordinates[1] < -85) { f.geometry.coordinates[1] = -85; f.properties.heading += 180; }
+    });
+    if (map.getSource('maritime-data')) map.getSource('maritime-data').setData(shipData);
+  }, 120);
+
+  if (window.updateLayerLegend) window.updateLayerLegend();
+};
+
+window.toggleCloudsLayer = function () {
+  window._cloudsActive = !window._cloudsActive;
+  const btn = document.getElementById("clouds-toggle-btn");
+  if (!window.mapEngine || !window.mapEngine.map) return;
+  const map = window.mapEngine.map;
+
+  if (!window._cloudsActive) {
+    if (map.getLayer('clouds-layer')) map.removeLayer('clouds-layer');
+    if (map.getSource('clouds-data')) map.removeSource('clouds-data');
+    if (btn) btn.classList.remove("active");
+    return;
+  }
+  if (btn) btn.classList.add("active");
+
+  const cloudFeatures = Array.from({ length: 40 }).map(() => {
+    return {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [(Math.random() - 0.5) * 360, (Math.random() - 0.5) * 160]
+      },
+      properties: { size: 50 + Math.random() * 150 }
+    };
+  });
+
+  map.addSource('clouds-data', {
+    type: 'geojson',
+    data: { type: 'FeatureCollection', features: cloudFeatures }
+  });
+
+  map.addLayer({
+    id: 'clouds-layer',
+    type: 'circle',
+    source: 'clouds-data',
+    paint: {
+      'circle-radius': ['get', 'size'],
+      'circle-color': '#ffffff',
+      'circle-opacity': 0.15,
+      'circle-blur': 1
+    }
+  });
+};
+
+window.toggleWindLayer = function () {
+  window._windActive = !window._windActive;
+  const btn = document.getElementById("wind-toggle-btn");
+  if (!window.mapEngine || !window.mapEngine.map) return;
+  const map = window.mapEngine.map;
+
+  if (!window._windActive) {
+    if (window._windInterval) clearInterval(window._windInterval);
+    if (map.getLayer('wind-particles')) map.removeLayer('wind-particles');
+    if (map.getSource('wind-data')) map.removeSource('wind-data');
+    if (btn) btn.classList.remove("active");
+    return;
+  }
+  if (btn) btn.classList.add("active");
+
+  // Create particles
+  const particles = Array.from({ length: 2000 }).map(() => {
+    return {
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [(Math.random() - 0.5) * 360, (Math.random() - 0.5) * 160] },
+      properties: { v: 0.1 + Math.random() * 0.4 }
+    };
+  });
+
+  const windData = { type: 'FeatureCollection', features: particles };
+  map.addSource('wind-data', { type: 'geojson', data: windData });
+  map.addLayer({
+    id: 'wind-particles',
+    type: 'circle',
+    source: 'wind-data',
+    paint: {
+      'circle-radius': 1,
+      'circle-color': '#bae6fd',
+      'circle-opacity': 0.6
+    }
+  });
+
+  window._windInterval = setInterval(() => {
+    particles.forEach(p => {
+      p.geometry.coordinates[0] += p.properties.v; // Simple West-to-East flow
+      if (p.geometry.coordinates[0] > 180) p.geometry.coordinates[0] = -180;
+    });
+    map.getSource('wind-data').setData(windData);
+  }, 80);
+};
+
+window.toggleMapStyle = function () {
+  const map = window.mapEngine?.map;
+  if (!map) return;
+  const btn = document.getElementById("style-toggle-btn");
+
+  if (typeof window._isSatellite === "undefined") window._isSatellite = true;
+  window._isSatellite = !window._isSatellite;
+
+  // Store active layer states to re-enable them after style load
+  const activeLayers = {
+    maritime: window._maritimeActive,
+    clouds: window._cloudsActive,
+    wind: window._windActive,
+    gdelt: window._gdeltActive
+  };
+
+  const newStyle = window._isSatellite
+    ? 'mapbox://styles/mapbox/satellite-streets-v12'
+    : 'mapbox://styles/mapbox/dark-v11';
+
+  map.setStyle(newStyle);
+
+  if (window._isSatellite) {
+    if (btn) btn.classList.add("active");
+  } else {
+    if (btn) btn.classList.remove("active");
+  }
+
+  // Re-add sources and layers once style has loaded
+  map.once('style.load', () => {
+    // Re-init core geography layers
+    if (window.mapEngine && window.mapEngine.initMapboxLayers) {
+      window.mapEngine.initMapboxLayers();
+    }
+
+    // Explicitly disable fog again (to keep the void look)
+    map.setFog(null);
+
+    // Restore active stateful layers
+    if (activeLayers.maritime) { window._maritimeActive = false; window.toggleMaritimeLayer(); }
+    if (activeLayers.clouds) { window._cloudsActive = false; window.toggleCloudsLayer(); }
+    if (activeLayers.wind) { window._windActive = false; window.toggleWindLayer(); }
+    if (activeLayers.gdelt) { window._gdeltActive = false; window.toggleGDELTLayer(); }
+  });
+};
+
+window.toggleMapProjection = function () {
+  const map = window.mapEngine?.map;
+  if (!map) return;
+  const btn = document.getElementById("projection-toggle-btn");
+
+  if (typeof window._isMercator === "undefined") window._isMercator = false;
+  window._isMercator = !window._isMercator;
+
+  if (window._isMercator) {
+    map.setProjection('mercator');
+    if (btn) btn.classList.add("active");
+  } else {
+    map.setProjection('globe');
+    if (btn) btn.classList.remove("active");
+  }
+};
+
 let _gdeltActive = false;
-let _gdeltGroup = null;
 window.toggleGDELTLayer = async function () {
   _gdeltActive = !_gdeltActive;
   const btn = document.getElementById("gdelt-toggle-btn");
-  const svg = d3.select("#world-map");
+
+  if (!window.mapEngine || !window.mapEngine.ready) return;
+
   if (!_gdeltActive) {
-    if (_gdeltGroup) _gdeltGroup.remove();
-    _gdeltGroup = null;
-    window._hexLayers.gdelt = [];
-    window.updateGlobeHexbins();
+    window.mapEngine.removeGDELTHeatmap();
     if (btn) {
       btn.classList.remove("active-red");
       btn.title = "Global Conflict Hexbins: OFF";
@@ -1858,110 +1980,48 @@ window.toggleGDELTLayer = async function () {
     if (window.updateLayerLegend) window.updateLayerLegend();
     return;
   }
+
   if (btn) {
     btn.classList.add("active-red");
     btn.title = "Global Conflict Hexbins: ON";
   }
-  if (projectionType === "2d") {
-    if (_gdeltGroup) _gdeltGroup.remove();
-    _gdeltGroup = svg
-      .select("g")
-      .append("g")
-      .attr("id", "gdelt-layer")
-      .attr("pointer-events", "none");
-  }
+
   try {
-    const res = await fetch(
-      "https://api.gdeltproject.org/api/v2/geo/geo?query=conflict&format=geojson&timespan=24H",
-      { signal: AbortSignal.timeout(5000) },
-    );
+    const res = await fetch("https://api.gdeltproject.org/api/v2/geo/geo?query=conflict&format=geojson&timespan=12H", { signal: AbortSignal.timeout(5000) });
     if (!res.ok) throw new Error("GDELT fetch failed");
     const data = await res.json();
     processGDELTData(data.features || []);
   } catch (e) {
-    console.warn(
-      "GDELT API blocked/timed out. Emulating telemetry with front-line fallbacks.",
-      e,
-    );
+    console.warn("GDELT API blocked/timed out. Emulating telemetry with front-line fallbacks.", e);
     const fallbackData = [
-      {
-        geometry: { coordinates: [37.8, 48.3] },
-        properties: { name: "Ukraine Frontline", count: 85 },
-      },
-      {
-        geometry: { coordinates: [34.4, 31.5] },
-        properties: { name: "Gaza / Israel Front", count: 98 },
-      },
-      {
-        geometry: { coordinates: [32.5, 15.6] },
-        properties: { name: "Sudan Instability", count: 62 },
-      },
-      {
-        geometry: { coordinates: [96.1, 21.9] },
-        properties: { name: "Myanmar Civil Unrest", count: 45 },
-      },
-      {
-        geometry: { coordinates: [70.0, 33.9] },
-        properties: { name: "Afghanistan Border", count: 30 },
-      },
-      {
-        geometry: { coordinates: [45.3, 2.0] },
-        properties: { name: "Somalia Unrest", count: 25 },
-      },
+      { type: "Feature", geometry: { type: "Point", coordinates: [37.8, 48.3] }, properties: { name: "Ukraine Frontline", goldstein_scale: -5, count: 85 } },
+      { type: "Feature", geometry: { type: "Point", coordinates: [34.4, 31.5] }, properties: { name: "Gaza / Israel Front", goldstein_scale: -8, count: 98 } },
+      { type: "Feature", geometry: { type: "Point", coordinates: [32.5, 15.6] }, properties: { name: "Sudan Instability", goldstein_scale: -4, count: 62 } },
+      { type: "Feature", geometry: { type: "Point", coordinates: [96.1, 21.9] }, properties: { name: "Myanmar Civil Unrest", goldstein_scale: -6, count: 45 } },
+      { type: "Feature", geometry: { type: "Point", coordinates: [70.0, 33.9] }, properties: { name: "Afghanistan Border", goldstein_scale: -3, count: 30 } },
+      { type: "Feature", geometry: { type: "Point", coordinates: [45.3, 2.0] }, properties: { name: "Somalia Unrest", goldstein_scale: -3, count: 25 } }
     ];
     processGDELTData(fallbackData);
   }
+
   function processGDELTData(features) {
-    if (projectionType !== "2d" && window.myGlobe) {
-      window._hexLayers.gdelt = features.map((f) => {
-        const [lon, lat] = f.geometry.coordinates;
-        const count = f.properties.count || 50;
-        return {
-          type: "gdelt",
-          lat,
-          lng: lon,
-          count,
-          place: f.properties.name || "Conflict Zone",
-        };
-      });
-      window.updateGlobeHexbins();
-    } else if (_gdeltGroup) {
-      features.forEach((f) => {
-        const [lon, lat] = f.geometry.coordinates;
-        const proj = currentProjection([lon, lat]);
-        if (!proj) return;
-        const [cx, cy] = proj;
-        _gdeltGroup
-          .append("circle")
-          .attr("cx", cx)
-          .attr("cy", cy)
-          .attr("r", Math.max(2, (f.properties.count || 20) * 0.15))
-          .attr("fill", "#ef4444")
-          .attr("opacity", 0.5)
-          .attr("stroke", "#b91c1c")
-          .attr("stroke-width", 0.5)
-          .style("cursor", "pointer")
-          .on("mouseover", function (event) {
-            const t = safeEl("map-tooltip");
-            if (t) {
-              setText("tooltip-name", f.properties.name || "Conflict Zone");
-              const tf = safeEl("tooltip-flag");
-              if (tf) tf.classList.add("hidden");
-              setText("tooltip-label-1", "Type");
-              setText("tooltip-label-2", "Intensity");
-              setText("tooltip-capital", "Armed Conflict");
-              setText("tooltip-pop", (f.properties.count || 50) + " Events");
-              t.style.left = event.pageX + 15 + "px";
-              t.style.top = event.pageY - 15 + "px";
-              t.classList.remove("hidden");
-            }
-          })
-          .on("mouseleave", () => {
-            const t = safeEl("map-tooltip");
-            if (t) t.classList.add("hidden");
-          });
-      });
-    }
+    const geoData = {
+      type: 'FeatureCollection',
+      features: features.map(f => {
+        // Ensure standard GeoJSON structure even for fallback
+        if (f.type !== "Feature") {
+          return {
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: f.geometry.coordinates || [0, 0] },
+            properties: f.properties || { count: 50, name: 'Conflict Zone', goldstein_scale: -5 }
+          };
+        }
+        return f;
+      })
+    };
+
+    // Delegate entirely to Mapbox engine
+    window.mapEngine.addGDELTHeatmap(geoData);
   }
   if (window.updateLayerLegend) window.updateLayerLegend();
 };
@@ -1969,15 +2029,15 @@ window.toggleAircraftLayer = function () {
   _aircraftActive = !_aircraftActive;
   const btn = document.getElementById("aircraft-toggle-btn");
   if (!_aircraftActive) {
-    if (_aircraftGroup) _aircraftGroup.remove();
-    _aircraftGroup = null;
-    if (window.myGlobe && window.myGlobe.arcsData) {
-      window.myGlobe.arcsData(
-        (window.myGlobe.arcsData() || []).filter((a) => a.type !== "flight"),
-      );
-    }
+    // Clear refresh interval
     clearInterval(_aircraftInterval);
     _aircraftInterval = null;
+    // Remove Mapbox layer & source
+    if (window.mapEngine && window.mapEngine.map) {
+      const map = window.mapEngine.map;
+      if (map.getLayer('aircraft-layer')) map.removeLayer('aircraft-layer');
+      if (map.getSource('aircraft-data')) map.removeSource('aircraft-data');
+    }
     if (btn) {
       btn.classList.remove("active");
       btn.title = "Live Aircraft: OFF";
@@ -1996,222 +2056,79 @@ window.toggleAircraftLayer = function () {
   if (window.updateLayerLegend) window.updateLayerLegend();
 };
 window._issData = [{ lat: 0, lng: 0, alt: 0.1, name: "ISS" }];
-window._issInitialized = false;
+window._issMarker = null;
+
 window.updateISS = async function () {
-  if (typeof projectionType !== "undefined" && projectionType !== "3d") return;
-  if (!window.myGlobe) return;
+  if (!window.mapEngine || !window.mapEngine.map) return;
+  const map = window.mapEngine.map;
+
   try {
-    const res = await fetch("https://api.wheretheiss.at/v1/satellites/25544");
+    const res = await fetch("/api/iss");
     if (!res.ok) return;
     const data = await res.json();
     window._issData[0].lat = data.latitude;
     window._issData[0].lng = data.longitude;
-    window._issData[0].alt = data.altitude / 6371 + 0.1;
+    window._issData[0].alt = data.altitude;
     window._issData[0].velocity = data.velocity;
-    if (!window._issInitialized && window.THREE) {
-      window.myGlobe
-        .objectLat("lat")
-        .objectLng("lng")
-        .objectAltitude("alt")
-        .objectThreeObject(() => {
-          const group = new window.THREE.Group();
-          const core = new window.THREE.Mesh(
-            new window.THREE.BoxGeometry(0.8, 0.8, 0.8),
-            new window.THREE.MeshPhongMaterial({
-              color: "#fb923c",
-              emissive: "#ea580c",
-            }),
-          );
-          group.add(core);
-          const panel = new window.THREE.Mesh(
-            new window.THREE.BoxGeometry(3.5, 0.1, 0.8),
-            new window.THREE.MeshPhongMaterial({
-              color: "#3b82f6",
-              emissive: "#1d4ed8",
-              transparent: true,
-              opacity: 0.8,
-            }),
-          );
-          group.add(panel);
-          return group;
-        })
-        .ringLat("lat")
-        .ringLng("lng")
-        .ringAltitude((d) => d.alt || 0.01)
-        .ringColor((d) => d.color || "#fb923c")
-        .ringMaxRadius((d) => d.r || 4)
-        .ringPropagationSpeed((d) => d.speed || 1)
-        .ringRepeatPeriod((d) => d.period || 1000);
-      window._issInitialized = true;
+
+    // Create Marker on first run
+    if (!window._issMarker) {
+      const el = document.createElement('div');
+      el.className = 'iss-marker flex items-center justify-center';
+      el.style.width = '32px';
+      el.style.height = '32px';
+      el.innerHTML = `
+        <div class="relative flex items-center justify-center">
+          <div class="absolute inset-0 rounded-full animate-ping bg-amber-500/20"></div>
+          <i class="fas fa-satellite text-amber-400 text-lg relative z-10 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]"></i>
+        </div>
+      `;
+      el.style.cursor = 'pointer';
+
+      // Tooltip interaction
+      el.addEventListener('mouseenter', (e) => {
+        const t = safeEl("map-tooltip");
+        if (t) {
+          setText("tooltip-name", "ISS Orbital Station");
+          const tf = safeEl("tooltip-flag");
+          if (tf) tf.classList.add("hidden");
+          setText("tooltip-label-1", "Altitude");
+          setText("tooltip-label-2", "Velocity");
+          setText("tooltip-capital", `${Math.round(window._issData[0].alt * 0.621371)} miles`);
+          setText("tooltip-pop", `${Math.round(window._issData[0].velocity * 0.621371)} mph`);
+          t.style.left = e.pageX + 15 + "px";
+          t.style.top = e.pageY - 15 + "px";
+          t.classList.remove("hidden");
+        }
+      });
+
+      el.addEventListener('mouseleave', () => {
+        const t = safeEl("map-tooltip");
+        if (t) t.classList.add("hidden");
+      });
+
+      window._issMarker = new mapboxgl.Marker({ element: el })
+        .setLngLat([data.longitude, data.latitude])
+        .addTo(map);
+    } else {
+      // Update position continuously
+      window._issMarker.setLngLat([data.longitude, data.latitude]);
     }
-    if (!window._radarPings) {
-      window._radarPings = [
-        {
-          lat: 38.8951,
-          lng: -77.0364,
-          r: 6,
-          color: "#ef4444",
-          speed: 0.5,
-          period: 2000,
-        },
-        {
-          lat: 55.7558,
-          lng: 37.6173,
-          r: 6,
-          color: "#ef4444",
-          speed: 0.5,
-          period: 2000,
-        },
-        {
-          lat: 39.9042,
-          lng: 116.4074,
-          r: 6,
-          color: "#ef4444",
-          speed: 0.5,
-          period: 2000,
-        },
-        {
-          lat: 20.5937,
-          lng: 78.9629,
-          r: 10,
-          color: "#3b82f6",
-          speed: 0.8,
-          period: 1500,
-        },
-      ];
-    }
-    window.myGlobe.objectsData(window._issData);
-    window.myGlobe.ringsData([...window._radarPings, ...window._issData]);
+
   } catch (e) {
     console.warn("ISS orbital tracking fetch failed", e);
-    if (window.showToast) window.showToast("ISS data unavailable.", "info");
   }
 };
+
 if (!window._issInterval) {
   setTimeout(() => window.updateISS(), 2000);
-  window._issInterval = setInterval(window.updateISS, 3000);
+  window._issInterval = setInterval(window.updateISS, 5000);
 }
-window._cyberDataCenters = [
-  { lat: 38.8951, lng: -77.0364 },
-  { lat: 55.7558, lng: 37.6173 },
-  { lat: 39.9042, lng: 116.4074 },
-  { lat: 51.5074, lng: -0.1278 },
-  { lat: 35.6762, lng: 139.6503 },
-  { lat: -33.8688, lng: 151.2093 },
-  { lat: 50.1109, lng: 8.6821 },
-  { lat: 1.3521, lng: 103.8198 },
-];
-window.updateCyberArcs = function () {
-  if (typeof projectionType !== "undefined" && projectionType !== "3d") return;
-  if (!window.myGlobe || !window.myGlobe.arcsData) return;
-  let currentArcs = window.myGlobe.arcsData() || [];
-  if (Math.random() > 0.25) {
-    const src =
-      window._cyberDataCenters[
-      Math.floor(Math.random() * window._cyberDataCenters.length)
-      ];
-    let tgt =
-      window._cyberDataCenters[
-      Math.floor(Math.random() * window._cyberDataCenters.length)
-      ];
-    while (src === tgt)
-      tgt =
-        window._cyberDataCenters[
-        Math.floor(Math.random() * window._cyberDataCenters.length)
-        ];
-    currentArcs.push({
-      startLat: src.lat,
-      startLng: src.lng,
-      endLat: tgt.lat,
-      endLng: tgt.lng,
-      color: ["rgba(239, 68, 68, 0)", "rgba(239, 68, 68, 1)"],
-      type: "cyber",
-      timeCreated: Date.now(),
-    });
-  }
-  const now = Date.now();
-  currentArcs = currentArcs.filter(
-    (a) => a.type !== "cyber" || now - a.timeCreated < 3000,
-  );
-  window.myGlobe.arcsData(currentArcs);
-};
-if (!window._cyberInterval) {
-  window._cyberInterval = setInterval(window.updateCyberArcs, 600);
-}
+
 if (typeof window._globeTheme === "undefined") {
   window._globeTheme = "night";
 }
-window._autoRotateActive = false;
-window.toggleAutoRotate = function () {
-  window._autoRotateActive = !window._autoRotateActive;
-  const btn = document.getElementById("autorotate-toggle-btn");
-  if (btn) {
-    if (window._autoRotateActive) {
-      btn.classList.add("text-blue-400", "active");
-      btn.title = "Auto-Rotate: ON";
-    } else {
-      btn.classList.remove("text-blue-400", "active");
-      btn.title = "Auto-Rotate: OFF";
-    }
-  }
-  if (window.myGlobe && window.myGlobe.controls()) {
-    window.myGlobe.controls().autoRotate = window._autoRotateActive;
-  }
-};
-window._globeZoomed = false;
-window.toggleGlobeZoom = function () {
-  if (!window.myGlobe || !window.myGlobe.controls()) return;
-  window._globeZoomed = !window._globeZoomed;
-  const btn = document.getElementById("globe-zoom-toggle-btn");
-  const camera = window.myGlobe.camera();
-  const controls = window.myGlobe.controls();
-  // Target distances: normal ~350, zoomed in ~220
-  const targetDist = window._globeZoomed ? 220 : 350;
-  if (btn) {
-    btn.classList.toggle("active", window._globeZoomed);
-    btn.title = window._globeZoomed ? "Globe Zoom: Closer" : "Globe Zoom: Normal";
-    const icon = btn.querySelector("i");
-    if (icon) icon.className = window._globeZoomed ? "fas fa-search-minus text-xs" : "fas fa-search-plus text-xs";
-  }
-  // Smooth zoom via camera position interpolation
-  const duration = 600;
-  const start = performance.now();
-  const pos = camera.position;
-  const currentDist = pos.length();
-  const dir = pos.clone().normalize();
-  function animateZoom(now) {
-    const t = Math.min(1, (now - start) / duration);
-    const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-    const dist = currentDist + (targetDist - currentDist) * eased;
-    camera.position.copy(dir.clone().multiplyScalar(dist));
-    controls.update();
-    if (t < 1) requestAnimationFrame(animateZoom);
-  }
-  requestAnimationFrame(animateZoom);
-  window.showToast?.(window._globeZoomed ? "Globe: Closer View" : "Globe: Normal View", "info");
-};
-window.toggleGlobeTheme = function () {
-  window._globeTheme = window._globeTheme === "night" ? "day" : "night";
-  const btn = document.getElementById("theme-toggle-btn");
-  if (btn) {
-    if (window._globeTheme === "day") {
-      btn.classList.add("text-yellow-400", "active-amber");
-      btn.innerHTML = '<i class="fas fa-sun text-xs"></i>';
-      btn.title = "Globe Theme: DAY";
-    } else {
-      btn.classList.remove("text-yellow-400", "active-amber");
-      btn.innerHTML = '<i class="fas fa-moon text-xs"></i>';
-      btn.title = "Globe Theme: NIGHT";
-    }
-  }
-  if (window.myGlobe) {
-    window.myGlobe.globeImageUrl(
-      window._globeTheme === "day"
-        ? "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-        : "//unpkg.com/three-globe/example/img/earth-night.jpg"
-    );
-  }
-};
+// Legacy 3D Globe methods removed (now using Mapbox)
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then(registration => {
@@ -2225,8 +2142,67 @@ if ('serviceWorker' in navigator) {
 // Global Initialization Sequence
 console.log("NewsAtlas Engine: Launching sequence...");
 window.generateAIBriefing = generateAIBriefing;
+
+// Initialize Mapbox instead of D3
+window.mapEngine = new MapboxEngine('map-container');
+window.mapEngine.init().then((success) => {
+  if (success) {
+    console.log("Mapbox initialized successfully!");
+  } else {
+    console.error("Mapbox failed to initialize. Check API key.");
+  }
+});
+
+// Run standard systems
 initTerminal();
-initMap("2d");
 setupEventListeners();
 setInterval(updateSystemTime, 1000);
 console.log("NewsAtlas Engine: Initialization calls complete.");
+
+window.renderTrendingHeader = () => {
+  const container = document.getElementById("trending-quick-container");
+  if (!container || !window.globalSearchData || window.globalSearchData.length === 0) return;
+
+  const trending = ["India", "United States", "Japan", "Russia", "United Kingdom"];
+  const list = document.getElementById("trending-sectors-list");
+
+  container.innerHTML = trending.map(name => {
+    const c = window.globalSearchData.find(x => x.name.common === name || (name === "United States" && x.name.common === "United States of America"));
+    if (!c) return "";
+    return `<button onclick="handleCountryClickByName('${name}')" class="w-7 h-4.5 rounded-sm overflow-hidden border border-white/10 hover:border-blue-400 hover:scale-110 transition-all shadow-sm" title="${name}">
+               <img src="${c.flags.svg}" class="w-full h-full object-cover">
+             </button>`;
+  }).join("");
+
+  if (list) list.classList.remove("hidden");
+};
+
+// Integration with reset
+const _origResetGlobal = window.resetToGlobalCenter;
+if (_origResetGlobal) {
+  window.resetToGlobalCenter = (fly) => {
+    _origResetGlobal(fly);
+    const headerFlagContainer = safeEl("search-flag-container");
+    const headerSearchIcon = safeEl("search-icon-main");
+    const headerInput = safeEl("map-search-input");
+    if (headerFlagContainer) headerFlagContainer.classList.add("hidden");
+    if (headerSearchIcon) headerSearchIcon.classList.remove("hidden");
+    if (headerInput) headerInput.value = "";
+  };
+}
+async function fetchGlobalSearchData() {
+  try {
+    const res = await fetch("/api/countries?all=true");
+    if (!res.ok) throw new Error("Index relay failed");
+    window.globalSearchData = await res.json();
+    console.log(`Global Registry Online: ${window.globalSearchData.length} sectors indexed.`);
+    // If the search overlay is open, force a re-render of trending
+    if (window.renderTrending) window.renderTrending();
+  } catch (e) {
+    console.error("Critical: Global Registry Link Failure", e);
+    // Silent fallback to local telemetry
+    window.globalSearchData = [];
+  }
+}
+
+window.fetchGlobalSearchData = fetchGlobalSearchData;

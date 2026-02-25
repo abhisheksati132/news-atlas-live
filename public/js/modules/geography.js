@@ -21,7 +21,17 @@ async function onCountrySelected(countryName) {
   const bc = document.getElementById("breadcrumb-country");
   if (bc) bc.innerText = countryName;
   const stateSelector = document.getElementById("state-selector");
+  const stateCollapseContent = document.getElementById("state-collapse-content");
+  const stateCollapseIcon = document.getElementById("state-collapse-icon");
   if (stateSelector) stateSelector.classList.remove("hidden");
+  // Auto-expand the state panel when a country is selected
+  // if (stateCollapseContent) stateCollapseContent.classList.remove("hidden");
+  // if (stateCollapseIcon) stateCollapseIcon.style.transform = "rotate(180deg)";
+  // Reset city panel
+  const cityCollapseContent = document.getElementById("city-collapse-content");
+  const cityCollapseIcon = document.getElementById("city-collapse-icon");
+  if (cityCollapseContent) cityCollapseContent.classList.add("hidden");
+  if (cityCollapseIcon) cityCollapseIcon.style.transform = "rotate(0deg)";
   if (window.fetchGDELTEvents) window.fetchGDELTEvents(countryName);
   try {
     const res = await fetch(
@@ -38,9 +48,13 @@ async function onCountrySelected(countryName) {
       stateList.innerHTML = "";
       data.states.forEach((state) => {
         const btn = document.createElement("button");
-        btn.className =
-          "text-left p-2 rounded border border-white/10 hover:border-blue-400 hover:bg-blue-400/10 transition-all text-xs font-mono";
-        btn.innerHTML = `<div class="font-bold text-white">${state.name}</div><div class="text-slate-400 text-[10px] font-mono">${state.code || ""}</div>`;
+        btn.className = "apple-glass hover-glow-blue text-left p-3 rounded-2xl border border-white/5 transition-all text-xs font-mono group";
+        btn.innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-blue-400 group-hover:text-white transition-colors uppercase tracking-wider">${state.name}</span>
+            <span class="text-slate-500 text-[9px] font-black opacity-40 uppercase">${state.code || ""}</span>
+          </div>
+        `;
         btn.onclick = () => selectState(countryName, state.name);
         stateList.appendChild(btn);
       });
@@ -67,6 +81,11 @@ async function selectState(countryName, stateName) {
   if (bsWrap) bsWrap.classList.remove("hidden");
   if (bcWrap) bcWrap.classList.add("hidden");
   if (citySelector) citySelector.classList.remove("hidden");
+  // Auto-expand city panel
+  const cityCollapseContent2 = document.getElementById("city-collapse-content");
+  const cityCollapseIcon2 = document.getElementById("city-collapse-icon");
+  if (cityCollapseContent2) cityCollapseContent2.classList.remove("hidden");
+  if (cityCollapseIcon2) cityCollapseIcon2.style.transform = "rotate(180deg)";
   if (cityList)
     cityList.innerHTML =
       '<div class="text-slate-500 text-xs col-span-3 py-2">Loading cities...</div>';
@@ -75,6 +94,23 @@ async function selectState(countryName, stateName) {
       `/api/geo?country=${encodeURIComponent(countryName)}&state=${encodeURIComponent(stateName)}&level=cities`,
     );
     const data = await res.json();
+
+    // Fly to state center (approximate via geocoder)
+    try {
+      const geoRes = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(stateName + ", " + countryName)}&count=1&language=en&format=json`,
+      );
+      const geoData = await geoRes.json();
+      if (geoData.results && geoData.results[0] && window.mapEngine?.map) {
+        window.mapEngine.map.flyTo({
+          center: [geoData.results[0].longitude, geoData.results[0].latitude],
+          zoom: 6,
+          pitch: 50,
+          duration: 2500
+        });
+      }
+    } catch (ee) { }
+
     if (!data.cities || data.cities.length === 0) {
       if (cityList)
         cityList.innerHTML =
@@ -85,9 +121,8 @@ async function selectState(countryName, stateName) {
       cityList.innerHTML = "";
       data.cities.forEach((cityName) => {
         const btn = document.createElement("button");
-        btn.className =
-          "text-left p-2 rounded border border-white/10 hover:border-cyan-400 hover:bg-cyan-400/10 transition-all text-xs font-mono";
-        btn.innerHTML = `<div class="font-bold text-white">${cityName}</div>`;
+        btn.className = "apple-glass hover-glow-cyan text-left p-3 rounded-2xl border border-white/5 transition-all text-xs font-mono group";
+        btn.innerHTML = `<span class="font-bold text-cyan-400 group-hover:text-white transition-colors uppercase tracking-wider">${cityName}</span>`;
         btn.onclick = () => selectCity(countryName, stateName, cityName);
         cityList.appendChild(btn);
       });
@@ -120,8 +155,21 @@ async function selectCity(countryName, stateName, cityName) {
       const { latitude, longitude } = geoData.results[0];
       window._currentWeatherLocation = `${cityName}, ${countryName}`;
       if (window.fetchWeather) window.fetchWeather(latitude, longitude);
+
+      // Mapbox flyTo city
+      if (window.mapEngine && window.mapEngine.map) {
+        window.mapEngine.map.flyTo({
+          center: [longitude, latitude],
+          zoom: 10,
+          pitch: 60,
+          essential: true,
+          duration: 2500
+        });
+      }
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error("City geocoding failed:", e);
+  }
   if (window.generateAIBriefing)
     window.generateAIBriefing(cityName + ", " + stateName + ", " + countryName);
 }

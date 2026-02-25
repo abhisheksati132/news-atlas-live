@@ -10,6 +10,8 @@ import aiHandler from "./api/ai.js";
 import geoHandler from "./api/geo.js";
 import openaqHandler from "./api/openaq.js";
 import configHandler from "./api/config.js";
+import countriesHandler from "./api/countries.js";
+import issHandler from "./api/iss.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
@@ -24,6 +26,8 @@ app.get("/api/openaq", async (req, res) => await openaqHandler(req, res));
 app.get("/api/config", async (req, res) => await configHandler(req, res));
 app.post("/api/ai", async (req, res) => await aiHandler(req, res));
 app.get("/api/ai", async (req, res) => await aiHandler(req, res));
+app.get("/api/countries", async (req, res) => await countriesHandler(req, res));
+app.get("/api/iss", async (req, res) => await issHandler(req, res));
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
   console.log(`- News Feed: /api/news`);

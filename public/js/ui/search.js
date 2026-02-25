@@ -10,28 +10,32 @@ function renderTrending() {
   }
   const recent = (typeof window.getRecentCountries === "function" && window.getRecentCountries()) || [];
   let recentHtml = "";
+
+  const headerStyle = `padding: 1.25rem 1.5rem 0.75rem; font-size: 11px; font-weight: 900; color: #475569; text-transform: uppercase; letter-spacing: 0.15em; font-family: 'JetBrains Mono', monospace;`;
+
   if (recent.length > 0) {
     recentHtml =
-      '<div class="p-4 text-[10px] font-black text-cyan-500/90 uppercase tracking-widest sticky top-0 bg-[#020617]/95 backdrop-blur z-10 border-b border-white/5">Recent</div>' +
+      `<div style="${headerStyle}">Recent Operations</div>` +
       recent
         .map((name) => {
           const c = window.globalSearchData.find((curr) => curr.name.common === name);
           if (!c) return "";
           return `
-            <div class="p-4 hover:bg-cyan-600/10 cursor-pointer flex items-center gap-4 border-b border-white/5 transition-all group" onclick="window.selectFromSearch('${name.replace(/'/g, "\\'")}')">
-                <div class="w-8 h-5 rounded shadow-sm overflow-hidden relative border border-white/10 group-hover:border-cyan-400/50">
+            <div class="flex items-center gap-5 px-6 py-4 hover:bg-white/[0.03] cursor-pointer border-b border-white/[0.04] transition-all group" onclick="window.selectFromSearch('${name.replace(/'/g, "\\'")}')">
+                <div class="w-10 h-6.5 rounded shadow-sm overflow-hidden border border-white/10 shrink-0">
                     <img src="${c.flags.svg}" class="w-full h-full object-cover">
                 </div>
-                <span class="font-bold text-white text-sm tracking-tight group-hover:text-cyan-300 transition-colors">${name}</span>
-                <i class="fas fa-chevron-right ml-auto text-[10px] text-slate-600 group-hover:text-cyan-400"></i>
+                <span class="font-bold text-white text-base tracking-tight group-hover:text-blue-400 transition-colors">${name}</span>
+                <i class="fas fa-chevron-right ml-auto text-[11px] text-slate-700 group-hover:text-blue-400 transition-all group-hover:translate-x-0.5"></i>
             </div>`;
         })
         .join("") +
-      '<div class="p-4 text-[10px] font-black text-slate-600 uppercase tracking-widest bg-[#020617]/95 border-b border-white/5">High Traffic Sectors</div>';
+      `<div style="${headerStyle} border-top: 1px solid rgba(255,255,255,0.05); margin-top: 0.5rem;">High Traffic Sectors</div>`;
   } else {
     recentHtml =
-      '<div class="p-4 text-[10px] font-black text-slate-600 uppercase tracking-widest sticky top-0 bg-[#020617]/95 backdrop-blur z-10 border-b border-white/5">High Traffic Sectors</div>';
+      `<div style="${headerStyle}">High Traffic Sectors</div>`;
   }
+
   const trending = [
     "India",
     "United States",
@@ -42,6 +46,7 @@ function renderTrending() {
     "Russia",
     "China",
   ];
+
   resContainer.innerHTML =
     recentHtml +
     trending
@@ -55,12 +60,12 @@ function renderTrending() {
         );
         if (!c) return "";
         return `
-            <div class="p-4 hover:bg-blue-600/10 cursor-pointer flex items-center gap-4 border-b border-white/5 transition-all group" onclick="window.selectFromSearch('${name}')">
-                <div class="w-8 h-5 rounded shadow-sm overflow-hidden relative border border-white/10 group-hover:border-blue-400/50">
+            <div class="flex items-center gap-5 px-6 py-4 hover:bg-white/[0.03] cursor-pointer border-b border-white/[0.04] transition-all group" onclick="window.selectFromSearch('${name}')">
+                <div class="w-10 h-6.5 rounded shadow-sm overflow-hidden border border-white/10 shrink-0">
                     <img src="${c.flags.svg}" class="w-full h-full object-cover">
                 </div>
-                <span class="font-bold text-white text-sm tracking-tight group-hover:text-blue-300 transition-colors">${name}</span>
-                <i class="fas fa-chevron-right ml-auto text-[10px] text-slate-600 group-hover:text-blue-400"></i>
+                <span class="font-bold text-white text-base tracking-tight group-hover:text-blue-400 transition-colors">${name}</span>
+                <i class="fas fa-chevron-right ml-auto text-[11px] text-slate-700 group-hover:text-blue-400 transition-all group-hover:translate-x-0.5"></i>
             </div>`;
       })
       .join("");

@@ -339,21 +339,28 @@ async function generateWeatherAnalysis(weatherData, cityName) {
       .map((d) => `${d.date}: ${d.temp}°C, ${d.condition}`)
       .join("\n");
     const prompt = `Provide a tactical weather assessment for ${cityName}:
-  Current: ${weatherData.temp}°C (feels like ${weatherData.feels_like}°C), ${weatherData.condition}
-  Humidity: ${weatherData.humidity}%, Wind: ${weatherData.wind_speed} km/h, UV: ${weatherData.uv_index}, Visibility: ${weatherData.visibility} km
-  7-Day: ${forecastStr}
-  In 150 words cover: Overall assessment, travel advisories, health warnings (UV/air), outdoor impact, recommended actions.`;
+Current: ${weatherData.temp}°C (feels like ${weatherData.feels_like}°C), ${weatherData.condition}
+Humidity: ${weatherData.humidity}%, Wind: ${weatherData.wind_speed} km/h, UV: ${weatherData.uv_index}, Visibility: ${weatherData.visibility} km
+7-Day: ${forecastStr}
+
+Write exactly ONE paragraph (max 50 words) covering an overall tactical assessment, travel advisories, and outdoor impacts. Use a strict, authoritative military intelligence tone. Do not use asterisks or headers.`;
     const res = await fetch("/api/ai", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt }),
     });
     const data = await res.json();
-    el.innerText =
-      data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Weather analysis unavailable.";
+    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Weather analysis unavailable.";
+    text = text.replace(/\*\*/g, "").replace(/\n/g, " ").trim();
+
+    el.innerHTML = `<div style="background:rgba(59,130,246,0.04);border:1px solid rgba(59,130,246,0.15);border-radius:8px;padding:12px 14px;box-shadow:inset 0 0 20px rgba(59,130,246,0.02);">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:900;color:#60a5fa;text-transform:uppercase;letter-spacing:.15em;display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+        <i class="fas fa-satellite" style="font-size:10px;"></i>Tactical Overview
+      </div>
+      <p style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#cbd5e1;line-height:1.7;margin:0;">${text}</p>
+    </div>`;
   } catch (e) {
-    el.innerText = "Weather analysis link failed.";
+    el.innerHTML = `<p style="color:#ef4444;font-family:'JetBrains Mono',monospace;font-size:10px;">Weather analysis link failed: ${e.message}</p>`;
   }
   generateWeatherAlerts(weatherData);
 }

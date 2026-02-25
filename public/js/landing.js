@@ -1,3 +1,11 @@
+window.addEventListener("load", () => {
+  const loader = document.getElementById("page-loader");
+  if (loader) {
+    loader.style.opacity = "0";
+    loader.style.visibility = "hidden";
+  }
+});
+
 const phrases = [
   "Aggregating 4,700+ global intelligence feeds...",
   "Cross-referencing market signals with geopolitical events...",
@@ -130,4 +138,26 @@ document.addEventListener("DOMContentLoaded", () => {
     );
     statsObserver.observe(statsEl.closest("section") || statsEl);
   }
+
+  // Mouse-tracking glow logic for feature cards
+  document.querySelectorAll('.feat-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      card.style.setProperty('--x', `${x}px`);
+      card.style.setProperty('--y', `${y}px`);
+    });
+  });
+
+  // Simple UI sound logic
+  const playSound = (type) => {
+    // Placeholder for audio assets
+    console.log(`Playing UI sound: ${type}`);
+  };
+
+  document.querySelectorAll('.cta-btn, .sec-btn').forEach(btn => {
+    btn.addEventListener('mouseenter', () => playSound('hover'));
+    btn.addEventListener('click', () => playSound('click'));
+  });
 });

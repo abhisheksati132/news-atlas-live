@@ -46,34 +46,79 @@ function initDrag() {
         }
     } catch { }
 }
-window.toggleCLI = function () {
-    _cliExpanded = !_cliExpanded;
+window.openCLI = function () {
     const panel = document.getElementById("floating-cli");
     const body = document.getElementById("floating-cli-body");
     const chev = document.getElementById("floating-cli-chevron");
     if (!panel || !body) return;
-    if (_cliExpanded) {
-        panel.classList.add("cli-expanded");        
-        body.style.display = "flex";
-        body.style.flexDirection = "column";
-        requestAnimationFrame(() => { body.classList.add("cli-body-open"); });
-        if (chev) chev.style.transform = "rotate(180deg)";
-        setTimeout(() => document.getElementById("floating-cli-input")?.focus(), 200);
-        if (window.playTacticalSound) window.playTacticalSound("click");
-        const output = document.getElementById("floating-cli-output");
-        if (output && !output.dataset.welcomed) {
-            output.dataset.welcomed = "1";
-            cliPrint([
-                `<span class="cli-head">NEURAL COMMAND INTERFACE v2.0</span>`,
-                `<span class="cli-dim">Type <span class="cli-key">help</span> for commands · Drag title bar to move · AI-powered</span>`,
-                `<span class="cli-dim">───────────────────────────────────</span>`,
-            ]);
-        }
+
+    panel.classList.remove("cli-locked");
+    _cliExpanded = true;
+
+    panel.classList.add("cli-expanded");
+    body.style.display = "flex";
+    body.style.flexDirection = "column";
+    requestAnimationFrame(() => { body.classList.add("cli-body-open"); });
+    if (chev) chev.style.transform = "rotate(180deg)";
+    setTimeout(() => document.getElementById("floating-cli-input")?.focus(), 200);
+    if (window.playTacticalSound) window.playTacticalSound("success");
+
+    const output = document.getElementById("floating-cli-output");
+    if (output && !output.dataset.welcomed) {
+        output.dataset.welcomed = "1";
+        cliPrint([
+            `<span class="cli-head">NEURAL COMMAND INTERFACE v2.0</span>`,
+            `<span class="cli-dim">Type <span class="cli-key">help</span> for commands · Drag title bar to move · AI-powered</span>`,
+            `<span class="cli-dim">───────────────────────────────────</span>`,
+        ]);
+    }
+};
+
+window.closeCLI = function (e) {
+    if (e) e.stopPropagation();
+    const panel = document.getElementById("floating-cli");
+    const body = document.getElementById("floating-cli-body");
+    const chev = document.getElementById("floating-cli-chevron");
+    if (!panel || !body) return;
+
+    _cliExpanded = false;
+    body.classList.remove("cli-body-open");
+    panel.classList.remove("cli-expanded");
+    if (chev) chev.style.transform = "rotate(0deg)";
+
+    if (window.playTacticalSound) window.playTacticalSound("click");
+
+    setTimeout(() => {
+        body.style.display = "none";
+        panel.classList.add("cli-locked");
+    }, 260);
+};
+
+window.toggleCLI = function () {
+    const panel = document.getElementById("floating-cli");
+    if (!panel) return;
+
+    if (panel.classList.contains("cli-locked")) {
+        window.openCLI();
     } else {
-        body.classList.remove("cli-body-open");
-        panel.classList.remove("cli-expanded");     
-        if (chev) chev.style.transform = "rotate(0deg)";
-        setTimeout(() => { body.style.display = "none"; }, 260);
+        // Just toggle expansion if visible
+        _cliExpanded = !_cliExpanded;
+        const body = document.getElementById("floating-cli-body");
+        const chev = document.getElementById("floating-cli-chevron");
+
+        if (_cliExpanded) {
+            panel.classList.add("cli-expanded");
+            body.style.display = "flex";
+            body.style.flexDirection = "column";
+            requestAnimationFrame(() => { body.classList.add("cli-body-open"); });
+            if (chev) chev.style.transform = "rotate(180deg)";
+            setTimeout(() => document.getElementById("floating-cli-input")?.focus(), 200);
+        } else {
+            body.classList.remove("cli-body-open");
+            panel.classList.remove("cli-expanded");
+            if (chev) chev.style.transform = "rotate(0deg)";
+            setTimeout(() => { body.style.display = "none"; }, 260);
+        }
     }
 };
 function cliPrint(lines) {
@@ -160,14 +205,14 @@ async function processCLICommand(raw) {
     }
     if (cmd === "analyze") {
         const t = rawArgs || country;
-        cliPrint([`<span class="cli-dim">▶ Generating intel for ${t}…</span>`]);
+        cliPrint([`<span class="cli-dim">-> Generating intel for ${t}...</span>`]);
         window.generateAIBriefing?.(t);
         window.switchTab?.("intel");
-        cliPrint([`<span class="cli-ok">▶ Streaming in Intel tab</span>`]);
+        cliPrint([`<span class="cli-ok">-> Streaming in Intel tab</span>`]);
         return;
     }
     const thinkId = "clt-" + Date.now();
-    cliPrint([`<span id="${thinkId}" class="cli-dim"><span class="cli-dot"></span><span class="cli-dot"></span><span class="cli-dot"></span> AI thinking…</span>`]);
+    cliPrint([`<span id="${thinkId}" class="cli-dim"><span class="cli-dot"></span><span class="cli-dot"></span><span class="cli-dot"></span> AI thinking...</span>`]);
     const activeLayers = [];
     if (window._earthquakeActive) activeLayers.push("Earthquakes");
     if (window._aircraftActive) activeLayers.push("Live Flights");
@@ -198,11 +243,11 @@ async function processCLICommand(raw) {
         window._cliMsgHistory.push({ role: "assistant", content: reply });
         if (window._cliMsgHistory.length > 6) window._cliMsgHistory = window._cliMsgHistory.slice(-6);
         document.getElementById(thinkId)?.remove();
-        cliPrint([`<span class="cli-ai">AI ›</span> <span class="cli-reply">${escH(reply.replace(/\*\*/g, "").trim())}</span>`]);
+        cliPrint([`<span class="cli-ai">AI ></span> <span class="cli-reply">${escH(reply.replace(/\*\*/g, "").trim())}</span>`]);
         window.playTacticalSound?.("success");
     } catch {
         const el = document.getElementById(thinkId);
-        if (el) el.innerHTML = `<span class="cli-err">⚠ AI uplink failed.</span>`;
+        if (el) el.innerHTML = `<span class="cli-err">! AI uplink failed.</span>`;
     }
 }
 function escH(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }

@@ -135,6 +135,14 @@ window.setCategory = (el, cat) => {
 };
 function displayFilteredNews() {
   let filtered = [...allNews];
+
+  // Prioritize articles with images
+  filtered.sort((a, b) => {
+    const hasA = a.image_url ? 1 : 0;
+    const hasB = b.image_url ? 1 : 0;
+    return hasB - hasA;
+  });
+
   let countToDisplay = Math.min(displayedNewsCount, filtered.length);
   const remainder = countToDisplay % 3;
   if (remainder !== 0 && countToDisplay > remainder) countToDisplay -= remainder;

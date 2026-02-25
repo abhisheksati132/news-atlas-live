@@ -1,7 +1,7 @@
 let audioCtx;
 let ambienceOscillators = [];
 let ambienceGain = null;
-let isAmbiencePlaying = false;
+window.isAmbiencePlaying = false;
 function initAudio() {
   if (!audioCtx)
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -9,15 +9,18 @@ function initAudio() {
 }
 window.toggleAmbience = () => {
   initAudio();
-  if (isAmbiencePlaying) {
-    ambienceOscillators.forEach((osc) => osc.stop());
-    ambienceOscillators = [];
-    isAmbiencePlaying = false;
+  if (window.isAmbiencePlaying || window._audioMuted) {
+    if (window.isAmbiencePlaying) {
+      ambienceOscillators.forEach((osc) => osc.stop());
+      ambienceOscillators = [];
+      window.isAmbiencePlaying = false;
+    }
     const el = document.getElementById("ambience-text");
     if (el) {
       el.innerText = "OFF";
       el.classList.remove("text-blue-400");
     }
+    if (window._audioMuted) return;
   } else {
     ambienceGain = audioCtx.createGain();
     ambienceGain.gain.value = 0.05;
@@ -30,7 +33,7 @@ window.toggleAmbience = () => {
       osc.start();
       ambienceOscillators.push(osc);
     });
-    isAmbiencePlaying = true;
+    window.isAmbiencePlaying = true;
     const el = document.getElementById("ambience-text");
     if (el) {
       el.innerText = "ON";
@@ -80,7 +83,7 @@ window.playTacticalSound = (type) => {
       osc.start();
       osc.stop(audioCtx.currentTime + 0.3);
     }
-  } catch (e) {}
+  } catch (e) { }
 };
 function safeText(id) {
   const el = document.getElementById(id);

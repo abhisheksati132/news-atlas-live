@@ -1,0 +1,113 @@
+/* global-fx.css - Advanced visual and interaction effects */
+
+/* 1. Custom Radar Cursor */
+* {
+    cursor: none !important;
+}
+
+input,
+textarea,
+[contenteditable] {
+    cursor: text !important;
+}
+
+#custom-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 22px;
+    height: 22px;
+    pointer-events: none;
+    z-index: 10000;
+    transform: translate(0, 0);
+    /* Standard top-left registration */
+    transition: transform 0.1s ease-out, filter 0.2s, scale 0.2s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2306b6d4' stroke='white' stroke-width='1.5' d='M5.5 3.21V20.8c0 .45.54.67.85.35l4.83-4.83 2.87 6.31c.14.31.5.45.81.3l2.84-1.29c.31-.14.45-.5.3-.81l-2.87-6.31 6.35-1.15c.44-.08.57-.64.22-.91L6.35 2.86c-.32-.24-.85-.01-.85.35z'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: drop-shadow(0 0 5px rgba(6, 182, 212, 0.6));
+}
+
+#custom-cursor.cursor-hover {
+    scale: 1.2;
+    filter: drop-shadow(0 0 12px rgba(6, 182, 212, 1));
+}
+
+/* 2. Mouse-Reactive Glow Borders (Apple Glass + VisionOS style) */
+.glass-glow-track {
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-glow-track::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    padding: 1px;
+    /* border width */
+    background: radial-gradient(600px circle at var(--mouse-x, -500px) var(--mouse-y, -500px),
+            rgba(255, 255, 255, 0.4),
+            transparent 40%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 10;
+    transition: opacity 0.3s;
+    opacity: 0.8;
+}
+
+.apple-glass,
+.glass-panel,
+.glass-glow-track {
+    position: relative;
+}
+
+.apple-glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.3s ease;
+}
+
+.hover-glow-blue:hover {
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.35);
+    border-color: rgba(59, 130, 246, 0.4) !important;
+    background: rgba(59, 130, 246, 0.08) !important;
+}
+
+.apple-glass::after,
+.glass-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: -1;
+    mix-blend-mode: overlay;
+}
+
+/* 4. Dynamic Parallax Background Map / Grid */
+.parallax-grid-wrapper {
+    position: fixed;
+    inset: -5%;
+    /* slightly larger to allow parallax movement */
+    width: 110vw;
+    height: 110vh;
+    pointer-events: none;
+    z-index: -10;
+    transform: translate(calc(var(--bg-mouse-x, 0) * 1px), calc(var(--bg-mouse-y, 0) * 1px));
+    transition: transform 0.1s ease-out;
+}
+
+/* 5. Decrypt / Scramble Text Effect Classes */
+.decrypt-text span {
+    display: inline-block;
+}

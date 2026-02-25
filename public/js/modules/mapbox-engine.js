@@ -14,7 +14,6 @@ class MapboxEngine {
     async init() {
         console.log('🚀 Initializing Mapbox GL JS Engine...');
 
-        // 1. Fetch token securely from our backend
         try {
             const res = await fetch('/api/config');
             if (!res.ok) throw new Error('Failed to fetch config');
@@ -30,12 +29,10 @@ class MapboxEngine {
             return false;
         }
 
-        // 2. Prep container
         const container = document.getElementById(this.containerId);
         if (!container) return false;
         container.innerHTML = '';
 
-        // 3. Initialize Mapbox
         this.map = new mapboxgl.Map({
             container: this.containerId,
             style: 'mapbox://styles/mapbox/satellite-streets-v12',
@@ -46,14 +43,12 @@ class MapboxEngine {
             attributionControl: false
         });
 
-        // 4. Configure all features on style load
         this.map.on('style.load', () => {
             this._applyAtmosphere();
             this._addTerrain();
-            // this._addDayNightTerminator(); // Removed per user request - buggy math caused huge polygon glitches.
+            
             this.initMapboxLayers();
 
-            // Start Next-Level DeckGL VFX
             this._startDeckAnimation();
 
             this.ready = true;
@@ -61,7 +56,6 @@ class MapboxEngine {
             this.onReady();
         });
 
-        // 5. Dynamic features at zoom level changes
         this.map.on('zoom', () => {
             this._toggle3DBuildings();
         });
@@ -69,23 +63,21 @@ class MapboxEngine {
         return true;
     }
 
-    // ─── Feature 1: Tactical Deep-Space Atmosphere ────────────────────────────
     _applyAtmosphere() {
         try {
-            // Rich tactical fog: deep navy horizon, stars visible, militaristic glow
+            
             this.map.setFog({
-                'color': 'rgb(4, 10, 28)',            // Horizon color — deep navy
-                'high-color': 'rgb(2, 6, 23)',         // Upper atmosphere — near-black
-                'horizon-blend': 0.04,                 // Thin, sharp horizon line
-                'space-color': 'rgb(0, 2, 10)',        // Deep space black
-                'star-intensity': 0.85,                // Stars clearly visible on globe
-                'range': [0.5, 10]                     // Fog depth range
+                'color': 'rgb(4, 10, 28)',            
+                'high-color': 'rgb(2, 6, 23)',         
+                'horizon-blend': 0.04,                 
+                'space-color': 'rgb(0, 2, 10)',        
+                'star-intensity': 0.85,                
+                'range': [0.5, 10]                     
             });
         } catch (e) {
             console.warn('Fog API not available on this Mapbox version:', e.message);
         }
 
-        // Directional lighting for 3D terrain pop
         try {
             this.map.setLights([{
                 id: 'sun',
@@ -104,11 +96,10 @@ class MapboxEngine {
                 }
             }]);
         } catch (e) {
-            // setLights requires Mapbox GL v3+
+            
         }
     }
 
-    // ─── Feature 2: 3D Terrain DEM ────────────────────────────────────────────
     _addTerrain() {
         if (!this.map.getSource('mapbox-dem')) {
             this.map.addSource('mapbox-dem', {
@@ -121,10 +112,9 @@ class MapboxEngine {
         this.map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
     }
 
-    // ─── Feature 3: Day/Night Terminator ──────────────────────────────────────
     _addDayNightTerminator() {
         const buildTerminatorGeoJSON = () => {
-            // Compute the subsolar point (where the Sun is directly overhead)
+            
             const now = new Date();
             const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
             const declination = -23.45 * Math.cos((2 * Math.PI / 365) * (dayOfYear + 10)) * (Math.PI / 180);
@@ -132,10 +122,9 @@ class MapboxEngine {
             const sunLon = -((utcHours / 24) * 360 - 180);
             const sunLat = declination * (180 / Math.PI);
 
-            // Build night polygon: a circle of 90° radius around the anti-solar point
             const antiLon = sunLon + 180 > 180 ? sunLon - 180 : sunLon + 180;
             const antiLat = -sunLat;
-            const R = 90; // degrees radius for night side
+            const R = 90; 
             const coords = [];
             for (let i = 0; i <= 360; i += 2) {
                 const angle = i * (Math.PI / 180);
@@ -162,7 +151,6 @@ class MapboxEngine {
             });
         }
 
-        // Update terminator every 60 seconds
         if (this._nightInterval) clearInterval(this._nightInterval);
         this._nightInterval = setInterval(() => {
             const src = this.map.getSource('night-overlay');
@@ -170,12 +158,11 @@ class MapboxEngine {
         }, 60000);
     }
 
-    // ─── Feature 4: 3D Buildings (auto-show at zoom 14+) ─────────────────────
     _toggle3DBuildings() {
         const zoom = this.map.getZoom();
         if (zoom >= 14 && !this._buildingsAdded) {
             this._buildingsAdded = true;
-            // Find a good insertion point (before labels)
+            
             const layers = this.map.getStyle().layers;
             let labelLayerId;
             for (const layer of layers) {
@@ -211,14 +198,13 @@ class MapboxEngine {
         }
     }
 
-    // ─── Feature 5: Cinematic Country Fly-To ─────────────────────────────────
     flyToCountry(lngLat, zoom = 4.5) {
         if (!this.map) return;
         const currentZoom = this.map.getZoom();
         const isGlobeView = currentZoom < 3;
 
         if (isGlobeView) {
-            // Two-step: first pull back to see departure, then fly in with pitch
+            
             this.map.easeTo({ zoom: 1.8, pitch: 0, bearing: 0, duration: 600 });
             setTimeout(() => {
                 this.map.flyTo({
@@ -233,7 +219,7 @@ class MapboxEngine {
                 });
             }, 700);
         } else {
-            // Direct cinematic approach
+            
             this.map.flyTo({
                 center: lngLat,
                 zoom,
@@ -246,7 +232,6 @@ class MapboxEngine {
         }
     }
 
-    // Reset to globe overview
     resetToGlobe() {
         if (!this.map) return;
         this.map.flyTo({
@@ -261,30 +246,26 @@ class MapboxEngine {
     }
 
     onReady() {
-        // Expose engine to app.js
+        
         window.mapEngine = this;
     }
 
-    // ─── Feature 6 & 7: Country Fill + Border Glow + Clustering ─────────────
     async initMapboxLayers() {
         try {
             const res = await fetch('https://unpkg.com/world-atlas@2.0.2/countries-110m.json');
             const data = await res.json();
             const features = topojson.feature(data, data.objects.countries);
 
-            // Remove existing layers/sources if re-initialising after style change
             ['country-fills', 'country-borders-base', 'country-borders-glow', 'country-borders-selected']
                 .forEach(id => { if (this.map.getLayer(id)) this.map.removeLayer(id); });
             if (this.map.getSource('countries')) this.map.removeSource('countries');
 
-            // Add countries source
             this.map.addSource('countries', {
                 type: 'geojson',
                 data: features,
                 generateId: true
             });
 
-            // ── Fill layer: hover + selected states ──────────────────────────────
             this.map.addLayer({
                 id: 'country-fills',
                 type: 'fill',
@@ -305,7 +286,6 @@ class MapboxEngine {
                 }
             });
 
-            // ── Border base layer (always visible, subtle) ───────────────────────
             this.map.addLayer({
                 id: 'country-borders-base',
                 type: 'line',
@@ -316,7 +296,6 @@ class MapboxEngine {
                 }
             });
 
-            // ── Border glow: hover ───────────────────────────────────────────────
             this.map.addLayer({
                 id: 'country-borders-glow',
                 type: 'line',
@@ -337,7 +316,6 @@ class MapboxEngine {
                 }
             });
 
-            // ── Border glow: selected (brighter, thicker) ────────────────────────
             this.map.addLayer({
                 id: 'country-borders-selected',
                 type: 'line',
@@ -358,7 +336,6 @@ class MapboxEngine {
                 }
             });
 
-            // ── Mouse interactions ───────────────────────────────────────────────
             let hoveredId = null;
 
             this.map.on('mousemove', 'country-fills', (e) => {
@@ -383,12 +360,10 @@ class MapboxEngine {
                 if (!e.features.length) return;
                 const feature = e.features[0];
 
-                // Clear previous selection glow
                 if (this._selectedCountryId !== null) {
                     this.map.setFeatureState({ source: 'countries', id: this._selectedCountryId }, { selected: false });
                 }
 
-                // Apply selection glow to new country
                 this._selectedCountryId = feature.id;
                 this.map.setFeatureState({ source: 'countries', id: this._selectedCountryId }, { selected: true });
 
@@ -396,7 +371,6 @@ class MapboxEngine {
                 if (window.handleCountryClick) window.handleCountryClick(e, feature);
             });
 
-            // Re-apply atmosphere & buildings after style reload
             this._applyAtmosphere();
 
             console.log('✅ Mapbox layers: fills, borders, glow — all active');
@@ -405,7 +379,6 @@ class MapboxEngine {
         }
     }
 
-    // ─── Feature 8: GPU Heatmap for GDELT conflicts (called from app.js) ─────
     addGDELTHeatmap(geojsonData) {
         if (!this.map || !this.ready) return;
 
@@ -416,7 +389,6 @@ class MapboxEngine {
 
         this.map.addSource('gdelt-heat-src', { type: 'geojson', data: geojsonData });
 
-        // GPU heatmap layer (low zoom)
         this.map.addLayer({
             id: 'gdelt-heatmap',
             type: 'heatmap',
@@ -438,7 +410,6 @@ class MapboxEngine {
             }
         }, 'country-fills');
 
-        // Cluster circles at higher zoom (visible dots)
         this.map.addLayer({
             id: 'gdelt-core',
             type: 'circle',
@@ -453,7 +424,6 @@ class MapboxEngine {
             }
         });
 
-        // Hover tooltip for conflict points
         this.map.on('mouseenter', 'gdelt-core', (e) => {
             this.map.getCanvas().style.cursor = 'crosshair';
             const props = e.features[0].properties;
@@ -487,7 +457,6 @@ class MapboxEngine {
         if (this.map.getSource('gdelt-heat-src')) this.map.removeSource('gdelt-heat-src');
     }
 
-    // Clear selected country glow (call when going back to global)
     clearSelection() {
         if (this._selectedCountryId !== null && this.map) {
             this.map.setFeatureState({ source: 'countries', id: this._selectedCountryId }, { selected: false });
@@ -497,7 +466,6 @@ class MapboxEngine {
         this.clearHoloHUD();
     }
 
-    // ─── Feature X: Holographic 3D HUD Marker ────────────────────────────────
     setHoloHUD(lngLat, title, stats) {
         this.clearHoloHUD();
 
@@ -517,7 +485,6 @@ class MapboxEngine {
             <div class="holo-hud-base"></div>
         `;
 
-        // pitchAlignment 'viewport' + rotationAlignment 'map' stays fixed vertically on ground!
         this._hudMarker = new mapboxgl.Marker({
             element: el,
             anchor: 'bottom',
@@ -534,7 +501,6 @@ class MapboxEngine {
         }
     }
 
-    // ─── Feature Y: Deck.gl 3D Corridors & Satellites ─────────────────────────
     _startDeckAnimation() {
         if (typeof deck === 'undefined') {
             console.warn("Deck.GL not loaded yet.");
@@ -547,14 +513,11 @@ class MapboxEngine {
         });
         this.map.addControl(this.deckOverlay);
 
-
-
         let timeOffset = 0;
         const animateDeck = () => {
             if (!this.map || !this.deckOverlay) return;
             timeOffset += 0.05;
 
-            // Generate "Live" Satellites orbiting at a virtual altitude
             const satellites = [];
             for (let i = 0; i < 40; i++) {
                 const lon = (i * 35 + timeOffset * 2) % 360 - 180;
@@ -570,13 +533,13 @@ class MapboxEngine {
                 id: 'satellite-layer',
                 data: satellites,
                 getPosition: d => d.position,
-                getText: d => '🛰',
+                getText: d => '◆',
                 getSize: 24,
                 getColor: d => d.color,
                 getAngle: d => d.position[0] * 2,
                 getTextAnchor: 'middle',
                 getAlignmentBaseline: 'center',
-                parameters: { depthTest: false } // ensure they overlay nicely
+                parameters: { depthTest: false } 
             });
 
             this.deckOverlay.setProps({

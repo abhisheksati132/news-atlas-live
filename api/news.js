@@ -1,5 +1,11 @@
 import Parser from "rss-parser";
 const parser = new Parser({
+  headers: {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "application/rss+xml, application/xml, text/xml, */*",
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache"
+  },
   customFields: {
     item: [
       ["media:content", "media"],
@@ -74,7 +80,7 @@ const FEEDS = [
     source: "Forbes",
   },
   {
-    url: "https://www.economist.com/sections/business-finance/rss.xml",
+    url: "https://www.economist.com/business-and-finance/rss.xml",
     category: "business",
     source: "The Economist",
   },
@@ -89,7 +95,7 @@ const FEEDS = [
     source: "CoinDesk",
   },
   {
-    url: "https://bitcoinmagazine.com/.rss/full/",
+    url: "https://bitcoinmagazine.com/feed",
     category: "crypto",
     source: "Bitcoin Magazine",
   },
@@ -104,7 +110,7 @@ const FEEDS = [
     source: "Phys.org",
   },
   {
-    url: "https://www.nature.com/nature.rss",
+    url: "https://www.nature.com/nature/articles?format=rss",
     category: "science",
     source: "Nature",
   },
@@ -147,14 +153,14 @@ const COUNTRY_FEEDS = {
       source: "Mint",
     },
     {
-      url: "https://www.business-standard.com/rss/home_page_top_stories.rss",
+      url: "https://www.business-standard.com/rss/latest.rss",
       category: "business",
       source: "Business Standard",
     },
     {
-      url: "https://feeds.feedburner.com/NDTV-TechNews",
+      url: "https://www.gadgets360.com/rss/news",
       category: "technology",
-      source: "NDTV Tech",
+      source: "NDTV Gadgets",
     },
     {
       url: "https://www.hindustantimes.com/feeds/rss/india-news/rssfeed.xml",
@@ -167,17 +173,17 @@ const COUNTRY_FEEDS = {
       source: "News18",
     },
     {
-      url: "https://zeenews.india.com/rss/india-national-news.xml",
+      url: "https://zeenews.india.com/rss/world-news.xml",
       category: "world",
       source: "Zee News",
     },
     {
-      url: "https://www.firstpost.com/commonfeeds/v1/rss/india.xml",
+      url: "https://www.firstpost.com/rss/world.xml",
       category: "world",
       source: "Firstpost",
     },
     {
-      url: "https://theprint.in/feed/",
+      url: "https://theprint.in/category/world/feed/",
       category: "world",
       source: "The Print",
     },
@@ -291,7 +297,7 @@ const COUNTRY_FEEDS = {
   ru: [
     { url: "https://tass.com/rss/v2.xml", category: "world", source: "TASS" },
     {
-      url: "https://www.themoscowtimes.com/rss",
+      url: "https://www.themoscowtimes.com/rss/news",
       category: "world",
       source: "Moscow Times",
     },

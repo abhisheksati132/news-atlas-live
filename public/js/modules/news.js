@@ -136,7 +136,6 @@ window.setCategory = (el, cat) => {
 function displayFilteredNews() {
   let filtered = [...allNews];
 
-  // Prioritize articles with images
   filtered.sort((a, b) => {
     const hasA = a.image_url ? 1 : 0;
     const hasB = b.image_url ? 1 : 0;
@@ -219,7 +218,7 @@ async function fetchGDELTEvents(country) {
     const query = country
       ? `${country} sourcelang:english`
       : "conflict OR economy OR geopolitics sourcelang:english";
-    const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(query)}&mode=ArtList&maxrecords=50&sort=DateDesc&format=json&timespan=72H`;
+    const url = `/api/gdelt?query=${encodeURIComponent(query)}&timespan=72H`;
     const res = await fetch(url);
     const data = await res.json();
     let articles = data.articles || [];

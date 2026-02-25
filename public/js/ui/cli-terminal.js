@@ -101,7 +101,7 @@ window.toggleCLI = function () {
     if (panel.classList.contains("cli-locked")) {
         window.openCLI();
     } else {
-        // Just toggle expansion if visible
+        
         _cliExpanded = !_cliExpanded;
         const body = document.getElementById("floating-cli-body");
         const chev = document.getElementById("floating-cli-chevron");

@@ -244,7 +244,6 @@
       text-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
     }
 
-
     header {
       height: var(--header-h);
       padding: 0 1.25rem;
@@ -1491,7 +1490,7 @@
               &middot;
               Abhishek Sati &middot; About this terminal</p>
           </div>
-          <!-- Social icons: GitHub · LinkedIn · Instagram -->
+          
           <div class="flex items-center gap-3 shrink-0 mr-2">
             <a href="https://github.com/abhisheksati132" target="_blank"
               class="about-social-link github text-lg hover:scale-110 transition-transform"
@@ -1515,7 +1514,6 @@
         style="background: rgba(4, 10, 25, 0.75); backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px);">
         <div class="max-w-2xl mx-auto flex flex-col gap-8">
 
-          <!-- BIO (Symmetrical, Centralized) -->
           <div
             class="flex flex-col items-center text-center p-8 rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl relative overflow-hidden group">
             <div
@@ -1529,10 +1527,8 @@
               class="text-base leading-9 text-slate-200 font-medium tracking-wide max-w-xl relative z-10"></p>
           </div>
 
-          <!-- AESTHETIC DIVIDER -->
           <div class="w-full h-px bg-gradient-to-r from-transparent via-slate-500/20 to-transparent"></div>
 
-          <!-- SYSTEM METRICS ROW (Clean & Symmetrical) -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div
               class="flex flex-col items-center justify-center p-4 rounded-2xl border border-white/5 bg-white/[0.02] shadow-[inset_0_0_20px_rgba(255,255,255,0.01)] backdrop-blur-md transition-transform hover:scale-[1.02]">
@@ -1560,9 +1556,8 @@
             </div>
           </div>
 
-          <!-- TECH STACK & FEEDS (Unified 2-Column Grid) -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
-            <!-- Architecture & Engine Map -->
+            
             <div class="p-6 rounded-2xl border border-white/5 bg-white/[0.015] shadow-lg backdrop-blur-md">
               <h3 class="text-[11px] font-black text-blue-400 uppercase tracking-[.25em] mb-4 text-center">Engine
                 Architecture</h3>
@@ -1598,7 +1593,6 @@
               </ul>
             </div>
 
-            <!-- Active Telemetry & Feeds -->
             <div class="p-6 rounded-2xl border border-white/5 bg-white/[0.015] shadow-lg backdrop-blur-md">
               <h3 class="text-[11px] font-black text-cyan-400 uppercase tracking-[.25em] mb-4 text-center">Active
                 Telemetry</h3>
@@ -1635,9 +1629,8 @@
             </div>
           </div>
 
-          <!-- ADVANCED SYSTEM SPECS (Unified 2-Column Grid) -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
-            <!-- Data Processing Pipeline -->
+            
             <div class="p-6 rounded-2xl border border-white/5 bg-white/[0.015] shadow-lg backdrop-blur-md">
               <h3 class="text-[11px] font-black text-amber-400 uppercase tracking-[.25em] mb-4 text-center">Data
                 Pipeline & Analysis</h3>
@@ -1673,7 +1666,6 @@
               </ul>
             </div>
 
-            <!-- Visual Systems -->
             <div class="p-6 rounded-2xl border border-white/5 bg-white/[0.015] shadow-lg backdrop-blur-md">
               <h3 class="text-[11px] font-black text-fuchsia-400 uppercase tracking-[.25em] mb-4 text-center">Tactical
                 Enhancements</h3>
@@ -1710,7 +1702,6 @@
             </div>
           </div>
 
-          <!-- TERMINAL COMMAND PROMPT -->
           <div
             class="flex flex-col items-center justify-center mt-2 p-6 rounded-2xl border border-blue-500/20 bg-blue-500/[0.02] transition-colors hover:bg-blue-500/[0.04]">
             <p class="text-xs text-slate-400 text-center max-w-sm leading-relaxed mb-4 font-mono">
@@ -1725,7 +1716,7 @@
 
         </div>
       </div>
-      <!-- ABOUT FOOTER -->
+      
       <div class="px-6 py-3 border-t border-white/5 flex items-center flex-shrink-0 bg-[#020617]/95">
         <div class="flex-1 flex items-center gap-2 min-w-0">
           <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse shrink-0"></div>
@@ -1782,9 +1773,8 @@
       </div>
     </div>
 
-    <!-- Center Floating Console -->
     <div class="hidden sm:flex items-center justify-center shrink-0 z-10 gap-2.5">
-      <!-- Search Mode -->
+      
       <button onclick="toggleSearch()"
         class="flex items-center gap-3 px-4 h-11 rounded-xl shadow-sm text-slate-400 hover:text-white transition-colors"
         style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);" title="Quick Search (/)">
@@ -1792,7 +1782,6 @@
         <span class="text-[10px] font-mono tracking-widest uppercase font-bold">Target Sector</span>
       </button>
 
-      <!-- Target Display -->
       <div class="flex flex-col min-w-[140px] justify-center px-4 h-11 rounded-xl shadow-sm"
         style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);">
         <span id="selected-country-name"
@@ -1803,7 +1792,6 @@
           style="font-family: &quot;JetBrains Mono&quot;, monospace">handshake verified</span>
       </div>
 
-      <!-- Seismic Tracker -->
       <div class="flex flex-col justify-center px-4 h-11 rounded-xl shadow-sm"
         style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);">
         <div class="flex items-center gap-2">
@@ -1965,10 +1953,10 @@
         <div id="map-legend" class="hidden absolute bottom-4 left-4 z-30 rounded-xl px-4 py-3 text-left"
           style="background: rgba(2,6,23,0.9); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(8px); min-width: 180px;">
         </div>
-        <!-- CRT Effects -->
+        
         <div class="crt-overlay"></div>
         <div class="crt-vignette"></div>
-        <!-- Click-to-interact overlay: Minimalist Radar Edition -->
+        
         <div id="map-interaction-overlay"
           class="absolute inset-0 flex flex-col items-center justify-center gap-4 z-40 pointer-events-auto cursor-pointer transition-opacity duration-500 opacity-0 group-hover:opacity-100"
           onclick="activateMapInteraction()" style="background: rgba(2, 6, 23, 0.6); backdrop-filter: blur(4px);">
@@ -2015,7 +2003,6 @@
             }
           };
         </script>
-
 
         <div id="chronos-slider-container"
           class="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-3/4 max-w-2xl px-6 py-3 rounded-2xl glass-panel z-10 flex flex-col gap-2 transition-all opacity-90 hover:opacity-100 hidden"
@@ -2112,9 +2099,9 @@
                   </span>
                 </span>
               </div>
-              <!-- Expandable Hierarchy Selectors -->
+              
               <div class="flex flex-col gap-3">
-                <!-- State Selector (Collapsible) -->
+                
                 <div id="state-selector" class="dossier-card p-0 overflow-hidden hidden">
                   <div
                     class="px-4 py-3 border-b border-white/5 flex justify-between items-center cursor-pointer hover:bg-white/[0.02] transition-colors"
@@ -2134,7 +2121,6 @@
                   </div>
                 </div>
 
-                <!-- City Selector (Collapsible) -->
                 <div id="city-selector" class="dossier-card p-0 overflow-hidden hidden">
                   <div
                     class="px-4 py-3 border-b border-white/5 flex justify-between items-center cursor-pointer hover:bg-white/[0.02] transition-colors"
@@ -3144,7 +3130,7 @@
         z-index: 49;
       ">
     <div class="animate-marquee whitespace-nowrap flex-1 text-center py-1" id="footer-ticker-content">
-      <!-- Populated by JS -->
+      
     </div>
   </footer>
   <div id="fact-pop" class="hidden"></div>
@@ -3231,7 +3217,6 @@
   <script src="js/enhancements.js"></script>
   <script type="module" src="js/core/firebase.js"></script>
 
-  <!-- Tactical Search Overlay -->
   <div id="search-overlay"
     class="fixed inset-0 z-[100] hidden flex items-start justify-center pt-24 px-4 bg-slate-950/80 backdrop-blur-md">
     <div class="glass-panel w-full max-w-2xl overflow-hidden shadow-2xl border-white/10">
@@ -3245,7 +3230,7 @@
         </button>
       </div>
       <div id="search-results" class="max-height-[65vh] overflow-y-auto min-h-[300px] scrollbar-thin">
-        <!-- populated by renderTrending -->
+        
       </div>
       <div
         class="px-6 py-3 border-t border-white/5 bg-black/40 flex justify-between items-center text-[10px] font-mono text-slate-500 uppercase tracking-widest">
@@ -3258,12 +3243,11 @@
     </div>
   </div>
 
-  <!-- System Identity & About Overlay -->
   <div id="about-overlay"
     class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl">
     <div
       class="glass-panel w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-2xl border-blue-500/20">
-      <!-- Left Profile Column -->
+      
       <div class="md:w-1/3 border-r border-white/5 p-8 flex flex-col items-center bg-blue-600/5">
         <div class="relative group">
           <div
@@ -3311,7 +3295,6 @@
         </div>
       </div>
 
-      <!-- Right System Column -->
       <div class="flex-1 p-8 overflow-y-auto scrollbar-thin flex flex-col">
         <div class="flex justify-between items-start mb-6">
           <div>
@@ -3323,7 +3306,6 @@
           </button>
         </div>
 
-        <!-- System Stats Grid -->
         <div class="grid grid-cols-2 gap-4 mb-6">
           <div class="bg-white/5 rounded-xl p-4 border border-white/5">
             <span class="text-[9px] text-slate-500 uppercase font-black tracking-widest block mb-2">Neural Uptime</span>
@@ -3372,7 +3354,6 @@
           </div>
         </div>
 
-        <!-- Tactical CLI Integration -->
         <div class="flex-1 min-h-[160px] bg-black/40 rounded-xl border border-white/5 flex flex-col overflow-hidden">
           <div class="px-4 py-2 bg-white/5 border-b border-white/5 flex items-center justify-between">
             <span class="text-[9px] font-black text-blue-400 uppercase tracking-widest">Neural Link CLI v2.0</span>
@@ -3421,7 +3402,6 @@
     #floating-cli.cli-expanded {
       width: 420px;
     }
-
 
     #floating-cli-handle {
       display: flex;
@@ -3758,7 +3738,6 @@
     }, 3000);
   </script>
   <script src="/js/modules/mapbox-engine.js"></script>
-  <script src="/js/ui/about.js"></script>
   <script src="/js/global-fx.js"></script>
 </body>
 

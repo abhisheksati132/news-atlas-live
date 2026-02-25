@@ -1,35 +1,31 @@
-/** global-fx.js - Advanced visual tracking, custom cursor, and decrypting effects **/
+
 
 document.addEventListener('DOMContentLoaded', () => {
-    // --- 1. Custom Radar Cursor ---
+    
     const cursor = document.createElement('div');
     cursor.id = 'custom-cursor';
     document.body.appendChild(cursor);
 
-    // Mouse move tracking
     document.addEventListener('mousemove', (e) => {
         cursor.style.left = e.clientX + 'px';
         cursor.style.top = e.clientY + 'px';
 
-        // Global parallax tracking for background
         const bgX = (e.clientX / window.innerWidth - 0.5) * -20;
         const bgY = (e.clientY / window.innerHeight - 0.5) * -20;
         document.documentElement.style.setProperty('--bg-mouse-x', bgX);
         document.documentElement.style.setProperty('--bg-mouse-y', bgY);
     });
 
-    // Hover states for cursor
     const interactiveSelectors = 'a, button, input, .nav-tab, .map-box, .glass-glow-track, .shortcut-item, [onclick]';
     document.querySelectorAll(interactiveSelectors).forEach(el => {
         el.addEventListener('mouseenter', () => cursor.classList.add('cursor-hover'));
         el.addEventListener('mouseleave', () => cursor.classList.remove('cursor-hover'));
     });
 
-    // Re-bind hover states on DOM changes (useful for dynamic content)
     const observer = new MutationObserver(mutations => {
         mutations.forEach(mutation => {
             mutation.addedNodes.forEach(node => {
-                if (node.nodeType === 1) { // Element 
+                if (node.nodeType === 1) { 
                     const iteracts = node.matches && node.matches(interactiveSelectors) ? [node] : node.querySelectorAll(interactiveSelectors);
                     if (iteracts) {
                         iteracts.forEach(el => {
@@ -43,18 +39,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
-    // Also re-apply glow tracking on changes
     const glowSyncObserver = new MutationObserver(() => applyGlowTracking());
     glowSyncObserver.observe(document.body, { childList: true, subtree: true });
 
-    // --- 2. Glass Glow Tracking (VisionOS style) ---
     const applyGlowTracking = () => {
         const trackers = document.querySelectorAll('.glass-glow-track, .apple-glass, .glass-panel, div.rounded-2xl, div.rounded-3xl, footer, nav [class*="glass"]');
         trackers.forEach(el => {
-            // Add class if not already there to apply CSS styles properly
+            
             if (!el.classList.contains('glass-glow-track')) el.classList.add('glass-glow-track');
 
-            // Set overflow hidden unless it's the footer which breaks it
             if (el.tagName.toLowerCase() !== 'footer') {
                 el.style.overflow = 'hidden';
             }
@@ -70,8 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     applyGlowTracking();
 
-    // --- 3. Decrypt / Scramble Text Effect ---
-    // A function to scramble text before revealing it
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
     window.scrambleText = function (element, finalString, duration = 1000) {
         if (!element) return;
@@ -86,19 +77,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 .join('');
 
             if (iterations >= finalString.length) clearInterval(interval);
-            iterations += 1 / (duration / 500); // adjust speed
+            iterations += 1 / (duration / 500); 
         }, 30);
     };
 
-    // Run scramble effect on elements with .decrypt-text
     const decryptElements = document.querySelectorAll('.decrypt-text');
 
-    // Intersection Observer to scramble only when scrolled into view
     const decryptObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const el = entry.target;
-                if (!el.dataset.scrambled) { // Ensure it only happens once
+                if (!el.dataset.scrambled) { 
                     const finalStr = el.dataset.final || el.innerText;
                     if (!el.dataset.final) el.dataset.final = finalStr;
                     window.scrambleText(el, finalStr, 800);
@@ -110,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     decryptElements.forEach(el => decryptObserver.observe(el));
 
-    // --- 4. Live Ticker Tape Logic ---
     const initTicker = () => {
         const tickerContainer = document.getElementById('footer-ticker-content');
         if (!tickerContainer) return;
@@ -126,9 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
             { type: 'GEO', text: 'TRACKING 195 SOVEREIGN STATES' }
         ];
 
-        // Render static ticker items
         const renderTicker = () => {
-            // Create repeated content for smooth loop
+            
             const itemsHtml = [...baseItems, ...baseItems].map(item => {
                 let color = 'text-slate-500';
                 if (item.type === 'SYSTEM' || item.type === 'NET') color = 'text-blue-400';
@@ -145,10 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     initTicker();
 
-    // --- 5. Global Tactical Audio UX ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    // Play a very subtle high-frequency synthetic tick on hover
     const playTacticalHover = () => {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
@@ -157,7 +142,6 @@ document.addEventListener('DOMContentLoaded', () => {
         osc.frequency.setValueAtTime(800, audioCtx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.03);
 
-        // Very quiet volume
         gain.gain.setValueAtTime(0.005, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.03);
 
@@ -171,7 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
         el.addEventListener('mouseenter', playTacticalHover);
     });
 
-    // --- 6. Global Command Palette (Cmd+K) ---
     const cmdPaletteHtml = `
     <div id="cmd-palette-container" class="fixed inset-0 z-[10001] hidden flex flex-col items-center pt-[15vh]">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity" onclick="toggleCmdPalette(false)"></div>

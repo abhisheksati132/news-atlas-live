@@ -165,7 +165,6 @@ async function initTerminal() {
     if (window.showToast) window.showToast("Config unavailable. Running in local mode.", "info");
   }
 
-  // Tactical Patch: Populate global search index for full-terminal situational awareness
   fetchGlobalSearchData();
 
   const hasFirebaseConfig =
@@ -302,7 +301,7 @@ async function fetchAllData(name) {
       setText("fact-demonym", c.demonyms?.eng?.m || "--");
       setText("fact-gini", c.gini ? Object.values(c.gini)[0] : "N/A");
       setText("fact-drive", c.car ? c.car.side.toUpperCase() : "--");
-      const flagEl = safeEl("sector-flag"); // Keep legacy for compatibility
+      const flagEl = safeEl("sector-flag"); 
       const nameEl = safeEl("sector-name");
       const box = safeEl("active-sector-display");
       if (flagEl && nameEl && box) {
@@ -311,7 +310,6 @@ async function fetchAllData(name) {
         box.classList.remove("hidden");
       }
 
-      // Update Header Search Display
       const headerFlagContainer = safeEl("search-flag-container");
       const headerFlagImg = safeEl("search-active-flag");
       const headerSearchIcon = safeEl("search-icon-main");
@@ -354,7 +352,7 @@ async function fetchAllData(name) {
 function renderBriefingCards(rawText) {
   const container = safeEl("ai-briefing-text");
   if (!container) return;
-  // Strip leading dashboard header wrapper
+  
   let clean = rawText
     .replace(/\[STRATEGIC METRICS DASHBOARD\]\s*/gi, '')
     .replace(/\*\*/g, '')
@@ -411,13 +409,13 @@ async function generateAIBriefing(loc) {
   if (text) {
     let _cursorOn = true;
     _cursorInterval = setInterval(() => {
-      // Only blink cursor if not yet streaming real content
+      
       if (!text.__streaming && text.children.length === 1 && text.children[0]?.style.color === 'rgb(71, 85, 105)') {
-        // still in init state — show blink
+        
       }
     }, 400);
   }
-  // Legacy 3D Globe beam arc effect removed
+  
   const briefingPrompt = `Target Sector: ${loc}.
 Initiate Deep-Scan Strategic Intelligence Dossier.
 Provide a comprehensive, high-density tactical analysis. 
@@ -470,7 +468,7 @@ TONE: Strict, authoritative military/intelligence analyst. Use high-fidelity tec
           const token = parsed?.choices?.[0]?.delta?.content || "";
           if (token) {
             accumulated += token;
-            // Live preview while streaming
+            
             if (text) text.innerText = accumulated.replace(/\*\*/g, "").trim();
           }
         } catch { }
@@ -582,11 +580,11 @@ window.toggleAirQuality = async function () {
         'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 9, 3],
         'heatmap-color': [
           'interpolate', ['linear'], ['heatmap-density'],
-          0, 'rgba(16, 185, 129, 0)', // Good (Green)
+          0, 'rgba(16, 185, 129, 0)', 
           0.2, 'rgba(16, 185, 129, 0.4)',
-          0.5, 'rgba(250, 204, 21, 0.6)', // Moderate (Yellow)
-          0.8, 'rgba(249, 115, 22, 0.8)', // Unhealthy (Orange)
-          1, 'rgba(220, 38, 38, 0.9)'     // Hazardous (Red)
+          0.5, 'rgba(250, 204, 21, 0.6)', 
+          0.8, 'rgba(249, 115, 22, 0.8)', 
+          1, 'rgba(220, 38, 38, 0.9)'     
         ],
         'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 15, 9, 45],
         'heatmap-opacity': 0.7
@@ -602,18 +600,17 @@ window.toggleAirQuality = async function () {
         'circle-radius': 4,
         'circle-color': [
           'step', ['get', 'aqi'],
-          '#10b981', // < 50 Green
-          50, '#facc15', // < 100 Yellow
-          100, '#f97316', // < 150 Orange
-          150, '#ef4444', // < 200 Red
-          200, '#991b1b'  // >= 200 Dark Red
+          '#10b981', 
+          50, '#facc15', 
+          100, '#f97316', 
+          150, '#ef4444', 
+          200, '#991b1b'  
         ],
         'circle-stroke-color': '#020617',
         'circle-stroke-width': 1
       }
     });
 
-    // Hover Interaction for AQ
     map.on('mouseenter', 'aq-core', (e) => {
       map.getCanvas().style.cursor = 'crosshair';
       const props = e.features[0].properties;
@@ -647,7 +644,6 @@ window.toggleAirQuality = async function () {
 };
 
 window.myGlobe = null;
-// initMap removed
 
 const _countryNameForAPI = {
   "Central African Rep.": "Central African Republic",
@@ -743,7 +739,6 @@ window.handleCountryClick = async function (event, d) {
     fetchAllData(countryName);
     if (window.onCountrySelected) window.onCountrySelected(countryName);
 
-    // Mapbox Cinematic Camera Fly To
     if (window.mapEngine && window.mapEngine.ready) {
       if (event && event.lngLat) {
         window.mapEngine.flyToCountry(event.lngLat, 4.5);
@@ -754,7 +749,6 @@ window.handleCountryClick = async function (event, d) {
     generateAIBriefing(countryName);
     window.fetchMarketIntel(countryName, currencyCode);
 
-    // Apply cyan glow effect to map search box
     const searchContainer = document.getElementById("map-search-container");
     if (searchContainer) {
       searchContainer.classList.add("cyan-glow-pulse");
@@ -762,10 +756,7 @@ window.handleCountryClick = async function (event, d) {
     }
   }
 };
-// D3 animation helpers removed
-// D3 Legacy Maps Controls Removed Here
-// Deprecated D3 Nav tools removed
-// Overlay interaction — dismisses the click-to-interact splash when user first interacts
+
 window.activateMapInteraction = () => {
   const overlay = document.getElementById("map-interaction-overlay");
   if (overlay) {
@@ -789,7 +780,6 @@ window.deactivateMapInteraction = () => {
   }
 };
 
-// ── Advanced Map Search ──────────────────────────────────────────────────
 let _mapSearchIndex = -1;
 let _mapSearchResults = [];
 
@@ -801,7 +791,7 @@ window.mapSearchFocus = function (on) {
     container.style.boxShadow = "0 0 18px 2px rgba(59,130,246,0.22), 0 0 0 1px rgba(59,130,246,0.15)";
     const inp = document.getElementById("map-search-input");
     if (inp && !inp.value.trim()) {
-      window.handleMapSearch(""); // Show trending
+      window.handleMapSearch(""); 
     }
   } else {
     container.style.border = "1px solid rgba(59,130,246,0.25)";
@@ -833,7 +823,7 @@ window.handleMapSearch = function (query) {
 
   if (!query || query.length < 2) {
     if (!query) {
-      // Show Trending if query is empty
+      
       const trending = ["India", "United States", "Japan", "Russia", "United Kingdom"];
       const data = window.globalSearchData || [];
       _mapSearchResults = trending.map(name => {
@@ -947,7 +937,6 @@ window.selectMapSearchResult = function (idx) {
   const results = document.getElementById("map-search-results");
   if (results) results.classList.add("hidden");
 
-  // Apply cyan glow effect
   const searchContainer = document.getElementById("map-search-container");
   if (searchContainer) {
     searchContainer.classList.add("cyan-glow-pulse");
@@ -1132,7 +1121,7 @@ window._mapHintShown = false;
 window.showMapHintOnce = function () {
   if (window._mapHintShown) return;
   window._mapHintShown = true;
-  // Show a subtle toast hint since the overlay div was removed
+  
   if (window.showToast) window.showToast("Click any country for intelligence briefing", "info");
 };
 window.updateLayerLegend = function () {
@@ -1204,7 +1193,6 @@ window.selectFromSearch = (name) => {
   const searchOverlay = document.getElementById("search-overlay");
   if (searchOverlay) searchOverlay.classList.add("hidden");
 
-  // Also clear overlay search input if any
   const searchInput = document.getElementById("country-search");
   if (searchInput) {
     searchInput.value = "";
@@ -1230,7 +1218,7 @@ window.zoomMap = (factor) => {
   window.playTacticalSound("click");
   if (window.mapEngine && window.mapEngine.map) {
     const currentZoom = window.mapEngine.map.getZoom();
-    // factor > 1 means zoom in
+    
     const targetZoom = factor > 1 ? currentZoom + 1 : currentZoom - 1;
     window.mapEngine.map.zoomTo(targetZoom, { duration: 400 });
   }
@@ -1282,7 +1270,7 @@ window.goToIndiaHome = () => {
   window.playTacticalSound("click");
   const mockFeature = { properties: { name: "India" } };
   if (window.handleCountryClick) {
-    // Mock the coordinates for India to give it a nice zoom
+    
     const mockEvent = { lngLat: [78.9629, 20.5937] };
     window.handleCountryClick(mockEvent, mockFeature);
   }
@@ -1316,7 +1304,6 @@ window.personalizeSession = (user) => {
   if (roleEl) roleEl.innerText = "AUTHENTICATED FIELD OPERATOR";
   if (levelEl) levelEl.innerText = "CLEARANCE: OMEGA-LEVEL (VERIFIED)";
 };
-// Risk Index logic removed. Will be reimplemented natively in Mapbox layers.
 
 document.addEventListener(
   "click",
@@ -1343,7 +1330,7 @@ window.addEventListener("resize", () => {
   } else if (projectionType === "3d" && window.myGlobe) {
     window.myGlobe.width(w).height(h);
   } else {
-    // Mapbox handles resize natively — just trigger its internal resize
+    
     if (window.mapEngine && window.mapEngine.map) {
       window.mapEngine.map.resize();
     }
@@ -1398,8 +1385,7 @@ window.toggleChronos = function () {
     btn.title = "Chronos Engine: ON";
   }
 };
-// _hexLayers legacy global definition removed. Mapbox engine handles layers directly.
-// updateGlobeHexbins: legacy ThreeGlobe function — no-op since Mapbox migration
+
 window.updateGlobeHexbins = function () {
   if (!window.myGlobe) return;
   const targetTime = Date.now() + window._chronosOffset * 3600 * 1000;
@@ -1519,7 +1505,6 @@ window.toggleEarthquakeLayer = async function () {
     } else {
       map.addSource('seismic-data', { type: 'geojson', data: geoData });
 
-      // Outer Glow / Aura
       map.addLayer({
         id: 'seismic-aura',
         type: 'circle',
@@ -1532,16 +1517,15 @@ window.toggleEarthquakeLayer = async function () {
           ],
           'circle-color': [
             'step', ['coalesce', ['get', 'mag'], 3],
-            '#fbbf24', // < 5: Amber
-            5, '#f97316', // 5-6: Orange
-            6, '#ef4444'  // >= 6: Red
+            '#fbbf24', 
+            5, '#f97316', 
+            6, '#ef4444'  
           ],
           'circle-opacity': 0.2,
           'circle-stroke-width': 0
         }
       });
 
-      // Inner Solid Core
       map.addLayer({
         id: 'seismic-core',
         type: 'circle',
@@ -1563,11 +1547,10 @@ window.toggleEarthquakeLayer = async function () {
         }
       });
 
-      // Hover Interactions
       map.on('mouseenter', 'seismic-core', (e) => {
         map.getCanvas().style.cursor = 'crosshair';
         const props = e.features[0].properties;
-        const coords = e.features[0].geometry.coordinates; // [lon, lat, depth]
+        const coords = e.features[0].geometry.coordinates; 
         const t = safeEl("map-tooltip");
         if (t) {
           setText("tooltip-name", `M${props.mag.toFixed(1)} — ${props.place}`);
@@ -1608,7 +1591,6 @@ async function renderAircraft() {
     const data = await res.json();
     const states = (data.states || []).filter((s) => s[5] && s[6]);
 
-    // Build GeoJSON FeatureCollection
     const features = states.slice(0, 1500).map(s => {
       const lon = s[5], lat = s[6], track = s[10] || 0, callsign = (s[1] || "").trim();
       return {
@@ -1625,7 +1607,6 @@ async function renderAircraft() {
 
     const geoData = { type: 'FeatureCollection', features };
 
-    // Update or Create Mapbox Source & Layer
     if (map.getSource('aircraft-data')) {
       map.getSource('aircraft-data').setData(geoData);
     } else {
@@ -1643,13 +1624,12 @@ async function renderAircraft() {
           'text-allow-overlap': true
         },
         paint: {
-          'text-color': '#60a5fa', // Tailwind blue-400
+          'text-color': '#60a5fa', 
           'text-halo-color': '#1e3a8a',
           'text-halo-width': 1
         }
       });
 
-      // Hover Tooltip Interactions
       map.on('mouseenter', 'aircraft-layer', (e) => {
         map.getCanvas().style.cursor = 'crosshair';
         const props = e.features[0].properties;
@@ -1703,7 +1683,6 @@ window.toggleRiskIndex = async function () {
     btn.title = "Geopolitical Risk Matrix: ON";
   }
 
-  // Guard: countries source must be loaded by mapbox-engine.js before we can add a layer
   if (!map.getSource('countries')) {
     if (window.showToast) window.showToast("Map layers still loading — try again in a moment.", "info");
     window._riskActive = false;
@@ -1712,7 +1691,7 @@ window.toggleRiskIndex = async function () {
   }
 
   if (!map.getLayer('risk-layer')) {
-    // Simple valid colour expression — map numeric ID mod 3 to risk colour bands
+    
     map.addLayer({
       id: 'risk-layer',
       type: 'fill',
@@ -1757,7 +1736,6 @@ window.toggleMaritimeLayer = async function () {
     btn.title = "Live Shipping Maritime Data: ON";
   }
 
-  // Increased density: 3500 ships for high-traffic simulation
   const ships = Array.from({ length: 3500 }).map((_, i) => {
     return {
       type: 'Feature',
@@ -1870,7 +1848,6 @@ window.toggleWindLayer = function () {
   }
   if (btn) btn.classList.add("active");
 
-  // Create particles
   const particles = Array.from({ length: 2000 }).map(() => {
     return {
       type: 'Feature',
@@ -1894,7 +1871,7 @@ window.toggleWindLayer = function () {
 
   window._windInterval = setInterval(() => {
     particles.forEach(p => {
-      p.geometry.coordinates[0] += p.properties.v; // Simple West-to-East flow
+      p.geometry.coordinates[0] += p.properties.v; 
       if (p.geometry.coordinates[0] > 180) p.geometry.coordinates[0] = -180;
     });
     map.getSource('wind-data').setData(windData);
@@ -1909,7 +1886,6 @@ window.toggleMapStyle = function () {
   if (typeof window._isSatellite === "undefined") window._isSatellite = true;
   window._isSatellite = !window._isSatellite;
 
-  // Store active layer states to re-enable them after style load
   const activeLayers = {
     maritime: window._maritimeActive,
     clouds: window._cloudsActive,
@@ -1929,17 +1905,14 @@ window.toggleMapStyle = function () {
     if (btn) btn.classList.remove("active");
   }
 
-  // Re-add sources and layers once style has loaded
   map.once('style.load', () => {
-    // Re-init core geography layers
+    
     if (window.mapEngine && window.mapEngine.initMapboxLayers) {
       window.mapEngine.initMapboxLayers();
     }
 
-    // Explicitly disable fog again (to keep the void look)
     map.setFog(null);
 
-    // Restore active stateful layers
     if (activeLayers.maritime) { window._maritimeActive = false; window.toggleMaritimeLayer(); }
     if (activeLayers.clouds) { window._cloudsActive = false; window.toggleCloudsLayer(); }
     if (activeLayers.wind) { window._windActive = false; window.toggleWindLayer(); }
@@ -2008,7 +1981,7 @@ window.toggleGDELTLayer = async function () {
     const geoData = {
       type: 'FeatureCollection',
       features: features.map(f => {
-        // Ensure standard GeoJSON structure even for fallback
+        
         if (f.type !== "Feature") {
           return {
             type: 'Feature',
@@ -2020,7 +1993,6 @@ window.toggleGDELTLayer = async function () {
       })
     };
 
-    // Delegate entirely to Mapbox engine
     window.mapEngine.addGDELTHeatmap(geoData);
   }
   if (window.updateLayerLegend) window.updateLayerLegend();
@@ -2029,10 +2001,10 @@ window.toggleAircraftLayer = function () {
   _aircraftActive = !_aircraftActive;
   const btn = document.getElementById("aircraft-toggle-btn");
   if (!_aircraftActive) {
-    // Clear refresh interval
+    
     clearInterval(_aircraftInterval);
     _aircraftInterval = null;
-    // Remove Mapbox layer & source
+    
     if (window.mapEngine && window.mapEngine.map) {
       const map = window.mapEngine.map;
       if (map.getLayer('aircraft-layer')) map.removeLayer('aircraft-layer');
@@ -2071,7 +2043,6 @@ window.updateISS = async function () {
     window._issData[0].alt = data.altitude;
     window._issData[0].velocity = data.velocity;
 
-    // Create Marker on first run
     if (!window._issMarker) {
       const el = document.createElement('div');
       el.className = 'iss-marker flex items-center justify-center';
@@ -2085,7 +2056,6 @@ window.updateISS = async function () {
       `;
       el.style.cursor = 'pointer';
 
-      // Tooltip interaction
       el.addEventListener('mouseenter', (e) => {
         const t = safeEl("map-tooltip");
         if (t) {
@@ -2111,7 +2081,7 @@ window.updateISS = async function () {
         .setLngLat([data.longitude, data.latitude])
         .addTo(map);
     } else {
-      // Update position continuously
+      
       window._issMarker.setLngLat([data.longitude, data.latitude]);
     }
 
@@ -2128,7 +2098,7 @@ if (!window._issInterval) {
 if (typeof window._globeTheme === "undefined") {
   window._globeTheme = "night";
 }
-// Legacy 3D Globe methods removed (now using Mapbox)
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then(registration => {
@@ -2139,11 +2109,9 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Global Initialization Sequence
 console.log("NewsAtlas Engine: Launching sequence...");
 window.generateAIBriefing = generateAIBriefing;
 
-// Initialize Mapbox instead of D3
 window.mapEngine = new MapboxEngine('map-container');
 window.mapEngine.init().then((success) => {
   if (success) {
@@ -2153,7 +2121,6 @@ window.mapEngine.init().then((success) => {
   }
 });
 
-// Run standard systems
 initTerminal();
 setupEventListeners();
 setInterval(updateSystemTime, 1000);
@@ -2177,7 +2144,6 @@ window.renderTrendingHeader = () => {
   if (list) list.classList.remove("hidden");
 };
 
-// Integration with reset
 const _origResetGlobal = window.resetToGlobalCenter;
 if (_origResetGlobal) {
   window.resetToGlobalCenter = (fly) => {
@@ -2196,11 +2162,11 @@ async function fetchGlobalSearchData() {
     if (!res.ok) throw new Error("Index relay failed");
     window.globalSearchData = await res.json();
     console.log(`Global Registry Online: ${window.globalSearchData.length} sectors indexed.`);
-    // If the search overlay is open, force a re-render of trending
+    
     if (window.renderTrending) window.renderTrending();
   } catch (e) {
     console.error("Critical: Global Registry Link Failure", e);
-    // Silent fallback to local telemetry
+    
     window.globalSearchData = [];
   }
 }

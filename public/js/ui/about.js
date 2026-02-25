@@ -32,7 +32,6 @@ function stopTrafficCanvas() {
   }
 }
 
-// --- Real-time Sparkline Charts Logic ---
 function drawSparkline(ctx, data, color) {
   const w = ctx.canvas.width;
   const h = ctx.canvas.height;
@@ -45,23 +44,19 @@ function drawSparkline(ctx, data, color) {
   ctx.strokeStyle = color;
   ctx.lineJoin = "round";
 
-  // Calculate step size based on data points
-  // We want the last point to be at x=w
   const step = w / (Math.max(data.length, 2) - 1);
 
-  // Using fixed 0-100 scale here as percentages
   const yScale = h / 100;
 
   for (let i = 0; i < data.length; i++) {
     const x = i * step;
-    const val = Math.max(0, Math.min(100, data[i])); // Clamp 0-100
-    const y = h - (val * yScale); // Invert Y
+    const val = Math.max(0, Math.min(100, data[i])); 
+    const y = h - (val * yScale); 
     if (i === 0) ctx.moveTo(x, y);
     else ctx.lineTo(x, y);
   }
   ctx.stroke();
 
-  // Gradient fill area under line
   ctx.lineTo(w, h);
   ctx.lineTo(0, h);
   ctx.closePath();
@@ -69,7 +64,7 @@ function drawSparkline(ctx, data, color) {
   ctx.fill();
 }
 
-const historyLen = 30; // 30 seconds of history
+const historyLen = 30; 
 const cpuHistory = new Array(historyLen).fill(0);
 const memHistory = new Array(historyLen).fill(0);
 const netHistory = new Array(historyLen).fill(0);
@@ -92,40 +87,35 @@ function startAboutStats() {
   if (aboutStatsInterval) clearInterval(aboutStatsInterval);
 
   aboutStatsInterval = setInterval(() => {
-    // 1. Generate new data points
-    // CPU: random 10-60% w/ slight variation
+
     const cpu = Math.floor(Math.random() * 50) + 10;
 
-    // Mem: random 4-12GB (converted to % of 16GB)
     const memRaw = parseFloat((Math.random() * 4 + 6).toFixed(1));
     const memPct = (memRaw / 16) * 100;
 
-    // Net: random 20-90%
     const net = Math.floor(Math.random() * 70) + 20;
 
-    // 2. Update Charts History
     cpuHistory.shift(); cpuHistory.push(cpu);
     memHistory.shift(); memHistory.push(memPct);
     netHistory.shift(); netHistory.push(net);
 
-    // 3. Draw Charts & Update Text
     const cpuCanvas = document.getElementById("cpu-chart");
     if (cpuCanvas) {
-      drawSparkline(cpuCanvas.getContext("2d"), cpuHistory, "rgba(59, 130, 246, 1)"); // Blue
+      drawSparkline(cpuCanvas.getContext("2d"), cpuHistory, "rgba(59, 130, 246, 1)"); 
       const cpuVal = document.getElementById("cpu-val");
       if (cpuVal) cpuVal.innerText = cpu + "%";
     }
 
     const memCanvas = document.getElementById("mem-chart");
     if (memCanvas) {
-      drawSparkline(memCanvas.getContext("2d"), memHistory, "rgba(16, 185, 129, 1)"); // Emerald
+      drawSparkline(memCanvas.getContext("2d"), memHistory, "rgba(16, 185, 129, 1)"); 
       const memVal = document.getElementById("mem-val");
       if (memVal) memVal.innerText = memRaw + "GB";
     }
 
     const netCanvas = document.getElementById("net-chart");
     if (netCanvas) {
-      drawSparkline(netCanvas.getContext("2d"), netHistory, "rgba(6, 182, 212, 1)"); // Cyan
+      drawSparkline(netCanvas.getContext("2d"), netHistory, "rgba(6, 182, 212, 1)"); 
       const netVal = document.getElementById("net-load-val");
       if (netVal) netVal.innerText = net + "%";
     }

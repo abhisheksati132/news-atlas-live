@@ -1,4 +1,4 @@
-let _cliExpanded = false;
+﻿let _cliExpanded = false;
 let _cliHistory = [];
 let _cliHistoryIndex = -1;
 let _dragging = false;
@@ -68,8 +68,8 @@ window.openCLI = function () {
         output.dataset.welcomed = "1";
         cliPrint([
             `<span class="cli-head">NEURAL COMMAND INTERFACE v2.0</span>`,
-            `<span class="cli-dim">Type <span class="cli-key">help</span> for commands · Drag title bar to move · AI-powered</span>`,
-            `<span class="cli-dim">───────────────────────────────────</span>`,
+            `<span class="cli-dim">Type <span class="cli-key">help</span> for commands  Drag title bar to move  AI-powered</span>`,
+            `<span class="cli-dim"></span>`,
         ]);
     }
 };
@@ -149,28 +149,28 @@ const CLI_BUILTINS = {
         `<span class="cli-key">color gdp|pop|off</span> Choropleth overlay`,
         `<span class="cli-key">watchlist</span>         Show pinned`,
         `<span class="cli-key">time</span>              UTC time`,
-        `<span class="cli-dim">─ or type any question for AI ─</span>`,
+        `<span class="cli-dim"> or type any question for AI </span>`,
     ],
     clear: () => { document.getElementById("floating-cli-output").innerHTML = ""; return []; },
     time: () => [`<span class="cli-val">${new Date().toUTCString()}</span>`],
     watchlist: () => {
         const list = window.getWatchlist?.() || [];
-        if (!list.length) return [`<span class="cli-dim">No pins yet. Click ⭐ on a country.</span>`];
-        return [`<span class="cli-head">PINNED</span>`, ...list.map(c => `  <span class="cli-val">↪ ${c}</span>`)];
+        if (!list.length) return [`<span class="cli-dim">No pins yet. Click  on a country.</span>`];
+        return [`<span class="cli-head">PINNED</span>`, ...list.map(c => `  <span class="cli-val"> ${c}</span>`)];
     },
-    "2d": () => { if (window.projectionType !== "2d" && window.toggleProjection) window.toggleProjection(); return [`<span class="cli-ok">▶ 2D map</span>`]; },
-    "3d": () => { if (window.projectionType !== "3d" && window.toggleProjection) window.toggleProjection(); return [`<span class="cli-ok">▶ 3D globe</span>`]; },
-    reset: () => { window.resetToGlobalCenter?.(); return [`<span class="cli-ok">▶ Reset</span>`]; },
-    quake: () => { window.toggleEarthquakeLayer?.(); return [`<span class="cli-ok">▶ Earthquake toggled</span>`]; },
-    flights: () => { window.toggleAircraftLayer?.(); return [`<span class="cli-ok">▶ Aircraft toggled</span>`]; },
-    conflict: () => { window.toggleGDELTLayer?.(); return [`<span class="cli-ok">▶ Conflict toggled</span>`]; },
-    airquality: () => { window.toggleAirQuality?.(); return [`<span class="cli-ok">▶ Air quality toggled</span>`]; },
+    "2d": () => { if (window.projectionType !== "2d" && window.toggleProjection) window.toggleProjection(); return [`<span class="cli-ok"> 2D map</span>`]; },
+    "3d": () => { if (window.projectionType !== "3d" && window.toggleProjection) window.toggleProjection(); return [`<span class="cli-ok"> 3D globe</span>`]; },
+    reset: () => { window.resetToGlobalCenter?.(); return [`<span class="cli-ok"> Reset</span>`]; },
+    quake: () => { window.toggleEarthquakeLayer?.(); return [`<span class="cli-ok"> Earthquake toggled</span>`]; },
+    flights: () => { window.toggleAircraftLayer?.(); return [`<span class="cli-ok"> Aircraft toggled</span>`]; },
+    conflict: () => { window.toggleGDELTLayer?.(); return [`<span class="cli-ok"> Conflict toggled</span>`]; },
+    airquality: () => { window.toggleAirQuality?.(); return [`<span class="cli-ok"> Air quality toggled</span>`]; },
 };
 async function processCLICommand(raw) {
     if (!raw.trim()) return;
     const input = raw.trim();
     const country = window.selectedCountry?.properties?.name || window._currentCountryName || "Global";
-    cliPrint([`<span class="cli-prompt">❯ <span class="cli-cmd">${escH(input)}</span></span>`]);
+    cliPrint([`<span class="cli-prompt"> <span class="cli-cmd">${escH(input)}</span></span>`]);
     _cliHistory.unshift(input);
     if (_cliHistory.length > 80) _cliHistory.pop();
     _cliHistoryIndex = -1;
@@ -184,7 +184,7 @@ async function processCLICommand(raw) {
         return;
     }
     if (cmd === "go" && rawArgs) {
-        cliPrint([`<span class="cli-dim">▶ Navigating to ${rawArgs}…</span>`]);
+        cliPrint([`<span class="cli-dim"> Navigating to ${rawArgs}</span>`]);
         if (window.handleCountryClickByName) window.handleCountryClickByName(rawArgs);
         else if (window.fetchAllData) window.fetchAllData(rawArgs);
         return;
@@ -193,14 +193,14 @@ async function processCLICommand(raw) {
         const MAP = { intel: "intel", news: "news", market: "markets", markets: "markets", economy: "economic", economic: "economic", weather: "atmosphere", atmosphere: "atmosphere" };
         const t = MAP[args] || args;
         window.switchTab?.(t);
-        cliPrint([`<span class="cli-ok">▶ Switched to ${t}</span>`]);
+        cliPrint([`<span class="cli-ok"> Switched to ${t}</span>`]);
         return;
     }
     if (cmd === "color") {
         const MODE = { gdp: "gdp", pop: "population", population: "population", conflict: "conflict", off: null, clear: null };
         const m = args in MODE ? MODE[args] : null;
         window.setChoropleth?.(m);
-        cliPrint([`<span class="cli-ok">▶ Map: ${m || "cleared"}</span>`]);
+        cliPrint([`<span class="cli-ok"> Map: ${m || "cleared"}</span>`]);
         return;
     }
     if (cmd === "analyze") {

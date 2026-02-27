@@ -11,34 +11,69 @@ window.toggleAmbience = () => {
   initAudio();
   if (window.isAmbiencePlaying || window._audioMuted) {
     if (window.isAmbiencePlaying) {
-      ambienceOscillators.forEach((osc) => osc.stop());
+      ambienceOscillators.forEach((osc) => {
+        try { osc.stop(); osc.disconnect(); } catch (e) { }
+      });
+      if (ambienceGain) {
+        ambienceGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.5);
+        setTimeout(() => ambienceGain.disconnect(), 1000);
+      }
       ambienceOscillators = [];
       window.isAmbiencePlaying = false;
     }
     const el = document.getElementById("ambience-text");
-    if (el) {
-      el.innerText = "OFF";
-      el.classList.remove("text-blue-400");
-    }
-    if (window._audioMuted) return;
+    if (el) { el.innerText = "OFF"; el.classList.remove("text-blue-400"); }
+    const btn = document.getElementById("ambience-toggle-btn");
+    if (btn) btn.classList.remove("active");
   } else {
     ambienceGain = audioCtx.createGain();
-    ambienceGain.gain.value = 0.05;
+    ambienceGain.gain.value = 0; // Fade in
+    ambienceGain.gain.setTargetAtTime(0.08, audioCtx.currentTime, 2); // Smooth 2s fade in
+
+    // Add a dark cinematic low-pass filter
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 400; // Deep muffled sound
+
+    // Slowly modulate the filter cutoff for a "breathing" effect
+    const lfo = audioCtx.createOscillator();
+    lfo.type = "sine";
+    lfo.frequency.value = 0.05; // Very slow (20s cycle)
+    const lfoGain = audioCtx.createGain();
+    lfoGain.gain.value = 150;
+    lfo.connect(lfoGain);
+    lfoGain.connect(filter.frequency);
+    lfo.start();
+    ambienceOscillators.push(lfo);
+
+    filter.connect(ambienceGain);
     ambienceGain.connect(audioCtx.destination);
-    [55, 110, 112, 54].forEach((f) => {
+
+    // Create a rich sub-bass and sci-fi drone chord
+    // Base frequency (G1), Fifth (D2), Octave (G2), plus a detuned sub
+    const freqs = [49.00, 73.42, 98.00, 48.5];
+
+    freqs.forEach((f, i) => {
       const osc = audioCtx.createOscillator();
-      osc.type = "sine";
+      // Mix of sine (deep bass) and triangle (some harmonics)
+      osc.type = i === 1 ? "triangle" : "sine";
       osc.frequency.setValueAtTime(f, audioCtx.currentTime);
-      osc.connect(ambienceGain);
+
+      // Add subtle stereo spread
+      const panner = audioCtx.createStereoPanner();
+      panner.pan.value = (i % 2 === 0 ? 1 : -1) * 0.4;
+
+      osc.connect(panner);
+      panner.connect(filter);
       osc.start();
       ambienceOscillators.push(osc);
     });
+
     window.isAmbiencePlaying = true;
     const el = document.getElementById("ambience-text");
-    if (el) {
-      el.innerText = "ON";
-      el.classList.add("text-blue-400");
-    }
+    if (el) { el.innerText = "ON"; el.classList.add("text-blue-400"); }
+    const btn = document.getElementById("ambience-toggle-btn");
+    if (btn) btn.classList.add("active");
   }
 };
 window.playTacticalSound = (type) => {

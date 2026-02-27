@@ -75,6 +75,49 @@ body {
     transform: translate3d(0, 0, 0);
 }
 
+/* Skeleton Loaders */
+.skeleton-pulse {
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+    background: linear-gradient(-90deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 100%);
+    background-size: 400% 400%;
+}
+
+@keyframes skeleton-pulse {
+    0% {
+        background-position: 0% 0%;
+    }
+
+    100% {
+        background-position: -135% 0%;
+    }
+}
+
+.skeleton-text-block {
+    height: 12px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    width: 100%;
+}
+
+.skeleton-text-block.short {
+    width: 60%;
+}
+
+/* Audio Status Pulse */
+.audio-pulse {
+    position: relative;
+}
+
+.audio-pulse::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.4);
+    animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    z-index: -1;
+}
+
 .decrypt-text span {
     display: inline-block;
 }

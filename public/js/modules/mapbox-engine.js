@@ -547,16 +547,16 @@ class MapboxEngine {
                 });
             }
 
-            const satLayer = new deck.TextLayer({
+            const satLayer = new deck.ScatterplotLayer({
                 id: 'satellite-layer',
                 data: satellites,
                 getPosition: d => d.position,
-                getText: d => '◆',
-                getSize: 20,
-                getColor: d => d.color,
-                getAngle: d => d.position[0] * 2,
-                getTextAnchor: 'middle',
-                getAlignmentBaseline: 'center',
+                getRadius: 25000,
+                getFillColor: d => d.color,
+                getLineColor: [255, 255, 255, 100],
+                lineWidthMinPixels: 1,
+                radiusMinPixels: 2,
+                radiusMaxPixels: 5,
                 parameters: { depthTest: false }
             });
 

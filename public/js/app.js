@@ -441,7 +441,20 @@ async function generateAIBriefing(loc) {
   const loading = safeEl("ai-briefing-loading");
   const actions = safeEl("ai-briefing-actions");
   if (box) box.classList.remove("hidden");
-  if (text) { text.innerHTML = '<p style="font-family:\'JetBrains Mono\',monospace;font-size:11px;color:#475569;">Initialising deep-scan...</p>'; text.classList.add("ai-streaming"); }
+  if (text) {
+    text.innerHTML = `
+      <div class="space-y-4 w-full mt-2">
+        <div class="skeleton-pulse skeleton-text-block short"></div>
+        <div class="skeleton-pulse skeleton-text-block"></div>
+        <div class="skeleton-pulse skeleton-text-block"></div>
+        <div class="skeleton-pulse skeleton-text-block" style="width: 80%;"></div>
+      </div>
+      <p style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#475569;margin-top:16px;">
+        <i class="fas fa-circle-notch fa-spin mr-2"></i> DEEP-SCAN INITIALIZING...
+      </p>
+    `;
+    text.classList.add("ai-streaming");
+  }
   if (loading) loading.classList.remove("hidden");
   if (actions) actions.classList.add("hidden");
   let _cursorInterval = null;

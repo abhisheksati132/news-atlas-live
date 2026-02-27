@@ -40,7 +40,14 @@ class MapboxEngine {
             zoom: 1.5,
             pitch: 0,
             projection: 'globe',
-            attributionControl: false
+            attributionControl: false,
+            // Prevent accidental interactions during page scroll
+            cooperativeGestures: true,
+            // Disable interactions by default
+            scrollZoom: false,
+            dragPan: false,
+            dragRotate: false,
+            touchZoomRotate: false
         });
 
         this.map.on('style.load', () => {
@@ -274,13 +281,11 @@ class MapboxEngine {
                     'fill-color': [
                         'case',
                         ['boolean', ['feature-state', 'selected'], false], '#3b82f6',
-                        ['boolean', ['feature-state', 'hover'], false], '#10b981',
                         'transparent'
                     ],
                     'fill-opacity': [
                         'case',
                         ['boolean', ['feature-state', 'selected'], false], 0.22,
-                        ['boolean', ['feature-state', 'hover'], false], 0.12,
                         0
                     ]
                 }
@@ -562,6 +567,24 @@ class MapboxEngine {
             this._deckAnimId = requestAnimationFrame(animateDeck);
         };
         this._deckAnimId = requestAnimationFrame(animateDeck);
+    }
+
+    enableInteractions() {
+        if (!this.map) return;
+        this.map.scrollZoom.enable();
+        this.map.dragPan.enable();
+        this.map.dragRotate.enable();
+        this.map.touchZoomRotate.enable();
+        console.log('📡 Map Telemetry Uplink: Interactivity Enabled');
+    }
+
+    disableInteractions() {
+        if (!this.map) return;
+        this.map.scrollZoom.disable();
+        this.map.dragPan.disable();
+        this.map.dragRotate.disable();
+        this.map.touchZoomRotate.disable();
+        console.log('📡 Map Telemetry Status: Interactivity Locked');
     }
 }
 

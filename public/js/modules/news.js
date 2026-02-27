@@ -146,8 +146,6 @@ function displayFilteredNews() {
   const remainder = countToDisplay % 3;
   if (remainder !== 0 && countToDisplay > remainder) countToDisplay -= remainder;
   displayNewsArticles(filtered.slice(0, countToDisplay));
-  const loadMoreEl = document.getElementById("news-load-more");
-  if (loadMoreEl) loadMoreEl.classList.toggle("hidden", filtered.length <= countToDisplay);
 }
 function displayNewsArticles(articles) {
   const container = document.getElementById("articles-container");
@@ -172,22 +170,24 @@ function displayNewsArticles(articles) {
       ? `<img src="${favicon}" alt="" class="w-4 h-4 rounded object-cover shrink-0" onerror="this.style.display='none'">`
       : `<i class="fas fa-newspaper text-[10px] text-slate-500"></i>`;
     const imgHtml = art.image_url
-      ? `<div class="w-full mb-3 rounded-lg bg-cover bg-center border border-white/8 overflow-hidden" 
-              style="background-image:url('${art.image_url}'); height: ${isFeatured ? '160px' : '120px'};"></div>`
+      ? `<div class="w-full mb-3 rounded-lg border border-white/[0.05] overflow-hidden bg-slate-900/50" 
+              style="height: 200px;">
+              <img src="${art.image_url}" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'">
+         </div>`
       : "";
-    card.className = `apple-glass news-card-animate p-4 mb-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] hover:border-blue-400/40 ${isFeatured ? "ring-1 ring-blue-500/20" : ""}`;
+    card.className = `apple-glass news-card-animate p-4 mb-4 transition-all duration-200 hover:border-blue-500/50 ${isFeatured ? "border-blue-500/30" : ""}`;
     card.style.animationDelay = `${i * 45}ms`;
     card.onmouseenter = () => window.playTacticalSound("hover");
     card.innerHTML = `
       <div class="flex items-center gap-2 mb-3">
         ${faviconHtml}
-        <span class="text-[11.5px] font-black text-white/70 uppercase tracking-widest truncate max-w-[140px]">${art.source_id || "UPLINK"}</span>
+        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate max-w-[140px]">${art.source_id || "UPLINK"}</span>
         <div class="flex-1"></div>
         <span class="text-[10px] font-mono text-slate-500">${timeAgo}</span>
-        <span class="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full ${sentiment.cls}">${sentiment.label}</span>
+        <span class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm ${sentiment.cls}">${sentiment.label}</span>
       </div>
       ${imgHtml}
-      <h3 class="font-bold ${isFeatured ? "text-[19px]" : "text-[16px]"} text-white leading-snug mb-3 cursor-pointer hover:text-blue-300 transition-colors" onclick="window.open('${art.link}', '_blank')">${art.title}</h3>
+      <h3 class="font-bold ${isFeatured ? "text-lg" : "text-base"} text-slate-100 leading-snug mb-3 cursor-pointer hover:text-blue-400 transition-colors" onclick="window.open('${art.link}', '_blank')">${art.title}</h3>
       <div class="flex items-center gap-3 mt-auto pt-2 border-t border-white/5">
         <button class="text-[9px] font-mono text-slate-500 hover:text-blue-400 transition-colors flex items-center gap-1" onclick="window.open('${art.link}', '_blank')">
           <i class="fas fa-external-link-alt"></i> Read

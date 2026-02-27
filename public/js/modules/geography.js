@@ -24,10 +24,6 @@ async function onCountrySelected(countryName) {
   const stateCollapseContent = document.getElementById("state-collapse-content");
   const stateCollapseIcon = document.getElementById("state-collapse-icon");
   if (stateSelector) stateSelector.classList.remove("hidden");
-  // Auto-expand the state panel when a country is selected
-  // if (stateCollapseContent) stateCollapseContent.classList.remove("hidden");
-  // if (stateCollapseIcon) stateCollapseIcon.style.transform = "rotate(180deg)";
-  // Reset city panel
   const cityCollapseContent = document.getElementById("city-collapse-content");
   const cityCollapseIcon = document.getElementById("city-collapse-icon");
   if (cityCollapseContent) cityCollapseContent.classList.add("hidden");
@@ -81,7 +77,6 @@ async function selectState(countryName, stateName) {
   if (bsWrap) bsWrap.classList.remove("hidden");
   if (bcWrap) bcWrap.classList.add("hidden");
   if (citySelector) citySelector.classList.remove("hidden");
-  // Auto-expand city panel
   const cityCollapseContent2 = document.getElementById("city-collapse-content");
   const cityCollapseIcon2 = document.getElementById("city-collapse-icon");
   if (cityCollapseContent2) cityCollapseContent2.classList.remove("hidden");
@@ -95,7 +90,6 @@ async function selectState(countryName, stateName) {
     );
     const data = await res.json();
 
-    // Fly to state center (approximate via geocoder)
     try {
       const geoRes = await fetch(
         `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(stateName + ", " + countryName)}&count=1&language=en&format=json`,
@@ -155,8 +149,6 @@ async function selectCity(countryName, stateName, cityName) {
       const { latitude, longitude } = geoData.results[0];
       window._currentWeatherLocation = `${cityName}, ${countryName}`;
       if (window.fetchWeather) window.fetchWeather(latitude, longitude);
-
-      // Mapbox flyTo city
       if (window.mapEngine && window.mapEngine.map) {
         window.mapEngine.map.flyTo({
           center: [longitude, latitude],

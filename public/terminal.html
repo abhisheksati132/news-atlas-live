@@ -18,7 +18,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <link
-    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="css/global-fx.css" />
   <meta name="description" content="NewsAtlas: Real-time Global Intelligence Terminal." />
@@ -59,24 +59,19 @@
     }
 
     body {
-      font-family: "Syne", "Segoe UI", sans-serif;
-      font-size: 13px;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
       background-color: var(--bg);
       background-image:
         radial-gradient(ellipse at 0% 0%,
-          rgba(59, 130, 246, 0.09) 0,
+          rgba(59, 130, 246, 0.06) 0,
           transparent 55%),
         radial-gradient(ellipse at 100% 100%,
-          rgba(6, 182, 212, 0.05) 0,
-          transparent 55%),
-        linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
-      background-size:
-        auto,
-        auto,
-        48px 48px,
-        48px 48px;
-      color: #e2e8f0;
+          rgba(6, 182, 212, 0.04) 0,
+          transparent 55%);
+      background-size: auto;
+      color: #f1f5f9;
       overflow-x: hidden;
       overflow-y: auto;
       width: 100vw;
@@ -87,36 +82,27 @@
     }
 
     body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      pointer-events: none;
-      background: repeating-linear-gradient(0deg,
-          transparent,
-          transparent 2px,
-          rgba(0, 0, 0, 0.09) 2px,
-          rgba(0, 0, 0, 0.09) 4px);
-      opacity: 0.55;
+      display: none;
     }
 
     body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: 9998;
-      pointer-events: none;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
-      opacity: 0.32;
+      display: none;
     }
 
     .glass-panel {
       border-radius: 1.25rem;
-      background: rgba(4, 10, 25, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 8px 32px 0 rgba(31, 50, 100, 0.37);
-      backdrop-filter: blur(28px) saturate(180%);
-      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    .glass-panel:hover {
+      border-color: rgba(59, 130, 246, 0.3);
+      background: rgba(15, 23, 42, 0.95);
+      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     }
 
     :focus-visible {
@@ -149,17 +135,7 @@
 
     /* CRT Terminal Scanlines */
     .crt-overlay {
-      background:
-        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%),
-        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
-      background-size: 100% 2px, 3px 100%;
-      pointer-events: none;
-      z-index: 1000;
-      mix-blend-mode: multiply;
-      position: fixed;
-      inset: 0;
-      opacity: 0.25;
-      /* Thinned out so things aren't too dark */
+      display: none;
     }
 
     .crt-vignette {
@@ -180,7 +156,6 @@
       transition: all 0.3s ease;
       animation: holoFadeIn 0.5s ease-out forwards;
       pointer-events: none;
-      text-shadow: 0 0 10px rgba(6, 182, 212, 0.8), 0 0 4px rgba(6, 182, 212, 1);
     }
 
     .holo-hud-line {
@@ -219,34 +194,31 @@
     }
 
     .hud-title {
-      font-size: 16px;
-      font-weight: 900;
-      letter-spacing: 0.15em;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       color: #fff;
-      text-shadow: 0 0 12px rgba(255, 255, 255, 0.8), 0 0 4px rgba(255, 255, 255, 1);
       margin-bottom: 2px;
     }
 
     .hud-stat {
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 600;
       color: #94a3b8;
       display: flex;
       justify-content: flex-start;
-      gap: 15px;
+      gap: 12px;
       margin-top: 4px;
-      text-shadow: 0 0 6px rgba(148, 163, 184, 0.8);
     }
 
     .hud-stat span {
       color: #38bdf8;
-      text-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
     }
 
     header {
       height: var(--header-h);
-      padding: 0 1.25rem;
+      padding: 0 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -257,12 +229,11 @@
       right: 1rem;
       z-index: 50;
       border-radius: 1.25rem;
-      background: rgba(4, 10, 25, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      /* Apple-like thin frost border */
-      box-shadow: 0 8px 32px 0 rgba(31, 50, 100, 0.37);
-      backdrop-filter: blur(28px) saturate(180%);
-      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
     }
 
     header::-webkit-scrollbar {
@@ -287,48 +258,32 @@
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
-      transition: background 0.5s ease;
+      transition: all 0.3s ease;
 
-      /* Apple Glassmorphism */
       border-radius: 1.25rem;
-      background: rgba(4, 10, 25, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 8px 32px 0 rgba(31, 50, 100, 0.37);
-      backdrop-filter: blur(28px) saturate(180%);
-      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      background: #020617;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     }
 
-    /* Map interaction overlay — only visible when mouse is INSIDE the map */
+    /* Map interaction overlay – visible until first click, then permanently hidden */
     .map-interaction-overlay {
       position: absolute;
       inset: 0;
-      z-index: 20;
-      background: rgba(2, 6, 23, 0.35);
+      z-index: 40;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: opacity 0.3s ease;
-      cursor: pointer;
-      backdrop-filter: blur(3px);
-      -webkit-backdrop-filter: blur(3px);
-      opacity: 0;
-      /* hidden by default (mouse outside) */
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      background: rgba(2, 6, 23, 0.35);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      cursor: default;
       pointer-events: none;
-      /* non-interactive when hidden */
-    }
-
-    /* Show blur only while mouse is hovering inside the map */
-    .map-box:hover .map-interaction-overlay:not(.activated) {
+      /* Crucial: allow page scroll to pass through */
       opacity: 1;
-      pointer-events: auto;
     }
 
-    /* Once user has interacted, never show again */
-    .map-interaction-overlay.activated {
-      opacity: 0 !important;
-      pointer-events: none !important;
-      visibility: hidden;
-    }
 
     #world-map {
       background-image:
@@ -360,6 +315,33 @@
       to {
         transform: rotate(360deg);
       }
+    }
+
+    /* Mapbox Cooperative Gestures Styling */
+    .mapboxgl-scroll-zoom-blocker,
+    .mapboxgl-touch-drag-pan-multi-finger {
+      background: rgba(2, 6, 23, 0.85) !important;
+      backdrop-filter: blur(8px) !important;
+      border: 1px solid rgba(6, 182, 212, 0.3) !important;
+      color: #06b6d4 !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 13px !important;
+      font-weight: bold !important;
+      letter-spacing: 0.1em !important;
+      text-transform: uppercase !important;
+      border-radius: 1.25rem !important;
+      padding: 24px 32px !important;
+      text-align: center !important;
+      box-shadow: 0 0 30px rgba(6, 182, 212, 0.15) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      pointer-events: none !important;
+    }
+
+    .mapboxgl-scroll-zoom-blocker::before {
+      content: '📡 ';
+      margin-right: 8px;
     }
 
     @keyframes pulseRadar {
@@ -1040,7 +1022,7 @@
       background: rgba(5, 15, 40, 0.4);
       backdrop-filter: blur(40px) saturate(180%);
       -webkit-backdrop-filter: blur(40px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.03);
       border-radius: 24px;
       box-shadow:
         0 8px 32px rgba(0, 0, 0, 0.4),
@@ -1098,7 +1080,7 @@
       background: rgba(4, 10, 25, 0.6);
       backdrop-filter: blur(28px) saturate(180%);
       -webkit-backdrop-filter: blur(28px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.03);
       box-shadow: 0 8px 32px 0 rgba(31, 50, 100, 0.37),
         inset 0 1px 0 rgba(255, 255, 255, 0.06);
     }
@@ -1113,7 +1095,7 @@
       -webkit-backdrop-filter: blur(28px) saturate(180%);
       padding: 1.5rem 2rem;
       border-radius: 1rem;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.03);
       box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
       font-family: "JetBrains Mono", monospace;
       font-size: 11px;
@@ -1265,15 +1247,15 @@
     }
 
     .tab-ai-chat {
-      background: rgba(4, 10, 25, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(59, 130, 246, 0.15);
       border-radius: 1.25rem;
       padding: 12px 14px;
-      margin-bottom: 0px;
+      margin-bottom: 0;
       flex-shrink: 0;
-      box-shadow: 0 8px 32px 0 rgba(31, 50, 100, 0.15);
-      backdrop-filter: blur(28px) saturate(180%);
-      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
     }
 
     .tab-ai-chat-header {
@@ -1357,7 +1339,7 @@
 
     .tab-ai-send-btn {
       background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.03);
       color: #e2e8f0;
       border-radius: 8px;
       padding: 4px 12px;
@@ -1782,7 +1764,7 @@
         <span class="text-[10px] font-mono tracking-widest uppercase font-bold">Target Sector</span>
       </button>
 
-      <div class="flex flex-col min-w-[140px] justify-center px-4 h-11 rounded-xl shadow-sm"
+      <div class="flex flex-col min-w-[200px] justify-center px-4 h-11 rounded-xl shadow-sm text-center"
         style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);">
         <span id="selected-country-name"
           class="font-black text-white text-[13px] uppercase truncate tracking-tight leading-none pt-0.5">GLOBAL
@@ -1803,10 +1785,9 @@
           <span class="text-[9px] text-slate-500 font-bold uppercase tracking-tighter leading-none">Events/Hr</span>
         </div>
       </div>
-    </div>
-    <div class="flex items-center gap-3 lg:gap-4 flex-1 basis-0 justify-end">
+
       <div
-        class="hidden sm:flex items-center gap-3 px-4 h-11 rounded-xl border border-white/[0.08] bg-white/[0.04] shrink-0 shadow-sm">
+        class="flex items-center gap-3 px-4 h-11 rounded-xl border border-white/[0.08] bg-white/[0.04] shrink-0 shadow-sm">
         <div class="flex flex-col justify-center">
           <span id="system-time" class="text-[13px] font-black text-white leading-none tracking-wide"
             style="font-family: &quot;JetBrains Mono&quot;, monospace">00:00:00 IST</span>
@@ -1815,6 +1796,9 @@
             <span id="local-time" class="text-slate-400">--:--:--</span></span>
         </div>
       </div>
+    </div>
+    <div class="flex items-center gap-3 lg:gap-4 flex-1 basis-0 justify-end">
+
 
       <div
         class="flex items-center gap-2.5 px-3.5 h-11 rounded-xl border border-white/[0.08] bg-white/[0.04] shrink-0 shadow-sm">
@@ -1947,7 +1931,7 @@
         </div>
         <div id="layer-legend" class="hidden mt-2 flex flex-wrap gap-2 layer-legend justify-center px-4 pb-1"></div>
       </div>
-      <div class="flex-1 relative w-full h-full overflow-hidden group" onmouseleave="deactivateMapInteraction()">
+      <div class="flex-1 relative w-full h-full overflow-hidden group">
         <div id="map-container" class="absolute inset-0 w-full h-full" role="img"
           aria-label="Interactive world map. Click a country for intelligence data. Supports 2D and 3D view."></div>
         <div id="map-legend" class="hidden absolute bottom-4 left-4 z-30 rounded-xl px-4 py-3 text-left"
@@ -1957,50 +1941,45 @@
         <div class="crt-overlay"></div>
         <div class="crt-vignette"></div>
 
-        <div id="map-interaction-overlay"
-          class="absolute inset-0 flex flex-col items-center justify-center gap-4 z-40 pointer-events-auto cursor-pointer transition-opacity duration-500 opacity-0 group-hover:opacity-100"
-          onclick="activateMapInteraction()" style="background: rgba(2, 6, 23, 0.6); backdrop-filter: blur(4px);">
-          <div class="map-interact-pulse flex flex-col items-center gap-3 transition-transform group-hover:scale-110">
-            <div class="relative">
-              <div
-                class="w-16 h-16 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.15)]"
-                style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.4);">
-                <i class="fas fa-satellite-dish text-cyan-400 text-xl animate-pulse"></i>
-              </div>
-              <div class="absolute inset-0 rounded-full animate-ping"
-                style="background:transparent;border:1px dashed rgba(6,182,212,0.3);"></div>
+        <div id="map-interaction-overlay" class="map-interaction-overlay pointer-events-none">
+          <div id="map-interact-content"
+            class="flex flex-col items-center gap-6 cursor-pointer pointer-events-auto hover:opacity-80 transition-all"
+            onclick="activateMapInteraction()">
+
+            <div id="map-hint-click"
+              class="flex items-center gap-2.5 text-base font-black uppercase tracking-[0.2em] text-cyan-400/90 whitespace-nowrap mb-4 transition-opacity duration-300">
+              <span id="map-hint-status"
+                class="w-3 h-3 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_12px_rgba(6,182,212,0.9)]"></span>
+              Click to initialize uplink
             </div>
-            <div class="px-5 py-2 rounded-xl font-mono text-[10px] tracking-widest text-cyan-200 uppercase font-black"
-              style="background:rgba(2,6,23,0.85);border:1px solid rgba(6,182,212,0.25);box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
-              Click anywhere to un-lock map telemetry
+
+            <div class="relative">
+              <div class="w-14 h-14 rounded-full flex items-center justify-center"
+                style="background:rgba(6,182,212,0.03); border: 1px solid rgba(6, 182, 212, 0.2);">
+                <i id="map-interact-icon" class="fas fa-satellite-dish text-cyan-400 text-lg"></i>
+              </div>
+              <div id="map-interact-pulse" class="absolute inset-0 rounded-full animate-ping"
+                style="background:transparent; border: 1px dashed rgba(6, 182, 212, 0.2);"></div>
             </div>
           </div>
         </div>
 
         <script>
-          /* Emergency UI Logic: Handle map interaction even if app.js crashes */
           window.activateMapInteraction = function () {
             const overlay = document.getElementById("map-interaction-overlay");
-            if (overlay) {
-              overlay.classList.add("activated");
-              overlay.style.pointerEvents = "none";
-              overlay.style.transition = "opacity 0.4s ease, transform 0.4s ease";
-              overlay.style.opacity = "0";
-              overlay.style.transform = "scale(1.05)";
-              setTimeout(() => { overlay.style.display = "none"; }, 400);
-            }
+            if (!overlay) return;
+
+            // Fade out and remove completely
+            overlay.style.opacity = "0";
+            overlay.style.pointerEvents = "none";
+            setTimeout(() => {
+              overlay.style.display = "none";
+            }, 600);
+
+            if (window.mapEngine) window.mapEngine.enableInteractions();
+
             if (window.playTacticalSound) window.playTacticalSound("click");
-          };
-          window.deactivateMapInteraction = function () {
-            const overlay = document.getElementById("map-interaction-overlay");
-            if (overlay && overlay.classList.contains("activated")) {
-              overlay.classList.remove("activated");
-              overlay.style.pointerEvents = "auto";
-              overlay.style.transition = "";
-              overlay.style.opacity = "";
-              overlay.style.transform = "";
-              overlay.style.display = "flex";
-            }
+            if (window.initializeEffects) window.initializeEffects();
           };
         </script>
 
@@ -2069,7 +2048,7 @@
                 <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
               </div>
               <div class="flex items-center gap-2 bg-black/30 rounded-xl px-3 py-2"
-                style="border: 1px solid rgba(255, 255, 255, 0.06)">
+                style="border: 1px solid rgba(255, 255, 255, 0.02)">
                 <input type="text" class="tab-ai-input" id="ai-chat-input-intel"
                   placeholder="Ask about geopolitics, threats, stability..."
                   onkeydown="if (event.key === 'Enter') sendTabAI('intel');" autocomplete="off" />
@@ -2078,6 +2057,25 @@
                 </button>
               </div>
               <div class="tab-ai-chat-response" id="ai-chat-response-intel"></div>
+            </div>
+            <div class="apple-glass p-5 mb-2">
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-xs text-blue-400 uppercase font-black tracking-widest"
+                  style="font-family: &quot;JetBrains Mono&quot;, monospace">
+                  <i class="fas fa-search-location mr-2"></i>Intel Target Search
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="text" id="intel-city-search" placeholder="Enter target city..."
+                  class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-blue-400 focus:outline-none transition-colors shadow-inner"
+                  style="font-family: &quot;JetBrains Mono&quot;, monospace" onkeydown="
+                      if (event.key === 'Enter') searchCityForTab('intel');
+                    " autocomplete="off" />
+                <button onclick="searchCityForTab('intel')"
+                  class="px-5 py-2 text-sm bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-bold tracking-widest uppercase rounded-xl transition-all border border-blue-500/20 shadow-sm">
+                  SCAN
+                </button>
+              </div>
             </div>
             <div id="hierarchy-panel" class="hidden">
               <div class="flex items-center gap-2 text-sm font-mono mb-3">
@@ -2142,7 +2140,7 @@
               </div>
             </div>
             <div id="ai-briefing-box"
-              class="apple-glass rounded-3xl p-6 border border-indigo-500/20 shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-3xl">
+              class="apple-glass rounded-3xl p-6 mb-4 border border-indigo-500/20 shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-3xl">
               <div class="flex justify-between items-center mb-5 border-b border-white/5 pb-4">
                 <span class="text-[11px] text-blue-400 uppercase font-black tracking-widest flex items-center gap-2"
                   style="font-family: &quot;JetBrains Mono&quot;, monospace">
@@ -2164,7 +2162,7 @@
               </div>
 
             </div>
-            <div class="apple-glass" style="
+            <div class="apple-glass mb-4" style="
                   background: rgba(16, 185, 129, 0.04);
                   border-color: rgba(16, 185, 129, 0.15);
                 ">
@@ -2195,7 +2193,7 @@
                 <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
               </div>
               <div class="flex items-center gap-2 bg-black/30 rounded-xl px-3 py-2"
-                style="border: 1px solid rgba(255, 255, 255, 0.06)">
+                style="border: 1px solid rgba(255, 255, 255, 0.02)">
                 <input type="text" class="tab-ai-input" id="ai-chat-input-news"
                   placeholder="Summarize today's news, explain an event..."
                   onkeydown="if (event.key === 'Enter') sendTabAI('news');" autocomplete="off" />
@@ -2204,6 +2202,25 @@
                 </button>
               </div>
               <div class="tab-ai-chat-response" id="ai-chat-response-news"></div>
+            </div>
+            <div class="apple-glass p-5 mb-2">
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-xs text-cyan-400 uppercase font-black tracking-widest"
+                  style="font-family: &quot;JetBrains Mono&quot;, monospace">
+                  <i class="fas fa-search-location mr-2"></i>News Region Search
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="text" id="news-city-search" placeholder="Enter target city..."
+                  class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-cyan-400 focus:outline-none transition-colors shadow-inner"
+                  style="font-family: &quot;JetBrains Mono&quot;, monospace" onkeydown="
+                      if (event.key === 'Enter') searchCityForTab('news');
+                    " autocomplete="off" />
+                <button onclick="searchCityForTab('news')"
+                  class="px-5 py-2 text-sm bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-bold tracking-widest uppercase rounded-xl transition-all border border-cyan-500/20 shadow-sm">
+                  SCAN
+                </button>
+              </div>
             </div>
             <div class="apple-glass" style="background: rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.05);">
               <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3">
@@ -2283,17 +2300,9 @@
             </div>
 
             <div id="articles-container"></div>
-
-            <div id="news-load-more" class="hidden text-center py-4">
-              <button onclick="loadMoreNews()"
-                class="text-xs font-mono text-blue-400 hover:text-white hover:bg-white/5 transition-all tracking-widest px-6 py-2.5 rounded-xl border border-white/5 bg-white/[0.02] shadow-sm hover:border-blue-500/50 hover:shadow-[0_0_15px_rgba(59,130,246,0.4)] flex items-center justify-center gap-2 group mx-auto font-bold">
-                <span
-                  class="w-1.5 h-1.5 bg-blue-400 rounded-full group-hover:shadow-[0_0_8px_rgba(59,130,246,1)] transition-shadow pulse-dot"></span>
-                LOAD MORE
-              </button>
-            </div>
           </div>
         </div>
+
         <div id="tab-markets" class="tab-content">
           <div class="content-scroll-area space-y-4">
             <div class="tab-ai-chat">
@@ -2305,7 +2314,7 @@
                 <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
               </div>
               <div class="flex items-center gap-2 bg-black/30 rounded-xl px-3 py-2"
-                style="border: 1px solid rgba(255, 255, 255, 0.06)">
+                style="border: 1px solid rgba(255, 255, 255, 0.02)">
                 <input type="text" class="tab-ai-input" id="ai-chat-input-markets"
                   placeholder="Analyze BTC trend, explain forex moves, gold outlook..."
                   onkeydown="if (event.key === 'Enter') sendTabAI('markets');" autocomplete="off" />
@@ -2314,6 +2323,25 @@
                 </button>
               </div>
               <div class="tab-ai-chat-response" id="ai-chat-response-markets"></div>
+            </div>
+            <div class="apple-glass p-5 mb-2">
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-xs text-emerald-400 uppercase font-black tracking-widest"
+                  style="font-family: &quot;JetBrains Mono&quot;, monospace">
+                  <i class="fas fa-search-location mr-2"></i>Financial Zone Search
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="text" id="markets-city-search" placeholder="Enter target city..."
+                  class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-emerald-400 focus:outline-none transition-colors shadow-inner"
+                  style="font-family: &quot;JetBrains Mono&quot;, monospace" onkeydown="
+                      if (event.key === 'Enter') searchCityForTab('markets');
+                    " autocomplete="off" />
+                <button onclick="searchCityForTab('markets')"
+                  class="px-5 py-2 text-sm bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-bold tracking-widest uppercase rounded-xl transition-all border border-emerald-500/20 shadow-sm">
+                  SCAN
+                </button>
+              </div>
             </div>
             <div class="apple-glass rounded-2xl p-5 border border-indigo-500/10 shadow-sm mb-4">
               <div class="flex justify-between items-center mb-4 border-b border-white/5 pb-3">
@@ -2402,10 +2430,7 @@
               </div>
               <div id="commodities-content" class="grid grid-cols-2 md:grid-cols-3 gap-3"></div>
             </div>
-            <div class="apple-glass" style="
-                  background: rgba(245, 158, 11, 0.04);
-                  border-color: rgba(245, 158, 11, 0.15);
-                ">
+            <div class="apple-glass">
               <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer"
                 onclick="window.toggleMarketCategory('trending-crypto')">
                 <span class="text-sm text-amber-400 uppercase font-black tracking-widest"
@@ -2420,10 +2445,7 @@
                 </div>
               </div>
             </div>
-            <div class="apple-glass" style="
-                  background: rgba(99, 102, 241, 0.04);
-                  border-color: rgba(99, 102, 241, 0.15);
-                ">
+            <div class="apple-glass">
               <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer"
                 onclick="window.toggleMarketCategory('top10-crypto')">
                 <span class="text-sm text-indigo-400 uppercase font-black tracking-widest"
@@ -2439,10 +2461,7 @@
                 </div>
               </div>
             </div>
-            <div class="apple-glass" style="
-                  background: rgba(6, 182, 212, 0.04);
-                  border-color: rgba(6, 182, 212, 0.15);
-                ">
+            <div class="apple-glass">
               <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3">
                 <span class="text-sm text-cyan-400 uppercase font-black tracking-widest"
                   style="font-family: &quot;JetBrains Mono&quot;, monospace">
@@ -2458,6 +2477,7 @@
             </div>
           </div>
         </div>
+
         <div id="tab-atmosphere" class="tab-content">
           <div class="content-scroll-area space-y-4">
             <div class="tab-ai-chat">
@@ -2472,7 +2492,7 @@
                 <div class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse ml-2"></div>
               </div>
               <div class="flex items-center gap-2 bg-black/30 rounded-xl px-3 py-2"
-                style="border: 1px solid rgba(255, 255, 255, 0.06)">
+                style="border: 1px solid rgba(255, 255, 255, 0.02)">
                 <input type="text" class="tab-ai-input" id="ai-chat-input-atmosphere"
                   placeholder="What does this weather mean? Best time to visit?" onkeydown="
                       if (event.key === 'Enter') sendTabAI('atmosphere');
@@ -2483,22 +2503,21 @@
               </div>
               <div class="tab-ai-chat-response" id="ai-chat-response-atmosphere"></div>
             </div>
-            <div class="apple-glass mb-4">
+            <div class="apple-glass p-5 mb-2">
               <div class="flex justify-between items-center mb-3">
-                <span class="text-sm text-cyan-400 uppercase font-black tracking-widest"
+                <span class="text-xs text-blue-300 uppercase font-black tracking-widest"
                   style="font-family: &quot;JetBrains Mono&quot;, monospace">
-                  <i class="fas fa-search-location mr-2"></i>Global Weather
-                  Uplink
+                  <i class="fas fa-search-location mr-2"></i>Global Weather Uplink
                 </span>
               </div>
               <div class="flex items-center gap-2">
-                <input type="text" id="atmo-city-search" placeholder="Enter target city..."
-                  class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-cyan-400 focus:outline-none transition-colors shadow-inner"
+                <input type="text" id="atmosphere-city-search" placeholder="Enter target city..."
+                  class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-blue-400 focus:outline-none transition-colors shadow-inner"
                   style="font-family: &quot;JetBrains Mono&quot;, monospace" onkeydown="
-                      if (event.key === 'Enter') searchAtmosphereCity();
+                      if (event.key === 'Enter') searchCityForTab('atmosphere');
                     " autocomplete="off" />
-                <button onclick="searchAtmosphereCity()"
-                  class="px-5 py-2 text-sm bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-bold tracking-widest uppercase rounded-xl transition-all border border-cyan-500/20 shadow-sm">
+                <button onclick="searchCityForTab('atmosphere')"
+                  class="px-5 py-2 text-sm bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-bold tracking-widest uppercase rounded-xl transition-all border border-blue-500/20 shadow-sm">
                   SCAN
                 </button>
               </div>
@@ -2708,7 +2727,7 @@
               <div class="apple-glass flex flex-col p-5">
                 <span class="text-[11px] text-slate-500 font-bold uppercase tracking-widest mb-2"
                   style="font-family: &quot;JetBrains Mono&quot;, monospace">Pressure</span>
-                <div class="flex items-end justify-between mt-auto">
+                <div class="mt-auto flex items-end justify-between">
                   <div>
                     <div id="atmo-pressure" class="text-2xl font-black text-white leading-none">
                       --
@@ -2844,7 +2863,7 @@
                 <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
               </div>
               <div class="flex items-center gap-2 bg-black/30 rounded-xl px-3 py-2"
-                style="border: 1px solid rgba(255, 255, 255, 0.06)">
+                style="border: 1px solid rgba(255, 255, 255, 0.02)">
                 <input type="text" class="tab-ai-input" id="ai-chat-input-economic"
                   placeholder="Explain GDP trends, inflation impact, trade balance..." onkeydown="
                       if (event.key === 'Enter') sendTabAI('economic');
@@ -2854,6 +2873,25 @@
                 </button>
               </div>
               <div class="tab-ai-chat-response" id="ai-chat-response-economic"></div>
+            </div>
+            <div class="apple-glass p-5 mb-2">
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-xs text-amber-400 uppercase font-black tracking-widest"
+                  style="font-family: &quot;JetBrains Mono&quot;, monospace">
+                  <i class="fas fa-search-location mr-2"></i>Macro Economic Search
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="text" id="economic-city-search" placeholder="Enter target city..."
+                  class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-amber-400 focus:outline-none transition-colors shadow-inner"
+                  style="font-family: &quot;JetBrains Mono&quot;, monospace" onkeydown="
+                      if (event.key === 'Enter') searchCityForTab('economic');
+                    " autocomplete="off" />
+                <button onclick="searchCityForTab('economic')"
+                  class="px-5 py-2 text-sm bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-bold tracking-widest uppercase rounded-xl transition-all border border-amber-500/20 shadow-sm">
+                  SCAN
+                </button>
+              </div>
             </div>
             <div class="flex flex-col md:flex-row gap-4">
               <div class="flex-1 apple-glass relative overflow-hidden" style="
@@ -3029,7 +3067,7 @@
                   --
                 </div>
                 <div class="text-[11px] text-slate-500 mt-1" style="font-family: &quot;JetBrains Mono&quot;, monospace">
-                  S&amp;P / Moody's
+                  S&amp;amp;P / Moody's
                 </div>
               </div>
             </div>
@@ -3564,17 +3602,26 @@
       style="border-color:rgba(59,130,246,0.25);max-height:60vh;">
       <div class="flex items-center gap-3 px-4 py-3 border-b border-white/8">
         <i class="fas fa-terminal text-blue-400 text-sm"></i>
-        <input id="cmd-palette-input" type="text" placeholder="Type a command..." autocomplete="off"
+        <input id="cmd-palette-input" type="text" placeholder="Search Intel, Queries, or Actions..." autocomplete="off"
           class="flex-1 bg-transparent border-none outline-none text-base font-bold text-white placeholder-slate-700"
           style="font-family:'JetBrains Mono',monospace;" />
         <kbd
           class="text-[11px] font-mono text-slate-600 px-1.5 py-0.5 rounded bg-white/6 border border-white/10">ESC</kbd>
       </div>
       <div id="cmd-palette-list" class="overflow-y-auto" style="max-height:48vh;"></div>
-      <div class="flex items-center gap-4 px-4 py-2 border-t border-white/5">
-        <span class="text-[11px] text-slate-700 font-mono"><kbd class="text-slate-600">â†‘â†“</kbd> Navigate</span>
-        <span class="text-[11px] text-slate-700 font-mono"><kbd class="text-slate-600">â†µ</kbd> Execute</span>
-        <span class="text-[11px] text-slate-700 font-mono"><kbd class="text-slate-600">Ctrl+K</kbd> Toggle</span>
+      <div class="flex items-center gap-4 px-4 py-2 border-t border-white/5 bg-white/[0.01]">
+        <div class="flex items-center gap-1.5">
+          <kbd class="text-[9px] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-500">↑↓</kbd>
+          <span class="text-[9px] text-slate-600 font-bold uppercase tracking-wider">Navigate</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <kbd class="text-[9px] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-500">↵</kbd>
+          <span class="text-[9px] text-slate-600 font-bold uppercase tracking-wider">Execute</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <kbd class="text-[9px] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-500">Ctrl+K</kbd>
+          <span class="text-[9px] text-slate-600 font-bold uppercase tracking-wider">Toggle</span>
+        </div>
       </div>
     </div>
   </div>

@@ -1,10 +1,9 @@
-
-
 document.addEventListener('DOMContentLoaded', () => {
 
-    const cursor = document.createElement('div');
-    cursor.id = 'custom-cursor';
-    document.body.appendChild(cursor);
+    // Custom cursor removed for professional standard usability
+    // const cursor = document.createElement('div');
+    // cursor.id = 'custom-cursor';
+    // document.body.appendChild(cursor);
 
     let mouseX = 0, mouseY = 0;
     let cursorX = 0, cursorY = 0;
@@ -12,21 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('mousemove', (e) => {
         mouseX = e.clientX;
         mouseY = e.clientY;
-
-        // Efficiently update globals for parallax
         const bgX = (e.clientX / window.innerWidth - 0.5) * -15;
         const bgY = (e.clientY / window.innerHeight - 0.5) * -15;
         document.documentElement.style.setProperty('--bg-mouse-x', bgX);
         document.documentElement.style.setProperty('--bg-mouse-y', bgY);
     });
 
-    const updateCursor = () => {
-        cursorX += (mouseX - cursorX) * 0.2;
-        cursorY += (mouseY - cursorY) * 0.2;
-        cursor.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0)`;
-        requestAnimationFrame(updateCursor);
-    };
-    updateCursor();
+    // updateCursor logic removed
 
     const interactiveSelectors = 'a, button, input, .nav-tab, .map-box, .glass-glow-track, .shortcut-item, [onclick]';
 
@@ -35,10 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.forEach(el => {
             if (el._bound) return;
             el.addEventListener('mouseenter', () => {
-                cursor.classList.add('cursor-hover');
+                // cursor.classList.add('cursor-hover');
                 if (window.playTacticalHover) window.playTacticalHover();
             });
-            el.addEventListener('mouseleave', () => cursor.classList.remove('cursor-hover'));
+            el.addEventListener('mouseleave', () => { /* cursor.classList.remove('cursor-hover') */ });
             el._bound = true;
         });
     };
@@ -65,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
     applyGlowTracking();
-    // Re-apply tracking occasionally rather than on every mutation
     setInterval(applyGlowTracking, 2000);
 
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
@@ -120,12 +110,11 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
 
         const renderTicker = () => {
-
             const itemsHtml = [...baseItems, ...baseItems].map(item => {
                 let color = 'text-slate-500';
                 if (item.type === 'SYSTEM' || item.type === 'NET') color = 'text-blue-400';
-                if (item.type === 'WARN') color = 'text-amber-400 animate-pulse';
-                if (item.type === 'GEO') color = 'text-emerald-400';
+                if (item.type === 'WARN') color = 'text-amber-500';
+                if (item.type === 'GEO') color = 'text-emerald-500';
 
                 return `<span class="font-black ${color} uppercase mx-8" 
                  style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .25em;">
@@ -138,12 +127,13 @@ document.addEventListener('DOMContentLoaded', () => {
     initTicker();
 
     let audioCtx = null;
-
     const playTacticalHover = () => {
         if (!audioCtx) {
             try {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            } catch (e) { return; }
+            } catch (e) {
+                return;
+            }
         }
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
@@ -151,22 +141,21 @@ document.addEventListener('DOMContentLoaded', () => {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(800, audioCtx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.03);
-
         gain.gain.setValueAtTime(0.005, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.03);
-
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
         osc.stop(audioCtx.currentTime + 0.04);
     };
 
-    document.querySelectorAll(interactiveSelectors).forEach(el => {
-        el.addEventListener('mouseenter', playTacticalHover);
-    });
+    window.playTacticalHover = playTacticalHover;
+    window.initializeEffects = () => {
+        applyGlowTracking();
+        bindInteractive(document.body);
+    };
 
-    if (!document.getElementById('cmd-palette-overlay')) {
-        const cmdPaletteHtml = `
+    const cmdPaletteHtml = `
         <div id="cmd-palette-container" class="fixed inset-0 z-[10001] hidden flex flex-col items-center pt-[15vh]">
           <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity" onclick="toggleCmdPalette(false)"></div>
           <div class="relative w-full max-w-2xl bg-slate-900/90 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-xl overflow-hidden glass-glow-track transform transition-all scale-95 opacity-0" id="cmd-palette-modal">
@@ -193,34 +182,42 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </div>
         `;
-        document.body.insertAdjacentHTML('beforeend', cmdPaletteHtml);
 
-        window.toggleCmdPalette = (show) => {
-            const container = document.getElementById('cmd-palette-container');
-            const modal = document.getElementById('cmd-palette-modal');
-            const input = document.getElementById('cmd-palette-input');
-            if (show) {
-                container.classList.remove('hidden');
-                setTimeout(() => {
-                    modal.classList.remove('scale-95', 'opacity-0');
-                    modal.classList.add('scale-100', 'opacity-100');
-                    input.focus();
-                }, 10);
-            } else {
+    if (!document.getElementById('cmd-palette-container')) {
+        document.body.insertAdjacentHTML('beforeend', cmdPaletteHtml);
+    }
+
+    window.toggleCmdPalette = (show) => {
+        const container = document.getElementById('cmd-palette-container');
+        const modal = document.getElementById('cmd-palette-modal');
+        const input = document.getElementById('cmd-palette-input');
+        if (show) {
+            container.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('scale-95', 'opacity-0');
+                modal.classList.add('scale-100', 'opacity-100');
+                input.focus();
+            }, 10);
+        } else {
+            if (modal) {
                 modal.classList.remove('scale-100', 'opacity-100');
                 modal.classList.add('scale-95', 'opacity-0');
-                setTimeout(() => container.classList.add('hidden'), 200);
             }
+            setTimeout(() => {
+                if (container) container.classList.add('hidden');
+            }, 200);
         }
-
-        document.addEventListener('keydown', (e) => {
-            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-                e.preventDefault();
-                window.toggleCmdPalette(true);
-            }
-            if (e.key === 'Escape') {
-                window.toggleCmdPalette(false);
-            }
-        });
     }
+
+    document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+            e.preventDefault();
+            window.toggleCmdPalette(true);
+        }
+        if (e.key === 'Escape') {
+            window.toggleCmdPalette(false);
+        }
+    });
+
+    bindInteractive(document.body);
 });

@@ -1,27 +1,48 @@
 const COMMANDS = [
-    { id: "search", label: "Search Countries", icon: "fa-search", shortcut: "/", run: () => window.toggleSearch() },
-    { id: "3d", label: "Switch to 3D Globe", icon: "fa-globe", shortcut: "P", run: () => { if (window.projectionType !== "3d" && window.toggleProjection) window.toggleProjection(); } },
-    { id: "2d", label: "Switch to 2D Map", icon: "fa-map", shortcut: "P", run: () => { if (window.projectionType !== "2d" && window.toggleProjection) window.toggleProjection(); } },
-    { id: "tab-intel", label: "Open Intel Tab", icon: "fa-brain", shortcut: null, run: () => window.switchTab("intel") },
-    { id: "tab-news", label: "Open News Tab", icon: "fa-newspaper", shortcut: null, run: () => window.switchTab("news") },
-    { id: "tab-markets", label: "Open Markets Tab", icon: "fa-chart-line", shortcut: null, run: () => window.switchTab("markets") },
-    { id: "tab-eco", label: "Open Economic Tab", icon: "fa-coins", shortcut: null, run: () => window.switchTab("economic") },
-    { id: "quake", label: "Toggle Earthquake Layer", icon: "fa-radiation", shortcut: null, run: () => window.toggleEarthquakeLayer && window.toggleEarthquakeLayer() },
-    { id: "aircraft", label: "Toggle Aircraft Layer", icon: "fa-plane", shortcut: null, run: () => window.toggleAircraftLayer && window.toggleAircraftLayer() },
-    { id: "gdelt", label: "Toggle Conflict Layer", icon: "fa-crosshairs", shortcut: null, run: () => window.toggleGDELTLayer && window.toggleGDELTLayer() },
-    { id: "airq", label: "Toggle Air Quality", icon: "fa-leaf", shortcut: null, run: () => window.toggleAirQuality && window.toggleAirQuality() },
-    { id: "reset", label: "Reset View to Global", icon: "fa-expand", shortcut: "R", run: () => window.resetToGlobalCenter && window.resetToGlobalCenter() },
-    { id: "copy", label: "Copy Intel Briefing", icon: "fa-copy", shortcut: null, run: () => window.copyBriefingToClipboard && window.copyBriefingToClipboard() },
-    { id: "voice", label: "Activate Voice Command", icon: "fa-microphone", shortcut: "V", run: () => window.activateVoice && window.activateVoice() },
-    { id: "about", label: "Open About Panel", icon: "fa-info-circle", shortcut: null, run: () => window.toggleAbout && window.toggleAbout(true) },
-    { id: "download", label: "Download Intel Dossier", icon: "fa-file-download", shortcut: null, run: () => window.downloadDossier && window.downloadDossier() },
-    { id: "india", label: "Go to India Base", icon: "fa-home", shortcut: "Ctrl+I", run: () => window.goToIndiaHome && window.goToIndiaHome() },
-    { id: "watchlist", label: "Show Watchlist", icon: "fa-star", shortcut: null, run: () => { window.toggleSearch(); setTimeout(() => { const i = document.getElementById("country-search"); if (i) { i.value = ""; i.dispatchEvent(new Event("input")); } }, 100); } },
-    { id: "choropleth-gdp", label: "Color Map by GDP", icon: "fa-layer-group", shortcut: null, run: () => window.setChoropleth && window.setChoropleth("gdp") },
-    { id: "choropleth-pop", label: "Color Map by Population", icon: "fa-users", shortcut: null, run: () => window.setChoropleth && window.setChoropleth("population") },
-    { id: "choropleth-off", label: "Clear Map Color Overlay", icon: "fa-times", shortcut: null, run: () => window.setChoropleth && window.setChoropleth(null) },
-    { id: "compare", label: "Enter Country Compare Mode", icon: "fa-columns", shortcut: null, run: () => window.toggleCompareMode && window.toggleCompareMode() },
-    { id: "cli", label: "Open Neural CLI Terminal", icon: "fa-terminal", shortcut: "`", run: () => window.toggleCLI && window.toggleCLI() },
+    // --- Intelligence & Navigation ---
+    { id: "tab-intel", label: "Intel Dashboard", desc: "View global situational awareness and AI briefings", icon: "fa-brain", shortcut: "1", run: () => window.switchTab("intel") },
+    { id: "tab-news", label: "News Feed", desc: "Live global news fragments and signal intelligence", icon: "fa-newspaper", shortcut: "2", run: () => window.switchTab("news") },
+    { id: "tab-markets", label: "Markets Terminal", desc: "Real-time exchange data and financial telemetry", icon: "fa-chart-line", shortcut: "3", run: () => window.switchTab("markets") },
+    { id: "tab-eco", label: "Economic Analysis", desc: "Macro-economic indicators and global GDP tracking", icon: "fa-coins", shortcut: "4", run: () => window.switchTab("economic") },
+    { id: "tab-atmo", label: "Atmosphere Node", desc: "Aeronautical weather and environmental telemetry", icon: "fa-cloud-sun", shortcut: "5", run: () => window.switchTab("atmosphere") },
+
+    // --- Search & Exploration ---
+    { id: "search", label: "Search Nations", desc: "Focus neural search on country sectors", icon: "fa-search", shortcut: "/", run: () => window.toggleSearch() },
+    {
+        id: "city-search", label: "City Scan", desc: "Search and fly to a specific city/target", icon: "fa-city", shortcut: "S", run: () => {
+            const activeTab = document.querySelector('.tab-content.active');
+            const searchInput = activeTab ? activeTab.querySelector('input[id$="-city-search"]') : null;
+            if (searchInput) searchInput.focus();
+            else window.toggleSearch();
+        }
+    },
+
+    // --- Map Control & Visuals ---
+    { id: "reset", label: "Global View", desc: "Reset neural camera to planetary overview", icon: "fa-expand", shortcut: "R", run: () => window.resetToGlobalCenter && window.resetToGlobalCenter() },
+    { id: "fly-india", label: "India HQ Base", desc: "Deploy camera to primary India orbital station", icon: "fa-home", shortcut: "Ctrl+I", run: () => window.goToIndiaHome && window.goToIndiaHome() },
+    { id: "map-style-sat", label: "Satellite Mode", desc: "Switch to high-resolution orbital imagery", icon: "fa-satellite", run: () => { if (window.mapEngine && window.mapEngine.map) window.mapEngine.map.setStyle('mapbox://styles/mapbox/satellite-streets-v12'); } },
+    { id: "map-style-dark", label: "Tactical Dark Mode", desc: "Switch to low-latency dark vector map", icon: "fa-moon", run: () => { if (window.mapEngine && window.mapEngine.map) window.mapEngine.map.setStyle('mapbox://styles/mapbox/dark-v11'); } },
+    { id: "map-style-streets", label: "Operational Streets", desc: "Switch to standard terrestrial street map", icon: "fa-road", run: () => { if (window.mapEngine && window.mapEngine.map) window.mapEngine.map.setStyle('mapbox://styles/mapbox/streets-v12'); } },
+
+    // --- Layers & Data Overlays ---
+    { id: "quake", label: "Seismic Layer", desc: "Toggle real-time earthquake telemetry", icon: "fa-radiation", run: () => window.toggleEarthquakeLayer && window.toggleEarthquakeLayer() },
+    { id: "aircraft", label: "Air Traffic Layer", desc: "Toggle live transponder data for aircraft", icon: "fa-plane", run: () => window.toggleAircraftLayer && window.toggleAircraftLayer() },
+    { id: "gdelt", label: "Conflict Matrix", desc: "Toggle GDELT global instability heatmaps", icon: "fa-crosshairs", run: () => window.toggleGDELTLayer && window.toggleGDELTLayer() },
+    { id: "airq", label: "Air Quality Node", desc: "Toggle global atmospheric particulate density", icon: "fa-leaf", run: () => window.toggleAirQuality && window.toggleAirQuality() },
+
+    // --- System & Tactical ---
+    { id: "audio", label: "Toggle Audio FX", desc: "Sync/Desync tactical audio feedback systems", icon: "fa-volume-up", run: () => window.toggleGlobalAudio && window.toggleGlobalAudio() },
+    { id: "voice", label: "Voice Command Mode", desc: "Initialize neural voice recognition uplink", icon: "fa-microphone", shortcut: "V", run: () => window.activateVoice && window.activateVoice() },
+    { id: "cli", label: "Neural CLI Terminal", desc: "Open advanced command-line interface", icon: "fa-terminal", shortcut: "`", run: () => window.toggleCLI && window.toggleCLI() },
+    {
+        id: "history-clear", label: "Clear Session Data", desc: "Wipe AI chat history and tactical cache", icon: "fa-trash-alt", run: () => {
+            localStorage.clear();
+            window.showToast("Local memory purged. Refreshing...", "info");
+            setTimeout(() => location.reload(), 1500);
+        }
+    },
+    { id: "about", label: "System Information", desc: "About NewsAtlas architecture and sensors", icon: "fa-info-circle", run: () => window.toggleAbout && window.toggleAbout(true) },
+    { id: "download", label: "Export Intel Dossier", desc: "Generate secure PDF intelligence report", icon: "fa-file-download", run: () => window.downloadDossier && window.downloadDossier() },
 ];
 let _paletteOpen = false;
 let _paletteSelected = 0;
@@ -30,6 +51,11 @@ function fuzzyMatch(haystack, needle) {
     if (!needle) return true;
     const h = haystack.toLowerCase();
     const n = needle.toLowerCase();
+
+    // Direct inclusion is highest priority
+    if (h.includes(n)) return true;
+
+    // Fuzzy sequence match
     let hi = 0;
     for (let ni = 0; ni < n.length; ni++) {
         while (hi < h.length && h[hi] !== n[ni]) hi++;
@@ -62,13 +88,18 @@ function renderPaletteItems() {
     }
     list.innerHTML = _paletteFiltered.map((cmd, i) => `
     <div
-      class="cmd-palette-item flex items-center gap-3 px-4 py-3 cursor-pointer transition-all ${i === _paletteSelected ? "bg-blue-500/15 border-l-2 border-blue-400" : "border-l-2 border-transparent hover:bg-white/4"}"
+      class="cmd-palette-item flex items-center gap-4 px-4 py-3 cursor-pointer transition-all border-l-2 ${i === _paletteSelected ? "bg-blue-500/15 border-blue-400" : "border-transparent hover:bg-white/4"}"
       onclick="window._executePaletteCmd(${i})"
       onmouseenter="window._paletteHover(${i})"
     >
-      <i class="fas ${cmd.icon} text-blue-400 text-xs w-4 text-center shrink-0"></i>
-      <span class="text-[13px] font-bold text-white flex-1">${cmd.label}</span>
-      ${cmd.shortcut ? `<kbd class="text-[9px] font-mono text-slate-500 px-1.5 py-0.5 rounded bg-white/6 border border-white/10">${cmd.shortcut}</kbd>` : ""}
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${i === _paletteSelected ? "bg-blue-400 text-[#020617]" : "bg-white/5 text-blue-400"}">
+        <i class="fas ${cmd.icon} text-sm"></i>
+      </div>
+      <div class="flex flex-col flex-1 min-w-0">
+        <span class="text-[13px] font-bold text-white leading-none">${cmd.label}</span>
+        ${cmd.desc ? `<span class="text-[10px] text-slate-500 font-medium mt-1 truncate tracking-tight uppercase">${cmd.desc}</span>` : ""}
+      </div>
+      ${cmd.shortcut ? `<kbd class="text-[9px] font-mono text-slate-500 px-1.5 py-0.5 rounded bg-white/6 border border-white/10 uppercase">${cmd.shortcut}</kbd>` : ""}
     </div>
   `).join("");
 }
@@ -114,7 +145,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (input) {
         input.addEventListener("input", (e) => {
             const q = e.target.value.trim();
-            _paletteFiltered = COMMANDS.filter(cmd => fuzzyMatch(cmd.label, q));
+            _paletteFiltered = COMMANDS.filter(cmd =>
+                fuzzyMatch(cmd.label, q) || (cmd.desc && fuzzyMatch(cmd.desc, q))
+            ).sort((a, b) => {
+                // Rank direct matches higher
+                const aMatch = a.label.toLowerCase().includes(q.toLowerCase());
+                const bMatch = b.label.toLowerCase().includes(q.toLowerCase());
+                if (aMatch && !bMatch) return -1;
+                if (!aMatch && bMatch) return 1;
+                return 0;
+            });
             _paletteSelected = 0;
             renderPaletteItems();
         });

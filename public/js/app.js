@@ -107,6 +107,14 @@ function setSrc(id, src) {
   const el = safeEl(id);
   if (el) el.src = src;
 }
+
+function runWhenIdle(callback, timeout = 2000) {
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(() => callback(), { timeout });
+  } else {
+    setTimeout(callback, timeout);
+  }
+}
 async function runBootSequence() {
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const logs = [
@@ -211,11 +219,15 @@ async function initTerminal() {
     window.globalSearchData = globalSearchData;
     if (window.renderTrendingHeader) window.renderTrendingHeader();
   } catch (e) { console.error("Search data load failed:", e); }
+
   window.fetchNews();
-  if (window.generateAIBriefing) window.generateAIBriefing("Global Context");
-  if (window.fetchGDELTEvents) window.fetchGDELTEvents("");
   startStockTicker();
-  window.initializeMarkets("Global");
+
+  runWhenIdle(() => {
+    if (window.generateAIBriefing) window.generateAIBriefing("Global Context");
+    if (window.fetchGDELTEvents) window.fetchGDELTEvents("");
+    if (window.initializeMarkets) window.initializeMarkets("Global");
+  });
 }
 async function startStockTicker() {
   const tickerContent = document.getElementById("stock-ticker-content");
@@ -356,6 +368,10 @@ function renderBriefingCards(rawText) {
   let clean = rawText
     .replace(/\[STRATEGIC METRICS DASHBOARD\]\s*/gi, '')
     .replace(/\*\*/g, '')
+    .replace(/Ã¢â‚¬Â¢/g, '•')
+    .replace(/Â·/g, '•')
+    .replace(/Â°/g, '°')
+    .replace(/Â/g, '')
     .trim();
 
   const parts = clean.split(/(?=\[[A-Z_ ]+\])/);
@@ -391,8 +407,8 @@ function renderBriefingCards(rawText) {
               <i class="fas ${icon} text-[18px]"></i>
             </div>
             <div class="flex flex-col">
-              <span class="text-[11px] font-black uppercase tracking-[0.3em] text-blue-400">Sector Analysis</span>
-              <span class="text-[17px] font-black text-white uppercase tracking-widest font-syne">${displayName}</span>
+              <span class="text-[11px] font-bold uppercase tracking-[0.2em] text-blue-400/80">Sector Analysis</span>
+              <span class="text-[16px] font-bold text-white uppercase tracking-wider">${displayName}</span>
             </div>
           </div>
           ${rating ? `
@@ -769,28 +785,8 @@ window.handleCountryClick = async function (event, d) {
   }
 };
 
-window.activateMapInteraction = () => {
-  const overlay = document.getElementById("map-interaction-overlay");
-  if (overlay) {
-    overlay.classList.add("activated");
-    overlay.style.pointerEvents = "none";
-    overlay.style.transition = "opacity 0.4s ease, transform 0.4s ease";
-    overlay.style.opacity = "0";
-    overlay.style.transform = "scale(1.05)";
-    setTimeout(() => { overlay.style.display = "none"; }, 400);
-  }
-};
-window.deactivateMapInteraction = () => {
-  const overlay = document.getElementById("map-interaction-overlay");
-  if (overlay && overlay.classList.contains("activated")) {
-    overlay.classList.remove("activated");
-    overlay.style.pointerEvents = "auto";
-    overlay.style.transition = "";
-    overlay.style.opacity = "";
-    overlay.style.transform = "";
-    overlay.style.display = "flex";
-  }
-};
+
+// Map interaction status managed by persistent HUD in main template
 
 let _mapSearchIndex = -1;
 let _mapSearchResults = [];
@@ -1603,7 +1599,7 @@ async function renderAircraft() {
     const data = await res.json();
     const states = (data.states || []).filter((s) => s[5] && s[6]);
 
-    const features = states.slice(0, 1500).map(s => {
+    const features = states.slice(0, 800).map(s => {
       const lon = s[5], lat = s[6], track = s[10] || 0, callsign = (s[1] || "").trim();
       return {
         type: 'Feature',
@@ -1797,7 +1793,7 @@ window.toggleMaritimeLayer = async function () {
       if (f.geometry.coordinates[1] < -85) { f.geometry.coordinates[1] = -85; f.properties.heading += 180; }
     });
     if (map.getSource('maritime-data')) map.getSource('maritime-data').setData(shipData);
-  }, 120);
+  }, 160);
 
   if (window.updateLayerLegend) window.updateLayerLegend();
 };
@@ -1860,7 +1856,7 @@ window.toggleWindLayer = function () {
   }
   if (btn) btn.classList.add("active");
 
-  const particles = Array.from({ length: 2000 }).map(() => {
+  const particles = Array.from({ length: 1500 }).map(() => {
     return {
       type: 'Feature',
       geometry: { type: 'Point', coordinates: [(Math.random() - 0.5) * 360, (Math.random() - 0.5) * 160] },
@@ -1887,7 +1883,7 @@ window.toggleWindLayer = function () {
       if (p.geometry.coordinates[0] > 180) p.geometry.coordinates[0] = -180;
     });
     map.getSource('wind-data').setData(windData);
-  }, 80);
+  }, 120);
 };
 
 window.toggleMapStyle = function () {
@@ -2105,7 +2101,7 @@ window.updateISS = async function () {
 
 if (!window._issInterval) {
   setTimeout(() => window.updateISS(), 2000);
-  window._issInterval = setInterval(window.updateISS, 5000);
+  window._issInterval = setInterval(window.updateISS, 15000);
 }
 
 if (typeof window._globeTheme === "undefined") {
@@ -2185,3 +2181,67 @@ async function fetchGlobalSearchData() {
 }
 
 window.fetchGlobalSearchData = fetchGlobalSearchData;
+
+window.searchCityForTab = async (tabId) => {
+  const inputEl = document.getElementById(`${tabId}-city-search`);
+  if (!inputEl) return;
+  const q = inputEl.value.trim();
+  if (!q) return;
+  const btn = inputEl.nextElementSibling;
+  const originalBtnText = btn.innerText;
+  btn.innerText = "WAIT..";
+  btn.disabled = true;
+  try {
+    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=1&format=json`);
+    const data = await res.json();
+    if (data.results && data.results.length > 0) {
+      const city = data.results[0];
+      const fullName = `${city.name}, ${city.country || city.admin1 || ""}`.replace(/,\s*$/, "");
+
+      if (window.playTacticalSound) window.playTacticalSound('success');
+
+      // Fly map to city
+      if (window.mapEngine && window.mapEngine.map) {
+        window.mapEngine.map.flyTo({
+          center: [city.longitude, city.latitude],
+          zoom: 9, pitch: 45, duration: 2000
+        });
+        if (window.mapEngine.setHoloHUD) {
+          window.mapEngine.setHoloHUD([city.longitude, city.latitude], city.name, { TARGET: "CITY", UPLINK: "ACTIVE" });
+        }
+      }
+
+      // Update global context labels
+      if (window.setText) window.setText("selected-country-name", city.name.toUpperCase());
+      window._currentWeatherLocation = fullName;
+
+      // Tab specific actions
+      if (tabId === 'intel') {
+        if (window.generateAIBriefing) window.generateAIBriefing(fullName);
+        if (window.fetchGDELTEvents) window.fetchGDELTEvents(city.name);
+      } else if (tabId === 'news') {
+        if (window.fetchNews) window.fetchNews(city.name);
+      } else if (tabId === 'markets') {
+        if (window.fetchMarketIntel) window.fetchMarketIntel(city.name, null);
+        if (window.initializeMarkets) window.initializeMarkets(city.name);
+      } else if (tabId === 'economic') {
+        if (window.fetchDetailedEconomics) window.fetchDetailedEconomics(city.name);
+      } else if (tabId === 'atmosphere') {
+        if (window.fetchWeather) await window.fetchWeather(city.latitude, city.longitude);
+      }
+
+      if (window.showToast) window.showToast(`Uplink established: ${city.name}`, "success");
+      inputEl.value = "";
+    } else {
+      if (window.playTacticalSound) window.playTacticalSound('hover');
+      inputEl.value = "";
+      inputEl.placeholder = "Sector undetected...";
+      setTimeout(() => (inputEl.placeholder = "Enter target city..."), 2000);
+    }
+  } catch (e) {
+    console.error(`Search for ${tabId} failed:`, e);
+    if (window.showToast) window.showToast("Uplink failed. Check signal.", "error");
+  }
+  btn.innerText = originalBtnText;
+  btn.disabled = false;
+};

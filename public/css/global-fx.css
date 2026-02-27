@@ -1,3 +1,13 @@
+* {
+    cursor: none !important;
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
 #custom-cursor {
     display: none !important;
 }

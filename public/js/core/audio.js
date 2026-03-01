@@ -27,18 +27,16 @@ window.toggleAmbience = () => {
     if (btn) btn.classList.remove("active");
   } else {
     ambienceGain = audioCtx.createGain();
-    ambienceGain.gain.value = 0; // Fade in
-    ambienceGain.gain.setTargetAtTime(0.08, audioCtx.currentTime, 2); // Smooth 2s fade in
+    ambienceGain.gain.value = 0;
+    ambienceGain.gain.setTargetAtTime(0.08, audioCtx.currentTime, 2);
 
-    // Add a dark cinematic low-pass filter
     const filter = audioCtx.createBiquadFilter();
     filter.type = "lowpass";
-    filter.frequency.value = 400; // Deep muffled sound
+    filter.frequency.value = 400;
 
-    // Slowly modulate the filter cutoff for a "breathing" effect
     const lfo = audioCtx.createOscillator();
     lfo.type = "sine";
-    lfo.frequency.value = 0.05; // Very slow (20s cycle)
+    lfo.frequency.value = 0.05;
     const lfoGain = audioCtx.createGain();
     lfoGain.gain.value = 150;
     lfo.connect(lfoGain);
@@ -49,17 +47,13 @@ window.toggleAmbience = () => {
     filter.connect(ambienceGain);
     ambienceGain.connect(audioCtx.destination);
 
-    // Create a rich sub-bass and sci-fi drone chord
-    // Base frequency (G1), Fifth (D2), Octave (G2), plus a detuned sub
     const freqs = [49.00, 73.42, 98.00, 48.5];
 
     freqs.forEach((f, i) => {
       const osc = audioCtx.createOscillator();
-      // Mix of sine (deep bass) and triangle (some harmonics)
       osc.type = i === 1 ? "triangle" : "sine";
       osc.frequency.setValueAtTime(f, audioCtx.currentTime);
 
-      // Add subtle stereo spread
       const panner = audioCtx.createStereoPanner();
       panner.pan.value = (i % 2 === 0 ? 1 : -1) * 0.4;
 

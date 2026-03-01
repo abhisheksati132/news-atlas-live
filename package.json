@@ -6,7 +6,9 @@
     "node": ">=20.x"
   },
   "scripts": {
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "vite": "vite",
+    "build": "vite build"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
@@ -15,5 +17,11 @@
     "express": "^5.2.1",
     "node-fetch": "^3.3.2",
     "rss-parser": "^3.13.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "vite": "^5.1.0"
   }
 }

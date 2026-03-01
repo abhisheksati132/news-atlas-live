@@ -75,7 +75,6 @@ body {
     transform: translate3d(0, 0, 0);
 }
 
-/* Skeleton Loaders */
 .skeleton-pulse {
     animation: skeleton-pulse 1.5s ease-in-out infinite;
     background: linear-gradient(-90deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 100%);
@@ -103,7 +102,6 @@ body {
     width: 60%;
 }
 
-/* Audio Status Pulse */
 .audio-pulse {
     position: relative;
 }

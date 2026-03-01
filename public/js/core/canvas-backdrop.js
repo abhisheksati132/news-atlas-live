@@ -50,17 +50,14 @@ class QuantumBackdrop {
             p.x += p.vx;
             p.y += p.vy;
 
-            // Bounce off edges
             if (p.x < 0 || p.x > this.width) p.vx *= -1;
             if (p.y < 0 || p.y > this.height) p.vy *= -1;
 
-            // Mouse interaction
             if (this.mouse.x) {
                 const dx = this.mouse.x - p.x;
                 const dy = this.mouse.y - p.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < 150) {
-                    // draw connection to mouse
                     this.ctx.beginPath();
                     this.ctx.moveTo(p.x, p.y);
                     this.ctx.lineTo(this.mouse.x, this.mouse.y);
@@ -70,7 +67,6 @@ class QuantumBackdrop {
                 }
             }
 
-            // Draw connections between particles
             for (let j = index + 1; j < this.particles.length; j++) {
                 const p2 = this.particles[j];
                 const dx = p.x - p2.x;
@@ -87,7 +83,6 @@ class QuantumBackdrop {
                 }
             }
 
-            // Draw particle
             this.ctx.beginPath();
             this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
             this.ctx.fillStyle = p.color;
@@ -96,7 +91,6 @@ class QuantumBackdrop {
     }
 }
 
-// only run on index.html
 if (!window.location.pathname.includes('terminal')) {
     window.addEventListener('DOMContentLoaded', () => new QuantumBackdrop());
 }

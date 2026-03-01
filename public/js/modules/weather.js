@@ -163,7 +163,6 @@ async function fetchWeather(lat, lon) {
       if (atmoAqi) {
         if (curr.aqi !== undefined) {
           atmoAqi.innerText = curr.aqi;
-          // Color code AQI
           atmoAqi.className = `text-2xl font-black leading-none ${curr.aqi <= 20 ? 'text-emerald-400' :
             curr.aqi <= 50 ? 'text-yellow-400' :
               curr.aqi <= 100 ? 'text-orange-400' : 'text-red-500'
@@ -339,28 +338,21 @@ async function generateWeatherAnalysis(weatherData, cityName) {
       .map((d) => `${d.date}: ${d.temp}°C, ${d.condition}`)
       .join("\n");
     const prompt = `Provide a tactical weather assessment for ${cityName}:
-Current: ${weatherData.temp}°C (feels like ${weatherData.feels_like}°C), ${weatherData.condition}
-Humidity: ${weatherData.humidity}%, Wind: ${weatherData.wind_speed} km/h, UV: ${weatherData.uv_index}, Visibility: ${weatherData.visibility} km
-7-Day: ${forecastStr}
-
-Write exactly ONE paragraph (max 50 words) covering an overall tactical assessment, travel advisories, and outdoor impacts. Use a strict, authoritative military intelligence tone. Do not use asterisks or headers.`;
+  Current: ${weatherData.temp}°C (feels like ${weatherData.feels_like}°C), ${weatherData.condition}
+  Humidity: ${weatherData.humidity}%, Wind: ${weatherData.wind_speed} km/h, UV: ${weatherData.uv_index}, Visibility: ${weatherData.visibility} km
+  7-Day: ${forecastStr}
+  In 150 words cover: Overall assessment, travel advisories, health warnings (UV/air), outdoor impact, recommended actions.`;
     const res = await fetch("/api/ai", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt }),
     });
     const data = await res.json();
-    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Weather analysis unavailable.";
-    text = text.replace(/\*\*/g, "").replace(/\n/g, " ").trim();
-
-    el.innerHTML = `<div style="background:rgba(59,130,246,0.04);border:1px solid rgba(59,130,246,0.15);border-radius:8px;padding:12px 14px;box-shadow:inset 0 0 20px rgba(59,130,246,0.02);">
-      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:900;color:#60a5fa;text-transform:uppercase;letter-spacing:.15em;display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-        <i class="fas fa-satellite" style="font-size:10px;"></i>Tactical Overview
-      </div>
-      <p style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#cbd5e1;line-height:1.7;margin:0;">${text}</p>
-    </div>`;
+    el.innerText =
+      data.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "Weather analysis unavailable.";
   } catch (e) {
-    el.innerHTML = `<p style="color:#ef4444;font-family:'JetBrains Mono',monospace;font-size:10px;">Weather analysis link failed: ${e.message}</p>`;
+    el.innerText = "Weather analysis link failed.";
   }
   generateWeatherAlerts(weatherData);
 }

@@ -14,13 +14,13 @@
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.css" rel="stylesheet" />
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.js"></script>
   <script src="https://unpkg.com/deck.gl@8.9.0/dist.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/tailwind.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="css/global-fx.css" />
+  <link rel="stylesheet" href="/css/global-fx.css" />
   <meta name="description" content="NewsAtlas: Real-time Global Intelligence Terminal." />
   <meta name="theme-color" content="#020617" />
   <link rel="icon" href="/favicon.ico" type="image/x-icon" />
@@ -75,7 +75,6 @@
       overflow-x: hidden;
       overflow-y: auto;
       width: 100vw;
-      /* Push content below fixed floating header and above fixed floating footer */
       padding-top: calc(var(--header-h) + 1.25rem);
       padding-bottom: calc(var(--footer-h) + 1.25rem);
       cursor: default;
@@ -133,24 +132,20 @@
       }
     }
 
-    /* CRT Terminal Scanlines */
     .crt-overlay {
       display: none;
     }
 
     .crt-vignette {
       display: none;
-      /* Disabled heavily faded corners per user request */
     }
 
-    /* 3D Holographic Marker Styling */
     .holo-hud-marker {
       width: max-content;
       color: #67e8f9;
       font-family: 'JetBrains Mono', monospace;
       padding: 5px;
       position: relative;
-      /* Add 3D rotation back to flat plane if pitchAlignment is set to map */
       transform-style: preserve-3d;
       transform-origin: bottom center;
       transition: all 0.3s ease;
@@ -241,7 +236,6 @@
     }
 
     .main-content {
-      /* No margin-top — body has padding-top via --header-h */
       padding: var(--gap);
       gap: var(--gap);
       display: flex;
@@ -266,7 +260,6 @@
       box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     }
 
-    /* Map interaction overlay – visible until first click, then permanently hidden */
     .map-interaction-overlay {
       position: absolute;
       inset: 0;
@@ -280,7 +273,6 @@
       -webkit-backdrop-filter: blur(4px);
       cursor: default;
       pointer-events: none;
-      /* Crucial: allow page scroll to pass through */
       opacity: 1;
     }
 
@@ -317,7 +309,6 @@
       }
     }
 
-    /* Mapbox Cooperative Gestures Styling */
     .mapboxgl-scroll-zoom-blocker,
     .mapboxgl-touch-drag-pan-multi-finger {
       background: rgba(2, 6, 23, 0.85) !important;
@@ -1224,7 +1215,6 @@
         display: none;
       }
 
-      /* On mobile the page CAN scroll, map-box uses auto height */
       .main-content {
         height: auto;
         overflow: visible;
@@ -1969,7 +1959,6 @@
             const overlay = document.getElementById("map-interaction-overlay");
             if (!overlay) return;
 
-            // Fade out and remove completely
             overlay.style.opacity = "0";
             overlay.style.pointerEvents = "none";
             setTimeout(() => {
@@ -3235,20 +3224,20 @@
       </div>
     </div>
   </div>
-  <script src="js/core/fetch-helper.js"></script>
-  <script src="js/core/audio.js"></script>
-  <script src="js/modules/geography.js"></script>
-  <script src="js/modules/markets.js"></script>
-  <script src="js/modules/economics.js"></script>
-  <script src="js/modules/news.js"></script>
-  <script src="js/modules/weather.js"></script>
-  <script src="js/ui/search.js"></script>
-  <script src="js/ui/about.js"></script>
-  <script src="js/ui/toast.js"></script>
-  <script src="js/ui/command-palette.js"></script>
-  <script src="js/ui/cli-terminal.js"></script>
-  <script src="js/enhancements.js"></script>
-  <script type="module" src="js/core/firebase.js"></script>
+  <script type="module" src="/js/core/fetch-helper.js"></script>
+  <script type="module" src="/js/core/audio.js"></script>
+  <script type="module" src="/js/modules/geography.js"></script>
+  <script type="module" src="/js/modules/markets.js"></script>
+  <script type="module" src="/js/modules/economics.js"></script>
+  <script type="module" src="/js/modules/news.js"></script>
+  <script type="module" src="/js/modules/weather.js"></script>
+  <script type="module" src="/js/ui/search.js"></script>
+  <script type="module" src="/js/ui/about.js"></script>
+  <script type="module" src="/js/ui/toast.js"></script>
+  <script type="module" src="/js/ui/command-palette.js"></script>
+  <script type="module" src="/js/ui/cli-terminal.js"></script>
+  <script type="module" src="/js/enhancements.js"></script>
+  <script type="module" src="/js/core/firebase.js"></script>
 
   <div id="search-overlay"
     class="fixed inset-0 z-[100] hidden flex items-start justify-center pt-24 px-4 bg-slate-950/80 backdrop-blur-md">
@@ -3779,9 +3768,9 @@
       }
     }, 3000);
   </script>
-  <script src="/js/modules/mapbox-engine.js"></script>
-  <script src="/js/global-fx.js"></script>
-  <script src="/js/core/cursor.js"></script>
+  <script type="module" src="/js/modules/mapbox-engine.js"></script>
+  <script type="module" src="/js/global-fx.js"></script>
+  <script type="module" src="/js/core/cursor.js"></script>
 </body>
 
 </html>

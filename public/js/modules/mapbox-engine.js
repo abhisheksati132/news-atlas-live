@@ -41,9 +41,7 @@ class MapboxEngine {
             pitch: 0,
             projection: 'globe',
             attributionControl: false,
-            // Prevent accidental interactions during page scroll
             cooperativeGestures: true,
-            // Disable interactions by default
             scrollZoom: false,
             dragPan: false,
             dragRotate: false,

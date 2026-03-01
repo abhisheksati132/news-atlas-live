@@ -5,30 +5,55 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NewsAtlas — Global Intelligence Terminal</title>
-  <link rel="stylesheet" href="/css/tailwind.css" />
+  <meta name="description"
+    content="Premium data visualization platform with Apple-glass UI for real-time global intelligence, AI synthesis, and rich dashboards." />
+  <meta property="og:title" content="NewsAtlas — Global Intelligence Terminal" />
+  <meta property="og:description" content="Live dashboards, AI synthesis, and premium UI." />
+  <link rel="canonical" href="https://news-atlas-live.example" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://open.er-api.com" crossorigin />
+  <link rel="preconnect" href="https://api.coingecko.com" crossorigin />
+  <link rel="preconnect" href="https://worldbank.org" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap"
     rel="stylesheet" />
+  <style>
+    /* Critical CSS: fast first paint for premium UI */
+    html, body { font-family: Inter, system-ui, -apple-system, 'SF Pro Text', Roboto, Arial; }
+    .apple-glass { backdrop-filter: blur(14px) saturate(115%); }
+  </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="css/global-fx.css" />
-  <link rel="stylesheet" href="css/landing.css" />
+  <!-- Tailwind CSS CDN for utility classes -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            mono: ['JetBrains Mono', 'monospace'],
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Landing page entry: loads landing.css (dark bg), design.css, and all animations -->
+  <script type="module" src="/js/landing.js"></script>
 </head>
 
 <body class="grid-bg">
-  <div id="page-loader">
-    <div class="loader-logo">
-      <div class="loader-ring"></div>
-      <div class="absolute inset-0 flex items-center justify-center">
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-          <line x1="2" y1="12" x2="22" y2="12" />
-        </svg>
-      </div>
-    </div>
-    <div class="loader-text">INITIALIZING QUANTUM UPLINK...</div>
+  <a href="#main" class="skip-link sr-only" id="skip-link">Skip to content</a>
+  <div class="loader-ring"></div>
+  <div class="absolute inset-0 flex items-center justify-center">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+      <line x1="2" y1="12" x2="22" y2="12" />
+    </svg>
+  </div>
+  </div>
+  <div class="loader-text">INITIALIZING QUANTUM UPLINK...</div>
   </div>
   <nav class="fixed top-4 left-4 right-4 max-w-7xl mx-auto z-50 apple-glass">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
@@ -110,6 +135,20 @@
         class="block text-sm font-mono text-slate-400 hover:text-white transition-all tracking-widest px-4 py-2 rounded-xl border border-white/5 bg-white/[0.02] shadow-sm hover:border-blue-500/50 hover:shadow-[0_0_15px_rgba(59,130,246,0.4)]">STATUS</a>
     </div>
   </nav>
+  <script>
+      (function () {
+        function ensureCursor() {
+          // Force reset of cursor in case it disappears after tab regain
+          document.documentElement.style.cursor = 'default';
+          document.body.style.cursor = 'default';
+        }
+        window.addEventListener('focus', ensureCursor);
+        document.addEventListener('visibilitychange', function () {
+          if (document.visibilityState === 'visible') setTimeout(ensureCursor, 150);
+        });
+        window.addEventListener('load', ensureCursor);
+      })();
+  </script>
   <section
     class="relative min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 pt-28 pb-20 overflow-hidden">
     <div
@@ -1003,7 +1042,6 @@
   <script type="module" src="/js/landing.js"></script>
   <script type="module" src="/js/global-fx.js"></script>
   <script type="module" src="/js/core/smooth-scroll.js"></script>
-  <script type="module" src="/js/core/cursor.js"></script>
   <script type="module" src="/js/core/canvas-backdrop.js"></script>
 </body>
 

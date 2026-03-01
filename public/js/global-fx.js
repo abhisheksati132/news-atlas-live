@@ -1,13 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    const cursor = document.createElement('div');
-    cursor.id = 'custom-cursor';
-    document.body.appendChild(cursor);
-
     document.addEventListener('mousemove', (e) => {
-        cursor.style.left = e.clientX + 'px';
-        cursor.style.top = e.clientY + 'px';
-
         const bgX = (e.clientX / window.innerWidth - 0.5) * -20;
         const bgY = (e.clientY / window.innerHeight - 0.5) * -20;
         document.documentElement.style.setProperty('--bg-mouse-x', bgX);
@@ -15,27 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const interactiveSelectors = 'a, button, input, .nav-tab, .map-box, .glass-glow-track, .shortcut-item, [onclick]';
-    document.querySelectorAll(interactiveSelectors).forEach(el => {
-        el.addEventListener('mouseenter', () => cursor.classList.add('cursor-hover'));
-        el.addEventListener('mouseleave', () => cursor.classList.remove('cursor-hover'));
-    });
-
-    const observer = new MutationObserver(mutations => {
-        mutations.forEach(mutation => {
-            mutation.addedNodes.forEach(node => {
-                if (node.nodeType === 1) {
-                    const iteracts = node.matches && node.matches(interactiveSelectors) ? [node] : node.querySelectorAll(interactiveSelectors);
-                    if (iteracts) {
-                        iteracts.forEach(el => {
-                            el.addEventListener('mouseenter', () => cursor.classList.add('cursor-hover'));
-                            el.addEventListener('mouseleave', () => cursor.classList.remove('cursor-hover'));
-                        });
-                    }
-                }
-            });
-        });
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
 
     const glowSyncObserver = new MutationObserver(() => applyGlowTracking());
     glowSyncObserver.observe(document.body, { childList: true, subtree: true });
@@ -45,10 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
         trackers.forEach(el => {
 
             if (!el.classList.contains('glass-glow-track')) el.classList.add('glass-glow-track');
-
-            if (el.tagName.toLowerCase() !== 'footer') {
-                el.style.overflow = 'hidden';
-            }
 
             el.addEventListener('mousemove', (e) => {
                 const rect = el.getBoundingClientRect();

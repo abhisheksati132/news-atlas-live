@@ -46,9 +46,12 @@ body::after {
   opacity: 0.15;
 }
 
-mono {
+ .mono {
   font-family: "JetBrains Mono", monospace;
 }
+
+/* Ensure interactive hints: pointer cursor on links and buttons for better UX */
+a, button { cursor: pointer; }
 
 .grid-bg {
   background-image:
@@ -519,6 +522,8 @@ mono {
 .log-line {
   opacity: 0;
   animation: logIn 0.4s ease forwards;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .log-line:nth-child(1) {

@@ -14,13 +14,11 @@
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.css" rel="stylesheet" />
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.js"></script>
   <script src="https://unpkg.com/deck.gl@8.9.0/dist.min.js"></script>
-  <link rel="stylesheet" href="/css/tailwind.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="/css/global-fx.css" />
   <meta name="description" content="NewsAtlas: Real-time Global Intelligence Terminal." />
   <meta name="theme-color" content="#020617" />
   <link rel="icon" href="/favicon.ico" type="image/x-icon" />
@@ -30,6 +28,22 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="NewsAtlas">
   <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+  <!-- Tailwind CSS via CDN for utility classes -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            mono: ['JetBrains Mono', 'monospace'],
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Main app module: loads map engine, news, markets, weather, and all JS modules -->
+  <script type="module" src="/js/app.js"></script>
   <style>
     :root {
       --blue: #3b82f6;
@@ -3401,7 +3415,6 @@
 
   <script type="module" src="/js/modules/mapbox-engine.js"></script>
   <script type="module" src="/js/global-fx.js"></script>
-  <script type="module" src="/js/core/cursor.js"></script>
   <script type="module" src="/js/app.js?v=5"></script>
   <style>
     #floating-cli {

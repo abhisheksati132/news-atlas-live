@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.className = "tactical-btn p-1 hover:text-amber-400 transition-colors";
         btn.title = "Add to watchlist";
         btn.innerHTML = `<i class="fas fa-star text-slate-600 text-xs"></i>`;
-        btn.onclick = () => window.toggleWatchlist(window.selectedCountry);
+        btn.onclick = () => window.toggleWatchlist(window.selectedCountry?.properties?.name || window.selectedCountry);
         sectorDisplay.appendChild(btn);
     }
 });
@@ -127,15 +127,15 @@ window.setChoropleth = async function (mode) {
     let values = {};
     if (mode === "population") {
         (window.globalSearchData || []).forEach((c) => {
-            if (c.population) values[c.name] = c.population;
+            if (c.population) values[c.name.common] = c.population;
         });
     } else if (mode === "gdp") {
         (window.globalSearchData || []).forEach((c) => {
-            if (c.gdp) values[c.name] = c.gdp;
+            if (c.gdp) values[c.name.common] = c.gdp;
         });
         if (Object.keys(values).length === 0) {
             (window.globalSearchData || []).forEach((c) => {
-                values[c.name] = (c.population || 1000000) * 15000;
+                values[c.name.common] = (c.population || 1000000) * 15000;
             });
         }
     } else if (mode === "conflict") {

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: newsatlas-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: newsatlas-frontend
+  template:
+    metadata:
+      labels:
+        app: newsatlas-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: newsatlas-frontend:latest
+          ports:
+            - containerPort: 5173
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5173
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5173
+            initialDelaySeconds: 15
+            periodSeconds: 20

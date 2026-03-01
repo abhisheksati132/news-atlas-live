@@ -1,3 +1,7 @@
+import '../css/tailwind.css';
+import '../css/landing.css';
+
+
 const hideLoader = () => {
   const loader = document.getElementById("page-loader");
   if (loader) {

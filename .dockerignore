@@ -1,0 +1,13 @@
+node_modules
+dist
+public/node_modules
+*.log
+.DS_Store
+npm-debug.log*
+*.tmp
+coverage
+build
+*.tgz
+Dockerfile
+.env
+*.env.*

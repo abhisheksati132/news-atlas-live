@@ -1,4 +1,4 @@
-function ecoEl(id) {
+﻿function ecoEl(id) {
   return document.getElementById(id);
 }
 async function fetchDetailedEconomics(country) {
@@ -226,38 +226,108 @@ async function fetchCurrency() {
 async function fetchMarketIntel(country, currency) {
   const textEl = document.getElementById("market-ai-analysis");
   if (textEl)
-    textEl.innerHTML =
-      '<span class="animate-pulse text-slate-500">Scanning global exchanges...</span>';
+    textEl.innerHTML = '<span class="animate-pulse text-slate-500 font-mono text-sm">Scanning global exchanges...</span>';
   try {
-    const prompt = `Analyze current financial markets for ${country} and global context.
-        Return a detailed intel report in this EXACT format:
-        [GLOBAL INDICES]
-        • Index: Value (Change%) - Context
-        [COMMODITIES & FOREX]
-        • GOLD_PRICE: 2345.67 (Example)
-        • SILVER_PRICE: 28.90 (Example)
-        [STRATEGIC ANALYSIS]
-        3-4 detailed sentences on market sentiment, sector performance, and risk factors.`;
+    const prompt = `Provide a financial market intelligence report for ${country} in this EXACT format:
+
+[EXECUTIVE SUMMARY]
+Tactical Rating: X/10
+2-3 sentence overview of current market conditions for ${country}.
+
+[GLOBAL INDICES]
+Tactical Rating: X/10
+Key index performance. Include SENSEX/relevant local index, DOW, NASDAQ context.
+
+[COMMODITIES & FOREX]
+Tactical Rating: X/10
+Gold, oil, and ${currency || 'local currency'}/USD movement analysis.
+
+[SECTOR PERFORMANCE]
+Tactical Rating: X/10
+Top performing and lagging sectors. Key drivers.
+
+[RISK ASSESSMENT]
+Tactical Rating: X/10
+Geopolitical, inflation, and monetary policy risk factors.
+
+[STRATEGIC OUTLOOK]
+Tactical Rating: X/10
+30-day forward market outlook and recommended positioning.
+
+Keep each section to 2-3 sentences. Be specific with numbers where possible.`;
     const res = await fetch("/api/ai", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt }),
     });
     const result = await res.json();
-    const responseText =
-      result.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Market data unavailable.";
-    if (textEl) textEl.innerText = responseText;
-    const goldMatch = responseText.match(/GOLD_PRICE:\s*([\d,.]+)/i);
-    const silverMatch = responseText.match(/SILVER_PRICE:\s*([\d,.]+)/i);
-    const goldEl = document.getElementById("price-gold");
-    const silverEl = document.getElementById("price-silver");
-    if (goldEl && goldMatch) goldEl.innerText = goldMatch[1];
-    if (silverEl && silverMatch) silverEl.innerText = silverMatch[1];
+    const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text || result.result || "";
+    if (responseText && textEl) {
+      renderMarketCards(responseText, textEl);
+      const goldMatch = responseText.match(/gold[^0-9]*([0-9,]{4,}\.?[0-9]*)/i);
+      const silverMatch = responseText.match(/silver[^0-9]*([0-9,]{2,}\.?[0-9]*)/i);
+      const goldEl = document.getElementById("price-gold");
+      const silverEl = document.getElementById("price-silver");
+      if (goldEl && goldMatch) goldEl.innerText = goldMatch[1];
+      if (silverEl && silverMatch) silverEl.innerText = silverMatch[1];
+    } else if (textEl) {
+      textEl.innerHTML = '<div class="apple-glass p-5 text-slate-400 font-mono text-sm">Market data unavailable.</div>';
+    }
     window.playTacticalSound("success");
   } catch (e) {
-    if (textEl) textEl.innerText = "Financial uplink failed.";
+    if (textEl) textEl.innerHTML = '<div class="apple-glass p-5 text-red-400 font-mono text-sm">Financial uplink failed.</div>';
   }
+}
+function renderMarketCards(rawText, container) {
+  const marketIconMap = {
+    'EXECUTIVE': { icon: 'fa-chart-line', color: '#3b82f6' },
+    'GLOBAL': { icon: 'fa-globe', color: '#06b6d4' },
+    'COMMODITIES': { icon: 'fa-coins', color: '#f59e0b' },
+    'FOREX': { icon: 'fa-money-bill-trend-up', color: '#f59e0b' },
+    'SECTOR': { icon: 'fa-building-columns', color: '#8b5cf6' },
+    'RISK': { icon: 'fa-triangle-exclamation', color: '#ef4444' },
+    'STRATEGIC': { icon: 'fa-chess', color: '#10b981' },
+    'OUTLOOK': { icon: 'fa-binoculars', color: '#10b981' },
+  };
+  let clean = rawText.replace(/\*\*/g, '').trim();
+  const parts = clean.split(/(?=\[[A-Z][A-Z_& ]+\])/);
+  let html = '';
+  parts.forEach(block => {
+    const headerMatch = block.match(/\[([A-Z][A-Z_& ]+)\]/);
+    if (!headerMatch) return;
+    const key = headerMatch[1].trim();
+    const bodyRaw = block.slice(block.indexOf(']') + 1).trim();
+    const ratingMatch = bodyRaw.match(/Tactical Rating:\s*(\d+)\s*\/\s*10/i);
+    const rating = ratingMatch ? parseInt(ratingMatch[1]) : null;
+    const paragraph = bodyRaw.replace(/Tactical Rating:\s*\d+\s*\/\s*10\n?/i, '').trim();
+    if (!paragraph && !rating) return;
+    const mapKey = Object.keys(marketIconMap).find(k => key.includes(k)) || 'EXECUTIVE';
+    const { icon, color } = marketIconMap[mapKey];
+    const displayName = key.replace(/_/g, ' ');
+    const ratingColor = !rating ? color : (rating >= 7 ? '#10b981' : rating >= 4 ? '#f59e0b' : '#ef4444');
+    const formattedParagraph = paragraph
+      .split('\n')
+      .map(line => line.trim().startsWith('-') ? `<span class="block pl-2 border-l-2 border-white/10 mb-1">${line.slice(1).trim()}</span>` : `<span>${line}</span>`)
+      .join('');
+    html += `
+      <div class="apple-glass group p-5 mb-4 relative overflow-hidden transition-all duration-300 hover:bg-white/[0.05]" style="border:1px solid ${color}22;">
+        <div class="absolute -inset-[1px] bg-gradient-to-br from-white/10 to-transparent opacity-20 pointer-events-none"></div>
+        <div class="flex justify-between items-start mb-4 relative z-10">
+          <div class="flex items-center gap-4">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center" style="background:${color}33;border:1px solid ${color}55;box-shadow:0 0 15px ${color}22;">
+              <i class="fas ${icon} text-[17px]" style="color:${color};"></i>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[11px] font-bold uppercase tracking-[0.2em] text-emerald-400/80">Market Intel</span>
+              <span class="text-[15px] font-bold text-white uppercase tracking-wider">${displayName}</span>
+            </div>
+          </div>
+          ${rating ? `<div class="bg-black/40 rounded-xl px-4 py-2 flex flex-col items-center" style="border:1px solid ${ratingColor}44;"><span class="text-[20px] font-black font-mono leading-none" style="color:${ratingColor};">${rating}<span class="text-[12px] opacity-40">/10</span></span><div class="w-14 h-1 bg-white/10 rounded-full mt-2 overflow-hidden"><div class="h-full rounded-full" style="width:${rating * 10}%;background:${ratingColor};"></div></div></div>` : ''}
+        </div>
+        <div class="text-[13.5px] text-white/85 leading-relaxed font-mono relative z-10">${formattedParagraph}</div>
+      </div>`;
+  });
+  container.innerHTML = html || `<div class="apple-glass p-6 text-[13px] text-slate-400 font-mono leading-relaxed">${clean.replace(/\n/g, '<br>')}</div>`;
 }
 window.fetchDetailedEconomics = fetchDetailedEconomics;
 window.drawGDPTrend = drawGDPTrend;
@@ -266,70 +336,42 @@ window.fetchMarketIntel = fetchMarketIntel;
 async function fetchECBRates() {
   const container = document.getElementById("ecb-rates-content");
   if (!container) return;
-  container.innerHTML =
-    '<div class="text-slate-500 text-xs animate-pulse">Fetching ECB rates...</div>';
+  container.innerHTML = '<div class="text-slate-500 text-xs animate-pulse">Fetching ECB rates...</div>';
   try {
     const pairs = [
-      { key: "D.USD.EUR.SP00.A", label: "EUR/USD", flag: "🇺🇸" },
-      { key: "D.GBP.EUR.SP00.A", label: "EUR/GBP", flag: "🇬🇧" },
-      { key: "D.JPY.EUR.SP00.A", label: "EUR/JPY", flag: "🇯🇵" },
-      { key: "D.CNY.EUR.SP00.A", label: "EUR/CNY", flag: "🇨🇳" },
-      { key: "D.INR.EUR.SP00.A", label: "EUR/INR", flag: "🇮🇳" },
+      { key: "D.USD.EUR.SP00.A", label: "EUR/USD", flag: "ðŸ‡ºðŸ‡¸" },
+      { key: "D.GBP.EUR.SP00.A", label: "EUR/GBP", flag: "ðŸ‡¬ðŸ‡§" },
+      { key: "D.JPY.EUR.SP00.A", label: "EUR/JPY", flag: "ðŸ‡¯ðŸ‡µ" },
+      { key: "D.CNY.EUR.SP00.A", label: "EUR/CNY", flag: "ðŸ‡¨ðŸ‡³" },
+      { key: "D.INR.EUR.SP00.A", label: "EUR/INR", flag: "ðŸ‡®ðŸ‡³" },
     ];
     const results = await Promise.allSettled(
-      pairs.map((p) =>
-        fetch(
-          `https://data-api.ecb.europa.eu/service/data/EXR/${p.key}?format=jsondata&lastNObservations=2`,
-        ).then((r) => r.json()),
-      ),
+      pairs.map((p) => fetch(`https://data-api.ecb.europa.eu/service/data/EXR/${p.key}?format=jsondata&lastNObservations=2`).then((r) => r.json())),
     );
     container.innerHTML = "";
     results.forEach((r, i) => {
       const p = pairs[i];
-      let value = "—",
-        prev = null;
+      let value = "â€”", prev = null;
       if (r.status === "fulfilled") {
         try {
           const obs = r.value.dataSets[0]?.series["0:0:0:0:0"]?.observations;
           const keys = obs ? Object.keys(obs).sort((a, b) => +b - +a) : [];
-          value =
-            keys[0] !== undefined
-              ? parseFloat(obs[keys[0]][0]).toFixed(4)
-              : "—";
+          value = keys[0] !== undefined ? parseFloat(obs[keys[0]][0]).toFixed(4) : "â€”";
           prev = keys[1] !== undefined ? parseFloat(obs[keys[1]][0]) : null;
-        } catch (_) {
-          value = "—";
-        }
+        } catch (_) { value = "â€”"; }
       }
       const current = parseFloat(value);
       const change = prev ? ((current - prev) / prev) * 100 : null;
-      const changeClass =
-        change === null
-          ? "text-slate-500"
-          : change >= 0
-            ? "text-emerald-400"
-            : "text-red-400";
+      const changeClass = change === null ? "text-slate-500" : change >= 0 ? "text-emerald-400" : "text-red-400";
       const row = document.createElement("div");
-      row.className =
-        "flex items-center justify-between py-1.5 border-b border-white/5";
-      row.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <span class="text-sm">${p.flag}</span>
-                    <span class="text-xs font-black text-white font-mono">${p.label}</span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <span class="text-xs font-mono text-cyan-400 font-bold">${value}</span>
-                    ${change !== null ? `<span class="${changeClass} text-[9px] font-mono">${change >= 0 ? "▲" : "▼"} ${Math.abs(change).toFixed(3)}%</span>` : ""}
-                </div>`;
+      row.className = "flex items-center justify-between py-1.5 border-b border-white/5";
+      row.innerHTML = `<div class="flex items-center gap-2"><span class="text-sm">${p.flag}</span><span class="text-xs font-black text-white font-mono">${p.label}</span></div><div class="flex items-center gap-3"><span class="text-xs font-mono text-cyan-400 font-bold">${value}</span>${change !== null ? `<span class="${changeClass} text-[9px] font-mono">${change >= 0 ? "â–²" : "â–¼"} ${Math.abs(change).toFixed(3)}%</span>` : ""}</div>`;
       container.appendChild(row);
     });
     const label = document.getElementById("ecb-timestamp");
-    if (label)
-      label.innerText =
-        "Updated: " + new Date().toUTCString().slice(0, 22) + " UTC";
+    if (label) label.innerText = "Updated: " + new Date().toUTCString().slice(0, 22) + " UTC";
   } catch (e) {
-    container.innerHTML =
-      '<div class="text-slate-500 text-xs">ECB data unavailable</div>';
+    container.innerHTML = '<div class="text-slate-500 text-xs">ECB data unavailable</div>';
   }
 }
 window.fetchECBRates = fetchECBRates;

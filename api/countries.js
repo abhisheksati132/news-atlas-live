@@ -30,10 +30,14 @@ export default async function handler(req, res) {
     try {
         if (allParam === "true" || req.url.includes("all=true")) {
             try {
+                // Implement a manual timeout for environments where fetch options differ
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 5000);
                 const response = await fetch("https://restcountries.com/v3.1/all?fields=name,cca2,latlng,flags,population,capital,region,capitalInfo", {
-                    timeout: 5000,
+                    signal: controller.signal,
                     headers: { "User-Agent": "Mozilla/5.0" }
                 });
+                clearTimeout(timer);
                 if (response.ok) return res.status(200).json(await response.json());
             } catch (e) {
                 console.warn("[Proxy] RestCountries timed out, using fallback list");

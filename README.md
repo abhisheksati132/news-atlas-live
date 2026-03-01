@@ -14,20 +14,26 @@ NewsAtlas is a cutting-edge Single Page Application (SPA) that transforms global
 
 ---
 
-## 🛠 Tech Stack (MERN / Serverless Architecture)
+## 🛠 Tech Stack (Modern Full-Stack, Premium UI)
 
-- **Frontend:** HTML5, Tailwind CSS, D3.js (Geospatial Visualization), TopoJSON, Canvas API (Particle Physics)
-- **Core Logic:** Vanilla JavaScript (ES6+), Web Audio API (Procedural Sound), Web Speech API
-- **Backend:** Node.js (Vercel Serverless Functions)
-- **Database/Auth:** Google Firebase (Firestore & Authentication with Google OAuth/Anonymous)
-- **AI Core:** **Groq Cloud** (Llama 3-70b-versatile) for ultra-fast, high-density intelligence synthesis
-- **Data Streams:**
-  - **News & Events:** Live Server-Side Feed Aggregation (Global Search), GDELT Project (Event Matrix)
-  - **Weather:** Open-Meteo High-Precision API with tactical estimation algorithms
-  - **Finance:** CoinGecko (Crypto), Yahoo Finance (Metals, Forex, Global Indices, Commodities), World Bank API (GDP)
-  - **Geo & Seismology:** REST Countries API v3.1, USGS (Real-time Earthquakes)
-  - **Aviation:** OpenSky Network (Live Flight Telemetry)
-  - **Satellite:** NASA GIBS (Real-time WMS Overlay)
+- Frontend: React + Vite, Tailwind CSS, D3.js (Geospatial Visualization), TopoJSON, Canvas (Particle effects), Inter + JetBrains Mono for typography
+- UI/UX: Premium Apple-glass aesthetic with a11y-first approach; Storybook for UI catalog
+- Core Logic: Modern JS (ES2020+), Web Audio API (Procedural Sound), Web Speech API
+- Backend/Platform: Node.js 20+ with Express; Dockerized microservices; Kubernetes readiness options
+- Auth/DB: Firebase (Firestore & Google OAuth/Anonymous)
+- AI Core: Groq Cloud (Llama 3-70b) for on-demand intelligence synthesis
+- Data Streams & Integrations:
+  - News & Events: GDELT, Live feed aggregation
+  - Weather: Open-Meteo
+  - Finance: CoinGecko (Crypto), Yahoo Finance (Metals/Forex/Indices), World Bank GDP
+  - Geo & Seismology: REST Countries v3.1, USGS
+  - Aviation: OpenSky
+  - Satellite: NASA GIBS
+- Data Access & Orchestration: REST APIs, WebSockets for live feeds, and server-side aggregations
+- DevOps & Deployment: Dockerfiles for API/frontend, Docker Compose, Kubernetes manifests, and optional Ingress
+- Security & Auth: Firebase Auth (Google OAuth/Anonymous)
+- Observability: Health checks, logging, and basic instrumentation hooks
+- Data Viz & UX patterns: Sparkline/ChartCard components, DataVizPanel, and a polished UX kit
 
 ---
 
@@ -173,6 +179,8 @@ The app uses the **Tailwind CDN** (`cdn.tailwindcss.com`) for quick local develo
 ---
 
 ## 🚀 Performance
+
+- Phase 5/6: Performance optimizations and production readiness in one go. Includes lazy loading, memoization, code-splitting, and a11y/SEO improvements. See PR_NOTES.md for full rollout details.
 
 - **60 FPS** animations using `requestAnimationFrame`
 - **Canvas-based rendering** for particle effects (GPU-accelerated)

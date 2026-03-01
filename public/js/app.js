@@ -1,9 +1,37 @@
+import '../css/tailwind.css';
+import '../css/global-fx.css';
+
+// Core utilities
+import './core/fetch-helper.js';
+import './core/audio.js';
+import './core/firebase.js';
+import './core/canvas-backdrop.js';
+
+// UI components
+import './ui/toast.js';
+import './ui/search.js';
+import './ui/cli-terminal.js';
+import './ui/command-palette.js';
+import './ui/about.js';
+
+// Feature modules
+import './modules/mapbox-engine.js';
+import './modules/news.js';
+import './modules/weather.js';
+import './modules/markets.js';
+import './modules/economics.js';
+import './modules/geography.js';
+
+// Enhancement & effects scripts
+import './global-fx.js';
+import './enhancements.js';
+
 let selectedCountry = null;
 let currencyCode = null;
 let iso2Code = null;
 let countryUTCOffset = null;
-let projectionType = "2d";
-window.projectionType = "2d";
+let projectionType = "3d";
+window.projectionType = "3d"; // default is globe (3d)
 let currentProjection, svg, g, zoom;
 let worldFeatures = [];
 let globalSearchData = [];
@@ -369,6 +397,7 @@ async function fetchAllData(name) {
     if (window.showToast) window.showToast("Country data failed. Try again.", "error");
   }
 }
+window.fetchAllData = fetchAllData;
 function renderBriefingCards(rawText) {
   const container = safeEl("ai-briefing-text");
   if (!container) return;
@@ -376,8 +405,8 @@ function renderBriefingCards(rawText) {
   let clean = rawText
     .replace(/\[STRATEGIC METRICS DASHBOARD\]\s*/gi, '')
     .replace(/\*\*/g, '')
-    .replace(/Ã¢â‚¬Â¢/g, '•')
-    .replace(/Â·/g, '•')
+    .replace(/Ã¢â‚¬Â¢/g, '-')
+    .replace(/Â·/g, '-')
     .replace(/Â°/g, '°')
     .replace(/Â/g, '')
     .trim();
@@ -1157,10 +1186,10 @@ window.updateLayerLegend = function () {
   const el = safeEl("layer-legend");
   if (!el) return;
   const active = [];
-  if (typeof _quakeActive !== "undefined" && _quakeActive) active.push({ label: "Earthquakes", color: "#f97316" });
-  if (typeof _aircraftActive !== "undefined" && _aircraftActive) active.push({ label: "Aircraft", color: "#3b82f6" });
+  if (window._quakeActive) active.push({ label: "Earthquakes", color: "#f97316" });
+  if (window._aircraftActive) active.push({ label: "Aircraft", color: "#3b82f6" });
   if (window._airQualityActive) active.push({ label: "Air quality", color: "#10b981" });
-  if (typeof _gdeltActive !== "undefined" && _gdeltActive) active.push({ label: "Conflict", color: "#ef4444" });
+  if (window._gdeltActive) active.push({ label: "Conflict", color: "#ef4444" });
   if (window._riskActive) active.push({ label: "Risk Matrix", color: "#f59e0b" });
   if (window._maritimeActive) active.push({ label: "Maritime", color: "#38bdf8" });
   const countEl = safeEl("active-layer-count");
@@ -1339,7 +1368,9 @@ document.addEventListener(
   function () {
     if (!window._ambienceStarted) {
       window._ambienceStarted = true;
-      window.toggleAmbience();
+      if (typeof window.toggleAmbience === "function") {
+        window.toggleAmbience();
+      }
     }
   },
   { once: true },
@@ -1488,11 +1519,11 @@ window.updateGlobeHexbins = function () {
       }
     });
 };
-let _quakeActive = false;
+window._quakeActive = window._quakeActive || false;
 window.toggleEarthquakeLayer = async function () {
-  _quakeActive = !_quakeActive;
+  window._quakeActive = !window._quakeActive;
   const btn = document.getElementById("quake-toggle-btn");
-  if (!_quakeActive) {
+  if (!window._quakeActive) {
     if (window.mapEngine && window.mapEngine.map) {
       const map = window.mapEngine.map;
       if (map.getLayer('seismic-aura')) map.removeLayer('seismic-aura');
@@ -1607,12 +1638,12 @@ window.toggleEarthquakeLayer = async function () {
   }
   if (window.updateLayerLegend) window.updateLayerLegend();
 };
-let _aircraftActive = false,
-  _aircraftGroup = null,
+window._aircraftActive = window._aircraftActive || false;
+let _aircraftGroup = null,
   _aircraftInterval = null;
 async function renderAircraft() {
   if (!window.mapEngine || !window.mapEngine.map) return;
-  if (!_aircraftActive) return;
+  if (!window._aircraftActive) return;
   const map = window.mapEngine.map;
 
   try {
@@ -1959,21 +1990,27 @@ window.toggleMapProjection = function () {
 
   if (window._isMercator) {
     map.setProjection('mercator');
+    window.projectionType = "2d";
     if (btn) btn.classList.add("active");
   } else {
     map.setProjection('globe');
+    window.projectionType = "3d";
     if (btn) btn.classList.remove("active");
   }
 };
+// Alias for voice commands, CLI, and keyboard shortcuts
+window.toggleProjection = window.toggleMapProjection;
+window.projectionType = "3d"; // default is globe (3d)
 
-let _gdeltActive = false;
+
+window._gdeltActive = window._gdeltActive || false;
 window.toggleGDELTLayer = async function () {
-  _gdeltActive = !_gdeltActive;
+  window._gdeltActive = !window._gdeltActive;
   const btn = document.getElementById("gdelt-toggle-btn");
 
   if (!window.mapEngine || !window.mapEngine.ready) return;
 
-  if (!_gdeltActive) {
+  if (!window._gdeltActive) {
     window.mapEngine.removeGDELTHeatmap();
     if (btn) {
       btn.classList.remove("active-red");
@@ -2028,9 +2065,9 @@ window.toggleGDELTLayer = async function () {
   if (window.updateLayerLegend) window.updateLayerLegend();
 };
 window.toggleAircraftLayer = function () {
-  _aircraftActive = !_aircraftActive;
+  window._aircraftActive = !window._aircraftActive;
   const btn = document.getElementById("aircraft-toggle-btn");
-  if (!_aircraftActive) {
+  if (!window._aircraftActive) {
 
     clearInterval(_aircraftInterval);
     _aircraftInterval = null;
@@ -2053,7 +2090,7 @@ window.toggleAircraftLayer = function () {
   }
   renderAircraft();
   _aircraftInterval = setInterval(() => {
-    if (_aircraftActive) renderAircraft();
+    if (window._aircraftActive) renderAircraft();
   }, 30000);
   if (window.updateLayerLegend) window.updateLayerLegend();
 };

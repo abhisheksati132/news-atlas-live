@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/lighthouserc.json",
+  "ci": {
+    "collect": {
+      "url": ["http://localhost:5173/"],
+      "startServerCommand": "npm run dev", 
+      "startUrlDelay": 5000
+    },
+    "upload": {
+      "target": "https://your-lhci-server.example.com",
+      "token": "<your-token>"
+    },
+    "assert": {
+      "assertion": "speed",
+      "options": {
+        "passCriteria": 0.9
+      }
+    }
+  }
+}

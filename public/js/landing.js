@@ -1,10 +1,19 @@
-window.addEventListener("load", () => {
+const hideLoader = () => {
   const loader = document.getElementById("page-loader");
   if (loader) {
     loader.style.opacity = "0";
-    loader.style.visibility = "hidden";
+    setTimeout(() => {
+      loader.style.visibility = "hidden";
+      loader.remove();
+    }, 800);
   }
-});
+};
+
+if (document.readyState === "complete") {
+  hideLoader();
+} else {
+  window.addEventListener("load", hideLoader);
+}
 
 const phrases = [
   "Aggregating 4,700+ global intelligence feeds...",

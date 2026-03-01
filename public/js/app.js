@@ -127,20 +127,28 @@ async function runBootSequence() {
   const logEl = safeEl("boot-log");
   const bar = safeEl("boot-bar");
   const stepMs = reducedMotion ? 80 : 400;
-  for (let i = 0; i < logs.length; i++) {
-    await new Promise((r) => setTimeout(r, stepMs));
-    const d = document.createElement("div");
-    d.innerText = `> ${logs[i]}`;
-    if (logEl) logEl.appendChild(d);
-    if (bar) bar.style.width = ((i + 1) / logs.length) * 100 + "%";
-  }
-  await new Promise((r) => setTimeout(r, reducedMotion ? 100 : 500));
-  const bootScreen = safeEl("boot-screen");
-  if (bootScreen) {
-    bootScreen.style.opacity = "0";
-    setTimeout(() => bootScreen.remove(), reducedMotion ? 200 : 800);
+  try {
+    for (let i = 0; i < logs.length; i++) {
+      await new Promise((r) => setTimeout(r, stepMs));
+      const d = document.createElement("div");
+      d.innerText = `> ${logs[i]}`;
+      if (logEl) logEl.appendChild(d);
+      if (bar) bar.style.width = ((i + 1) / logs.length) * 100 + "%";
+    }
+    await new Promise((r) => setTimeout(r, reducedMotion ? 100 : 500));
+  } catch (e) {
+    console.error("Boot sequence error:", e);
+  } finally {
+    const bootScreen = safeEl("boot-screen");
+    if (bootScreen) {
+      console.log("Removing boot-screen explicitly...");
+      bootScreen.style.opacity = "0";
+      bootScreen.style.pointerEvents = "none";
+      setTimeout(() => bootScreen.remove(), 500);
+    }
   }
 }
+
 function showBackendRequiredBanner() {
   if (document.getElementById("backend-required-banner")) return;
   const banner = document.createElement("div");

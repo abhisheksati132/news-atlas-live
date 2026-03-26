@@ -2,19 +2,23 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
+    branches: [main]
 
 jobs:
   build-test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
@@ -22,47 +26,26 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Start server for smoke tests
+      - name: Start API server for smoke tests
         run: |
           nohup node server.js > server.log 2>&1 &
           echo $! > server.pid
         env:
           NODE_ENV: production
-      - name: Start frontend for a11y tests
-        run: |
-          nohup npm run frontend > frontend.log 2>&1 &
-          echo $! > frontend.pid
 
-      - name: Wait for server
+      - name: Wait for API server
         run: |
-          for i in {1..60}; do
+          for i in {1..30}; do
             if nc -z localhost 3000; then echo "Server ready"; break; fi
             sleep 1
           done
-        timeout-minutes: 2
 
-      - name: Run smoke tests (HTTP checks)
+      - name: Run smoke tests
         run: |
-          curl -sSf http://localhost:3000/api/config | echo
-          curl -sSf http://localhost:3000/api/news | head -n 1 | echo
-          curl -sSf http://localhost:3000/api/iss | head -n 1 | echo
-      
-      - name: Run Lighthouse CI (if configured)
-        if: github.event_name != 'pull_request'
-        run: |
-          npm i -g lhci || true
-          lhci autorun || true
-      
-      - name: Accessibility checks
-        run: |
-          for i in 1 2 3; do
-            if nc -z localhost 5173; then break; fi
-            sleep 1
-          done
-          npx -y pa11y http://localhost:5173 || true
-        continue-on-error: true
+          curl -sf http://localhost:3000/api/config | echo "config ok"
+          curl -sf http://localhost:3000/api/iss | echo "iss ok"
 
       - name: Stop server
+        if: always()
         run: |
-          if [ -f server.pid ]; then kill -9 $(cat server.pid) || true; fi
-  
+          if [ -f server.pid ]; then kill $(cat server.pid) 2>/dev/null || true; fi

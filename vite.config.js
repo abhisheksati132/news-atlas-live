@@ -3,7 +3,6 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import { readdirSync } from 'fs';
 
-// Dynamically resolve all HTML files in public/ as Rollup entry points
 const getHtmlEntries = () => {
     const publicPath = resolve(__dirname, 'public');
     const entries = {};

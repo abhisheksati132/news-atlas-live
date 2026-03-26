@@ -35,7 +35,6 @@ button {
   font-family: "JetBrains Mono", monospace;
 }
 
-/* Subtle grid background — light, not overwhelming */
 .grid-bg {
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
@@ -43,10 +42,6 @@ button {
   background-size: 60px 60px;
 }
 
-/* .glow-blue, .glow-cyan, .glow-green — neon text-shadow removed */
-
-
-/* ── Removed neon box glow on hover ── */
 .box-glow-blue,
 .box-glow-cyan,
 .box-glow-green {
@@ -59,7 +54,6 @@ button {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
-/* Clean glass card */
 .apple-glass {
   border-radius: 1rem;
   background: rgba(15, 23, 42, 0.85);
@@ -135,19 +129,16 @@ button {
   gap: 0.5rem;
 }
 
-/* Corner brackets removed — too "tactical" */
 .corner-bracket::before,
 .corner-bracket::after {
   display: none;
 }
 
-/* ── All neon pulse/orbit animations removed ── */
 .pulse-ring::before,
 .pulse-ring::after {
   display: none;
 }
 
-/* Clean CTA button — no pulsing animation */
 .cta-btn {
   border-radius: 8px;
   background: var(--blue);
@@ -196,22 +187,16 @@ button {
   animation: blink 1s step-end infinite;
 }
 
-/* Scan line removed */
 .scan-line {
   display: none;
 }
 
-/* Orbit dots removed */
 .orbit-dot1,
 .orbit-dot2,
 .orbit-dot3 {
   display: none;
 }
 
-/* .globe-inner and .globe-pulse — rotation/pulse animations removed */
-
-
-/* Fade up entrance — kept but toned down */
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -249,7 +234,6 @@ button {
   animation-delay: 0.5s;
 }
 
-/* Ticker — kept, it's functional */
 @keyframes ticker {
   from {
     transform: translateX(0);
@@ -270,7 +254,6 @@ button {
   overflow: hidden;
 }
 
-/* Log lines */
 @keyframes logIn {
   from {
     opacity: 0;
@@ -330,7 +313,6 @@ button {
   animation-delay: 2.9s;
 }
 
-/* Stat values */
 @keyframes countUp {
   from {
     opacity: 0;
@@ -348,7 +330,6 @@ button {
   opacity: 0;
 }
 
-/* Feature cards — clean, no neon border on hover */
 .feat-card {
   position: relative;
   overflow: hidden;
@@ -363,7 +344,6 @@ button {
 .feat-card::before,
 .feat-card::after {
   display: none;
-  /* removed gradient hover overlay effects */
 }
 
 .feat-card>* {
@@ -377,7 +357,6 @@ button {
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
 }
 
-/* Status dot — subtle pulse only */
 @keyframes status-pulse {
 
   0%,
@@ -394,7 +373,6 @@ button {
   animation: status-pulse 2.5s ease-in-out infinite;
 }
 
-/* Radar removed */
 .radar-sweep,
 .radar-ring-1,
 .radar-ring-2,
@@ -402,7 +380,6 @@ button {
   display: none;
 }
 
-/* Float icon — very subtle */
 @keyframes float {
 
   0%,
@@ -419,7 +396,6 @@ button {
   animation: float 4s ease-in-out infinite;
 }
 
-/* Navbar — clean dark, no neon glow */
 nav {
   background: rgba(10, 15, 30, 0.9);
   border-radius: 1rem;
@@ -429,7 +405,6 @@ nav {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
-/* Subtle ambient backgrounds — toned way down */
 .radial-blue {
   background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.06) 0%, transparent 70%);
 }
@@ -457,7 +432,6 @@ nav {
   animation-delay: 0.5s;
 }
 
-/* Mobile menu */
 #mobile-menu {
   display: block;
   opacity: 0;
@@ -492,7 +466,6 @@ nav {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
-/* Skeleton shimmer */
 @keyframes skeleton-shimmer {
   0% {
     background-position: -200% 0;
@@ -513,7 +486,6 @@ nav {
   border-radius: 0.5rem;
 }
 
-/* Page loader — minimal spinner, no military text */
 #page-loader {
   position: fixed;
   inset: 0;
@@ -555,7 +527,6 @@ nav {
   }
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }

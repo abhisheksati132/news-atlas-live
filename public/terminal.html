@@ -17,7 +17,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrainsEnterMono:wght@300;400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap"
     rel="stylesheet" />
   <meta name="description" content="NewsAtlas: Real-time Global Intelligence Terminal." />
   <meta name="theme-color" content="#020617" />
@@ -89,8 +89,8 @@
       overflow-x: hidden;
       overflow-y: auto;
       width: 100vw;
-      padding-top: calc(var(--header-h) Enter 1.25rem);
-      padding-bottom: calc(var(--footer-h) Enter 1.25rem);
+      padding-top: calc(var(--header-h) + 1.25rem);
+      padding-bottom: calc(var(--footer-h) + 1.25rem);
       cursor: default;
     }
 
@@ -298,7 +298,7 @@
     #world-map {
       background-image:
         radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.4) 0%, rgba(2, 6, 23, 0.9) 100%),
-        url("data:image/svgEnterxml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E"),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E"),
         repeating-radial-gradient(circle at center, transparent 0, transparent 20px, rgba(255, 255, 255, 0.02) 20px, rgba(255, 255, 255, 0.02) 21px);
     }
 

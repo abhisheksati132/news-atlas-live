@@ -404,7 +404,7 @@ function renderBriefingCards(rawText) {
     const displayName = key.replace(/_/g, ' ');
 
     html += `
-      <div class="apple-glass group p-5 mb-4 relative overflow-hidden transition-all duration-300 hover:bg-white/[0.05] hover:shadow-[0_0_30px_${color}33] hover:border-${color}/40">
+      <div class="apple-glass group p-5 mb-4 relative overflow-hidden transition-all duration-300 hover:bg-white/[0.05]" style="border: 1px solid ${color}22">
         <div class="absolute -inset-[1px] bg-gradient-to-br from-white/10 to-transparent opacity-30 pointer-events-none"></div>
         
         <div class="flex justify-between items-start mb-4 relative z-10">
@@ -419,7 +419,7 @@ function renderBriefingCards(rawText) {
             </div>
           </div>
           ${rating ? `
-            <div class="bg-black/40 border border-${color}/40 rounded-xl px-4 py-2 flex flex-col items-center">
+            <div class="bg-black/40 rounded-xl px-4 py-2 flex flex-col items-center" style="border: 1px solid ${color}44;">
               <span class="text-[20px] font-black font-mono leading-none" style="color: ${color};">${rating}<span class="text-[12px] opacity-40">/10</span></span>
               <div class="w-14 h-1 bg-white/10 rounded-full mt-2 overflow-hidden">
                 <div class="h-full" style="width: ${rating * 10}%; background: ${color}; shadow: 0 0 10px ${color};"></div>

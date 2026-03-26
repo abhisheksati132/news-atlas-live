@@ -976,9 +976,7 @@
       color: #e2e8f0;
     }
 
-    #boot-screen {
-      transition: opacity 0.8s ease-out;
-    }
+
 
     @keyframes logFade {
       0% {
@@ -1385,37 +1383,7 @@
 </head>
 
 <body class="flex flex-col day-mode">
-  <div id="boot-screen" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center"
-    style="background: #020617">
-    <div class="w-full max-w-sm space-y-4 px-8">
-      <div class="flex items-center gap-4 mb-6">
-        <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="
-              background: linear-gradient(135deg, #1d4ed8, #0e7490);
-              box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
-            ">
-          <i class="fas fa-satellite-dish text-white text-xl"></i>
-        </div>
-        <span class="font-black tracking-[0.3em] text-white text-lg"
-          style="font-family: &quot;JetBrains Mono&quot;, monospace">NEWS<span class="text-blue-400">ATLAS</span></span>
-        <span
-          class="text-[12px] font-mono text-blue-400/50 border border-blue-500/20 px-2 py-0.5 rounded ml-auto">v3.7</span>
-      </div>
-      <div class="h-0.5 w-full bg-slate-900 rounded-full overflow-hidden">
-        <div id="boot-bar" class="h-full w-0 transition-all duration-300 rounded-full" style="
-              background: linear-gradient(90deg, #3b82f6, #06b6d4);
-              box-shadow: 0 0 10px #3b82f6;
-            "></div>
-      </div>
-      <div id="boot-log" class="h-28 overflow-hidden flex flex-col justify-end space-y-1.5" style="
-            font-family: &quot;JetBrains Mono&quot;, monospace;
-            font-size: 10px;
-            color: rgba(100, 116, 139, 0.8);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-          "></div>
-    </div>
-  </div>
+
   <div id="map-tooltip"
     class="fixed hidden text-white rounded-[1.25rem] border-l-4 border-l-emerald-500 overflow-hidden" style="
         background: rgba(4, 10, 25, 0.6);
@@ -1954,7 +1922,7 @@
               class="flex items-center gap-2.5 text-base font-black uppercase tracking-[0.2em] text-cyan-400/90 whitespace-nowrap mb-4 transition-opacity duration-300">
               <span id="map-hint-status"
                 class="w-3 h-3 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_12px_rgba(6,182,212,0.9)]"></span>
-              Click to initialize uplink
+              Click to connect
             </div>
 
             <div class="relative">
@@ -2235,7 +2203,7 @@
               </div>
               <div class="ticker-wrap pt-1">
                 <div id="headline-ticker-content" class="headline-ticker-content">
-                  <span class="headline-ticker-item text-slate-500">Loading headlines...</span>
+                  <span class="headline-ticker-item text-slate-500">Loading...</span>
                 </div>
               </div>
             </div>
@@ -2357,7 +2325,7 @@
               </div>
               <div id="market-ai-analysis" class="text-slate-300 leading-relaxed whitespace-pre-line"
                 style="font-family: 'JetBrains Mono', monospace; font-size: 12px;"><span
-                  class="animate-pulse text-slate-500">Initializing financial uplink...</span></div>
+                  class="animate-pulse text-slate-500">Loading markets...</span></div>
               <div class="hidden">
                 <span id="price-gold"></span>
                 <span id="price-silver"></span>
@@ -2510,7 +2478,7 @@
               <div class="flex justify-between items-center mb-3">
                 <span class="text-xs text-blue-300 uppercase font-black tracking-widest"
                   style="font-family: &quot;JetBrains Mono&quot;, monospace">
-                  <i class="fas fa-search-location mr-2"></i>Global Weather Uplink
+                  <i class="fas fa-search-location mr-2"></i>Global Weather
                 </span>
               </div>
               <div class="flex items-center gap-2">
@@ -2939,7 +2907,7 @@
                   <div>
                     <span class="text-[11px] text-blue-400 font-bold uppercase tracking-widest" style="
                           font-family: &quot;JetBrains Mono&quot;, monospace;
-                        ">Forex Uplink</span>
+                        ">Forex</span>
                     <div id="eco-currency-code" class="text-3xl font-black text-white mt-1" style="
                           font-family: &quot;JetBrains Mono&quot;, monospace;
                         ">
@@ -3143,7 +3111,7 @@
               <span id="eco-market-ticker" class="text-slate-300 typing-cursor" style="
                     font-family: &quot;JetBrains Mono&quot;, monospace;
                     font-size: 11px;
-                  ">Initializing Global Financial Uplink...</span>
+                  ">Loading Markets...</span>
             </div>
           </div>
         </div>
@@ -3273,7 +3241,7 @@
         <span>Global Intelligence Index v4.0</span>
         <span class="flex items-center gap-2">
           <span class="w-1 h-1 bg-blue-500 rounded-full animate-pulse"></span>
-          Direct Satellite Uplink Active
+          Live Data Feed Active
         </span>
       </div>
     </div>

@@ -64,6 +64,12 @@
         display: none;
       }
 
+      footer {
+        width: 100%;
+        margin-top: 2rem;
+        padding-bottom: 2rem;
+      }
+
       .glass-panel {
         border-radius: 1.25rem;
         background: rgba(15, 23, 42, 0.9);
@@ -226,12 +232,12 @@
       }
 
       .main-content {
-        padding: 1rem 6vw;
+        padding: 1rem 2.5vw;
         gap: 1.25rem;
         display: flex;
         flex-direction: column;
         width: 100%;
-        max-width: 1400px;
+        max-width: 1560px;
         margin: 0 auto;
       }
 

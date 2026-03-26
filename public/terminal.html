@@ -614,23 +614,23 @@
                 box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
               "
             >
-              <i class="fas fa-satellite-dish text-xl text-white"></i>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                <line x1="2" y1="12" x2="22" y2="12" />
+              </svg>
             </div>
             <div
               class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-[#020617] animate-pulse"
             ></div>
           </div>
-          <div class="shrink-0">
-            <h1
-              class="text-xl font-black tracking-tighter text-white leading-none"
-            >
-              News<span class="text-blue-400">Atlas</span>
+          <div class="shrink-0 flex items-center gap-3">
+            <h1 class="text-xl font-black tracking-tighter text-white leading-none">
+              NEWS<span class="text-blue-400">ATLAS</span>
             </h1>
-            <p
-              class="text-[10px] uppercase tracking-[.3em] text-slate-500 font-black leading-none mt-1"
-              style="font-family: &quot;JetBrains Mono&quot;, monospace"
-            >
-              News Dashboard
+            <div class="h-4 w-px bg-white/10 hidden lg:block"></div>
+            <p class="hidden lg:block text-[10px] uppercase tracking-[.3em] text-blue-400/60 font-black leading-none" style="font-family: 'JetBrains Mono', monospace">
+              TACTICAL DASHBOARD
             </p>
           </div>
         </div>
@@ -3891,7 +3891,7 @@
             result.text ||
             "No response received.";
           text = text.replace(/\*\*/g, "").trim();
-          responseEl.innerHTML = `<span style="color:#60a5fa;font-size:9px;letter-spacing:.1em;font-weight:900;text-transform:uppercase">AI â€º</span> ${text}`;
+          responseEl.innerHTML = `<span style="color:#60a5fa;font-size:9px;letter-spacing:.1em;font-weight:900;text-transform:uppercase">AI ›</span> ${text}`;
           input.value = "";
           if (window.playTacticalSound) window.playTacticalSound("success");
         } catch (e) {
@@ -4010,6 +4010,13 @@
         }
       }, 3000);
     </script>
+    <footer class="mt-auto">
+      <div class="headline-ticker-wrap py-2 border-t border-white/5 bg-black/20">
+        <div id="footer-ticker-content" class="headline-ticker-content">
+          <!-- Ticker items dynamically injected by global-fx.js -->
+        </div>
+      </div>
+    </footer>
     <div class="fixed inset-0 z-[10000] bg-slate-950 flex flex-col items-center justify-center p-8 text-center md:hidden border-t-4 border-t-blue-500">
       <i class="fas fa-desktop text-4xl text-blue-500 mb-6"></i>
       <h2 class="text-xl font-black text-white uppercase tracking-tighter mb-4">NewsAtlas Workspace</h2>

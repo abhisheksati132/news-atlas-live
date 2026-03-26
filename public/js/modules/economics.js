@@ -1,4 +1,4 @@
-﻿function ecoEl(id) {
+function ecoEl(id) {
   return document.getElementById(id);
 }
 async function fetchDetailedEconomics(country) {
@@ -339,11 +339,11 @@ async function fetchECBRates() {
   container.innerHTML = '<div class="text-slate-500 text-xs animate-pulse">Fetching ECB rates...</div>';
   try {
     const pairs = [
-      { key: "D.USD.EUR.SP00.A", label: "EUR/USD", flag: "ðŸ‡ºðŸ‡¸" },
-      { key: "D.GBP.EUR.SP00.A", label: "EUR/GBP", flag: "ðŸ‡¬ðŸ‡§" },
-      { key: "D.JPY.EUR.SP00.A", label: "EUR/JPY", flag: "ðŸ‡¯ðŸ‡µ" },
-      { key: "D.CNY.EUR.SP00.A", label: "EUR/CNY", flag: "ðŸ‡¨ðŸ‡³" },
-      { key: "D.INR.EUR.SP00.A", label: "EUR/INR", flag: "ðŸ‡®ðŸ‡³" },
+      { key: "D.USD.EUR.SP00.A", label: "EUR/USD", flag: "🇺🇸" },
+      { key: "D.GBP.EUR.SP00.A", label: "EUR/GBP", flag: "🇬🇧" },
+      { key: "D.JPY.EUR.SP00.A", label: "EUR/JPY", flag: "🇯🇵" },
+      { key: "D.CNY.EUR.SP00.A", label: "EUR/CNY", flag: "🇨🇳" },
+      { key: "D.INR.EUR.SP00.A", label: "EUR/INR", flag: "🇮🇳" },
     ];
     const results = await Promise.allSettled(
       pairs.map((p) => fetch(`https://data-api.ecb.europa.eu/service/data/EXR/${p.key}?format=jsondata&lastNObservations=2`).then((r) => r.json())),
@@ -351,21 +351,21 @@ async function fetchECBRates() {
     container.innerHTML = "";
     results.forEach((r, i) => {
       const p = pairs[i];
-      let value = "â€”", prev = null;
+      let value = "—", prev = null;
       if (r.status === "fulfilled") {
         try {
           const obs = r.value.dataSets[0]?.series["0:0:0:0:0"]?.observations;
           const keys = obs ? Object.keys(obs).sort((a, b) => +b - +a) : [];
-          value = keys[0] !== undefined ? parseFloat(obs[keys[0]][0]).toFixed(4) : "â€”";
+          value = keys[0] !== undefined ? parseFloat(obs[keys[0]][0]).toFixed(4) : "—";
           prev = keys[1] !== undefined ? parseFloat(obs[keys[1]][0]) : null;
-        } catch (_) { value = "â€”"; }
+        } catch (_) { value = "—"; }
       }
       const current = parseFloat(value);
       const change = prev ? ((current - prev) / prev) * 100 : null;
       const changeClass = change === null ? "text-slate-500" : change >= 0 ? "text-emerald-400" : "text-red-400";
       const row = document.createElement("div");
       row.className = "flex items-center justify-between py-1.5 border-b border-white/5";
-      row.innerHTML = `<div class="flex items-center gap-2"><span class="text-sm">${p.flag}</span><span class="text-xs font-black text-white font-mono">${p.label}</span></div><div class="flex items-center gap-3"><span class="text-xs font-mono text-cyan-400 font-bold">${value}</span>${change !== null ? `<span class="${changeClass} text-[9px] font-mono">${change >= 0 ? "â–²" : "â–¼"} ${Math.abs(change).toFixed(3)}%</span>` : ""}</div>`;
+      row.innerHTML = `<div class="flex items-center gap-2"><span class="text-sm">${p.flag}</span><span class="text-xs font-black text-white font-mono">${p.label}</span></div><div class="flex items-center gap-3"><span class="text-xs font-mono text-cyan-400 font-bold">${value}</span>${change !== null ? `<span class="${changeClass} text-[9px] font-mono">${change >= 0 ? "▲" : "▼"} ${Math.abs(change).toFixed(3)}%</span>` : ""}</div>`;
       container.appendChild(row);
     });
     const label = document.getElementById("ecb-timestamp");

@@ -51,8 +51,11 @@
         overflow-x: hidden;
         overflow-y: auto;
         width: 100vw;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
         padding-top: calc(var(--header-h) + 1.25rem);
-        padding-bottom: calc(var(--footer-h) + 1.25rem);
+        padding-bottom: 0px;
         cursor: default;
       }
 
@@ -239,6 +242,7 @@
         width: 100%;
         max-width: 1560px;
         margin: 0 auto;
+        flex: 1;
       }
 
       .map-box {

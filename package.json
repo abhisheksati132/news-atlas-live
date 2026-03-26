@@ -13,8 +13,7 @@
     "vite": "vite",
     "build": "vite build",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook",
-    "verify-live": "node verify-live.js"
+    "build-storybook": "build-storybook"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",

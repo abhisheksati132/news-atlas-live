@@ -12,7 +12,7 @@ export default function Hero() {
         Real-time intelligence, geo data, and market telemetry presented in an ultra-premium glass UI.
       </p>
       <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-        <a href="terminal.html" className="cta-btn">LAUNCH TERMINAL</a>
+        <a href="/terminal" className="cta-btn">LAUNCH TERMINAL</a>
         <a href="#briefing" className="sec-btn">VIEW BRIEFING</a>
       </div>
     </section>

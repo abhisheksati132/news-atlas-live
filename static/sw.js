@@ -12,7 +12,7 @@ if (self.location.hostname === 'localhost' || self.location.hostname === '127.0.
 } else {
     const URLS_TO_CACHE = [
         '/',
-        '/terminal.html',
+        '/terminal',
         '/favicon.ico'
     ];
 

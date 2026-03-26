@@ -28,5 +28,12 @@
             "src": "/(.*)",
             "dest": "/$1"
         }
+    ],
+    "redirects": [
+        {
+            "source": "/:path*.html",
+            "destination": "/:path*",
+            "permanent": true
+        }
     ]
 }

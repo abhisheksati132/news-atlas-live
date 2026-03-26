@@ -58,4 +58,4 @@ computing gzip size...
 [2m../dist/[22m[36massets/canvas-backdrop-BKe_KI1z.js         [39m[1m[2m 10.60 kB[22m[1m[22m[2m │ gzip:  4.19 kB[22m
 [2m../dist/[22m[36massets/react_app-BJhTf7mj.js               [39m[1m[2m150.34 kB[22m[1m[22m[2m │ gzip: 49.05 kB[22m
 [2m../dist/[22m[36massets/terminal-BEe84Re0.js                [39m[1m[2m222.50 kB[22m[1m[22m[2m │ gzip: 63.31 kB[22m
-[32m✓ built in 1.62s[39m
+[32m✓ built in 1.71s[39m

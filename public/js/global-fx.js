@@ -138,15 +138,15 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div class="p-2" id="cmd-palette-results">
                 <div class="px-4 py-3 text-xs font-mono text-slate-500 uppercase tracking-widest">Suggested Actions</div>
-                <a href="terminal.html" class="flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl cursor-pointer transition-colors group">
+                <a href="terminal" class="flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl cursor-pointer transition-colors group">
                     <i class="fas fa-map text-blue-400 group-hover:scale-110 transition-transform"></i>
                     <span class="text-slate-300 font-mono text-sm">Launch Terminal App</span>
                 </a>
-                <div class="flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl cursor-pointer transition-colors group" onclick="if(window.toggleAbout) { toggleAbout(true); toggleCmdPalette(false); } else { window.location.href='terminal.html' }">
+                <div class="flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl cursor-pointer transition-colors group" onclick="if(window.toggleAbout) { toggleAbout(true); toggleCmdPalette(false); } else { window.location.href='terminal' }">
                     <i class="fas fa-microchip text-emerald-400 group-hover:scale-110 transition-transform"></i>
                     <span class="text-slate-300 font-mono text-sm">View System Telemetry</span>
                 </div>
-                <div class="flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl cursor-pointer transition-colors group" onclick="if(document.getElementById('cli-input')) { document.getElementById('cli-input').focus(); toggleCmdPalette(false); } else { window.location.href='terminal.html' }">
+                <div class="flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl cursor-pointer transition-colors group" onclick="if(document.getElementById('cli-input')) { document.getElementById('cli-input').focus(); toggleCmdPalette(false); } else { window.location.href='terminal' }">
                     <i class="fas fa-terminal text-cyan-400 group-hover:scale-110 transition-transform"></i>
                     <span class="text-slate-300 font-mono text-sm">Execute AI Action Query</span>
                 </div>

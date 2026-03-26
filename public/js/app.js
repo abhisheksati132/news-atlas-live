@@ -1,20 +1,20 @@
 import '../css/tailwind.css';
 import '../css/global-fx.css';
 
-// Core utilities
+
 import './core/fetch-helper.js';
 import './core/audio.js';
 import './core/firebase.js';
 
 
-// UI components
+
 import './ui/toast.js';
 import './ui/search.js';
 import './ui/cli-terminal.js';
 import './ui/command-palette.js';
 import './ui/about.js';
 
-// Feature modules
+
 import './modules/mapbox-engine.js';
 import './modules/news.js';
 import './modules/weather.js';
@@ -22,7 +22,7 @@ import './modules/markets.js';
 import './modules/economics.js';
 import './modules/geography.js';
 
-// Enhancement & effects scripts
+
 import './global-fx.js';
 import './enhancements.js';
 
@@ -31,7 +31,7 @@ let currencyCode = null;
 let iso2Code = null;
 let countryUTCOffset = null;
 let projectionType = "3d";
-window.projectionType = "3d"; // default is globe (3d)
+window.projectionType = "3d";
 let currentProjection, svg, g, zoom;
 let worldFeatures = [];
 let globalSearchData = [];
@@ -144,7 +144,7 @@ function runWhenIdle(callback, timeout = 2000) {
   }
 }
 async function runBootSequence() {
-  // Boot screen disabled per user request
+  
 }
 
 function showBackendRequiredBanner() {
@@ -806,7 +806,7 @@ window.handleCountryClick = async function (event, d) {
 };
 
 
-// Map interaction status managed by persistent HUD in main template
+
 
 let _mapSearchIndex = -1;
 let _mapSearchResults = [];
@@ -1968,9 +1968,9 @@ window.toggleMapProjection = function () {
     if (btn) btn.classList.remove("active");
   }
 };
-// Alias for voice commands, CLI, and keyboard shortcuts
+
 window.toggleProjection = window.toggleMapProjection;
-window.projectionType = "3d"; // default is globe (3d)
+window.projectionType = "3d";
 
 
 window._gdeltActive = window._gdeltActive || false;
@@ -2228,7 +2228,7 @@ window.searchCityForTab = async (tabId) => {
 
       if (window.playTacticalSound) window.playTacticalSound('success');
 
-      // Fly map to city
+      
       if (window.mapEngine && window.mapEngine.map) {
         window.mapEngine.map.flyTo({
           center: [city.longitude, city.latitude],
@@ -2239,11 +2239,11 @@ window.searchCityForTab = async (tabId) => {
         }
       }
 
-      // Update global context labels
+      
       if (window.setText) window.setText("selected-country-name", city.name.toUpperCase());
       window._currentWeatherLocation = fullName;
 
-      // Tab specific actions
+      
       if (tabId === 'intel') {
         if (window.generateAIBriefing) window.generateAIBriefing(fullName);
         if (window.fetchGDELTEvents) window.fetchGDELTEvents(city.name);

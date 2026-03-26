@@ -1,12 +1,12 @@
 const COMMANDS = [
-    // --- Intelligence & Navigation ---
+    
     { id: "tab-intel", label: "Intel Dashboard", desc: "View global situational awareness and AI briefings", icon: "fa-brain", shortcut: "1", run: () => window.switchTab("intel") },
     { id: "tab-news", label: "News Feed", desc: "Live global news fragments and signal intelligence", icon: "fa-newspaper", shortcut: "2", run: () => window.switchTab("news") },
     { id: "tab-markets", label: "Markets Terminal", desc: "Real-time exchange data and financial telemetry", icon: "fa-chart-line", shortcut: "3", run: () => window.switchTab("markets") },
     { id: "tab-eco", label: "Economic Analysis", desc: "Macro-economic indicators and global GDP tracking", icon: "fa-coins", shortcut: "4", run: () => window.switchTab("economic") },
     { id: "tab-atmo", label: "Atmosphere Node", desc: "Aeronautical weather and environmental telemetry", icon: "fa-cloud-sun", shortcut: "5", run: () => window.switchTab("atmosphere") },
 
-    // --- Search & Exploration ---
+    
     { id: "search", label: "Search Nations", desc: "Focus neural search on country sectors", icon: "fa-search", shortcut: "/", run: () => window.toggleSearch() },
     {
         id: "city-search", label: "City Scan", desc: "Search and fly to a specific city/target", icon: "fa-city", shortcut: "S", run: () => {
@@ -17,20 +17,20 @@ const COMMANDS = [
         }
     },
 
-    // --- Map Control & Visuals ---
+    
     { id: "reset", label: "Global View", desc: "Reset neural camera to planetary overview", icon: "fa-expand", shortcut: "R", run: () => window.resetToGlobalCenter && window.resetToGlobalCenter() },
     { id: "fly-india", label: "India HQ Base", desc: "Deploy camera to primary India orbital station", icon: "fa-home", shortcut: "Ctrl+I", run: () => window.goToIndiaHome && window.goToIndiaHome() },
     { id: "map-style-sat", label: "Satellite Mode", desc: "Switch to high-resolution orbital imagery", icon: "fa-satellite", run: () => { if (window.mapEngine && window.mapEngine.map) window.mapEngine.map.setStyle('mapbox://styles/mapbox/satellite-streets-v12'); } },
     { id: "map-style-dark", label: "Tactical Dark Mode", desc: "Switch to low-latency dark vector map", icon: "fa-moon", run: () => { if (window.mapEngine && window.mapEngine.map) window.mapEngine.map.setStyle('mapbox://styles/mapbox/dark-v11'); } },
     { id: "map-style-streets", label: "Operational Streets", desc: "Switch to standard terrestrial street map", icon: "fa-road", run: () => { if (window.mapEngine && window.mapEngine.map) window.mapEngine.map.setStyle('mapbox://styles/mapbox/streets-v12'); } },
 
-    // --- Layers & Data Overlays ---
+    
     { id: "quake", label: "Seismic Layer", desc: "Toggle real-time earthquake telemetry", icon: "fa-radiation", run: () => window.toggleEarthquakeLayer && window.toggleEarthquakeLayer() },
     { id: "aircraft", label: "Air Traffic Layer", desc: "Toggle live transponder data for aircraft", icon: "fa-plane", run: () => window.toggleAircraftLayer && window.toggleAircraftLayer() },
     { id: "gdelt", label: "Conflict Matrix", desc: "Toggle GDELT global instability heatmaps", icon: "fa-crosshairs", run: () => window.toggleGDELTLayer && window.toggleGDELTLayer() },
     { id: "airq", label: "Air Quality Node", desc: "Toggle global atmospheric particulate density", icon: "fa-leaf", run: () => window.toggleAirQuality && window.toggleAirQuality() },
 
-    // --- System & Tactical ---
+    
     { id: "audio", label: "Toggle Audio FX", desc: "Sync/Desync tactical audio feedback systems", icon: "fa-volume-up", run: () => window.toggleGlobalAudio && window.toggleGlobalAudio() },
     { id: "voice", label: "Voice Command Mode", desc: "Initialize neural voice recognition uplink", icon: "fa-microphone", shortcut: "V", run: () => window.activateVoice && window.activateVoice() },
     { id: "cli", label: "Neural CLI Terminal", desc: "Open advanced command-line interface", icon: "fa-terminal", shortcut: "`", run: () => window.toggleCLI && window.toggleCLI() },
@@ -52,10 +52,10 @@ function fuzzyMatch(haystack, needle) {
     const h = haystack.toLowerCase();
     const n = needle.toLowerCase();
 
-    // Direct inclusion is highest priority
+    
     if (h.includes(n)) return true;
 
-    // Fuzzy sequence match
+    
     let hi = 0;
     for (let ni = 0; ni < n.length; ni++) {
         while (hi < h.length && h[hi] !== n[ni]) hi++;
@@ -148,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
             _paletteFiltered = COMMANDS.filter(cmd =>
                 fuzzyMatch(cmd.label, q) || (cmd.desc && fuzzyMatch(cmd.desc, q))
             ).sort((a, b) => {
-                // Rank direct matches higher
+                
                 const aMatch = a.label.toLowerCase().includes(q.toLowerCase());
                 const bMatch = b.label.toLowerCase().includes(q.toLowerCase());
                 if (aMatch && !bMatch) return -1;

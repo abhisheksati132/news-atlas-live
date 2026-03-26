@@ -341,19 +341,24 @@ class MapboxEngine {
 
             let hoveredId = null;
 
-            let lastMove = 0;
+            let hoverUpdateRequested = false;
             this.map.on('mousemove', 'country-fills', (e) => {
-                const now = Date.now();
-                if (now - lastMove < 32) return;
-                lastMove = now;
+                if (hoverUpdateRequested) return;
+                hoverUpdateRequested = true;
 
-                if (!e.features.length) return;
-                this.map.getCanvas().style.cursor = 'crosshair';
-                if (hoveredId !== null) {
-                    this.map.setFeatureState({ source: 'countries', id: hoveredId }, { hover: false });
-                }
-                hoveredId = e.features[0].id;
-                this.map.setFeatureState({ source: 'countries', id: hoveredId }, { hover: true });
+                requestAnimationFrame(() => {
+                    if (!e.features.length) {
+                        hoverUpdateRequested = false;
+                        return;
+                    }
+                    this.map.getCanvas().style.cursor = 'crosshair';
+                    if (hoveredId !== null) {
+                        this.map.setFeatureState({ source: 'countries', id: hoveredId }, { hover: false });
+                    }
+                    hoveredId = e.features[0].id;
+                    this.map.setFeatureState({ source: 'countries', id: hoveredId }, { hover: true });
+                    hoverUpdateRequested = false;
+                });
             });
 
             this.map.on('mouseleave', 'country-fills', () => {
@@ -522,44 +527,36 @@ class MapboxEngine {
         this.map.addControl(this.deckOverlay);
 
         let timeOffset = 0;
-        let lastUpdate = 0;
-        const animateDeck = (now) => {
+        const animateDeck = () => {
             if (!this.map || !this.deckOverlay) return;
 
-            if (now - lastUpdate < 33) {
-                this._deckAnimId = requestAnimationFrame(animateDeck);
-                return;
-            }
-            lastUpdate = now;
-
             timeOffset += 0.05;
-
             const satellites = [];
             for (let i = 0; i < 20; i++) {
-                const lon = (i * 70 + timeOffset * 2) % 360 - 180;
-                const lat = Math.sin(i * 0.2 + timeOffset * 0.01) * 65;
-                const alt = 1200000 + Math.cos(i) * 200000;
                 satellites.push({
-                    position: [lon, lat, alt],
+                    position: [
+                        (i * 70 + timeOffset * 2) % 360 - 180,
+                        Math.sin(i * 0.2 + timeOffset * 0.01) * 65,
+                        1200000 + Math.cos(i) * 200000
+                    ],
                     color: i % 4 === 0 ? [239, 68, 68] : [6, 182, 212]
                 });
             }
 
-            const satLayer = new deck.ScatterplotLayer({
-                id: 'satellite-layer',
-                data: satellites,
-                getPosition: d => d.position,
-                getRadius: 25000,
-                getFillColor: d => d.color,
-                getLineColor: [255, 255, 255, 100],
-                lineWidthMinPixels: 1,
-                radiusMinPixels: 2,
-                radiusMaxPixels: 5,
-                parameters: { depthTest: false }
-            });
-
             this.deckOverlay.setProps({
-                layers: [satLayer]
+                layers: [
+                    new deck.ScatterplotLayer({
+                        id: 'satellite-layer',
+                        data: satellites,
+                        getPosition: d => d.position,
+                        getRadius: 25000,
+                        getFillColor: d => d.color,
+                        lineWidthMinPixels: 1,
+                        radiusMinPixels: 2,
+                        radiusMaxPixels: 5,
+                        parameters: { depthTest: false }
+                    })
+                ]
             });
 
             this._deckAnimId = requestAnimationFrame(animateDeck);

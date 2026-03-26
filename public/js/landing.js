@@ -152,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
     statsObserver.observe(statsEl.closest("section") || statsEl);
   }
 
-  // Mouse-tracking glow logic for feature cards
+  
   document.querySelectorAll('.feat-card').forEach(card => {
     card.addEventListener('mousemove', e => {
       const rect = card.getBoundingClientRect();
@@ -163,9 +163,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Simple UI sound logic
+  
   const playSound = (type) => {
-    // Placeholder for audio assets
+    
     console.log(`Playing UI sound: ${type}`);
   };
 

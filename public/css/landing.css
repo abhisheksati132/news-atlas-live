@@ -43,12 +43,8 @@ button {
   background-size: 60px 60px;
 }
 
-/* ── Removed neon glow text effects ── */
-.glow-blue,
-.glow-cyan,
-.glow-green {
-  /* text-shadow removed intentionally — no neon glow */
-}
+/* .glow-blue, .glow-cyan, .glow-green — neon text-shadow removed */
+
 
 /* ── Removed neon box glow on hover ── */
 .box-glow-blue,
@@ -212,14 +208,8 @@ button {
   display: none;
 }
 
-/* Globe — subtle fade, no pulse */
-.globe-inner {
-  /* no rotation animation */
-}
+/* .globe-inner and .globe-pulse — rotation/pulse animations removed */
 
-.globe-pulse {
-  /* no pulse animation */
-}
 
 /* Fade up entrance — kept but toned down */
 @keyframes fadeUp {

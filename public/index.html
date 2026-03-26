@@ -20,8 +20,14 @@
     rel="stylesheet" />
   <style>
     /* Critical CSS: fast first paint for premium UI */
-    html, body { font-family: Inter, system-ui, -apple-system, 'SF Pro Text', Roboto, Arial; }
-    .apple-glass { backdrop-filter: blur(14px) saturate(115%); }
+    html,
+    body {
+      font-family: Inter, system-ui, -apple-system, 'SF Pro Text', Roboto, Arial;
+    }
+
+    .apple-glass {
+      backdrop-filter: blur(14px) saturate(115%);
+    }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <!-- Tailwind CSS CDN for utility classes -->
@@ -109,9 +115,11 @@
         </div>
         <div class="flex items-center gap-3">
           <a href="#terminal"
-            class="sec-btn text-sm font-mono text-slate-300 font-semibold px-4 py-2 rounded-full tracking-widest inline-block hidden sm:inline-block"><i class="fas fa-play mr-1.5"></i>DEMO</a>
+            class="sec-btn text-sm font-mono text-slate-300 font-semibold px-4 py-2 rounded-full tracking-widest inline-block hidden sm:inline-block"><i
+              class="fas fa-play mr-1.5"></i>DEMO</a>
           <a href="terminal"
-            class="cta-btn text-sm font-mono text-blue-300 font-semibold px-5 py-2 rounded-full tracking-widest inline-block"><i class="fas fa-rocket mr-1.5"></i>LAUNCH</a>
+            class="cta-btn text-sm font-mono text-blue-300 font-semibold px-5 py-2 rounded-full tracking-widest inline-block"><i
+              class="fas fa-rocket mr-1.5"></i>LAUNCH</a>
           <button id="nav-toggle" class="md:hidden text-slate-400 hover:text-white p-2" onclick="
                 document.getElementById('mobile-menu').classList.toggle('open')
               ">
@@ -283,7 +291,8 @@
     </h1>
     <div class="fade-up delay-3 mb-10 text-center max-w-2xl">
       <p class="font-mono text-slate-400 text-sm sm:text-base leading-relaxed">
-        <span class="text-blue-400">$</span> <span id="typed-text"></span><span class="cursor text-blue-400">&bull;</span>
+        <span class="text-blue-400">$</span> <span id="typed-text"></span><span
+          class="cursor text-blue-400">&bull;</span>
       </p>
     </div>
     <div class="fade-up delay-4 flex flex-col sm:flex-row gap-4 items-center">
@@ -665,7 +674,8 @@
                 </div>
                 <div class="log-line flex gap-3">
                   <span class="text-blue-400/50 shrink-0">00:00:07</span>
-                  <span class="text-yellow-400"><i class="fas fa-satellite-dish mr-1"></i>GEOINT alert: East Asia &bull; medium priority</span>
+                  <span class="text-yellow-400"><i class="fas fa-satellite-dish mr-1"></i>GEOINT alert: East Asia &bull;
+                    medium priority</span>
                 </div>
                 <div class="log-line flex gap-3">
                   <span class="text-blue-400/50 shrink-0">00:00:08</span>
@@ -675,11 +685,13 @@
                 </div>
                 <div class="log-line flex gap-3">
                   <span class="text-blue-400/50 shrink-0">00:00:09</span>
-                  <span class="text-red-400"><i class="fas fa-bolt mr-1"></i>BREAKING: Central bank rate decision &bull; Europe</span>
+                  <span class="text-red-400"><i class="fas fa-bolt mr-1"></i>BREAKING: Central bank rate decision &bull;
+                    Europe</span>
                 </div>
                 <div class="log-line flex gap-3">
                   <span class="text-blue-400/50 shrink-0">00:00:10</span>
-                  <span class="text-emerald-400 font-semibold"><i class="fas fa-check-circle mr-1"></i>Connected. All feeds active.</span>
+                  <span class="text-emerald-400 font-semibold"><i class="fas fa-check-circle mr-1"></i>Connected. All
+                    feeds active.</span>
                 </div>
               </div>
             </div>
@@ -713,9 +725,9 @@
                     14
                   </div>
                   <div class="flex items-center gap-2 text-xs font-mono">
-                    <span class="text-red-400">? 3 HIGH</span>
-                    <span class="text-yellow-400">? 7 MED</span>
-                    <span class="text-emerald-400">? 4 LOW</span>
+                    <span class="text-red-400">&bull; 3 HIGH</span>
+                    <span class="text-yellow-400">&bull; 7 MED</span>
+                    <span class="text-emerald-400">&bull; 4 LOW</span>
                   </div>
                 </div>
               </div>
@@ -725,16 +737,20 @@
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-xs font-mono">
                   <div class="flex justify-between">
-                    <span class="text-slate-500">S&P 500</span><span class="text-emerald-400"><i class="fas fa-caret-up mr-1 text-emerald-400"></i>+1.2%</span>
+                    <span class="text-slate-500">S&P 500</span><span class="text-emerald-400"><i
+                        class="fas fa-caret-up mr-1 text-emerald-400"></i>+1.2%</span>
                   </div>
                   <div class="flex justify-between">
-                    <span class="text-slate-500">NASDAQ</span><span class="text-emerald-400"><i class="fas fa-caret-up mr-1 text-emerald-400"></i>+0.6%</span>
+                    <span class="text-slate-500">NASDAQ</span><span class="text-emerald-400"><i
+                        class="fas fa-caret-up mr-1 text-emerald-400"></i>+0.6%</span>
                   </div>
                   <div class="flex justify-between">
-                    <span class="text-slate-500">BTC</span><span class="text-red-400"><i class="fas fa-caret-down mr-1 text-red-400"></i>-0.8%</span>
+                    <span class="text-slate-500">BTC</span><span class="text-red-400"><i
+                        class="fas fa-caret-down mr-1 text-red-400"></i>-0.8%</span>
                   </div>
                   <div class="flex justify-between">
-                    <span class="text-slate-500">GOLD</span><span class="text-emerald-400"><i class="fas fa-caret-up mr-1 text-emerald-400"></i>+0.5%</span>
+                    <span class="text-slate-500">GOLD</span><span class="text-emerald-400"><i
+                        class="fas fa-caret-up mr-1 text-emerald-400"></i>+0.5%</span>
                   </div>
                 </div>
               </div>
@@ -806,7 +822,8 @@
         <div class="feat-card hover-elevate apple-glass rounded-[2rem] p-5 border border-white/5 flex flex-col gap-3">
           <div class="flex items-center justify-between">
             <span
-              class="glass-amber glass-pill text-[10px] font-mono text-amber-400 font-bold tracking-widest uppercase px-2 py-0.5"><i class="fas fa-satellite-dish mr-1"></i>GEOINT alert</span>
+              class="glass-amber glass-pill text-[10px] font-mono text-amber-400 font-bold tracking-widest uppercase px-2 py-0.5"><i
+                class="fas fa-satellite-dish mr-1"></i>GEOINT alert</span>
             <span class="text-[10px] font-mono text-slate-600">11 MIN AGO</span>
           </div>
           <h3 class="text-sm font-bold text-white leading-snug">
@@ -1041,7 +1058,7 @@
   <script type="module" src="/js/landing.js"></script>
   <script type="module" src="/js/global-fx.js"></script>
   <script type="module" src="/js/core/smooth-scroll.js"></script>
-  
+
 </body>
 
 </html>

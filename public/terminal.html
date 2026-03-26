@@ -234,8 +234,10 @@
       gap: 0.75rem;
       position: fixed;
       top: 0.75rem;
-      left: 1rem;
-      right: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 2rem);
+      max-width: 1536px;
       z-index: 50;
       border-radius: 1.25rem;
       background: rgba(15, 23, 42, 0.9);
@@ -255,6 +257,8 @@
       display: flex;
       flex-direction: column;
       width: 100%;
+      max-width: 1536px;
+      margin: 0 auto;
     }
 
     .map-box {
@@ -3120,7 +3124,8 @@
   </main>
   <footer style="
         position: fixed;
-        bottom: 0.75rem; left: 1rem; right: 1rem;
+        bottom: 0.75rem; left: 50%; transform: translateX(-50%);
+        width: calc(100% - 2rem); max-width: 1536px;
         height: var(--footer-h);
         border-radius: 1.25rem;
         background: rgba(4, 10, 25, 0.6);

@@ -1,4 +1,0 @@
-/* App-wide tweaks for React UI */
-html, body, #root { height: 100%; }
-:root { color-scheme: light dark; }
-.apple-glass { /* Mirror existing global style; kept here for React components to import if needed */ }

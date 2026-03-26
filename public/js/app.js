@@ -1028,6 +1028,10 @@ function setupEventListeners() {
       e.preventDefault();
       window.toggleSearch();
     }
+    if (e.key === "?" && !["INPUT", "TEXTAREA"].includes(e.target.tagName)) {
+      e.preventDefault();
+      if (window.toggleShortcuts) window.toggleShortcuts();
+    }
     if (e.key === "Escape") {
       const so = safeEl("search-overlay");
       const ao = safeEl("about-overlay");

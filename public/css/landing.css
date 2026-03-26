@@ -188,13 +188,39 @@ button {
 }
 
 .scan-line {
-  display: none;
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 100%;
+  background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.4), transparent);
+  animation: scan 4s linear infinite;
+  opacity: 0.5;
 }
 
-.orbit-dot1,
-.orbit-dot2,
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes orbit1 {
+  0% { transform: rotate(0deg) translateX(120px) rotate(0deg); }
+  100% { transform: rotate(360deg) translateX(120px) rotate(-360deg); }
+}
+@keyframes orbit2 {
+  0% { transform: rotate(120deg) translateX(160px) rotate(-120deg); }
+  100% { transform: rotate(480deg) translateX(160px) rotate(-480deg); }
+}
+@keyframes orbit3 {
+  0% { transform: rotate(240deg) translateX(200px) rotate(-240deg); }
+  100% { transform: rotate(600deg) translateX(200px) rotate(-600deg); }
+}
+
+.orbit-dot1 {
+  animation: orbit1 12s linear infinite;
+}
+.orbit-dot2 {
+  animation: orbit2 18s linear infinite;
+}
 .orbit-dot3 {
-  display: none;
+  animation: orbit3 24s linear infinite;
 }
 
 @keyframes fadeUp {

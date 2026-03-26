@@ -4,7 +4,12 @@ export default {
         "./public/**/*.js"
     ],
     theme: {
-        extend: {},
+        extend: {
+            fontFamily: {
+                mono: ["JetBrains Mono", "monospace"],
+                sans: ["Inter", "sans-serif"],
+            },
+        },
     },
     plugins: [],
 }

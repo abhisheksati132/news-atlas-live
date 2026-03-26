@@ -1,5 +1,4 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import { readdirSync } from 'fs';
 
@@ -18,7 +17,7 @@ export default defineConfig({
     root: 'public',
     base: '/',
     publicDir: resolve(__dirname, 'static'),
-    plugins: [react()],
+    plugins: [],
     server: {
         port: 5173,
         proxy: {

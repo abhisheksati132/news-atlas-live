@@ -1,4 +1,4 @@
-const CACHE_NAME = 'newsatlas-cache-v3';
+const CACHE_NAME = 'newsatlas-cache-v4';
 
 if (self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1') {
     self.addEventListener('install', () => self.skipWaiting());

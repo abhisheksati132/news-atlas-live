@@ -1,4 +1,22 @@
 import Parser from "rss-parser";
+
+const _cache = new Map();
+const CACHE_TTL = 5 * 60 * 1000;
+
+function getCached(key) {
+  const hit = _cache.get(key);
+  if (!hit) return null;
+  if (Date.now() - hit.ts > CACHE_TTL) { _cache.delete(key); return null; }
+  return hit.data;
+}
+function setCache(key, data) {
+  _cache.set(key, { data, ts: Date.now() });
+  if (_cache.size > 200) {
+    const oldest = [..._cache.entries()].sort((a, b) => a[1].ts - b[1].ts)[0];
+    if (oldest) _cache.delete(oldest[0]);
+  }
+}
+
 const parser = new Parser({
   headers: {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -371,9 +389,6 @@ const COUNTRY_FEEDS = {
     {
       url: "https://feeds.bbci.co.uk/portuguese/brazil/rss.xml",
       category: "world",
-      source: "BBC Brazil",
-    },
-    {
       url: "https://g1.globo.com/rss/g1/index.rss",
       category: "world",
       source: "Globo",
@@ -396,6 +411,19 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
   const { category, q, iso2 } = req.query;
   try {
+    const cacheKey = `news|${iso2 || "global"}|${category || "all"}`;
+    if (!q) {
+      const cached = getCached(cacheKey);
+      if (cached) {
+        res.setHeader("X-Cache", "HIT");
+        return res.status(200).json({
+          status: "success",
+          totalResults: cached.length,
+          results: cached.slice(0, 200),
+          cachedAt: _cache.get(cacheKey)?.ts,
+        });
+      }
+    }
     let selectedFeeds = [...FEEDS];
     if (iso2) {
       const countryCode = iso2.toLowerCase();
@@ -443,6 +471,8 @@ export default async function handler(req, res) {
     });
     const results = await Promise.all(feedPromises);
     let allArticles = results.flat();
+    allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+    if (!q) setCache(cacheKey, allArticles);
     if (q) {
       const lowerQ = q.toLowerCase();
       allArticles = allArticles.filter(
@@ -451,13 +481,13 @@ export default async function handler(req, res) {
           (a.description && a.description.toLowerCase().includes(lowerQ)),
       );
     }
-    allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-    const responseData = {
+    res.setHeader("X-Cache", "MISS");
+    res.status(200).json({
       status: "success",
       totalResults: allArticles.length,
       results: allArticles.slice(0, 200),
-    };
-    res.status(200).json(responseData);
+      fetchedAt: Date.now(),
+    });
   } catch (error) {
     console.error("RSS Handler Error:", error);
     res.status(500).json({ error: "Internal Server Error" });

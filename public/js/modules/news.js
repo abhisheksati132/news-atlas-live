@@ -78,16 +78,18 @@ async function fetchNews(overrideQ) {
     if (container) {
       container.innerHTML = `
         <div class="col-span-full p-8 text-center">
-          <p class="text-[12px] text-red-400 font-black uppercase tracking-widest mb-4">Uplink error</p>
+          <p class="text-[12px] text-red-400 font-black uppercase tracking-widest mb-4">Could not load news</p>
           <button type="button" onclick="window.fetchNews()" class="px-5 py-2 rounded-lg border border-blue-500/40 text-blue-400 text-xs font-mono font-bold hover:bg-blue-500/10 transition-all">
-            Retry
+            Try Again
           </button>
         </div>`;
     }
     if (previousNews && previousNews.length > 0) allNews = previousNews;
-    if (window.showToast) window.showToast("News feed unavailable. Retry or check connection.", "error");
+    if (window.showToast) window.showToast("News feed unavailable. Check your connection.", "error");
   } finally {
     if (loading) loading.classList.add("hidden");
+    const stamp = document.getElementById("news-last-updated");
+    if (stamp) stamp.innerText = `Updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
   }
 }
 window.filterNews = (searchTerm) => {
@@ -154,9 +156,9 @@ function displayNewsArticles(articles) {
   if (!articles || articles.length === 0) {
     container.innerHTML = `
       <div class="col-span-full p-10 text-center">
-        <p class="text-[12px] text-slate-500 font-black uppercase tracking-widest mb-3">Zero news fragments matching filters.</p>
-        <p class="text-[11px] text-slate-600 mb-4">Try another category or search term.</p>
-        <button type="button" onclick="window.clearNewsSearch(); window.fetchNews();" class="px-4 py-2 rounded-lg border border-white/20 text-slate-400 text-xs font-mono hover:bg-white/5 transition-all">Clear &amp; refresh</button>
+        <p class="text-[12px] text-slate-500 font-black uppercase tracking-widest mb-3">No articles found.</p>
+        <p class="text-[11px] text-slate-600 mb-4">Try a different category or clear your search.</p>
+        <button type="button" onclick="window.clearNewsSearch(); window.fetchNews();" class="px-4 py-2 rounded-lg border border-white/20 text-slate-400 text-xs font-mono hover:bg-white/5 transition-all">Clear &amp; Refresh</button>
       </div>`;
     return;
   }
@@ -214,7 +216,7 @@ async function fetchGDELTEvents(country) {
   const container = document.getElementById("gdelt-events-content");
   if (!container) return;
   container.innerHTML =
-    '<div class="text-slate-500 text-xs animate-pulse py-2">Scanning GDELT intelligence matrix...</div>';
+    '<div class="text-slate-500 text-xs animate-pulse py-2">Loading news events...</div>';
   try {
     const query = country
       ? `${country} sourcelang:english`
@@ -273,8 +275,8 @@ async function fetchGDELTEvents(country) {
     if (stamp) stamp.innerText = `GDELT · ${articles.length} events · Last 24h`;
   } catch (e) {
     container.innerHTML =
-      '<div class="text-slate-500 text-xs py-2">GDELT uplink failed. Events may be temporarily unavailable.</div>';
-    if (window.showToast) window.showToast("GDELT events unavailable.", "info");
+      '<div class="text-slate-500 text-xs py-2">Event data temporarily unavailable.</div>';
+    if (window.showToast) window.showToast("Event data unavailable.", "info");
   }
 }
 window.fetchGDELTEvents = fetchGDELTEvents;
@@ -296,3 +298,17 @@ async function fetchSeismicStatus() {
 window.fetchSeismicStatus = fetchSeismicStatus;
 fetchSeismicStatus();
 setInterval(fetchSeismicStatus, 300000);
+
+let _newsRefreshTimer = null;
+function startNewsAutoRefresh() {
+    if (_newsRefreshTimer) clearInterval(_newsRefreshTimer);
+    _newsRefreshTimer = setInterval(() => {
+        if (document.visibilityState === 'visible' && !isLiveSearching) {
+            fetchNews();
+        }
+    }, 5 * 60 * 1000);
+}
+startNewsAutoRefresh();
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') startNewsAutoRefresh();
+});

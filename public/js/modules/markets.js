@@ -200,6 +200,9 @@ function initializeMarkets(countryName) {
   displayCommodities();
   displayCoinGeckoTrending();
   displayCoinGeckoTop10();
+  
+  const stamp = document.getElementById("markets-last-updated");
+  if (stamp) stamp.innerText = `Updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
 }
 window.displayPreciousMetals = displayPreciousMetals;
 window.displayCountryIndices = displayCountryIndices;
@@ -273,3 +276,14 @@ async function displayCoinGeckoTop10() {
   }
 }
 window.displayCoinGeckoTop10 = displayCoinGeckoTop10;
+
+let _marketsRefreshTimer = null;
+function startMarketsAutoRefresh() {
+    if (_marketsRefreshTimer) clearInterval(_marketsRefreshTimer);
+    _marketsRefreshTimer = setInterval(() => {
+        if (document.visibilityState === 'visible' && window._currentTab === 'markets') {
+            initializeMarkets(window._currentCountryName || "Global");
+        }
+    }, 60 * 1000);
+}
+startMarketsAutoRefresh();

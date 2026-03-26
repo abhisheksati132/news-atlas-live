@@ -16,8 +16,8 @@ NewsAtlas is a cutting-edge Single Page Application (SPA) that transforms global
 
 ## 🛠 Tech Stack (Modern Full-Stack, Premium UI)
 
-- Frontend: React + Vite, Tailwind CSS, D3.js (Geospatial Visualization), TopoJSON, Canvas (Particle effects), Inter + JetBrains Mono for typography
-- UI/UX: Premium Apple-glass aesthetic with a11y-first approach; Storybook for UI catalog
+- Frontend: Vanilla JS + Vite, Tailwind CSS, D3.js (Geospatial Visualization), TopoJSON, Canvas (Particle effects), Inter + JetBrains Mono for typography
+- UI/UX: Premium Apple-glass aesthetic with an accessible, high-density dashboard matrix
 - Core Logic: Modern JS (ES2020+), Web Audio API (Procedural Sound), Web Speech API
 - Backend/Platform: Node.js 20+ with Express; Dockerized microservices; Kubernetes readiness options
 - Auth/DB: Firebase (Firestore & Google OAuth/Anonymous)
@@ -144,7 +144,8 @@ Power user navigation with full keyboard control:
    │       ├── search.js     -> Global Search Interface
    │       └── about.js      -> System Stats & CLI
    └── /css
-       └── landing.css  -> Tactical styling with glassmorphism
+       ├── landing.css  -> Tactical styling with glassmorphism
+       └── terminal.css -> Extracted core dashboard styles
 ```
 
 ---
@@ -169,12 +170,9 @@ Power user navigation with full keyboard control:
 
 ---
 
-## 📦 Tailwind CSS
+## 📦 Tailwind CSS & Build Process
 
-The app uses the **Tailwind CDN** (`cdn.tailwindcss.com`) for quick local development. The browser may show: *"cdn.tailwindcss.com should not be used in production."* For production (e.g. Vercel), either:
-
-- Keep using the CDN (simplest; the warning is a recommendation), or  
-- Install Tailwind as a dependency and build a static CSS file: see [Tailwind installation](https://tailwindcss.com/docs/installation).
+The application's styles and design tokens are compiled efficiently via the **Vite** build pipeline using `tailwind.config.js`. We deliberately migrated away from the heavy runtime Tailwind CDN scripts in favor of a locally bundled, pure Vanilla HTML/JS setup. This significantly improves bundle sizes, Initial Paint metrics, and cache reliability on edge networks like Vercel.
 
 ---
 

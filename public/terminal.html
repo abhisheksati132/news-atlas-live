@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>NewsAtlas | Global Intelligence Terminal</title>
+    <title>NewsAtlas | Global News Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://unpkg.com" crossorigin />
@@ -50,1402 +50,9 @@
     <meta name="apple-mobile-web-app-title" content="NewsAtlas" />
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              mono: ["JetBrains Mono", "monospace"],
-              sans: ["Inter", "sans-serif"],
-            },
-          },
-        },
-      };
-    </script>
 
     <script type="module" src="/js/app.js"></script>
-    <style>
-      :root {
-        --blue: #3b82f6;
-        --cyan: #06b6d4;
-        --emerald: #10b981;
-        --red: #ef4444;
-        --amber: #f59e0b;
-        --bg: #020617;
-        --glass: rgba(5, 15, 40, 0.93);
-        --border: rgba(59, 130, 246, 0.11);
-        --header-h: 74px;
-        --footer-h: 38px;
-        --sidebar-w: 420px;
-        --gap: 0.875rem;
-      }
-
-      *,
-      *::before,
-      *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-
-      html {
-        scroll-behavior: smooth;
-      }
-
-      body {
-        font-family:
-          "Inter",
-          "Segoe UI",
-          system-ui,
-          -apple-system,
-          sans-serif;
-        font-size: 14px;
-        line-height: 1.5;
-        background-color: var(--bg);
-        background-image:
-          radial-gradient(
-            ellipse at 0% 0%,
-            rgba(59, 130, 246, 0.06) 0,
-            transparent 55%
-          ),
-          radial-gradient(
-            ellipse at 100% 100%,
-            rgba(6, 182, 212, 0.04) 0,
-            transparent 55%
-          );
-        background-size: auto;
-        color: #f1f5f9;
-        overflow-x: hidden;
-        overflow-y: auto;
-        width: 100vw;
-        padding-top: calc(var(--header-h) + 1.25rem);
-        padding-bottom: calc(var(--footer-h) + 1.25rem);
-        cursor: default;
-      }
-
-      body::before {
-        display: none;
-      }
-
-      body::after {
-        display: none;
-      }
-
-      .glass-panel {
-        border-radius: 1.25rem;
-        background: rgba(15, 23, 42, 0.9);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        transition: all 0.2s ease;
-        box-shadow:
-          0 4px 6px -1px rgb(0 0 0 / 0.1),
-          0 2px 4px -2px rgb(0 0 0 / 0.1);
-        will-change: transform, opacity;
-      }
-
-      .glass-panel:hover {
-        border-color: rgba(59, 130, 246, 0.3);
-        background: rgba(15, 23, 42, 0.95);
-        box-shadow:
-          0 10px 15px -3px rgb(0 0 0 / 0.1),
-          0 4px 6px -4px rgb(0 0 0 / 0.1);
-      }
-
-      :focus-visible {
-        outline: 2px solid var(--blue);
-        outline-offset: 2px;
-      }
-
-      button:focus-visible,
-      .nav-tab:focus-visible,
-      [role="tab"]:focus-visible {
-        outline: 2px solid var(--cyan);
-        outline-offset: 2px;
-      }
-
-      .map-ctrl-btn:focus,
-      .map-ctrl-btn:focus-visible {
-        outline: none !important;
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        *,
-        *::before,
-        *::after {
-          animation-duration: 0.01ms !important;
-          animation-iteration-count: 1 !important;
-          transition-duration: 0.01ms !important;
-        }
-      }
-
-      .crt-overlay {
-        display: none;
-      }
-
-      .crt-vignette {
-        display: none;
-      }
-
-      .holo-hud-marker {
-        width: max-content;
-        color: #67e8f9;
-        font-family: "JetBrains Mono", monospace;
-        padding: 5px;
-        position: relative;
-        transform-style: preserve-3d;
-        transform-origin: bottom center;
-        transition: all 0.3s ease;
-        animation: holoFadeIn 0.5s ease-out forwards;
-        pointer-events: none;
-      }
-
-      .holo-hud-line {
-        position: absolute;
-        width: 2px;
-        height: 30px;
-        background: linear-gradient(
-          to bottom,
-          rgba(6, 182, 212, 0.8),
-          transparent
-        );
-        bottom: -30px;
-        left: 50%;
-        transform: translateX(-50%);
-        box-shadow: 0 0 8px rgba(6, 182, 212, 0.8);
-      }
-
-      .holo-hud-base {
-        position: absolute;
-        width: 12px;
-        height: 4px;
-        background: rgba(6, 182, 212, 0.8);
-        border-radius: 50%;
-        bottom: -32px;
-        left: 50%;
-        transform: translateX(-50%);
-        box-shadow: 0 0 10px rgba(6, 182, 212, 1);
-      }
-
-      @keyframes holoFadeIn {
-        0% {
-          opacity: 0;
-          transform: translateY(20px) scale(0.8);
-        }
-
-        100% {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-        }
-      }
-
-      .hud-title {
-        font-size: 14px;
-        font-weight: 700;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: #fff;
-        margin-bottom: 2px;
-      }
-
-      .hud-stat {
-        font-size: 11px;
-        font-weight: 600;
-        color: #94a3b8;
-        display: flex;
-        justify-content: flex-start;
-        gap: 12px;
-        margin-top: 4px;
-      }
-
-      .hud-stat span {
-        color: #38bdf8;
-      }
-
-      header {
-        height: var(--header-h);
-        padding: 0 1.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 0.75rem;
-        position: fixed;
-        top: 0.75rem;
-        left: 50%;
-        transform: translateX(-50%);
-        width: calc(100% - 2rem);
-        max-width: 1400px;
-        will-change: transform;
-        will-change: transform;
-        z-index: 50;
-        border-radius: 1.25rem;
-        background: rgba(15, 23, 42, 0.9);
-        border: 1px solid rgba(255, 255, 255, 0.04);
-        box-shadow:
-          0 4px 6px -1px rgb(0 0 0 / 0.1),
-          0 2px 4px -2px rgb(0 0 0 / 0.1);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-      }
-
-      header::-webkit-scrollbar {
-        display: none;
-      }
-
-      .main-content {
-        padding: 1rem 6vw;
-        gap: 1.25rem;
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        max-width: 1400px;
-        margin: 0 auto;
-      }
-
-      .map-box {
-        position: relative;
-        width: 100%;
-        height: calc(100vh - var(--header-h) - var(--footer-h) - 3.5rem);
-        min-height: 400px;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        flex-shrink: 0;
-        transition: all 0.3s ease;
-
-        border-radius: 1.25rem;
-        background: #020617;
-        border: 1px solid rgba(255, 255, 255, 0.04);
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-      }
-
-      .map-interaction-overlay {
-        position: absolute;
-        inset: 0;
-        z-index: 40;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        background: rgba(2, 6, 23, 0.35);
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
-        cursor: default;
-        pointer-events: none;
-        opacity: 1;
-      }
-
-      #world-map {
-        background-image:
-          radial-gradient(
-            circle at 50% 50%,
-            rgba(15, 23, 42, 0.4) 0%,
-            rgba(2, 6, 23, 0.9) 100%
-          ),
-          url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E"),
-          repeating-radial-gradient(
-            circle at center,
-            transparent 0,
-            transparent 20px,
-            rgba(255, 255, 255, 0.02) 20px,
-            rgba(255, 255, 255, 0.02) 21px
-          );
-      }
-
-      .country {
-        stroke: rgba(255, 255, 255, 0.15);
-        stroke-width: 0.5;
-        opacity: 0.9;
-        transition:
-          opacity 0.4s ease,
-          filter 0.4s ease,
-          stroke 0.2s ease;
-      }
-
-      .country:hover {
-        opacity: 1;
-        stroke: rgba(255, 255, 255, 0.5);
-        stroke-width: 1;
-        filter: brightness(1.2) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
-        cursor: crosshair;
-      }
-
-      @keyframes spinRadar {
-        from {
-          transform: rotate(0deg);
-        }
-
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      .mapboxgl-scroll-zoom-blocker,
-      .mapboxgl-touch-drag-pan-multi-finger {
-        background: rgba(2, 6, 23, 0.85) !important;
-        backdrop-filter: blur(8px) !important;
-        border: 1px solid rgba(6, 182, 212, 0.3) !important;
-        color: #06b6d4 !important;
-        font-family: "JetBrains Mono", monospace !important;
-        font-size: 13px !important;
-        font-weight: bold !important;
-        letter-spacing: 0.1em !important;
-        text-transform: uppercase !important;
-        border-radius: 1.25rem !important;
-        padding: 24px 32px !important;
-        text-align: center !important;
-        box-shadow: 0 0 30px rgba(6, 182, 212, 0.15) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        pointer-events: none !important;
-      }
-
-      .mapboxgl-scroll-zoom-blocker::before {
-        content: "📡 ";
-        margin-right: 8px;
-      }
-
-      @keyframes pulseRadar {
-        0% {
-          transform: scale(0.95);
-          opacity: 0.8;
-        }
-
-        50% {
-          transform: scale(1.05);
-          opacity: 0.3;
-        }
-
-        100% {
-          transform: scale(0.95);
-          opacity: 0.8;
-        }
-      }
-
-      @keyframes cyan-glow-pulse {
-        0% {
-          border-color: rgba(6, 182, 212, 0.5);
-          box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4);
-        }
-
-        50% {
-          border-color: rgba(6, 182, 212, 1);
-          box-shadow: 0 0 20px 4px rgba(6, 182, 212, 0.6);
-          background: rgba(6, 182, 212, 0.1);
-        }
-
-        100% {
-          border-color: rgba(6, 182, 212, 0.5);
-          box-shadow: 0 0 0 0 rgba(6, 182, 212, 0);
-        }
-      }
-
-      .cyan-glow-pulse {
-        animation: cyan-glow-pulse 1.5s ease-out infinite;
-      }
-
-      #quake-toggle-btn.active {
-        color: #f97316 !important;
-        filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.8));
-      }
-
-      #aircraft-toggle-btn.active {
-        color: #3b82f6 !important;
-        filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.8));
-      }
-
-      #airquality-toggle-btn.active {
-        color: #10b981 !important;
-        filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.8));
-      }
-
-      #clouds-toggle-btn.active {
-        color: #bae6fd !important;
-        filter: drop-shadow(0 0 4px rgba(186, 230, 253, 0.8));
-      }
-
-      #wind-toggle-btn.active {
-        color: #22d3ee !important;
-        filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.8));
-      }
-
-      #gdelt-toggle-btn.active {
-        color: #ef4444 !important;
-        filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.8));
-      }
-
-      #chronos-toggle-btn.active {
-        color: #a855f7 !important;
-        filter: drop-shadow(0 0 4px rgba(168, 85, 247, 0.8));
-      }
-
-      @keyframes mapscan {
-        0% {
-          top: -2px;
-        }
-
-        100% {
-          top: 100%;
-        }
-      }
-
-      .map-scan-line {
-        position: absolute;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          rgba(6, 182, 212, 0.35),
-          transparent
-        );
-        animation: mapscan 5s linear infinite;
-        pointer-events: none;
-        z-index: 5;
-      }
-
-      .intel-sidebar {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        overflow: visible;
-        flex-shrink: 0;
-        min-height: 100vh;
-      }
-
-      .country {
-        stroke: #020617;
-        stroke-width: 0.4;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: pointer;
-      }
-
-      .country:hover {
-        fill: #1e3a5f;
-        filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
-      }
-
-      .country.active {
-        fill: var(--blue);
-        stroke: rgba(255, 255, 255, 0.6);
-        stroke-width: 1.5;
-        filter: drop-shadow(0 0 25px rgba(59, 130, 246, 0.7));
-      }
-
-      .apple-glass {
-        background: rgba(4, 10, 25, 0.4);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 1.25rem;
-        padding: 1rem 1.25rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        box-shadow: 0 8px 32px 0 rgba(31, 50, 100, 0.15);
-        backdrop-filter: blur(28px) saturate(180%);
-        -webkit-backdrop-filter: blur(28px) saturate(180%);
-      }
-
-      .apple-glass:hover {
-        background: rgba(4, 10, 25, 0.5);
-        border-color: rgba(255, 255, 255, 0.12);
-        transform: translateY(-2px);
-        box-shadow:
-          0 10px 40px 0 rgba(31, 50, 100, 0.3),
-          inset 0 1px 0 rgba(255, 255, 255, 0.06);
-      }
-
-      @keyframes slideInCard {
-        from {
-          opacity: 0;
-          transform: translateY(14px);
-        }
-
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .news-card-animate {
-        animation: slideInCard 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
-      }
-
-      .news-card-featured {
-        background: linear-gradient(
-          135deg,
-          rgba(59, 130, 246, 0.06),
-          rgba(6, 182, 212, 0.03)
-        ) !important;
-        border-color: rgba(59, 130, 246, 0.25) !important;
-      }
-
-      .news-card-featured:hover {
-        border-color: rgba(59, 130, 246, 0.45) !important;
-        box-shadow:
-          0 0 30px rgba(59, 130, 246, 0.1),
-          inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
-      }
-
-      .sentiment-negative {
-        background: rgba(239, 68, 68, 0.12);
-        color: #f87171;
-        border: 1px solid rgba(239, 68, 68, 0.25);
-      }
-
-      .sentiment-positive {
-        background: rgba(16, 185, 129, 0.12);
-        color: #34d399;
-        border: 1px solid rgba(16, 185, 129, 0.25);
-      }
-
-      .sentiment-neutral {
-        background: rgba(245, 158, 11, 0.12);
-        color: #fbbf24;
-        border: 1px solid rgba(245, 158, 11, 0.2);
-      }
-
-      @keyframes countUp {
-        from {
-          opacity: 0;
-          transform: translateY(6px);
-        }
-
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .animate-countup {
-        animation: countUp 0.5s ease both;
-      }
-
-      .headline-ticker-wrap {
-        overflow: hidden;
-        white-space: nowrap;
-        border-top: 1px solid rgba(255, 255, 255, 0.04);
-        background: rgba(2, 6, 23, 0.6);
-      }
-
-      .headline-ticker-content {
-        display: inline-flex;
-        gap: 0;
-        animation: marquee 40s linear infinite;
-      }
-
-      .headline-ticker-item {
-        display: inline-flex;
-        align-items: center;
-        padding: 0 1.25rem;
-        font-size: 9px;
-        font-family: "JetBrains Mono", monospace;
-        color: rgba(148, 163, 184, 0.75);
-        white-space: nowrap;
-      }
-
-      #cmd-palette-overlay {
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-      }
-
-      @keyframes paletteDrop {
-        from {
-          opacity: 0;
-          transform: translateY(-12px) scale(0.98);
-        }
-
-        to {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-        }
-      }
-
-      #cmd-palette-box {
-        animation: paletteDrop 0.2s cubic-bezier(0.4, 0, 0.2, 1) both;
-      }
-
-      .nav-tab {
-        transition: all 0.25s ease;
-        background: transparent;
-        border: none;
-        border-bottom: 2px solid transparent;
-        cursor: pointer;
-        font-family: "JetBrains Mono", monospace;
-        font-size: 11px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        flex: 1 1 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        padding: 0.85rem 0;
-        color: rgba(100, 116, 139, 0.75);
-        appearance: none;
-        white-space: nowrap;
-      }
-
-      .nav-tab:hover {
-        color: #e2e8f0;
-        background: rgba(59, 130, 246, 0.06);
-      }
-
-      .nav-tab.active {
-        color: var(--blue);
-        border-bottom-color: var(--blue);
-        background: rgba(59, 130, 246, 0.05);
-        text-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
-      }
-
-      .intel-tab {
-        cursor: pointer;
-        font-family: "JetBrains Mono", monospace;
-        font-size: 10px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.15em;
-        color: rgba(100, 116, 139, 0.7);
-        padding: 0.6rem 0;
-        margin-right: 1.5rem;
-        transition: all 0.25s ease;
-        white-space: nowrap;
-        position: relative;
-      }
-
-      .intel-tab:hover {
-        color: #e2e8f0;
-      }
-
-      .intel-tab.active {
-        color: var(--blue);
-      }
-
-      .intel-tab.active::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 1.5px;
-        background: var(--blue);
-        box-shadow: 0 0 8px var(--blue);
-      }
-
-      .tab-content {
-        display: none;
-        height: 100%;
-        flex-direction: column;
-        overflow: visible;
-      }
-
-      .tab-content.active {
-        display: flex;
-      }
-
-      .content-scroll-area {
-        flex: 1;
-        overflow-y: visible;
-        padding: 0.85rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-      }
-
-      #articles-container {
-        display: grid;
-        grid-template-columns: repeat(1, 1fr);
-        gap: 1rem;
-      }
-
-      @media (min-width: 768px) {
-        #articles-container {
-          grid-template-columns: repeat(2, 1fr);
-        }
-      }
-
-      @media (min-width: 1024px) {
-        #articles-container {
-          grid-template-columns: repeat(3, 1fr);
-        }
-      }
-
-      .ticker-wrap {
-        width: 100%;
-        overflow: hidden;
-        white-space: nowrap;
-      }
-
-      .ticker {
-        display: inline-block;
-        padding-left: 100%;
-        animation: ticker-anim 45s linear infinite;
-      }
-
-      .ticker-item {
-        display: inline-block;
-        padding: 0 0.875rem;
-        font-size: 9px;
-        font-family: "JetBrains Mono", monospace;
-        font-weight: 600;
-        letter-spacing: 0.02em;
-      }
-
-      @keyframes ticker-anim {
-        0% {
-          transform: translate3d(0, 0, 0);
-        }
-
-        100% {
-          transform: translate3d(-100%, 0, 0);
-        }
-      }
-
-      .skeleton {
-        background: linear-gradient(
-          90deg,
-          rgba(255, 255, 255, 0.02) 25%,
-          rgba(255, 255, 255, 0.05) 50%,
-          rgba(255, 255, 255, 0.02) 75%
-        );
-        background-size: 200% 100%;
-        animation: skel 1.5s infinite linear;
-      }
-
-      @keyframes skel {
-        0% {
-          background-position: 200% 0;
-        }
-
-        100% {
-          background-position: -200% 0;
-        }
-      }
-
-      .animate-marquee {
-        display: inline-block;
-        animation: marquee 50s linear infinite;
-      }
-
-      @keyframes marquee {
-        0% {
-          transform: translateX(0);
-        }
-
-        100% {
-          transform: translateX(-50%);
-        }
-      }
-
-      ::-webkit-scrollbar {
-        width: 3px;
-      }
-
-      ::-webkit-scrollbar-thumb {
-        background: rgba(59, 130, 246, 0.3);
-        border-radius: 10px;
-      }
-
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-
-      .no-scrollbar::-webkit-scrollbar {
-        display: none;
-      }
-
-      .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
-
-      #about-overlay {
-        background: rgba(2, 6, 23, 0.98);
-        backdrop-filter: blur(24px);
-        z-index: 1000;
-      }
-
-      /* Social icon hover glow effects in about header */
-      .about-social-link {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 28px;
-        height: 28px;
-        border-radius: 8px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        background: rgba(255, 255, 255, 0.04);
-        color: rgba(148, 163, 184, 0.7);
-        font-size: 12px;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        text-decoration: none;
-        cursor: pointer;
-      }
-
-      .about-social-link:hover {
-        transform: translateY(-2px) scale(1.12);
-      }
-
-      .about-social-link.github:hover {
-        background: rgba(255, 255, 255, 0.12);
-        border-color: rgba(255, 255, 255, 0.35);
-        color: #ffffff;
-        box-shadow: 0 0 14px rgba(255, 255, 255, 0.2);
-      }
-
-      .about-social-link.linkedin:hover {
-        background: rgba(10, 102, 194, 0.2);
-        border-color: rgba(10, 102, 194, 0.6);
-        color: #0a66c2;
-        box-shadow: 0 0 14px rgba(10, 102, 194, 0.35);
-      }
-
-      .about-social-link.instagram:hover {
-        background: rgba(225, 48, 108, 0.15);
-        border-color: rgba(225, 48, 108, 0.5);
-        color: #e1306c;
-        box-shadow: 0 0 14px rgba(225, 48, 108, 0.3);
-      }
-
-      .tactical-btn {
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      @media (max-width: 1023px) {
-        .tactical-btn {
-          min-width: 44px;
-          min-height: 44px;
-        }
-      }
-
-      .tactical-btn:hover {
-        transform: scale(1.08);
-        filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.55));
-      }
-
-      .signal-blue {
-        border-left: 3px solid var(--blue);
-      }
-
-      .signal-emerald {
-        border-left: 3px solid var(--emerald);
-      }
-
-      .signal-red {
-        border-left: 3px solid var(--red);
-      }
-
-      .skill-tag {
-        background: rgba(59, 130, 246, 0.1);
-        border: 1px solid rgba(59, 130, 246, 0.25);
-        color: #60a5fa;
-        font-size: 10px;
-        font-weight: 900;
-        font-family: "JetBrains Mono", monospace;
-        padding: 5px 12px;
-        border-radius: 6px;
-        text-transform: uppercase;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-      }
-
-      .skill-dot {
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background: #60a5fa;
-        box-shadow: 0 0 5px #60a5fa;
-      }
-
-      .meter-bg {
-        background: rgba(255, 255, 255, 0.08);
-        height: 3px;
-        width: 100%;
-        border-radius: 2px;
-        overflow: hidden;
-        margin-top: 5px;
-      }
-
-      .meter-fill {
-        height: 100%;
-        background: var(--blue);
-        width: 0%;
-        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 0 6px var(--blue);
-      }
-
-      .scanner-container {
-        position: relative;
-        overflow: hidden;
-      }
-
-      .scanner-line {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-          to bottom,
-          transparent,
-          rgba(59, 130, 246, 0.7),
-          transparent
-        );
-        transform: translateY(-150%);
-        animation: scan-anim 2.5s infinite linear;
-      }
-
-      @keyframes scan-anim {
-        0% {
-          transform: translateY(-150%);
-        }
-
-        100% {
-          transform: translateY(150%);
-        }
-      }
-
-      @keyframes blink {
-        0%,
-        100% {
-          opacity: 1;
-        }
-
-        50% {
-          opacity: 0;
-        }
-      }
-
-      .typing-cursor::after {
-        content: "|";
-        animation: blink 1s infinite;
-      }
-
-      .map-ctrl-btn {
-        width: 36px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        background: rgba(255, 255, 255, 0.03);
-        transition: all 0.2s ease;
-        cursor: pointer;
-        color: rgba(148, 163, 184, 0.7);
-      }
-
-      .map-ctrl-btn:hover {
-        background: rgba(59, 130, 246, 0.1);
-        border-color: rgba(59, 130, 246, 0.3);
-        color: #e2e8f0;
-      }
-
-      @keyframes logFade {
-        0% {
-          opacity: 0;
-          transform: translateX(-8px);
-        }
-
-        100% {
-          opacity: 1;
-          transform: translateX(0);
-        }
-      }
-
-      .log-entry {
-        animation: logFade 0.3s ease-out forwards;
-      }
-
-      #map-tooltip {
-        pointer-events: none;
-        z-index: 100;
-        transition: all 0.1s ease-out;
-        backdrop-filter: blur(8px);
-        font-family: "JetBrains Mono", monospace;
-      }
-
-      .day-mode {
-        --solar-glow: rgba(59, 130, 246, 0.08);
-      }
-
-      .night-mode {
-        --solar-glow: rgba(139, 92, 246, 0.12);
-      }
-
-      #ai-briefing-text {
-        font-family: "JetBrains Mono", monospace;
-        font-size: 11px;
-        line-height: 1.75;
-      }
-
-      ::selection {
-        background: rgba(59, 130, 246, 0.3);
-        color: #fff;
-      }
-
-      .glass-panel-enhanced {
-        background: rgba(5, 15, 40, 0.4);
-        backdrop-filter: blur(40px) saturate(180%);
-        -webkit-backdrop-filter: blur(40px) saturate(180%);
-        border: 1px solid rgba(255, 255, 255, 0.03);
-        border-radius: 24px;
-        box-shadow:
-          0 8px 32px rgba(0, 0, 0, 0.4),
-          inset 0 1px 0 rgba(255, 255, 255, 0.1),
-          0 0 60px rgba(59, 130, 246, 0.05);
-      }
-
-      .loading-pulse {
-        animation: loading-pulse 2s ease-in-out infinite;
-      }
-
-      @keyframes loading-pulse {
-        0%,
-        100% {
-          opacity: 0.4;
-        }
-
-        50% {
-          opacity: 1;
-        }
-      }
-
-      * {
-        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      .map-ctrl-btn.active {
-        background: rgba(59, 130, 246, 0.2) !important;
-        border-color: rgba(59, 130, 246, 0.5) !important;
-        color: #60a5fa !important;
-      }
-
-      .map-ctrl-btn.active-red {
-        background: rgba(239, 68, 68, 0.2) !important;
-        border-color: rgba(239, 68, 68, 0.5) !important;
-        color: #f87171 !important;
-      }
-
-      .map-ctrl-btn.active-amber {
-        background: rgba(245, 158, 11, 0.2) !important;
-        border-color: rgba(245, 158, 11, 0.5) !important;
-        color: #fbbf24 !important;
-      }
-
-      #map-interaction-overlay:hover .fixed-label {
-        opacity: 1;
-      }
-
-      #map-interaction-overlay:hover #map-hint-click {
-        opacity: 0.7;
-      }
-
-      .apple-glass.enhanced {
-        background: rgba(4, 10, 25, 0.6);
-        backdrop-filter: blur(28px) saturate(180%);
-        -webkit-backdrop-filter: blur(28px) saturate(180%);
-        border: 1px solid rgba(255, 255, 255, 0.03);
-        box-shadow:
-          0 8px 32px 0 rgba(31, 50, 100, 0.37),
-          inset 0 1px 0 rgba(255, 255, 255, 0.06);
-      }
-
-      .shortcuts-overlay {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(4, 10, 25, 0.85);
-        backdrop-filter: blur(28px) saturate(180%);
-        -webkit-backdrop-filter: blur(28px) saturate(180%);
-        padding: 1.5rem 2rem;
-        border-radius: 1rem;
-        border: 1px solid rgba(255, 255, 255, 0.03);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
-        font-family: "JetBrains Mono", monospace;
-        font-size: 11px;
-        z-index: 1000;
-        display: none;
-        width: 650px;
-        max-width: 90vw;
-      }
-
-      .shortcuts-overlay.active {
-        display: block;
-        animation: popCenter 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      }
-
-      @keyframes popCenter {
-        from {
-          opacity: 0;
-          transform: translate(-50%, -45%) scale(0.96);
-        }
-
-        to {
-          opacity: 1;
-          transform: translate(-50%, -50%) scale(1);
-        }
-      }
-
-      .shortcut-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.4rem 0;
-        border-bottom: 1px dashed rgba(255, 255, 255, 0.04);
-      }
-
-      .shortcut-key {
-        background: rgba(59, 130, 246, 0.1);
-        border: 1px solid rgba(59, 130, 246, 0.3);
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-weight: 700;
-        color: #60a5fa;
-      }
-
-      @keyframes toastIn {
-        from {
-          opacity: 0;
-          transform: translateY(12px);
-        }
-
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @keyframes toastOut {
-        to {
-          opacity: 0;
-          transform: translateY(-8px);
-        }
-      }
-
-      .animate-toast-in {
-        animation: toastIn 0.3s ease forwards;
-      }
-
-      .animate-toast-out {
-        animation: toastOut 0.3s ease forwards;
-      }
-
-      .nav-tab:focus-visible,
-      .map-ctrl-btn:focus-visible,
-      button:focus-visible,
-      [tabindex]:focus-visible {
-        outline: 2px solid var(--blue);
-        outline-offset: 2px;
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        .map-scan-line,
-        .pulse-ring,
-        .status-dot,
-        .animate-pulse {
-          animation: none !important;
-        }
-
-        .ticker-track {
-          animation-duration: 60s !important;
-        }
-      }
-
-      .tab-content {
-        transition: opacity 0.2s ease;
-      }
-
-      .tab-content:not(.active) {
-        opacity: 0;
-        pointer-events: none;
-        position: absolute;
-      }
-
-      .tab-content.active {
-        opacity: 1;
-      }
-
-      .layer-legend {
-        font-family: "JetBrains Mono", monospace;
-        font-size: 9px;
-        padding: 4px 8px;
-        border-radius: 6px;
-        background: rgba(2, 6, 23, 0.85);
-        border: 1px solid rgba(59, 130, 246, 0.2);
-      }
-
-      @media (max-width: 1023px) {
-        header {
-          overflow-x: auto;
-          justify-content: flex-start;
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-          overflow: auto;
-        }
-
-        header::-webkit-scrollbar {
-          display: none;
-        }
-
-        .main-content {
-          height: auto;
-          overflow: visible;
-        }
-
-        .map-box {
-          height: 50vh !important;
-          min-height: 280px !important;
-          flex: none !important;
-        }
-
-        .intel-sidebar .tab-content {
-          padding-bottom: 2rem;
-        }
-
-        .map-ctrl-btn {
-          min-width: 40px;
-          min-height: 40px;
-        }
-      }
-
-      .tab-ai-chat {
-        background: rgba(15, 23, 42, 0.95);
-        border: 1px solid rgba(59, 130, 246, 0.15);
-        border-radius: 1.25rem;
-        padding: 12px 14px;
-        margin-bottom: 0;
-        flex-shrink: 0;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-      }
-
-      .tab-ai-chat-header {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-bottom: 8px;
-      }
-
-      .tab-ai-chat-response {
-        font-family: "JetBrains Mono", monospace;
-        font-size: 13px;
-        line-height: 1.7;
-        color: #94a3b8;
-        min-height: 0;
-        max-height: 0;
-        overflow: hidden;
-        transition:
-          max-height 0.4s ease,
-          padding 0.3s ease;
-      }
-
-      .tab-ai-chat-response.open {
-        max-height: 280px;
-        overflow-y: auto;
-        padding-top: 8px;
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-        margin-top: 8px;
-      }
-
-      .tab-ai-thinking {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-      }
-
-      .tab-ai-thinking span {
-        display: inline-block;
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background: #3b82f6;
-        animation: ai-pulse 1.2s ease-in-out infinite;
-      }
-
-      .tab-ai-thinking span:nth-child(2) {
-        animation-delay: 0.2s;
-      }
-
-      .tab-ai-thinking span:nth-child(3) {
-        animation-delay: 0.4s;
-      }
-
-      @keyframes ai-pulse {
-        0%,
-        100% {
-          opacity: 0.2;
-          transform: scale(0.8);
-        }
-
-        50% {
-          opacity: 1;
-          transform: scale(1.2);
-        }
-      }
-
-      .tab-ai-input {
-        flex: 1;
-        background: transparent;
-        border: none;
-        outline: none;
-        color: #e2e8f0;
-        font-family: "JetBrains Mono", monospace;
-        font-size: 13px;
-      }
-
-      .tab-ai-input::placeholder {
-        color: rgba(100, 116, 139, 0.5);
-      }
-
-      .tab-ai-send-btn {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.03);
-        color: #e2e8f0;
-        border-radius: 8px;
-        padding: 4px 12px;
-        font-family: "JetBrains Mono", monospace;
-        font-size: 11px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-      }
-
-      .tab-ai-send-btn:hover {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: rgba(255, 255, 255, 0.2);
-      }
-
-      .tracking-widest {
-        font-size: 12px !important;
-        font-weight: 900 !important;
-      }
-
-      @keyframes marquee {
-        0% {
-          transform: translateX(0);
-        }
-
-        100% {
-          transform: translateX(-50%);
-        }
-      }
-
-      .animate-marquee {
-        display: flex;
-        width: max-content;
-        animation: marquee 60s linear infinite;
-      }
-    </style>
+    <link rel="stylesheet" href="/css/terminal.css" />
   </head>
 
   <body class="flex flex-col day-mode">
@@ -1549,14 +156,13 @@
                 <span
                   class="text-blue-400 font-bold text-[11px] uppercase tracking-[.3em] opacity-80"
                   style="font-family: &quot;JetBrains Mono&quot;, monospace"
-                  >Global Intelligence Platform</span
+                  >Global News Platform</span
                 >
               </div>
               <p
                 class="text-[11px] text-slate-500 uppercase tracking-widest font-mono mt-0.5 opacity-70"
               >
-                Lead Architect &middot; Abhishek Sati &middot; About this
-                terminal
+                Creator &middot; Abhishek Sati &middot; About this dashboard
               </p>
             </div>
 
@@ -1755,7 +361,7 @@
                 <h3
                   class="text-[11px] font-black text-cyan-400 uppercase tracking-[.25em] mb-4 text-center"
                 >
-                  Active Telemetry
+                  Active Data Sources
                 </h3>
                 <ul class="space-y-4">
                   <li
@@ -1786,7 +392,7 @@
                     >
                       <i class="fas fa-rss flex text-emerald-400"></i>
                     </div>
-                    RSS Arrays &middot; Real-Time Live Intel
+                    RSS News Feeds &middot; Real-Time Articles
                   </li>
                   <li
                     class="flex items-center gap-3 text-xs text-slate-400 font-medium"
@@ -1809,7 +415,7 @@
                 <h3
                   class="text-[11px] font-black text-amber-400 uppercase tracking-[.25em] mb-4 text-center"
                 >
-                  Data Pipeline & Analysis
+                  Data & Analysis Pipeline
                 </h3>
                 <ul class="space-y-4">
                   <li
@@ -1830,7 +436,7 @@
                     >
                       <i class="fas fa-wave-square text-orange-400"></i>
                     </div>
-                    Procedural Tactile Audio Synthesis
+                    Sound Feedback &middot; UI Audio Effects
                   </li>
                   <li
                     class="flex items-center gap-3 text-xs text-slate-400 font-medium"
@@ -1861,7 +467,7 @@
                 <h3
                   class="text-[11px] font-black text-fuchsia-400 uppercase tracking-[.25em] mb-4 text-center"
                 >
-                  Tactical Enhancements
+                  More Features
                 </h3>
                 <ul class="space-y-4">
                   <li
@@ -1872,7 +478,7 @@
                     >
                       <i class="fas fa-satellite text-pink-400"></i>
                     </div>
-                    Deep Space Orbital Simulations
+                    ISS Live Position Tracking
                   </li>
                   <li
                     class="flex items-center gap-3 text-xs text-slate-400 font-medium"
@@ -1914,8 +520,8 @@
               <p
                 class="text-xs text-slate-400 text-center max-w-sm leading-relaxed mb-4 font-mono"
               >
-                Access the main Neural CLI for deep-system interactions, layer
-                overrides, and natural language sector queries.
+                Use the AI Assistant to ask questions about any country, get news summaries,
+                market analysis, or weather insights.
               </p>
               <button
                 onclick="
@@ -1924,7 +530,7 @@
                 "
                 class="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-blue-400 bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 transition-all shadow-[0_0_15px_rgba(59,130,246,0.15)] flex items-center gap-2"
               >
-                <i class="fas fa-terminal"></i> Initialize CLI
+                <i class="fas fa-comment-dots"></i> Open AI Assistant
               </button>
             </div>
           </div>
@@ -1940,7 +546,7 @@
             <span
               class="text-[11px] text-slate-500 font-bold uppercase tracking-widest"
               style="font-family: &quot;JetBrains Mono&quot;, monospace"
-              >System Online</span
+              >All systems online</span
             >
           </div>
           <div class="flex-1 flex justify-end min-w-0">
@@ -1978,7 +584,7 @@
             type="text"
             id="country-search"
             autocomplete="off"
-            placeholder="Sector designation..."
+            placeholder="Search countries..."
             class="w-full bg-transparent border-none outline-none text-[22px] font-black text-white placeholder-slate-800 tracking-tighter"
           />
           <button
@@ -2024,7 +630,7 @@
               class="text-[10px] uppercase tracking-[.3em] text-slate-500 font-black leading-none mt-1"
               style="font-family: &quot;JetBrains Mono&quot;, monospace"
             >
-              Intel Terminal
+              News Dashboard
             </p>
           </div>
         </div>
@@ -2045,7 +651,7 @@
           <i class="fas fa-search text-xs"></i>
           <span
             class="text-[10px] font-mono tracking-widest uppercase font-bold"
-            >Target Sector</span
+            >Search Countries</span
           >
         </button>
 
@@ -2059,14 +665,14 @@
           <span
             id="selected-country-name"
             class="font-black text-white text-[13px] uppercase truncate tracking-tight leading-none pt-0.5"
-            >GLOBAL SURVEILLANCE</span
+            >Worldwide</span
           >
           <span id="back-to-global-wrap" class="hidden"></span>
           <span
             id="neural-id"
             class="text-[9px] font-bold text-slate-500 uppercase tracking-[.15em] mt-0.5 leading-none"
             style="font-family: &quot;JetBrains Mono&quot;, monospace"
-            >handshake verified</span
+            >all feeds live</span
           >
         </div>
 
@@ -2193,7 +799,7 @@
                   ></span>
                   <span
                     class="text-[10px] font-black text-blue-300 uppercase tracking-widest mt-[1px]"
-                    >Planetary Grid Active</span
+                    >Map Ready</span
                   >
                 </div>
               </div>
@@ -3042,12 +1648,18 @@
                 <div class="apple-glass h-44 skeleton"></div>
               </div>
 
+              <div class="flex items-center justify-end px-1 pb-1">
+                <span id="news-last-updated" class="text-[9px] font-mono text-slate-600 tracking-wide"></span>
+              </div>
               <div id="articles-container"></div>
             </div>
           </div>
 
           <div id="tab-markets" class="tab-content">
             <div class="content-scroll-area space-y-4">
+              <div class="flex items-center justify-end px-1 pb-1 pt-2">
+                <span id="markets-last-updated" class="text-[9px] font-mono text-slate-600 tracking-wide"></span>
+              </div>
               <div class="tab-ai-chat">
                 <div class="tab-ai-chat-header">
                   <i class="fas fa-chart-line text-emerald-400 text-sm"></i>
@@ -5118,7 +3730,7 @@
                 text-transform: uppercase;
                 color: #60a5fa;
               "
-              >Neural CLI</span
+              >AI Assistant</span
             >
             <div
               style="
@@ -5162,7 +3774,7 @@
             type="text"
             autocomplete="off"
             spellcheck="false"
-            placeholder="Command or ask AI ANALYST"
+            placeholder="Ask a question or type a command..."
             style="
               flex: 1;
               background: transparent;
@@ -5398,5 +4010,11 @@
         }
       }, 3000);
     </script>
+    <div class="fixed inset-0 z-[10000] bg-slate-950 flex flex-col items-center justify-center p-8 text-center md:hidden border-t-4 border-t-blue-500">
+      <i class="fas fa-desktop text-4xl text-blue-500 mb-6"></i>
+      <h2 class="text-xl font-black text-white uppercase tracking-tighter mb-4">NewsAtlas Workspace</h2>
+      <p class="text-slate-400 font-mono text-xs leading-relaxed max-w-sm">This high-density dashboard is optimized for desktop displays. Please rotate your device or use a wider screen for the optimal experience.</p>
+      <a href="/" class="mt-8 px-5 py-2.5 rounded-lg border border-blue-500/30 text-blue-400 text-xs font-mono font-bold hover:bg-blue-500/10 transition-all uppercase tracking-widest">Return Home</a>
+    </div>
   </body>
 </html>

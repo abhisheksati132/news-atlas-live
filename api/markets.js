@@ -1,9 +1,28 @@
+const _mktCache = new Map();
+const MKT_TTL = 60 * 1000;
+function getMktCached(key) {
+  const hit = _mktCache.get(key);
+  if (!hit) return null;
+  if (Date.now() - hit.ts > MKT_TTL) { _mktCache.delete(key); return null; }
+  return hit.data;
+}
+function setMktCache(key, data) { _mktCache.set(key, { data, ts: Date.now() }); }
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
   if (req.method === "OPTIONS") return res.status(200).end();
   const { type, currency = "usd" } = req.query;
+
+  const cacheKey = `${type}|${(currency || "usd").toLowerCase()}`;
+  const cached = getMktCached(cacheKey);
+  if (cached) {
+    res.setHeader("X-Cache", "HIT");
+    return res.status(200).json({ ...cached, cachedAt: _mktCache.get(cacheKey)?.ts });
+  }
+
   try {
+
     if (type === "ticker") {
       const symbols = [
         { label: "S&P 500", ticker: "^GSPC" },
@@ -39,9 +58,9 @@ export default async function handler(req, res) {
         }
       };
       const results = await Promise.all(symbols.map(fetchTicker));
-      return res
-        .status(200)
-        .json({ type: "ticker", data: results.filter(Boolean) });
+      const tickerResult = { type: "ticker", data: results.filter(Boolean) };
+      setMktCache(cacheKey, tickerResult);
+      return res.status(200).json(tickerResult);
     }
     if (type === "crypto") {
       const cur = (currency || "usd").toLowerCase();

@@ -1,4 +1,4 @@
-// Simple in-memory TTL cache for API responses
+
 const cache = new Map()
 
 export function getCache(key) {

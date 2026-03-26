@@ -145,6 +145,23 @@ document.addEventListener("DOMContentLoaded", () => {
           delay(600).then(() =>
             animateCounter(document.getElementById("stat-markets"), 47, ""),
           );
+
+          // Add Dynamic Heartbeats
+          setInterval(() => {
+            const sourcesEl = document.getElementById("stat-sources");
+            if(sourcesEl) {
+              const current = 4700 + Math.floor(Math.random() * 8) - 3;
+              sourcesEl.textContent = current.toLocaleString() + "+";
+            }
+          }, 3500);
+
+          setInterval(() => {
+            const latEl = document.getElementById("stat-latency");
+            if(latEl) {
+              const lat = 42 + Math.floor(Math.random() * 12);
+              latEl.innerHTML = `<span class="text-amber-400">&lt;${lat}ms</span>`;
+            }
+          }, 2000);
         }
       },
       { threshold: 0.3 },

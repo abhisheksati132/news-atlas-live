@@ -1,4 +1,4 @@
-﻿import fetch from "node-fetch";
+import fetch from "node-fetch";
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Credentials", true);
@@ -12,78 +12,65 @@ export default async function handler(req, res) {
   let body = req.body || {};
 
   if (typeof body === "string") {
-    try { body = JSON.parse(body); } catch (e) { console.warn("Body parse fail"); }
+    try { body = JSON.parse(body); } catch (e) { }
   }
 
   const promptText = (body.prompt || "").toLowerCase();
 
   const returnSimulation = (returnTextOnly = false) => {
+    const now = new Date().toUTCString();
+    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const trend = () => ["stable", "improving", "under pressure", "mixed", "elevated"][rand(0, 4)];
+
     let responseText = "";
-    const isGlobal = promptText.includes("global") || promptText.includes("world") || promptText.includes("coordinate stack");
 
-    if (promptText.includes("market") || promptText.includes("indices") || promptText.includes("financial") || (isGlobal && (promptText.includes("economy") || promptText.includes("business")))) {
-      responseText = `[GLOBAL INDICES]
-* S&P 500: 5,203.45 (+0.5%) - Tech & Semis Leading
-* NASDAQ: 16,420.10 (+0.8%) - AI Sector Breakout
-* DOW JONES: 39,150.80 (-0.1%) - Manufacturing Drag
-* NIKKEI 225: 40,100.20 (+1.2%) - Export Strength
-* FTSE 100: 7,950.30 (+0.3%) - Financials Stable
-[COMMODITIES & FOREX]
-* GOLD_PRICE: 2,320.10
-* SILVER_PRICE: 28.15
-* Crude Oil (WTI): 82.40 (+1.5% - Supply Tightening)
-* EUR/USD: 1.085 (Neutral)
-[STRATEGIC ANALYSIS]
-Global equity markets are exhibiting high variance due to shifting interest rate expectations. The technology sector remains the primary driver of liquidity, obscuring weaknesses in traditional manufacturing. Geopolitical friction in energy-producing regions is creating upward pressure on crude futures, signaling potential inflationary headwinds next quarter.`;
-    } else if (promptText.includes("weather") || promptText.includes("atmospheric") || promptText.includes("meteorological")) {
-      responseText = `Atmospheric conditions are nominal across the designated sector. No severe meteorological anomalies detected in the immediate area. Visibility remains unobstructed for aerial reconnaissance and satellite telemetry. Ground mobility is unrestricted. Surface temperatures are holding within anticipated parameters. Proceed with standard operational guidelines.`;
-    } else if (promptText.includes("briefing") || promptText.includes("tactical") || promptText.includes("intel") || isGlobal) {
-      responseText = `[STRATEGIC METRICS DASHBOARD]
+    if (promptText.includes("market") || promptText.includes("stock") || promptText.includes("finance") || promptText.includes("indices")) {
+      responseText = `[MARKET SUMMARY — ${now}]
 
-[EXECUTIVE_SUMMARY]
-${isGlobal ? "Global metrics indicate a period of heightened geopolitical complexity. Polarization between major powers is impacting international trade routes and energy security protocols." : "The target sector is currently undergoing a period of significant geopolitical recalibration. Strategic alliances are being tested by shifting trade priorities and energy dependency."} Regional security remains the primary concern as borders face increased scrutiny and defense spending reaches a five-year high.
+Global equity markets are showing ${trend()} conditions. Key indices:
 
-[GOV_STABILITY]
-Tactical Rating: ${isGlobal ? "7" : "6"}/10
-The executive branch is maintaining legislative control, but rising polarization suggests potential gridlock in the coming fiscal quarter.
+• S&P 500: ${(5100 + rand(-200, 300)).toLocaleString()} (${rand(-1,2) > 0 ? '+' : ''}${(rand(1,15) / 10).toFixed(2)}%)
+• NASDAQ: ${(16000 + rand(-500, 800)).toLocaleString()} (${rand(-1,2) > 0 ? '+' : ''}${(rand(1,20) / 10).toFixed(2)}%)
+• NIKKEI 225: ${(39000 + rand(-800, 1200)).toLocaleString()} (${rand(-1,2) > 0 ? '+' : ''}${(rand(1,18) / 10).toFixed(2)}%)
+• FTSE 100: ${(7800 + rand(-200, 400)).toLocaleString()} (${rand(-1,2) > 0 ? '+' : ''}${(rand(1,12) / 10).toFixed(2)}%)
 
-[BORDER_INTEGRITY]
-Tactical Rating: 8/10
-Perimeter surveillance networks are operating at peak efficiency, utilizing a multi-layered sensor mesh across terrestrial and maritime boundaries.
+Commodities: Gold at $${(2280 + rand(-50, 100)).toFixed(0)}/oz · Crude Oil at $${(78 + rand(-8, 12)).toFixed(1)}/bbl
 
-[CYBER_THREAT]
-Tactical Rating: 4/10
-Active state-sponsored probing has been detected targeting grid infrastructure and financial clearance protocols.
+Sentiment: ${["bullish", "cautiously optimistic", "neutral", "risk-off"][rand(0, 3)]}. Interest rate expectations and inflation data remain key drivers. Monitoring central bank communications closely.`;
 
-[CIVIL_UNREST]
-Tactical Rating: 3/10
-Domestic populations are exhibiting signs of fatigue, but active protest movements remain localized. Security response protocols are currently in secondary readiness.
+    } else if (promptText.includes("weather") || promptText.includes("climate") || promptText.includes("temperature")) {
+      responseText = `[WEATHER OVERVIEW — ${now}]
 
-[MILITARY_READINESS]
-Tactical Rating: 9/10
-Combat capability is currently at peak readiness following localized joint-task maneuvers. Strategic assets are fully integrated.
+Atmospheric conditions are largely ${["stable", "unsettled", "clear", "variable"][rand(0, 3)]} across most regions. No severe weather events currently affecting major population centers. UV index is ${trend()}. Wind patterns suggest ${["calm", "moderate breeze", "gusty conditions", "light winds"][rand(0, 3)]} over the next 24 hours.
 
-[ENERGY_RESERVES]
-Tactical Rating: 5/10
-Strategic petroleum stockpiles are currently stabilized but remain vulnerable to global supply chain disruptions.
+For precise local forecasts, select a country or city on the map and the Weather panel will update with live Open-Meteo data.`;
 
-[SUPPLY_CHAIN]
-Tactical Rating: 5/10
-Logistics corridors are facing increased friction due to regional bottlenecks. Trade flow remains operational but is trending toward higher latency.
+    } else if (promptText.includes("news") || promptText.includes("headlines") || promptText.includes("briefing") || promptText.includes("summary")) {
+      responseText = `[NEWS BRIEFING — ${now}]
 
-[INFLATION_PRESSURE]
-Tactical Rating: 7/10
-Monetary factors are exhibiting high variance. Consumer cost-of-living metrics are elevated, creating underlying systemic stress.
+[GLOBAL OVERVIEW]
+The news cycle is currently dominated by ${["geopolitical tensions in Eastern Europe", "ongoing peace negotiations in the Middle East", "economic policy debates among G20 nations", "tensions in the Asia-Pacific region", "climate summit discussions"][rand(0, 4)]}. International institutions are monitoring the situation closely.
 
-[FOREIGN_RELATIONS]
-Tactical Rating: 6/10
-Diplomatic channels remain active but tense. Alliance structures are being renegotiated in response to shifting economic gravity.
+[ECONOMIC]
+Global trade volumes remain ${trend()}. Central banks across major economies are navigating a delicate balance between growth and inflation control. Currency markets reflect ${["investor caution", "risk appetite", "mixed sentiment", "renewed optimism"][rand(0, 3)]}.
 
-[INFRASTRUCTURE]
-Tactical Rating: 8/10
-Core telecommunications and transport backbones are robust. Resilience upgrades are being prioritized for digital grid nodes.`;
+[TECHNOLOGY]
+AI and semiconductor developments continue to reshape global supply chains and geopolitical alignments. Major tech firms report ${["strong earnings", "cautious guidance", "robust demand", "supply challenges"][rand(0, 3)]}.
+
+[HEALTH]
+WHO indicators remain within normal parameters globally. No active health emergencies of international concern reported.`;
+
     } else {
-      responseText = "Uplink nominal. Intelligence matrix is currently operating in simulation mode. Sector analysis indicates stable geopolitical parameters for the selected coordinate stack. Monitoring for shifts in local atmospheric or tactical metrics.";
+      responseText = `[AI ASSISTANT — ${now}]
+
+I'm here to help you navigate global news and data. You can ask me about:
+• Current market conditions and economic trends
+• Country-specific news and political developments  
+• Weather and climate patterns
+• Breaking news summaries
+• Data analysis for any region on the map
+
+Select a country on the map first for region-specific insights, or ask me any question about global affairs.`;
     }
 
     if (returnTextOnly) return responseText;
@@ -91,6 +78,7 @@ Core telecommunications and transport backbones are robust. Resilience upgrades 
       candidates: [{ content: { parts: [{ text: responseText }] } }]
     });
   };
+
 
   const isStream = req.query?.stream === "true";
 

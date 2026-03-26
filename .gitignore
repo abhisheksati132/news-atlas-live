@@ -18,6 +18,8 @@ yarn-error.log*
 
 # Build output
 dist/
+build_out.txt
+*.log
 build/
 .vite/
 .vite_cache/

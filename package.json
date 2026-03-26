@@ -22,7 +22,7 @@
     "rss-parser": "^3.13.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.4",
+    "@vitejs/plugin-react": "^6.0.1",
     "autoprefixer": "^10.4.17",
     "postcss": "^8.4.35",
     "react": "^18.3.1",

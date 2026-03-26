@@ -5,7 +5,7 @@ import '../css/global-fx.css';
 import './core/fetch-helper.js';
 import './core/audio.js';
 import './core/firebase.js';
-import './core/canvas-backdrop.js';
+
 
 // UI components
 import './ui/toast.js';

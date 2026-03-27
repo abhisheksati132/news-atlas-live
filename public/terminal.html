@@ -606,98 +606,81 @@
           class="flex items-center gap-4 cursor-pointer group shrink-0"
           onclick="resetToGlobalCenter(true)"
         >
-          <div class="relative w-12 h-12 shrink-0">
+          <div class="relative w-10 h-10 shrink-0">
             <div
-              class="absolute inset-0 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:rotate-6 group-hover:scale-110"
+              class="absolute inset-0 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110"
               style="
-                background: linear-gradient(135deg, #1d4ed8, #0e7490);
-                box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+                background: linear-gradient(135deg, #1d4ed8 0%, #0891b2 100%);
+                box-shadow: 0 0 16px rgba(59,130,246,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
               "
             >
-              <i class="fas fa-satellite-dish text-xl text-white"></i>
+              <i class="fas fa-satellite-dish text-base text-white"></i>
             </div>
             <div
-              class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-[#020617] animate-pulse"
+              class="absolute -top-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#020617] animate-pulse"
             ></div>
           </div>
-          <div class="shrink-0 flex items-center gap-3">
-            <h1 class="text-xl font-black tracking-tighter text-white leading-none">
+          <div class="shrink-0 flex items-center gap-2">
+            <h1 class="text-lg font-black tracking-tighter text-white leading-none">
               NEWS<span class="text-blue-400">ATLAS</span>
             </h1>
-            <div class="h-4 w-px bg-white/10 hidden lg:block"></div>
-            <p class="hidden lg:block text-[10px] uppercase tracking-[.3em] text-blue-400/60 font-black leading-none" style="font-family: 'JetBrains Mono', monospace">
-              TACTICAL DASHBOARD
-            </p>
+            <span class="hidden xl:block text-[8px] font-mono font-black text-blue-400/50 border border-blue-500/20 px-1.5 py-0.5 rounded tracking-widest uppercase">v3.7</span>
           </div>
         </div>
       </div>
 
-      <div
-        class="hidden sm:flex items-center justify-center shrink-0 z-10 gap-2.5"
-      >
-        <button
-          onclick="toggleSearch()"
-          class="flex items-center gap-3 px-4 h-11 rounded-xl shadow-sm text-slate-400 hover:text-white transition-colors"
-          style="
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-          "
-          title="Quick Search (/)"
-        >
-          <i class="fas fa-search text-xs"></i>
-          <span
-            class="text-[10px] font-mono tracking-widest uppercase font-bold"
-            >Search Countries</span
-          >
-        </button>
-
         <div
-          class="flex flex-col min-w-[200px] justify-center px-4 h-11 rounded-xl shadow-sm text-center"
-          style="
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-          "
+          class="hidden md:flex items-center justify-center shrink-0 z-10 gap-2"
         >
-          <span
-            id="selected-country-name"
-            class="font-black text-white text-[13px] uppercase truncate tracking-tight leading-none pt-0.5"
-            >Worldwide</span
+          <button
+            onclick="toggleSearch()"
+            class="flex items-center gap-2 px-3 h-9 rounded-lg shadow-sm text-slate-400 hover:text-white transition-colors"
+            style="
+              background: rgba(255,255,255,0.04);
+              border: 1px solid rgba(255,255,255,0.08);
+            "
+            title="Quick Search (/)"
           >
-          <span id="back-to-global-wrap" class="hidden"></span>
-          <span
-            id="neural-id"
-            class="text-[9px] font-bold text-slate-500 uppercase tracking-[.15em] mt-0.5 leading-none"
-            style="font-family: &quot;JetBrains Mono&quot;, monospace"
-            >all feeds live</span
-          >
-        </div>
+            <i class="fas fa-search text-xs"></i>
+            <span class="text-[9px] font-mono tracking-widest uppercase font-bold hidden lg:block">Search</span>
+          </button>
 
-        <div
-          class="flex flex-col justify-center px-4 h-11 rounded-xl shadow-sm"
-          style="
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-          "
-        >
-          <div class="flex items-center gap-2">
+          <div
+            class="flex flex-col min-w-[140px] justify-center px-3 h-9 rounded-lg shadow-sm text-center"
+            style="
+              background: rgba(255,255,255,0.04);
+              border: 1px solid rgba(255,255,255,0.08);
+            "
+          >
             <span
-              class="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-none"
-              >Seismic</span
+              id="selected-country-name"
+              class="font-black text-white text-[11px] uppercase truncate tracking-tight leading-none"
+              >Worldwide</span
             >
-            <div
-              class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse"
-            ></div>
+            <span id="back-to-global-wrap" class="hidden"></span>
+            <span
+              id="neural-id"
+              class="text-[8px] font-bold text-slate-500 uppercase tracking-[.15em] leading-none"
+              style="font-family: 'JetBrains Mono', monospace"
+              >all feeds live</span
+            >
           </div>
-          <div class="flex items-center gap-1.5 mt-0.5">
-            <span
-              id="seismic-count"
-              class="text-[13px] font-black text-amber-400 font-mono leading-none"
-              >--</span
-            >
-            <span
-              class="text-[9px] text-slate-500 font-bold uppercase tracking-tighter leading-none"
-              >Events/Hr</span
-            >
+
+          <div
+            class="flex flex-col justify-center px-3 h-9 rounded-lg shadow-sm"
+            style="
+              background: rgba(255,255,255,0.04);
+              border: 1px solid rgba(255,255,255,0.08);
+            "
+          >
+            <div class="flex items-center gap-1.5">
+              <span class="text-[8px] font-bold text-slate-500 uppercase tracking-widest leading-none">Seismic</span>
+              <div class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse"></div>
+            </div>
+            <div class="flex items-center gap-1 mt-0.5">
+              <span id="seismic-count" class="text-[12px] font-black text-amber-400 font-mono leading-none">--</span>
+              <span class="text-[8px] text-slate-500 font-bold uppercase tracking-tighter leading-none">Events/Hr</span>
+            </div>
           </div>
         </div>
 
@@ -720,86 +703,45 @@
           </div>
         </div>
       </div>
-      <div class="flex items-center gap-3 lg:gap-4 flex-1 basis-0 justify-end">
+      </div>
+      <div class="flex items-center gap-2 flex-1 basis-0 justify-end">
         <div
-          class="flex items-center gap-2.5 px-3.5 h-11 rounded-xl border border-white/[0.08] bg-white/[0.04] shrink-0 shadow-sm"
+          class="hidden lg:flex items-center gap-2 px-3 h-9 rounded-lg border border-white/[0.08] bg-white/[0.04] shrink-0"
         >
-          <button
-            onclick="upgradeToGoogle()"
-            class="text-slate-400 hover:text-white transition-all tactical-btn"
-            title="Verify Identity"
-          >
-            <i class="fas fa-user-shield text-base"></i>
-          </button>
-          <button
-            onclick="downloadDossier()"
-            class="text-slate-400 hover:text-white transition-all tactical-btn"
-            title="Download Intel Dossier"
-          >
-            <i class="fas fa-file-download text-base"></i>
-          </button>
-          <button
-            onclick="activateVoice()"
-            class="text-slate-400 hover:text-red-400 transition-all tactical-btn"
-            title="Voice Command"
-          >
-            <i class="fas fa-microphone text-base"></i>
-          </button>
-          <button
-            onclick="toggleGlobalAudio()"
-            id="audio-toggle-btn"
-            class="text-emerald-400 hover:text-white transition-all tactical-btn"
-            title="Toggle Global Audio"
-          >
-            <i
-              id="audio-icon"
-              class="fas fa-volume-up text-base relative z-10"
-            ></i>
-          </button>
-          <button
-            onclick="toggleAbout(true)"
-            class="text-slate-400 hover:text-emerald-400 transition-all tactical-btn"
-            title="About"
-          >
-            <i class="fas fa-info-circle text-base"></i>
-          </button>
+          <span id="system-time" class="text-[12px] font-black text-white leading-none tracking-wide" style="font-family: 'JetBrains Mono', monospace">00:00:00</span>
+          <span class="text-[8px] font-bold text-slate-500 uppercase tracking-[.1em] whitespace-nowrap" style="font-family: 'JetBrains Mono', monospace">IST</span>
+        </div>
+
+        <div
+          class="flex items-center gap-2 px-2.5 h-9 rounded-lg border border-white/[0.08] bg-white/[0.04] shrink-0"
+        >
+          <button onclick="upgradeToGoogle()" class="text-slate-400 hover:text-white transition-all" title="Verify Identity"><i class="fas fa-user-shield text-sm"></i></button>
+          <button onclick="downloadDossier()" class="text-slate-400 hover:text-white transition-all" title="Download Intel Dossier"><i class="fas fa-file-download text-sm"></i></button>
+          <button onclick="toggleGlobalAudio()" id="audio-toggle-btn" class="text-emerald-400 hover:text-white transition-all" title="Toggle Global Audio"><i id="audio-icon" class="fas fa-volume-up text-sm"></i></button>
+          <button onclick="toggleAbout(true)" class="text-slate-400 hover:text-emerald-400 transition-all" title="About"><i class="fas fa-info-circle text-sm"></i></button>
         </div>
 
         <button
           onclick="goToIndiaHome()"
-          class="flex items-center justify-center w-11 h-11 rounded-xl tactical-btn group transition-all shrink-0 shadow-sm border border-white/[0.08] bg-white/[0.04]"
+          class="flex items-center justify-center w-9 h-9 rounded-lg tactical-btn group transition-all shrink-0 border border-white/[0.08] bg-white/[0.04]"
           title="India Base"
         >
-          <i
-            class="fas fa-home text-blue-400 text-base group-hover:text-white transition-colors"
-          ></i>
+          <i class="fas fa-home text-blue-400 text-sm group-hover:text-white transition-colors"></i>
         </button>
       </div>
     </header>
     <main class="main-content">
       <div id="map-box-id" class="map-box">
         <div
-          class="px-4 py-3 border-b border-white/6 flex flex-col flex-shrink-0"
+          class="px-3 py-1.5 border-b border-white/6 flex items-center justify-between gap-2 flex-shrink-0"
           style="background: rgba(59, 130, 246, 0.03)"
         >
-          <div
-            class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 relative min-h-[44px]"
-          >
-            <div class="flex-1 flex items-center gap-3 min-w-0">
-              <div id="map-status-area" class="flex items-center gap-3">
-                <div
-                  class="flex items-center gap-2 px-3.5 h-[34px] rounded-xl shadow-sm border border-white/[0.08] bg-white/[0.04]"
-                >
-                  <span
-                    class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"
-                  ></span>
-                  <span
-                    class="text-[10px] font-black text-blue-300 uppercase tracking-widest mt-[1px]"
-                    >Map Ready</span
-                  >
-                </div>
-              </div>
+          <div id="map-status-area" class="flex items-center gap-2 shrink-0">
+            <div class="flex items-center gap-2 px-2.5 h-7 rounded-lg border border-white/[0.08] bg-white/[0.04]">
+              <span class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></span>
+              <span class="text-[9px] font-black text-blue-300 uppercase tracking-widest">Map Ready</span>
             </div>
+          </div>
 
             <div
               class="flex gap-2 items-center w-full xl:w-auto overflow-x-auto pb-1 custom-scrollbar shrink-0"
@@ -932,48 +874,19 @@
                 <i class="fas fa-expand text-sm"></i>
               </button>
             </div>
-            <div
-              class="flex-1 min-w-0 flex items-center justify-end gap-3 pr-1"
-            >
-              <div id="map-live-stats" class="flex items-center gap-3">
-                <div
-                  class="flex items-center gap-1.5"
-                  title="Active map overlay layers"
-                >
-                  <span
-                    class="text-[11px] font-black text-slate-600 uppercase tracking-widest font-mono"
-                    >Layers</span
-                  >
-                  <span
-                    id="active-layer-count"
-                    class="text-sm font-black text-blue-400 font-mono tabular-nums"
-                    >0</span
-                  >
-                </div>
-                <div class="w-px h-4 bg-slate-800"></div>
-                <div
-                  class="flex items-center gap-1.5"
-                  title="Last seismic event magnitude"
-                >
-                  <i class="fas fa-wave-square text-[11px] text-amber-500"></i>
-                  <span
-                    id="map-seismic-label"
-                    class="text-[11px] font-black text-slate-600 uppercase tracking-widest font-mono"
-                    >Seismic</span
-                  >
-                  <span
-                    id="map-seismic-val"
-                    class="text-sm font-black text-amber-400 font-mono tabular-nums"
-                    >--</span
-                  >
-                </div>
+          <div id="map-live-stats" class="flex items-center gap-3 shrink-0 ml-auto">
+              <div class="flex items-center gap-1.5" title="Active map overlay layers">
+                <span class="text-[10px] font-black text-slate-600 uppercase tracking-widest font-mono">Layers</span>
+                <span id="active-layer-count" class="text-sm font-black text-blue-400 font-mono tabular-nums">0</span>
+              </div>
+              <div class="w-px h-4 bg-slate-800"></div>
+              <div class="flex items-center gap-1.5" title="Last seismic event magnitude">
+                <i class="fas fa-wave-square text-[10px] text-amber-500"></i>
+                <span id="map-seismic-label" class="text-[10px] font-black text-slate-600 uppercase tracking-widest font-mono">Seismic</span>
+                <span id="map-seismic-val" class="text-sm font-black text-amber-400 font-mono tabular-nums">--</span>
               </div>
             </div>
-          </div>
-          <div
-            id="layer-legend"
-            class="hidden mt-2 flex flex-wrap gap-2 layer-legend justify-center px-4 pb-1"
-          ></div>
+          <div id="layer-legend" class="hidden mt-1 flex flex-wrap gap-2 layer-legend justify-center px-2"></div>
         </div>
         <div class="flex-1 relative w-full h-full overflow-hidden group">
           <div
@@ -4006,13 +3919,7 @@
         }
       }, 3000);
     </script>
-    <footer class="mt-auto">
-      <div class="headline-ticker-wrap py-2 border-t border-white/5 bg-black/20">
-        <div id="footer-ticker-content" class="headline-ticker-content">
-          <!-- Ticker items dynamically injected by global-fx.js -->
-        </div>
-      </div>
-    </footer>
+
     <div class="fixed inset-0 z-[10000] bg-slate-950 flex flex-col items-center justify-center p-8 text-center md:hidden border-t-4 border-t-blue-500">
       <i class="fas fa-desktop text-4xl text-blue-500 mb-6"></i>
       <h2 class="text-xl font-black text-white uppercase tracking-tighter mb-4">NewsAtlas Workspace</h2>

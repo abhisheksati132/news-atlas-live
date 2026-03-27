@@ -65,40 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     decryptElements.forEach(el => decryptObserver.observe(el));
 
-    const initTicker = () => {
-        const tickerContainer = document.getElementById('footer-ticker-content');
-        if (!tickerContainer) return;
-
-        const baseItems = [
-            { type: 'SYSTEM', text: 'MAP ENGINE CALIBRATED v3.7.1' },
-            { type: 'STACK', text: 'NODE.JS | EXPRESS | FIREBASE | VERCEL EDGE' },
-            { type: 'UI', text: 'TAILWIND CSS | VANILLA JS | WEBAUDIO' },
-            { type: 'DATA', text: 'APINEWSDATA | GDET | WORLD BANK API' },
-            { type: 'NET', text: 'UPLINK STABLE (14ms)' },
-            { type: 'WARN', text: 'INTERCEPTING ENCRYPTED TRAFFIC...' },
-            { type: 'INFO', text: 'GLOBAL MARKETS: MIXED' },
-            { type: 'GEO', text: 'TRACKING 195 SOVEREIGN STATES' }
-        ];
-
-        const renderTicker = () => {
-
-            const itemsHtml = [...baseItems, ...baseItems].map(item => {
-                let color = 'text-slate-500';
-                if (item.type === 'SYSTEM' || item.type === 'NET') color = 'text-blue-400';
-                if (item.type === 'WARN') color = 'text-amber-400 animate-pulse';
-                if (item.type === 'GEO') color = 'text-emerald-400';
-
-                return `<span class="font-black ${color} uppercase mx-8" 
-                 style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .25em;">
-                 ${item.type}: ${item.text}</span>`;
-            }).join('');
-            tickerContainer.innerHTML = itemsHtml;
-        };
-        renderTicker();
-    };
-    initTicker();
 
     let audioCtx = null;
+
 
     const playTacticalHover = () => {
         if (!audioCtx) {

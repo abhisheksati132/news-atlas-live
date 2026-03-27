@@ -8,7 +8,9 @@ class MapboxEngine {
         this._selectedCountryId = null;
         this.deckOverlay = null;
         this._hudMarker = null;
-        this._deckAnimId = null;
+        this._isNightActive = false;
+        this._isRotating = false;
+        this._rotateAnimId = null;
     }
 
     async init() {
@@ -119,7 +121,6 @@ class MapboxEngine {
 
     _addDayNightTerminator() {
         const buildTerminatorGeoJSON = () => {
-
             const now = new Date();
             const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
             const declination = -23.45 * Math.cos((2 * Math.PI / 365) * (dayOfYear + 10)) * (Math.PI / 180);
@@ -149,9 +150,10 @@ class MapboxEngine {
                 id: 'night-shadow',
                 type: 'fill',
                 source: 'night-overlay',
+                layout: { visibility: 'none' },
                 paint: {
                     'fill-color': '#000820',
-                    'fill-opacity': 0.35
+                    'fill-opacity': 0.45
                 }
             });
         }
@@ -161,6 +163,47 @@ class MapboxEngine {
             const src = this.map.getSource('night-overlay');
             if (src) src.setData(buildTerminatorGeoJSON());
         }, 60000);
+    }
+
+    toggleNightLayer() {
+        if (!this.map) return false;
+        this._isNightActive = !this._isNightActive;
+        if (!this.map.getLayer('night-shadow')) this._addDayNightTerminator();
+        
+        this.map.setLayoutProperty('night-shadow', 'visibility', this._isNightActive ? 'visible' : 'none');
+        
+        if (this._isNightActive) {
+            this.map.setFog({
+              'color': 'rgb(4, 10, 20)',
+              'high-color': 'rgb(2, 6, 18)',
+              'horizon-blend': 0.02,
+              'space-color': 'rgb(0, 1, 5)',
+              'star-intensity': 0.95
+            });
+        } else {
+            this._applyAtmosphere();
+        }
+        return this._isNightActive;
+    }
+
+    toggleAutoRotate() {
+        if (!this.map) return false;
+        this._isRotating = !this._isRotating;
+        
+        const rotate = () => {
+            if (!this._isRotating) return;
+            const center = this.map.getCenter();
+            center.lng += 0.05;
+            this.map.setCenter(center);
+            this._rotateAnimId = requestAnimationFrame(rotate);
+        };
+
+        if (this._isRotating) {
+            rotate();
+        } else {
+            cancelAnimationFrame(this._rotateAnimId);
+        }
+        return this._isRotating;
     }
 
     _toggle3DBuildings() {

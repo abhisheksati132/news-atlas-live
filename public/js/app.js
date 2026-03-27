@@ -41,9 +41,6 @@ window.currencyCode = currencyCode;
 window.iso2Code = iso2Code;
 window.currentCategory = currentCategory;
 window._hexLayers = { seismic: [], gdelt: [], aq: [] };
-window._timeOffsetHours = 0;
-window._chronosOffset = 0;
-window._chronosActive = false;
 function magColor(m) {
   return m >= 7 ? "#ef4444" : m >= 6 ? "#f97316" : m >= 5 ? "#eab308" : "#10b981";
 }
@@ -1370,59 +1367,36 @@ window.addEventListener("resize", () => {
     }
   }
 });
-window._chronosOffset = 0;
-window.updateChronos = function (val) {
-  window._chronosOffset = parseInt(val, 10);
-  const display = safeEl("chronos-display");
-  if (display) {
-    display.innerText =
-      window._chronosOffset === 0
-        ? "LIVE / -0H"
-        : `ARCHIVE / ${window._chronosOffset}H`;
-  }
-  window.updateGlobeHexbins();
-  if (window._chronosOffset < 0) {
-    if (window.myGlobe && window.myGlobe.arcsData) {
-      const intelArcs = (window.myGlobe.arcsData() || []).filter(
-        (a) => Array.isArray(a.color) && a.color[1] === "rgba(6, 182, 212, 1)",
-      );
-      window.myGlobe.arcsData(intelArcs);
-    }
-    if (window._aircraftGroup) window._aircraftGroup.attr("opacity", 0);
-  } else {
-    if (typeof window.renderAircraft === "function" && window._aircraftActive)
-      window.renderAircraft();
-    if (window._aircraftGroup) window._aircraftGroup.attr("opacity", 1);
-  }
-};
-window._chronosActive = false;
-window.toggleChronos = function () {
-  window._chronosActive = !window._chronosActive;
-  const btn = document.getElementById("chronos-toggle-btn");
-  const container = document.getElementById("chronos-slider-container");
-  if (!window._chronosActive) {
-    if (container) container.classList.add("hidden");
-    if (btn) {
-      btn.classList.remove("active");
-      btn.title = "Chronos Engine: OFF";
-    }
-    const slider = document.getElementById("chronos-slider");
-    if (slider) {
-      slider.value = 0;
-      if (typeof window.updateChronos === 'function') window.updateChronos(0);
-    }
-    return;
-  }
-  if (container) container.classList.remove("hidden");
+window.toggleGlobeTheme = function () {
+  if (!window.mapEngine) return;
+  const active = window.mapEngine.toggleNightLayer();
+  const btn = document.getElementById("theme-toggle-btn");
   if (btn) {
-    btn.classList.add("active");
-    btn.title = "Chronos Engine: ON";
+    if (active) btn.classList.add("active");
+    else btn.classList.remove("active");
   }
+  window.playTacticalSound("click");
+};
+
+window.toggleAutoRotate = function () {
+  if (!window.mapEngine) return;
+  const active = window.mapEngine.toggleAutoRotate();
+  const btn = document.getElementById("autorotate-toggle-btn");
+  if (btn) {
+    if (active) {
+      btn.classList.add("active");
+      btn.title = "Auto-Rotate: ON";
+    } else {
+      btn.classList.remove("active");
+      btn.title = "Auto-Rotate: OFF";
+    }
+  }
+  window.playTacticalSound("click");
 };
 
 window.updateGlobeHexbins = function () {
   if (!window.myGlobe) return;
-  const targetTime = Date.now() + window._chronosOffset * 3600 * 1000;
+  const targetTime = Date.now();
   const filteredSeismic = window._hexLayers.seismic.filter(
     (d) => !d.time || d.time <= targetTime,
   );

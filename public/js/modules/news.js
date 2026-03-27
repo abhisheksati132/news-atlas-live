@@ -225,17 +225,6 @@ async function fetchGDELTEvents(country) {
     const res = await fetch(url);
     const data = await res.json();
     let articles = data.articles || [];
-    if (typeof window._timeOffsetHours === 'number' && window._timeOffsetHours < 0) {
-      const thresholdDate = new Date();
-      thresholdDate.setHours(thresholdDate.getHours() + window._timeOffsetHours);
-      articles = articles.filter(a => {
-        if (!a.seendate) return false;
-        const dStr = a.seendate;
-        const iso = `${dStr.slice(0, 4)}-${dStr.slice(4, 6)}-${dStr.slice(6, 8)}T${dStr.slice(9, 11)}:${dStr.slice(11, 13)}:${dStr.slice(13, 15)}Z`;
-        const pubDate = new Date(iso);
-        return pubDate <= thresholdDate;
-      });
-    }
     if (!articles.length) {
       container.innerHTML =
         '<div class="text-slate-500 text-xs py-2">No GDELT events found for this timeframe.</div>';
@@ -281,7 +270,7 @@ async function fetchGDELTEvents(country) {
 }
 window.fetchGDELTEvents = fetchGDELTEvents;
 async function fetchSeismicStatus() {
-  const el = document.getElementById("seismic-count");
+  const el = document.getElementById("map-seismic-val");
   if (!el) return;
   try {
     const res = await fetch(

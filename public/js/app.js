@@ -769,6 +769,16 @@ window.handleCountryClick = async function (event, d) {
   if (d && d.properties) {
     const countryName = d.properties.name;
     setText("selected-country-name", countryName);
+    const flagEl = document.getElementById("header-country-flag");
+    if (flagEl) {
+      const iso = d.properties.iso_a2 || d.properties.iso_3166_1 || d.properties.ISO_A2;
+      if (iso) {
+        flagEl.src = `https://flagcdn.com/w40/${iso.toLowerCase()}.png`;
+        flagEl.classList.remove("hidden");
+      } else {
+        flagEl.classList.add("hidden");
+      }
+    }
     const backWrap = safeEl("back-to-global-wrap");
     if (backWrap) backWrap.classList.remove("hidden");
     window.addRecentCountry(countryName);
@@ -1253,12 +1263,14 @@ window.zoomMap = (factor) => {
   }
 };
 
-window.resetToGlobalCenter = () => {
+window.resetToGlobalCenter = (fly) => {
   window.playTacticalSound("click");
   selectedCountry = null;
   window.selectedCountry = null;
+  setText("selected-country-name", "Worldwide");
+  const flagEl = document.getElementById("header-country-flag");
+  if (flagEl) flagEl.classList.add("hidden");
   countryUTCOffset = null;
-  setText("selected-country-name", "GLOBAL SURVEILLANCE");
   const backWrap = safeEl("back-to-global-wrap");
   if (backWrap) backWrap.classList.add("hidden");
 
@@ -2162,6 +2174,13 @@ window.renderTrendingHeader = () => {
 const _origResetGlobal = window.resetToGlobalCenter;
 if (_origResetGlobal) {
   window.resetToGlobalCenter = (fly) => {
+    // - [x] Update header widgets scale & spacing in `terminal.html`
+    // - [x] Add country flag placeholder in `terminal.html`
+    // - [x] Remove ghost 'thin box' by fixing mobile overlay border
+    // - [x] Add 2rem margin under `map-box` in `terminal.css`
+    // - [x] Style header flags and increase font sizes in `terminal.css`
+    // - [x] Implement dynamic flag updates in `app.js`
+    // - [x] Verify selection, spacing, and layout symmetry
     _origResetGlobal(fly);
     const headerFlagContainer = safeEl("search-flag-container");
     const headerSearchIcon = safeEl("search-icon-main");
@@ -2219,6 +2238,11 @@ window.searchCityForTab = async (tabId) => {
 
       
       if (window.setText) window.setText("selected-country-name", city.name.toUpperCase());
+      const flagEl = document.getElementById("header-country-flag");
+      if (flagEl && city.country_code) {
+        flagEl.src = `https://flagcdn.com/w40/${city.country_code.toLowerCase()}.png`;
+        flagEl.classList.remove("hidden");
+      }
       window._currentWeatherLocation = fullName;
 
       

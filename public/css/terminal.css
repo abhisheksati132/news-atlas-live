@@ -249,8 +249,9 @@
       .map-box {
         position: relative;
         width: 100%;
-        height: calc(100vh - var(--header-h) - 46px);
+        height: calc(100vh - var(--header-h) - 64px);
         min-height: 400px;
+        margin-bottom: 2rem;
         overflow: hidden;
         display: flex;
         flex-direction: column;

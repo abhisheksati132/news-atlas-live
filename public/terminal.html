@@ -47,7 +47,7 @@
     <link rel="stylesheet" href="/css/terminal.css" />
   </head>
 
-  <body class="flex flex-col day-mode">
+  <body class="flex flex-col night-theme">
     <div
       id="map-tooltip"
       class="fixed hidden text-white rounded-[1.25rem] border-l-4 border-l-emerald-500 overflow-hidden"
@@ -644,16 +644,6 @@
           <span id="system-time" class="text-[14px] font-black text-white leading-none tracking-wide" style="font-family: 'JetBrains Mono', monospace">00:00:00 IST</span>
           <span class="text-[9px] font-bold text-slate-500 uppercase tracking-[.1em] whitespace-nowrap leading-none mt-1" style="font-family: 'JetBrains Mono', monospace">LOCAL · <span id="local-time" class="text-slate-400">--:--:--</span></span>
         </div>
-
-        <button
-          onclick="toggleTheme()"
-          id="theme-toggle"
-          class="flex items-center justify-center w-10 h-10 rounded-xl text-slate-400 hover:text-white transition-colors shrink-0"
-          style="background: var(--widget-bg); border: 1px solid var(--widget-border);"
-          title="Toggle Theme (Solar/Midnight)"
-        >
-          <i id="theme-icon" class="fas fa-moon text-sm"></i>
-        </button>
 
       </div>
 

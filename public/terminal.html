@@ -617,7 +617,7 @@
         <button
           onclick="toggleSearch()"
           class="flex items-center gap-2.5 px-5 h-10 rounded-xl text-slate-400 hover:text-white transition-colors shrink-0"
-          style="min-width: 130px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09);"
+          style="min-width: 130px; background: var(--widget-bg); border: 1px solid var(--widget-border);"
           title="Quick Search (/)"
         >
           <i class="fas fa-search text-xs"></i>
@@ -626,7 +626,7 @@
 
         <div
           class="flex flex-col items-center justify-center px-6 h-10 rounded-xl text-center shrink-0"
-          style="min-width: 190px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09);"
+          style="min-width: 190px; background: var(--widget-bg); border: 1px solid var(--widget-border);"
         >
           <div class="flex items-center gap-2 leading-none">
             <img id="header-country-flag" src="" class="hidden w-5 h-3.5 object-cover rounded shadow-sm border border-white/10" />
@@ -639,11 +639,21 @@
 
         <div
           class="flex flex-col items-center justify-center px-6 h-10 rounded-xl shrink-0"
-          style="min-width: 180px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09);"
+          style="min-width: 180px; background: var(--widget-bg); border: 1px solid var(--widget-border);"
         >
           <span id="system-time" class="text-[14px] font-black text-white leading-none tracking-wide" style="font-family: 'JetBrains Mono', monospace">00:00:00 IST</span>
           <span class="text-[9px] font-bold text-slate-500 uppercase tracking-[.1em] whitespace-nowrap leading-none mt-1" style="font-family: 'JetBrains Mono', monospace">LOCAL · <span id="local-time" class="text-slate-400">--:--:--</span></span>
         </div>
+
+        <button
+          onclick="toggleTheme()"
+          id="theme-toggle"
+          class="flex items-center justify-center w-10 h-10 rounded-xl text-slate-400 hover:text-white transition-colors shrink-0"
+          style="background: var(--widget-bg); border: 1px solid var(--widget-border);"
+          title="Toggle Theme (Solar/Midnight)"
+        >
+          <i id="theme-icon" class="fas fa-moon text-sm"></i>
+        </button>
 
       </div>
 
@@ -3004,33 +3014,7 @@
         </div>
       </div>
     </main>
-    <footer
-      style="
-        position: fixed;
-        bottom: 0.75rem;
-        left: 50%;
-        transform: translateX(-50%);
-        width: calc(100% - 2rem);
-        max-width: 1400px;
-        will-change: transform;
-        height: var(--footer-h);
-        border-radius: 1.25rem;
-        background: rgba(4, 10, 25, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.08); /* Apple-like thin frost border */
-        box-shadow: 0 8px 32px 0 rgba(31, 50, 100, 0.37);
-        backdrop-filter: blur(28px) saturate(180%);
-        -webkit-backdrop-filter: blur(28px) saturate(180%);
-        display: flex;
-        align-items: center;
-        overflow: hidden;
-        z-index: 49;
-      "
-    >
-      <div
-        class="animate-marquee whitespace-nowrap flex-1 text-center py-1"
-        id="footer-ticker-content"
-      ></div>
-    </footer>
+
     <div id="fact-pop" class="hidden"></div>
     <div id="fact-currency" class="hidden"></div>
     <div id="fact-cap" class="hidden"></div>
@@ -3854,12 +3838,8 @@
       }, 3000);
     </script>
 
-    <div class="fixed inset-0 z-[10000] bg-slate-950 flex flex-col items-center justify-center p-8 text-center md:hidden">
-      <i class="fas fa-desktop text-4xl text-blue-500 mb-6"></i>
-      <h2 class="text-xl font-black text-white uppercase tracking-tighter mb-4">NewsAtlas Workspace</h2>
-      <p class="text-slate-400 font-mono text-xs leading-relaxed max-w-sm">This high-density dashboard is optimized for desktop displays. Please rotate your device or use a wider screen for the optimal experience.</p>
-      <a href="/" class="mt-8 px-5 py-2.5 rounded-lg border border-blue-500/30 text-blue-400 text-xs font-mono font-bold hover:bg-blue-500/10 transition-all uppercase tracking-widest">Return Home</a>
-    </div>
+    <!-- HIDDEN OVERLAY FOR MOBILE: Switched to hidden to ensure NO line artifacts on desktop -->
+    <div class="hidden"></div>
     <footer class="terminal-footer">
       Made By Abhishek
     </footer>

@@ -1,16 +1,31 @@
 :root {
-        --blue: #3b82f6;
-        --cyan: #06b6d4;
-        --emerald: #10b981;
-        --red: #ef4444;
-        --amber: #f59e0b;
-        --bg: #020617;
-        --glass: rgba(5, 15, 40, 0.93);
-        --border: rgba(59, 130, 246, 0.11);
-        --header-h: 84px;
-        --sidebar-w: 420px;
-        --gap: 0.875rem;
-      }
+  --blue: #3b82f6;
+  --cyan: #06b6d4;
+  --emerald: #10b981;
+  --red: #ef4444;
+  --amber: #f59e0b;
+  --bg: #040a1d; /* Vibrant Midnight base */
+  --glass: rgba(15, 23, 42, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --widget-bg: rgba(255, 255, 255, 0.05);
+  --widget-border: rgba(255, 255, 255, 0.09);
+  --text: #f1f5f9;
+  --text-dim: #94a3b8;
+  --header-h: 84px;
+  --sidebar-w: 420px;
+  --gap: 0.875rem;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.light-theme {
+  --bg: #f8fafc; /* Solar Gray-White base */
+  --glass: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --widget-bg: rgba(0, 0, 0, 0.03);
+  --widget-border: rgba(0, 0, 0, 0.1);
+  --text: #0f172a;
+  --text-dim: #475569;
+}
 
       *,
       *::before,
@@ -22,6 +37,9 @@
 
       html {
         scroll-behavior: smooth;
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
       }
 
       body {
@@ -34,19 +52,22 @@
         font-size: 14px;
         line-height: 1.5;
         background-color: var(--bg);
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
         background-image:
           radial-gradient(
             ellipse at 0% 0%,
-            rgba(59, 130, 246, 0.06) 0,
-            transparent 55%
+            var(--cyan-glow, rgba(6, 182, 212, 0.04)) 0,
+            transparent 50%
           ),
           radial-gradient(
             ellipse at 100% 100%,
-            rgba(6, 182, 212, 0.04) 0,
-            transparent 55%
+            var(--blue-glow, rgba(59, 130, 246, 0.04)) 0,
+            transparent 50%
           );
         background-size: auto;
-        color: #f1f5f9;
+        color: var(--text);
         overflow-x: hidden;
         overflow-y: auto;
         width: 100vw;
@@ -56,6 +77,12 @@
         padding-top: calc(var(--header-h) + 18px);
         padding-bottom: 3rem;
         cursor: default;
+        transition: background-color 0.4s ease, color 0.4s ease;
+      }
+
+      .light-theme {
+        --cyan-glow: rgba(6, 182, 212, 0.08);
+        --blue-glow: rgba(59, 130, 246, 0.08);
       }
 
       body::before {
@@ -81,14 +108,14 @@
 
       .glass-panel {
         border-radius: 1.25rem;
-        background: rgba(15, 23, 42, 0.9);
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
-        transition: all 0.2s ease;
+        transition: var(--transition);
         box-shadow:
-          0 4px 6px -1px rgb(0 0 0 / 0.1),
-          0 2px 4px -2px rgb(0 0 0 / 0.1);
+          0 4px 12px -1px rgb(0 0 0 / 0.15),
+          0 2px 6px -2px rgb(0 0 0 / 0.1);
         will-change: transform, opacity;
       }
 
@@ -224,11 +251,12 @@
         width: 100%;
         max-width: 100%;
         z-index: 50;
-        background: rgba(2, 6, 23, 0.95);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        background: var(--glass);
+        border-bottom: 1px solid var(--glass-border);
         box-shadow: 0 4px 24px rgba(0,0,0,0.4);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
+        transition: var(--transition);
       }
 
       header::-webkit-scrollbar {

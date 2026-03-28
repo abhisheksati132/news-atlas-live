@@ -2275,3 +2275,22 @@ window.searchCityForTab = async (tabId) => {
   btn.innerText = originalBtnText;
   btn.disabled = false;
 };
+
+window.toggleTheme = function() {
+  const isLight = document.body.classList.toggle('light-theme');
+  const icon = document.getElementById('theme-icon');
+  if (icon) {
+    icon.className = isLight ? 'fas fa-sun text-sm' : 'fas fa-moon text-sm';
+  }
+  localStorage.setItem('terminal-theme', isLight ? 'light' : 'dark');
+  if (window.playTacticalSound) window.playTacticalSound('click');
+};
+
+(function initTheme() {
+  const saved = localStorage.getItem('terminal-theme');
+  if (saved === 'light') {
+    document.body.classList.add('light-theme');
+    const icon = document.getElementById('theme-icon');
+    if (icon) icon.className = 'fas fa-sun text-sm';
+  }
+})();

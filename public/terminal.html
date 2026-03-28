@@ -614,36 +614,21 @@
       <!-- CENTER: Nav Widgets — all h-10, gap-5 -->
       <div class="hidden md:flex items-center gap-5">
 
-        <button
-          onclick="toggleSearch()"
-          class="flex items-center gap-2.5 px-5 h-10 rounded-xl text-slate-400 hover:text-white transition-colors shrink-0"
-          style="min-width: 130px; background: var(--widget-bg); border: 1px solid var(--widget-border);"
-          title="Quick Search (/)"
-        >
-          <i class="fas fa-search text-xs"></i>
-          <span class="text-[11px] font-mono tracking-widest uppercase font-black">Search</span>
-        </button>
+        <button onclick="toggleSearch()" class="flex items-center gap-3 px-6 h-10 bg-white/3 border border-white/5 rounded-xl hover:bg-white/6 hover:border-white/10 transition-all group header-widget">
+            <i class="fas fa-search text-xs text-slate-500 group-hover:text-blue-400"></i>
+            <span class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Search</span>
+          </button>
 
-        <div
-          class="flex flex-col items-center justify-center px-6 h-10 rounded-xl text-center shrink-0"
-          style="min-width: 190px; background: var(--widget-bg); border: 1px solid var(--widget-border);"
-        >
-          <div class="flex items-center gap-2 leading-none">
-            <img id="header-country-flag" src="" class="hidden w-5 h-3.5 object-cover rounded shadow-sm border border-white/10" />
-            <span id="selected-country-name" class="font-black text-white text-[13px] uppercase truncate tracking-tight">Worldwide</span>
+        <div class="flex flex-col items-center justify-center h-10 px-6 border border-white/5 rounded-xl header-widget" style="background: rgba(255, 255, 255, 0.02)">
+            <span class="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em] leading-none mb-1">Worldwide</span>
+            <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] leading-none">Local Mode (Offline)</span>
           </div>
-          <span id="back-to-global-wrap" class="hidden"></span>
-          <span id="neural-id" class="text-[9px] font-bold text-slate-500 uppercase tracking-[.15em] leading-none mt-1" style="font-family: 'JetBrains Mono', monospace">all feeds live</span>
-        </div>
 
 
-        <div
-          class="flex flex-col items-center justify-center px-6 h-10 rounded-xl shrink-0"
-          style="min-width: 180px; background: var(--widget-bg); border: 1px solid var(--widget-border);"
-        >
-          <span id="system-time" class="text-[14px] font-black text-white leading-none tracking-wide" style="font-family: 'JetBrains Mono', monospace">00:00:00 IST</span>
-          <span class="text-[9px] font-bold text-slate-500 uppercase tracking-[.1em] whitespace-nowrap leading-none mt-1" style="font-family: 'JetBrains Mono', monospace">LOCAL · <span id="local-time" class="text-slate-400">--:--:--</span></span>
-        </div>
+        <div class="px-4 h-9 flex flex-col justify-center border-l border-white/5 header-widget">
+            <span id="ist-time" class="text-[12px] font-black text-white leading-none">--:--:-- IST</span>
+            <span class="text-[9px] font-bold text-slate-500 uppercase tracking-[.1em] whitespace-nowrap leading-none mt-1" style="font-family: 'JetBrains Mono', monospace">LOCAL · <span id="local-time" class="text-slate-400">--:--:--</span></span>
+          </div>
 
       </div>
 

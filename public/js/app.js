@@ -8,7 +8,7 @@ import './ui/toast.js';
 import './ui/search.js';
 import './ui/cli-terminal.js';
 import './ui/command-palette.js';
-import './ui/about.js';
+
 
 
 import './modules/mapbox-engine.js';

@@ -2642,7 +2642,7 @@
                 <p style="font-size: 11px; color: #64748b; margin: 0;">Global Intelligence Dashboard</p>
               </div>
             </div>
-            <button onclick="toggleAbout(false)" style="color: #64748b; background: none; border: none; cursor: pointer; padding: 8px;" class="hover:text-white transition-colors">
+            <button onclick="toggleNewsAtlasAbout(false)" style="color: #64748b; background: none; border: none; cursor: pointer; padding: 8px;" class="hover:text-white transition-colors">
               <i class="fas fa-times text-lg"></i>
             </button>
           </div>
@@ -2725,6 +2725,15 @@
           response.innerHTML = '<span style="color:#ef4444">Connection failed. Please try again.</span>';
         }
       };
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const about = document.getElementById('_atlas_about_overlay');
+          if (about && !about.classList.contains('hidden')) {
+            about.classList.add('hidden');
+          }
+        }
+      });
     </script>
 
   </body>

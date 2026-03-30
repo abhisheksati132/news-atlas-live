@@ -126,16 +126,20 @@ window.toggleAbout = (show) => {
   if (window.playTacticalSound) window.playTacticalSound(show ? "success" : "click");
   const overlay = document.getElementById("about-overlay");
   if (overlay) {
-    overlay.classList.toggle("hidden", !show);
     if (show) {
+      overlay.style.display = "flex";
+      overlay.classList.remove("hidden");
       initTrafficCanvas();
       startAboutStats();
     } else {
+      overlay.style.display = "none";
+      overlay.classList.add("hidden");
       if (aboutStatsInterval) clearInterval(aboutStatsInterval);
       stopTrafficCanvas();
     }
   }
 };
+
 
 const cliInput = document.getElementById("cli-input");
 const cliOutput = document.getElementById("cli-output");

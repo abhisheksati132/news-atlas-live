@@ -205,7 +205,7 @@ function applyChoropleth(mode, values) {
         legend = document.createElement("div");
         legend.id = "choropleth-legend";
         legend.className = "absolute bottom-14 left-4 px-3 py-2 rounded-xl z-10 flex items-center gap-2";
-        legend.style.cssText = "background:rgba(2,6,23,0.8);border:1px solid rgba(59,130,246,0.2);backdrop-filter:blur(8px)";
+        legend.style.cssText = "background:rgba(2,6,23,0.92);border:1px solid rgba(59,130,246,0.18);";
         document.getElementById("map-container")?.appendChild(legend);
     }
     if (mode === "risk") {

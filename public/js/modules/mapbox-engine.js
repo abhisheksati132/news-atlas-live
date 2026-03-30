@@ -37,7 +37,7 @@ class MapboxEngine {
 
         this.map = new mapboxgl.Map({
             container: this.containerId,
-            style: 'mapbox://styles/mapbox/satellite-streets-v12',
+            style: 'mapbox://styles/mapbox/dark-v11',
             center: [10, 0],
             zoom: 1.5,
             pitch: 0,
@@ -72,38 +72,16 @@ class MapboxEngine {
 
     _applyAtmosphere() {
         try {
-
             this.map.setFog({
-                'color': 'rgb(4, 10, 28)',
-                'high-color': 'rgb(2, 6, 23)',
-                'horizon-blend': 0.04,
-                'space-color': 'rgb(0, 2, 10)',
-                'star-intensity': 0.85,
+                'color': 'rgb(13, 17, 23)',
+                'high-color': 'rgb(9, 12, 18)',
+                'horizon-blend': 0.03,
+                'space-color': 'rgb(3, 5, 10)',
+                'star-intensity': 0.5,
                 'range': [0.5, 10]
             });
         } catch (e) {
-            console.warn('Fog API not available on this Mapbox version:', e.message);
-        }
-
-        try {
-            this.map.setLights([{
-                id: 'sun',
-                type: 'directional',
-                properties: {
-                    color: 'white',
-                    intensity: 1.0,
-                    direction: [200, 40]
-                }
-            }, {
-                id: 'ambient',
-                type: 'ambient',
-                properties: {
-                    color: 'rgb(30, 50, 100)',
-                    intensity: 0.4
-                }
-            }]);
-        } catch (e) {
-
+            console.warn('Fog API not available:', e.message);
         }
     }
 
@@ -319,14 +297,11 @@ class MapboxEngine {
                 type: 'fill',
                 source: 'countries',
                 paint: {
-                    'fill-color': [
-                        'case',
-                        ['boolean', ['feature-state', 'selected'], false], '#3b82f6',
-                        'transparent'
-                    ],
+                    'fill-color': '#3b82f6',
                     'fill-opacity': [
                         'case',
-                        ['boolean', ['feature-state', 'selected'], false], 0.22,
+                        ['boolean', ['feature-state', 'selected'], false], 0.18,
+                        ['boolean', ['feature-state', 'hover'], false], 0.06,
                         0
                     ]
                 }
@@ -337,28 +312,26 @@ class MapboxEngine {
                 type: 'line',
                 source: 'countries',
                 paint: {
-                    'line-color': 'rgba(59, 130, 246, 0.18)',
+                    'line-color': 'rgba(255, 255, 255, 0.1)',
                     'line-width': 0.5
                 }
             });
 
             this.map.addLayer({
-                id: 'country-borders-glow',
+                id: 'country-borders-hover',
                 type: 'line',
                 source: 'countries',
                 paint: {
                     'line-color': [
                         'case',
-                        ['boolean', ['feature-state', 'hover'], false], '#10b981',
+                        ['boolean', ['feature-state', 'hover'], false], 'rgba(255, 255, 255, 0.5)',
                         'transparent'
                     ],
                     'line-width': [
                         'case',
-                        ['boolean', ['feature-state', 'hover'], false], 2,
+                        ['boolean', ['feature-state', 'hover'], false], 1,
                         0
-                    ],
-                    'line-blur': 1,
-                    'line-opacity': 0.9
+                    ]
                 }
             });
 
@@ -374,11 +347,9 @@ class MapboxEngine {
                     ],
                     'line-width': [
                         'case',
-                        ['boolean', ['feature-state', 'selected'], false], 2.5,
+                        ['boolean', ['feature-state', 'selected'], false], 1.5,
                         0
-                    ],
-                    'line-blur': 0.5,
-                    'line-dasharray': [2, 1.5]
+                    ]
                 }
             });
 
@@ -558,53 +529,13 @@ class MapboxEngine {
     }
 
     _startDeckAnimation() {
-        if (typeof deck === 'undefined') {
-            console.warn("Deck.GL not loaded yet.");
-            return;
-        }
-
+        if (typeof deck === 'undefined') return;
+        // Deck.GL overlay initialised but no animated dots — reserved for data layers
         this.deckOverlay = new deck.MapboxOverlay({
             interleaved: true,
             layers: []
         });
         this.map.addControl(this.deckOverlay);
-
-        let timeOffset = 0;
-        const animateDeck = () => {
-            if (!this.map || !this.deckOverlay) return;
-
-            timeOffset += 0.05;
-            const satellites = [];
-            for (let i = 0; i < 20; i++) {
-                satellites.push({
-                    position: [
-                        (i * 70 + timeOffset * 2) % 360 - 180,
-                        Math.sin(i * 0.2 + timeOffset * 0.01) * 65,
-                        1200000 + Math.cos(i) * 200000
-                    ],
-                    color: i % 4 === 0 ? [239, 68, 68] : [6, 182, 212]
-                });
-            }
-
-            this.deckOverlay.setProps({
-                layers: [
-                    new deck.ScatterplotLayer({
-                        id: 'satellite-layer',
-                        data: satellites,
-                        getPosition: d => d.position,
-                        getRadius: 25000,
-                        getFillColor: d => d.color,
-                        lineWidthMinPixels: 1,
-                        radiusMinPixels: 2,
-                        radiusMaxPixels: 5,
-                        parameters: { depthTest: false }
-                    })
-                ]
-            });
-
-            this._deckAnimId = requestAnimationFrame(animateDeck);
-        };
-        this._deckAnimId = requestAnimationFrame(animateDeck);
     }
 
     enableInteractions() {

@@ -39,14 +39,16 @@ app.use(
   }),
 );
 
-// Simple request duration header for performance visibility
+// Request timing middleware — override res.json so header is set before flush
 app.use((req, res, next) => {
   const started = process.hrtime();
-  res.on('finish', () => {
+  const origJson = res.json.bind(res);
+  res.json = function(data) {
     const diff = process.hrtime(started);
     const ms = (diff[0] * 1e3) + (diff[1] / 1e6);
     res.setHeader('X-Response-Time', ms.toFixed(3) + 'ms');
-  });
+    return origJson(data);
+  };
   next();
 });
 

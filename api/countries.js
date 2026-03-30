@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 /** Minimal fallback list if restcountries.com is unavailable */
 const FALLBACK_COUNTRIES = [
     { name: { common: 'United States' }, cca2: 'US', cca3: 'USA', latlng: [38, -97], flags: { png: 'https://flagcdn.com/w320/us.png' }, region: 'Americas', population: 331000000, capital: ['Washington, D.C.'] },

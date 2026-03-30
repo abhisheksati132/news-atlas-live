@@ -164,7 +164,7 @@
         <button onclick="downloadDossier()" class="header-widget p-2" title="Download report" style="color: #64748b">
           <i class="fas fa-file-download"></i>
         </button>
-        <button onclick="toggleAbout(true)" class="header-widget p-2" title="About" style="color: #64748b">
+        <button onclick="toggleNewsAtlasAbout(true)" class="header-widget p-2" title="About" style="color: #64748b">
           <i class="fas fa-info-circle"></i>
         </button>
         <button onclick="goToIndiaHome()" class="header-widget p-2" title="Home" style="color: #64748b">
@@ -2627,7 +2627,7 @@
     </script>
     <!-- Keyboard Shortcuts Disabled -->
     <!-- About Overlay -->
-    <div id="about-overlay" class="fixed inset-0 z-[200] hidden" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(12px);">
+    <div id="_atlas_about_overlay" class="fixed inset-0 z-[200] hidden" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(12px);">
       <div class="flex items-center justify-center min-h-screen p-6">
         <div style="background: rgba(15,23,42,0.95); border: 1px solid rgba(255,255,255,0.08); border-radius: 1.25rem; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto;" class="shadow-2xl">
           
@@ -2695,8 +2695,8 @@
     </div>
 
     <script>
-      window.toggleAbout = function(show) {
-        const el = document.getElementById('about-overlay');
+      window.toggleNewsAtlasAbout = function(show) {
+        const el = document.getElementById('_atlas_about_overlay');
         if (!el) return;
         if (show) {
           el.classList.remove('hidden');
@@ -2704,20 +2704,6 @@
           el.classList.add('hidden');
         }
       };
-
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          const about = document.getElementById('about-overlay');
-          if (about && !about.classList.contains('hidden')) {
-            about.classList.add('hidden');
-            return;
-          }
-          const search = document.getElementById('search-overlay');
-          if (search && !search.classList.contains('hidden')) {
-            search.classList.add('hidden');
-          }
-        }
-      });
 
       window.sendAboutAI = async function() {
         const input = document.getElementById('about-ai-input');
@@ -2740,5 +2726,6 @@
         }
       };
     </script>
+
   </body>
 </html>

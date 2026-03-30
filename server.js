@@ -36,8 +36,10 @@ app.use(cors({
 // Request time logger
 app.use((req, res, next) => {
   const start = Date.now();
+  console.log(`[REQ] ${new Date().toISOString()} | ${req.method} ${req.url}`);
   res.on('finish', () => {
     const elapsed = Date.now() - start;
+    console.log(`[RES] ${new Date().toISOString()} | ${req.method} ${req.url} -> ${res.statusCode} (${elapsed}ms)`);
     res.setHeader('X-Response-Time', `${elapsed}ms`);
   });
   next();
@@ -46,17 +48,17 @@ app.use((req, res, next) => {
 // API Routes
 const apiRouter = express.Router();
 
-apiRouter.get("/news", newsHandler);
-apiRouter.get("/weather", weatherHandler);
-apiRouter.get("/markets", marketsHandler);
-apiRouter.get("/geo", geoHandler);
-apiRouter.get("/openaq", openaqHandler);
-apiRouter.get("/gdelt", gdeltHandler);
-apiRouter.get("/config", configHandler);
-apiRouter.post("/ai", aiHandler);
-apiRouter.get("/ai", aiHandler);
-apiRouter.get("/countries", countriesHandler);
-apiRouter.get("/iss", issHandler);
+apiRouter.get("/news", (req, res) => newsHandler(req, res).catch(e => res.status(500).json({error: e.message})));
+apiRouter.get("/weather", (req, res) => weatherHandler(req, res).catch(e => res.status(500).json({error: e.message})));
+apiRouter.get("/markets", (req, res) => marketsHandler(req, res).catch(e => res.status(500).json({error: e.message})));
+apiRouter.get("/geo", (req, res) => geoHandler(req, res).catch(e => res.status(500).json({error: e.message})));
+apiRouter.get("/openaq", (req, res) => openaqHandler(req, res).catch(e => res.status(500).json({error: e.message})));
+apiRouter.get("/gdelt", (req, res) => gdeltHandler(req, res).catch(e => res.status(500).json({error: e.message})));
+apiRouter.get("/config", (req, res) => configHandler(req, res).catch(e => res.status(500).json({error: e.message})));
+apiRouter.post("/ai", (req, res) => aiHandler(req, res).catch(e => res.status(500).json({error: e.message})));
+apiRouter.get("/ai", (req, res) => aiHandler(req, res).catch(e => res.status(500).json({error: e.message})));
+apiRouter.get("/countries", (req, res) => countriesHandler(req, res).catch(e => res.status(500).json({error: e.message})));
+apiRouter.get("/iss", (req, res) => issHandler(req, res).catch(e => res.status(500).json({error: e.message})));
 
 app.use("/api", apiRouter);
 

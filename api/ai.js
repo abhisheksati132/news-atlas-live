@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-
 export default async function handler(req, res) {
     const apiKey = process.env.GROQ_API_KEY;
     let body = req.body || {};

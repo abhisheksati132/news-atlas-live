@@ -142,18 +142,30 @@ async function initTerminal() {
   }
   try {
     const res = await fetch("/api/countries?all=true");
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     globalSearchData = await res.json();
     window.globalSearchData = globalSearchData;
     if (window.renderTrendingHeader) window.renderTrendingHeader();
-  } catch (e) { console.error("Search data load failed:", e); }
+  } catch (e) { 
+    console.error("Search data load failed:", e); 
+    window.globalSearchData = [];
+  }
 
-  window.fetchNews();
-  startStockTicker();
+  try {
+    window.fetchNews();
+    startStockTicker();
+  } catch (e) {
+    console.error("Critical systems load failed:", e);
+  }
 
   runWhenIdle(() => {
-    if (window.generateAIBriefing) window.generateAIBriefing("Global Context");
-    if (window.fetchGDELTEvents) window.fetchGDELTEvents("");
-    if (window.initializeMarkets) window.initializeMarkets("Global");
+    try {
+      if (window.generateAIBriefing) window.generateAIBriefing("Global Context");
+      if (window.fetchGDELTEvents) window.fetchGDELTEvents("");
+      if (window.initializeMarkets) window.initializeMarkets("Global");
+    } catch (e) {
+      console.warn("Background systems failed:", e);
+    }
   });
 }
 async function startStockTicker() {

@@ -17,18 +17,18 @@ body {
 }
 
 .main-content {
-  max-width: 1600px;
+  width: 100%;
   margin: 0 auto;
-  padding: 4rem 2rem !important;
-  gap: 4rem;
+  padding: 1.5rem 1.5rem !important;
+  gap: 1.5rem;
   display: flex;
   flex-direction: column;
 }
 
 header {
-  max-width: 1600px;
+  width: 100%;
   margin: 0 auto;
-  padding: 1.5rem 2rem !important;
+  padding: 1rem 1.5rem !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;

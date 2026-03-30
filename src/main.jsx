@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
+import './styles/globals.css';
 
 const AIAssistant = () => {
   const [input, setInput] = useState('');

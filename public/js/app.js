@@ -1,7 +1,3 @@
-import '../css/tailwind.css';
-import '../css/global-fx.css';
-
-
 import './core/fetch-helper.js';
 import './core/audio.js';
 import './core/firebase.js';

@@ -3,43 +3,43 @@
    Design: flat, solid surfaces, one accent color, breathing room
    ============================================================ */
 
-/* ── Design Tokens ───────────────────────────────────────── */
+
 
 :root {
-  /* Surfaces */
+  
   --bg:          #0d1117;
   --surface:     #161b27;
   --surface-2:   #1c2333;
   --surface-3:   #232c3d;
 
-  /* Borders */
+  
   --border:       rgba(255, 255, 255, 0.06);
   --border-hover: rgba(255, 255, 255, 0.11);
 
-  /* Accent — one color only */
+  
   --accent:      #3b82f6;
   --accent-dim:  rgba(59, 130, 246, 0.12);
   --accent-text: #60a5fa;
 
-  /* Text */
+  
   --text:        #e2e8f0;
   --text-muted:  #64748b;
   --text-faint:  #2d3748;
 
-  /* Semantic */
+  
   --green:  #10b981;
   --red:    #ef4444;
   --yellow: #f59e0b;
   --cyan:   #22d3ee;
 
-  /* Layout */
+  
   --header-h:   56px;
   --radius:     8px;
   --radius-sm:  6px;
   --gap:        1.75rem;
   --panel-pad:  1.25rem;
 
-  /* Compatibility aliases */
+  
   --glass:          var(--surface);
   --glass-hover:    var(--surface-2);
   --glass-dim:      var(--surface);
@@ -56,7 +56,7 @@
   --blue-glow:      transparent;
 }
 
-/* ── Reset ───────────────────────────────────────────────── */
+
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -70,7 +70,7 @@ html {
   outline: none !important;
 }
 
-/* ── Base ────────────────────────────────────────────────── */
+
 
 body {
   font-family: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
@@ -97,7 +97,7 @@ body::after {
   display: none;
 }
 
-/* ── Typography ──────────────────────────────────────────── */
+
 
 h1, h2, h3, h4 {
   font-weight: 600;
@@ -105,7 +105,7 @@ h1, h2, h3, h4 {
   color: var(--text);
 }
 
-/* Neutralise aggressive terminal uppercase override */
+
 .tracking-widest {
   letter-spacing: 0.06em !important;
   font-size: inherit !important;
@@ -120,14 +120,14 @@ h1, h2, h3, h4 {
   font-size: max(var(--font-floor, 11px), revert) !important;
 }
 
-/* Be more specific — Tailwind's sub-12px classes */
+
 .text-\[9px\]  { font-size: 11px !important; }
 .text-\[10px\] { font-size: 11px !important; }
 .text-\[11px\] { font-size: 12px !important; }
 .text-\[8px\]  { font-size: 11px !important; }
 
 
-/* ── Focus ───────────────────────────────────────────────── */
+
 
 :focus-visible {
   outline: 2px solid var(--accent);
@@ -146,7 +146,7 @@ button:focus-visible,
   outline: none !important;
 }
 
-/* ── Selection ───────────────────────────────────────────── */
+
 
 ::selection {
   background: rgba(59, 130, 246, 0.18);
@@ -159,7 +159,7 @@ button:focus-visible,
    Tier 2: Data cards (bordered, solid surface)
    ══════════════════════════════════════════════════════════ */
 
-/* Default panel (data card) */
+
 .glass-panel,
 .apple-glass {
   background: var(--surface);
@@ -189,7 +189,7 @@ button:focus-visible,
   margin-bottom: 0 !important;
 }
 
-/* Signal Intelligence header section in News tab */
+
 .content-scroll-area > .apple-glass:has(#news-count) {
   background: transparent !important;
   border: none !important;
@@ -197,9 +197,9 @@ button:focus-visible,
   padding: 0 0 1rem !important;
 }
 
-/* ── Restore boxes that should stay boxed ────────────────── */
 
-/* Nested data cards always stay boxed */
+
+
 .content-scroll-area .apple-glass .apple-glass,
 .content-scroll-area .grid > .apple-glass {
   background: var(--surface) !important;
@@ -208,7 +208,7 @@ button:focus-visible,
   padding: var(--panel-pad) !important;
 }
 
-/* Named functional panels always stay boxed */
+
 #ai-briefing-box {
   background: var(--surface) !important;
   border: 1px solid var(--border) !important;
@@ -237,7 +237,7 @@ button:focus-visible,
   background: var(--surface) !important;
 }
 
-/* ── Header ──────────────────────────────────────────────── */
+
 
 header {
   height: var(--header-h);
@@ -274,7 +274,7 @@ header::-webkit-scrollbar {
   opacity: 1;
 }
 
-/* ── Main layout ─────────────────────────────────────────── */
+
 
 .main-content {
   padding: 1.5rem 3vw;
@@ -287,7 +287,7 @@ header::-webkit-scrollbar {
   z-index: 10;
 }
 
-/* ── Map box ─────────────────────────────────────────────── */
+
 
 .map-box {
   position: relative;
@@ -324,7 +324,7 @@ header::-webkit-scrollbar {
   background: var(--bg);
 }
 
-/* ── Map countries ───────────────────────────────────────── */
+
 
 .country {
   stroke: rgba(255, 255, 255, 0.1);
@@ -346,7 +346,7 @@ header::-webkit-scrollbar {
   stroke-width: 1.5;
 }
 
-/* ── Map layer button active states ──────────────────────── */
+
 
 #quake-toggle-btn.active      { color: #f97316 !important; }
 #aircraft-toggle-btn.active   { color: #3b82f6 !important; }
@@ -356,14 +356,14 @@ header::-webkit-scrollbar {
 #gdelt-toggle-btn.active      { color: #ef4444 !important; }
 #chronos-toggle-btn.active    { color: #a855f7 !important; }
 
-/* Disabled decorative elements */
+
 .map-scan-line,
 .crt-overlay,
 .crt-vignette {
   display: none;
 }
 
-/* ── Mapbox scroll blocker ───────────────────────────────── */
+
 
 .mapboxgl-scroll-zoom-blocker,
 .mapboxgl-touch-drag-pan-multi-finger {
@@ -385,7 +385,7 @@ header::-webkit-scrollbar {
   pointer-events: none !important;
 }
 
-/* ── Sidebar ─────────────────────────────────────────────── */
+
 
 .intel-sidebar {
   width: 100%;
@@ -395,7 +395,7 @@ header::-webkit-scrollbar {
   flex-shrink: 0;
 }
 
-/* ── Nav tabs ────────────────────────────────────────────── */
+
 
 .nav-tab {
   background: transparent;
@@ -430,7 +430,7 @@ header::-webkit-scrollbar {
   text-shadow: none;
 }
 
-/* ── Intel sub-tabs ──────────────────────────────────────── */
+
 
 .intel-tab {
   cursor: pointer;
@@ -467,7 +467,7 @@ header::-webkit-scrollbar {
   box-shadow: none;
 }
 
-/* ── Tab content ─────────────────────────────────────────── */
+
 
 .tab-content {
   display: none;
@@ -490,7 +490,7 @@ header::-webkit-scrollbar {
   position: absolute;
 }
 
-/* ── Content scroll area ─────────────────────────────────── */
+
 
 .content-scroll-area {
   flex: 1;
@@ -501,9 +501,9 @@ header::-webkit-scrollbar {
   gap: var(--gap);
 }
 
-/* Space between adjacent sections */
+
 .content-scroll-area > * + * {
-  /* gap handles this, but Tailwind space-y-4 overrides — compensate */
+  
   margin-top: 0 !important;
 }
 
@@ -511,7 +511,7 @@ header::-webkit-scrollbar {
   margin-top: var(--gap) !important;
 }
 
-/* ── Scrollbars ──────────────────────────────────────────── */
+
 
 .custom-scrollbar {
   scrollbar-width: thin;
@@ -534,7 +534,7 @@ header::-webkit-scrollbar {
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* ── Map control buttons ─────────────────────────────────── */
+
 
 .map-ctrl-btn {
   width: 32px;
@@ -575,7 +575,7 @@ header::-webkit-scrollbar {
   color: #fbbf24 !important;
 }
 
-/* ── Tactical / icon buttons ─────────────────────────────── */
+
 
 .tactical-btn {
   transition: opacity 0.12s ease;
@@ -589,7 +589,7 @@ header::-webkit-scrollbar {
   .tactical-btn { min-width: 44px; min-height: 44px; }
 }
 
-/* ── News cards ──────────────────────────────────────────── */
+
 
 .news-card-featured {
   border-color: rgba(59, 130, 246, 0.16) !important;
@@ -599,7 +599,7 @@ header::-webkit-scrollbar {
   border-color: rgba(59, 130, 246, 0.28) !important;
 }
 
-/* ── Sentiment badges ────────────────────────────────────── */
+
 
 .sentiment-negative {
   background: rgba(239, 68, 68, 0.08);
@@ -619,13 +619,13 @@ header::-webkit-scrollbar {
   border: 1px solid rgba(245, 158, 11, 0.12);
 }
 
-/* ── Signal indicators ───────────────────────────────────── */
+
 
 .signal-blue    { border-left: 2px solid var(--accent); }
 .signal-emerald { border-left: 2px solid var(--green); }
 .signal-red     { border-left: 2px solid var(--red); }
 
-/* ── Neural Synthesis / AI briefing ─────────────────────── */
+
 
 #ai-briefing-text {
   font-family: "Plus Jakarta Sans", system-ui, sans-serif;
@@ -635,7 +635,7 @@ header::-webkit-scrollbar {
 }
 
 
-/* ── AI chat components (compatibility) ──────────────────── */
+
 
 .tab-ai-chat {
   background: var(--surface);
@@ -732,7 +732,7 @@ header::-webkit-scrollbar {
   color: var(--accent-text);
 }
 
-/* ── Holo HUD markers (map) ──────────────────────────────── */
+
 
 .holo-hud-marker {
   width: max-content;
@@ -786,7 +786,7 @@ header::-webkit-scrollbar {
   color: var(--cyan);
 }
 
-/* ── Tooltip ─────────────────────────────────────────────── */
+
 
 #map-tooltip {
   pointer-events: none;
@@ -795,7 +795,7 @@ header::-webkit-scrollbar {
   backdrop-filter: none;
 }
 
-/* ── News article grid ───────────────────────────────────── */
+
 
 #articles-container {
   display: grid;
@@ -811,7 +811,7 @@ header::-webkit-scrollbar {
   #articles-container { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* ── About overlay ───────────────────────────────────────── */
+
 
 #about-overlay {
   background: rgba(13, 17, 23, 0.98);
@@ -820,7 +820,7 @@ header::-webkit-scrollbar {
   z-index: 1000;
 }
 
-/* ── Social links ────────────────────────────────────────── */
+
 
 .about-social-link {
   display: flex;
@@ -843,7 +843,7 @@ header::-webkit-scrollbar {
   border-color: var(--border-hover);
 }
 
-/* ── Skill / tech tags ───────────────────────────────────── */
+
 
 .skill-tag {
   background: var(--accent-dim);
@@ -865,7 +865,7 @@ header::-webkit-scrollbar {
   background: var(--accent);
 }
 
-/* ── Meter / progress bars ───────────────────────────────── */
+
 
 .meter-bg {
   background: var(--surface-3);
@@ -884,14 +884,14 @@ header::-webkit-scrollbar {
   box-shadow: none;
 }
 
-/* ── Skeleton ────────────────────────────────────────────── */
+
 
 .skeleton {
   background: var(--surface-2);
   border-radius: 4px;
 }
 
-/* ── Layer legend ────────────────────────────────────────── */
+
 
 .layer-legend {
   font-family: "Plus Jakarta Sans", system-ui, sans-serif;
@@ -902,14 +902,14 @@ header::-webkit-scrollbar {
   border: 1px solid var(--border);
 }
 
-/* ── Command palette ─────────────────────────────────────── */
+
 
 #cmd-palette-overlay {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
-/* ── Shortcuts overlay ───────────────────────────────────── */
+
 
 .shortcuts-overlay {
   position: fixed;
@@ -954,7 +954,7 @@ header::-webkit-scrollbar {
   box-shadow: none;
 }
 
-/* ── Toast notifications ─────────────────────────────────── */
+
 
 @keyframes toastIn {
   from { opacity: 0; transform: translateY(6px); }
@@ -968,7 +968,7 @@ header::-webkit-scrollbar {
 .animate-toast-in  { animation: toastIn  0.15s ease forwards; }
 .animate-toast-out { animation: toastOut 0.15s ease forwards; }
 
-/* ── Misc disabled ───────────────────────────────────────── */
+
 
 .cyan-glow-pulse,
 .pulse-ring { animation: none !important; }
@@ -984,7 +984,7 @@ header::-webkit-scrollbar {
   opacity: 0.8;
 }
 
-/* ── Typing cursor ───────────────────────────────────────── */
+
 
 @keyframes blink {
   0%, 100% { opacity: 1; }
@@ -996,7 +996,7 @@ header::-webkit-scrollbar {
   animation: blink 1s step-end infinite;
 }
 
-/* ── Loading dot ─────────────────────────────────────────── */
+
 
 .loading-pulse { animation: loading-pulse 2s ease-in-out infinite; }
 
@@ -1005,7 +1005,7 @@ header::-webkit-scrollbar {
   50%       { opacity: 1; }
 }
 
-/* ── Footer ──────────────────────────────────────────────── */
+
 
 .terminal-footer {
   text-align: center;
@@ -1018,7 +1018,7 @@ header::-webkit-scrollbar {
   box-shadow: none !important;
 }
 
-/* ── Reduced motion ──────────────────────────────────────── */
+
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -1028,7 +1028,7 @@ header::-webkit-scrollbar {
   }
 }
 
-/* ── Mobile ──────────────────────────────────────────────── */
+
 
 @media (max-width: 1023px) {
   header {
@@ -1060,7 +1060,7 @@ header::-webkit-scrollbar {
   .map-ctrl-btn { min-width: 40px; min-height: 40px; }
 }
 
-/* ── Transition normalisation ────────────────────────────── */
+
 
 * {
   transition-timing-function: ease;
@@ -1078,7 +1078,7 @@ header::-webkit-scrollbar {
    a single muted grey. Only interactive elements + data values
    keep semantic color.                                        */
 
-/* Section label spans that sit inside search panels or panel headers */
+
 .content-scroll-area > .apple-glass.mb-2 span,
 .content-scroll-area > .apple-glass.mb-2 i,
 .apple-glass > div:first-child > span:first-child,
@@ -1094,7 +1094,7 @@ header::-webkit-scrollbar {
    look like a hacker terminal. Labels use the body sans-serif;
    mono is reserved for data values (numbers, codes).         */
 
-/* Strip mono from search panel labels */
+
 .content-scroll-area > .apple-glass.mb-2 span,
 .content-scroll-area > .apple-glass.mb-2 .flex span {
   font-family: "Plus Jakarta Sans", system-ui, sans-serif !important;
@@ -1208,7 +1208,7 @@ button[onclick*="searchCity"]:hover {
   animation: none !important;
 }
 
-/* Keep the single live indicator on neural synthesis */
+
 #ai-briefing-box .animate-pulse {
   animation: loading-pulse 3s ease-in-out infinite;
 }

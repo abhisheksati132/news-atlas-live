@@ -148,17 +148,8 @@
         </div>
       </div>
 
-      <!-- CENTER: Search + Clock -->
-      <div class="hidden md:flex items-center gap-4">
-        <button onclick="toggleSearch()" class="flex items-center gap-2 px-4 h-8 rounded-lg transition-all header-widget" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
-          <i class="fas fa-search text-xs" style="color: #64748b"></i>
-          <span style="font-size: 11px; color: #94a3b8; font-weight: 500; font-family: 'JetBrains Mono', monospace;">Search</span>
-        </button>
-
-        <div class="px-3 h-8 flex items-center border-l border-white/5">
-          <span id="ist-time" style="font-size: 11px; font-weight: 500; color: #64748b; font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;">--:-- IST</span>
-        </div>
-      </div>
+      
+      <div class="hidden md:flex items-center gap-4"></div>
 
       <div class="flex items-center gap-2 shrink-0">
         <button onclick="downloadDossier()" class="header-widget p-2" title="Download report" style="color: #64748b">
@@ -407,8 +398,7 @@
             aria-selected="false"
             aria-controls="tab-markets"
             id="tab-btn-markets"
-            title="Markets: indices, crypto, forex"
-            
+            title="Markets: indices, forex, commodities"
             onclick="switchTab('markets')"
           >
             Markets
@@ -444,35 +434,7 @@
           <div id="tab-intel" class="tab-content active">
             <div class="content-scroll-area space-y-4">
 
-              <div class="apple-glass p-5 mb-2">
-                <div class="flex justify-between items-center mb-3">
-                  <span
-                    class="text-xs text-blue-400 uppercase font-black tracking-widest"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace"
-                  >
-                    <i class="fas fa-search-location mr-2"></i>Find Country
-                  </span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <input
-                    type="text"
-                    id="intel-city-search"
-                    placeholder="Enter target city..."
-                    class="w-full bg-glass-dim border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-blue-400 focus:outline-none transition-colors shadow-inner"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace"
-                    onkeydown="
-                      if (event.key === 'Enter') searchCityForTab('intel');
-                    "
-                    autocomplete="off"
-                  />
-                  <button
-                    onclick="searchCityForTab('intel')"
-                    class="px-5 py-2 text-sm bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-bold tracking-widest uppercase rounded-xl transition-all border border-blue-500/20 shadow-sm"
-                  >
-                    SCAN
-                  </button>
-                </div>
-              </div>
+<div class="p-2"></div>
               <div id="hierarchy-panel" class="hidden">
                 <div class="flex items-center gap-2 text-sm font-mono mb-3">
                   <span
@@ -599,7 +561,7 @@
                   id="ai-briefing-text"
                   class="text-slate-300 font-mono text-[11px] leading-relaxed"
                 >
-                  Select a country on the map to generate a real-time AI summary.
+                  Select a country on the map for real-time analysis.
                 </div>
                 <div id="ai-briefing-loading" class="hidden text-center py-4">
                   <i class="fas fa-circle-notch fa-spin text-blue-400"></i>
@@ -838,29 +800,7 @@
                   class="grid grid-cols-1 md:grid-cols-2 gap-3"
                 ></div>
               </div>
-              <div
-                class="apple-glass rounded-2xl p-5 border border-white/5 shadow-sm"
-              >
-                <div
-                  class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer"
-                  onclick="toggleMarketCategory('crypto')"
-                >
-                  <span
-                    class="text-sm text-emerald-400 uppercase font-black tracking-widest"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace"
-                  >
-                    <i class="fab fa-bitcoin mr-2"></i>Cryptocurrencies
-                  </span>
-                  <i
-                    class="fas fa-chevron-up text-slate-500"
-                    id="crypto-chevron"
-                  ></i>
-                </div>
-                <div
-                  id="crypto-content"
-                  class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
-                ></div>
-              </div>
+
               <div
                 class="apple-glass rounded-2xl p-5 border border-white/5 shadow-sm"
               >
@@ -907,54 +847,8 @@
                   class="grid grid-cols-2 md:grid-cols-3 gap-3"
                 ></div>
               </div>
-              <div class="apple-glass">
-                <div
-                  class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer"
-                  onclick="window.toggleMarketCategory('trending-crypto')"
-                >
-                  <span
-                    class="text-sm text-amber-400 uppercase font-black tracking-widest"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace"
-                  >
-                    <i class="fas fa-fire-alt mr-2"></i>Trending · CoinGecko
-                  </span>
-                  <i
-                    class="fas fa-chevron-up text-slate-500"
-                    id="trending-crypto-chevron"
-                  ></i>
-                </div>
-                <div
-                  id="trending-crypto-content"
-                  class="grid grid-cols-2 lg:grid-cols-4 gap-3"
-                >
-                  <div class="text-slate-500 text-sm py-2 animate-pulse">
-                    Fetching trending coins...
-                  </div>
-                </div>
-              </div>
-              <div class="apple-glass">
-                <div
-                  class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer"
-                  onclick="window.toggleMarketCategory('top10-crypto')"
-                >
-                  <span
-                    class="text-sm text-indigo-400 uppercase font-black tracking-widest"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace"
-                  >
-                    <i class="fas fa-trophy mr-2"></i>Top 10 by Mkt Cap ·
-                    CoinGecko
-                  </span>
-                  <i
-                    class="fas fa-chevron-up text-slate-500"
-                    id="top10-crypto-chevron"
-                  ></i>
-                </div>
-                <div id="top10-crypto-content" class="space-y-0">
-                  <div class="text-slate-500 text-sm py-2 animate-pulse">
-                    Loading top 10...
-                  </div>
-                </div>
-              </div>
+
+
               <div class="apple-glass">
                 <div
                   class="flex justify-between items-center mb-3 border-b border-white/5 pb-3"
@@ -2042,7 +1936,7 @@
     <div id="fact-demonym" class="hidden"></div>
     <div id="fact-gini" class="hidden"></div>
     <div id="fact-drive" class="hidden"></div>
-    <!-- All modules are loaded via /js/app.js (in <head>) to avoid duplicate execution -->
+    
 
 
     <div
@@ -2625,13 +2519,13 @@
         }
       };
     </script>
-    <!-- Keyboard Shortcuts Disabled -->
-    <!-- About Overlay -->
+    
+    
     <div id="_atlas_about_overlay" class="fixed inset-0 z-[200] hidden" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(12px);">
       <div class="flex items-center justify-center min-h-screen p-6">
         <div style="background: rgba(15,23,42,0.95); border: 1px solid rgba(255,255,255,0.08); border-radius: 1.25rem; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto;" class="shadow-2xl">
           
-          <!-- Header -->
+          
           <div style="padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.06);" class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div style="width: 36px; height: 36px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 10px;" class="flex items-center justify-center">
@@ -2647,7 +2541,7 @@
             </button>
           </div>
 
-          <!-- Description -->
+          
           <div style="padding: 1.25rem 1.5rem;">
             <p style="font-size: 13px; color: #94a3b8; line-height: 1.7; margin: 0;">
               NewsAtlas is a real-time global news and intelligence dashboard. Click any country on the map to get live news, weather, economic data, and AI-powered analysis — all in one place.
@@ -2661,7 +2555,7 @@
             </div>
           </div>
 
-          <!-- AI Assistant -->
+          
           <div style="padding: 0 1.5rem 1.5rem;">
             <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 0.75rem; overflow: hidden;">
               <div style="padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 0.5rem;">
@@ -2686,7 +2580,7 @@
             </div>
           </div>
 
-          <!-- Footer -->
+          
           <div style="padding: 1rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); text-align: center;">
             <p style="font-size: 11px; color: #475569; margin: 0;">Built with ❤️ · © 2025 NewsAtlas</p>
           </div>

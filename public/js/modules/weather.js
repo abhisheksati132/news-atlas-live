@@ -542,7 +542,7 @@ window.searchAtmosphereCity = async () => {
   btn.disabled = true;
   try {
     const res = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=1&format=json`,
+      `https:
     );
     const data = await res.json();
     if (data.results && data.results.length > 0) {

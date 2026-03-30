@@ -5,7 +5,7 @@ let newsSearchQuery = "";
 let newsSearchTimer = null;
 let isLiveSearching = false;
 
-// Security: escape HTML special chars to prevent XSS from external RSS content
+
 function escapeHtml(str) {
   if (!str) return "";
   return String(str)
@@ -39,7 +39,7 @@ function getFavicon(sourceUrl) {
   if (!sourceUrl) return null;
   try {
     const domain = new URL(sourceUrl).hostname;
-    return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+    return `https:
   } catch {
     return null;
   }
@@ -285,7 +285,7 @@ async function fetchSeismicStatus() {
   if (!el) return;
   try {
     const res = await fetch(
-      "https://earthquake.usgs.gov/fdsnws/event/1/count?format=geojson&starttime=" +
+      "https:
       new Date(Date.now() - 3600000).toISOString() +
       "&minmagnitude=2",
     );

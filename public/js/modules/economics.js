@@ -103,7 +103,7 @@ async function drawGDPTrend(country) {
   }
   try {
     const r = await fetch(
-      `https://api.worldbank.org/v2/country/${iso}/indicator/NY.GDP.MKTP.CD?format=json&mrv=6&per_page=6`,
+      `https:
     );
     const json = await r.json();
     const raw = (json[1] || [])
@@ -208,7 +208,7 @@ async function fetchCurrency() {
   if (elCode) elCode.innerText = window.currencyCode;
   if (elRate) elRate.innerText = "Scanning...";
   try {
-    const res = await fetch(`https://open.er-api.com/v6/latest/USD`);
+    const res = await fetch(`https:
     const data = await res.json();
     if (data && data.rates && data.rates[window.currencyCode]) {
       const rate = data.rates[window.currencyCode];
@@ -346,7 +346,7 @@ async function fetchECBRates() {
       { key: "D.INR.EUR.SP00.A", label: "EUR/INR", flag: "🇮🇳" },
     ];
     const results = await Promise.allSettled(
-      pairs.map((p) => fetch(`https://data-api.ecb.europa.eu/service/data/EXR/${p.key}?format=jsondata&lastNObservations=2`).then((r) => r.json())),
+      pairs.map((p) => fetch(`https:
     );
     container.innerHTML = "";
     results.forEach((r, i) => {

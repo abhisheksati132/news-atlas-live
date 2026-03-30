@@ -1,4 +1,4 @@
-import './core/fetch-helper.js';
+﻿import './core/fetch-helper.js';
 import './core/audio.js';
 import './core/firebase.js';
 
@@ -77,7 +77,7 @@ function showBackendRequiredBanner() {
     <p class="text-amber-300 font-mono text-xs font-bold mb-2">API not available — backend not running.</p>
     <p class="text-slate-400 text-[11px] mb-2">Do not use Live Server (e.g. port 5500). Run the Node server instead:</p>
     <code class="block bg-black/40 px-3 py-1.5 rounded text-emerald-400 text-[11px] font-mono mb-2">npm run dev</code>
-    <p class="text-slate-500 text-[10px]">Then open <a href="http://localhost:3000" class="text-blue-400 underline">http://localhost:3000</a></p>
+    <p class="text-slate-500 text-[10px]">Then open <a href="http:
     <button type="button" onclick="this.closest('#backend-required-banner').remove()" class="mt-2 text-slate-500 hover:text-white text-[10px] font-mono">Dismiss</button>
   `;
   document.body.appendChild(banner);
@@ -519,7 +519,7 @@ window.toggleAirQuality = async function () {
 
   let features = [];
   try {
-    const res = await fetch("https://api.waqi.info/map/bounds/?latlng=-90,-180,90,180&token=demo");
+    const res = await fetch("https:
     const data = await res.json();
     if (data.status !== "ok") throw new Error("WAQI status: " + data.status);
 
@@ -709,7 +709,7 @@ window.handleCountryClick = async function (event, d) {
     if (flagEl) {
       const iso = d.properties.iso_a2 || d.properties.iso_3166_1 || d.properties.ISO_A2;
       if (iso) {
-        flagEl.src = `https://flagcdn.com/w40/${iso.toLowerCase()}.png`;
+        flagEl.src = `https:
         flagEl.classList.remove("hidden");
       } else {
         flagEl.classList.add("hidden");
@@ -966,7 +966,7 @@ function setupEventListeners() {
         .join("");
     }, 250);
   };
-  // Use addEventListener instead of window.onkeydown to avoid overwriting other listeners
+  
   window.addEventListener("keydown", (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === "k") {
       e.preventDefault();
@@ -989,7 +989,7 @@ function updateSystemTime() {
   if (typeof window._timeOffsetHours === 'number' && window._timeOffsetHours !== 0) {
     now.setHours(now.getHours() + window._timeOffsetHours);
   }
-  // Show local system time (not hardcoded to IST)
+  
   const localTimeStr = now.toLocaleTimeString("en-US", {
     hour12: false,
     hour: "2-digit",
@@ -1397,7 +1397,7 @@ window.toggleEarthquakeLayer = async function () {
     btn.title = "Earthquake Layer: ON";
   }
   try {
-    const res = await fetch("https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=4&limit=80&orderby=time");
+    const res = await fetch("https:
     const geoData = await res.json();
 
     if (geoData.features && geoData.features.length > 0) {
@@ -1499,7 +1499,7 @@ async function renderAircraft() {
   const map = window.mapEngine.map;
 
   try {
-    const res = await fetch("https://opensky-network.org/api/states/all?lamin=-60&lomin=-180&lamax=80&lomax=180");
+    const res = await fetch("https:
     const data = await res.json();
     const states = (data.states || []).filter((s) => s[5] && s[6]);
 
@@ -1806,8 +1806,8 @@ window.toggleMapStyle = function () {
   };
 
   const newStyle = window._isSatellite
-    ? 'mapbox://styles/mapbox/satellite-streets-v12'
-    : 'mapbox://styles/mapbox/dark-v11';
+    ? 'mapbox:
+    : 'mapbox:
 
   map.setStyle(newStyle);
 
@@ -2105,7 +2105,7 @@ window.searchCityForTab = async (tabId) => {
   btn.innerText = "WAIT..";
   btn.disabled = true;
   try {
-    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=1&format=json`);
+    const res = await fetch(`https:
     const data = await res.json();
     if (data.results && data.results.length > 0) {
       const city = data.results[0];
@@ -2128,7 +2128,7 @@ window.searchCityForTab = async (tabId) => {
       if (window.setText) window.setText("selected-country-name", city.name.toUpperCase());
       const flagEl = document.getElementById("header-country-flag");
       if (flagEl && city.country_code) {
-        flagEl.src = `https://flagcdn.com/w40/${city.country_code.toLowerCase()}.png`;
+        flagEl.src = `https:
         flagEl.classList.remove("hidden");
       }
       window._currentWeatherLocation = fullName;

@@ -1,4 +1,4 @@
-/* global-fx.css — Aligned to clean minimal design system */
+
 
 body {
   -webkit-font-smoothing: antialiased;
@@ -6,12 +6,12 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Custom cursor — disabled */
+
 #custom-cursor {
   display: none !important;
 }
 
-/* Glass glow track — class kept for compatibility, no effect */
+
 .glass-glow-track {
   position: relative;
 }
@@ -26,24 +26,24 @@ body {
   position: relative;
 }
 
-/* Pseudo-element decorations — disabled */
+
 .apple-glass::after,
 .glass-panel::after {
   display: none;
 }
 
-/* Hover blue — simplified to flat border highlight */
+
 .hover-glow-blue:hover {
   border-color: rgba(59, 130, 246, 0.3) !important;
   background: rgba(59, 130, 246, 0.04) !important;
 }
 
-/* Parallax grid — removed */
+
 .parallax-grid-wrapper {
   display: none;
 }
 
-/* Skeleton shimmer — flat, no animation */
+
 .skeleton-pulse {
   background: rgba(255, 255, 255, 0.04);
 }
@@ -60,7 +60,7 @@ body {
   width: 55%;
 }
 
-/* Audio pulse — no rings */
+
 .audio-pulse {
   position: relative;
 }
@@ -69,7 +69,7 @@ body {
   display: none;
 }
 
-/* Decrypt text — structural only */
+
 .decrypt-text span {
   display: inline-block;
 }

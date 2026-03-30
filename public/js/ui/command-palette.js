@@ -31,9 +31,6 @@ const COMMANDS = [
     { id: "airq", label: "Air Quality Node", desc: "Toggle global atmospheric particulate density", icon: "fa-leaf", run: () => window.toggleAirQuality && window.toggleAirQuality() },
 
     
-    { id: "audio", label: "Toggle Audio FX", desc: "Sync/Desync tactical audio feedback systems", icon: "fa-volume-up", run: () => window.toggleGlobalAudio && window.toggleGlobalAudio() },
-    { id: "voice", label: "Voice Command Mode", desc: "Initialize neural voice recognition uplink", icon: "fa-microphone", shortcut: "V", run: () => window.activateVoice && window.activateVoice() },
-    { id: "cli", label: "Neural CLI Terminal", desc: "Open advanced command-line interface", icon: "fa-terminal", shortcut: "`", run: () => window.toggleCLI && window.toggleCLI() },
     {
         id: "history-clear", label: "Clear Session Data", desc: "Wipe AI chat history and tactical cache", icon: "fa-trash-alt", run: () => {
             localStorage.clear();
@@ -70,14 +67,20 @@ function openCommandPalette() {
     _paletteSelected = 0;
     const overlay = document.getElementById("cmd-palette-overlay");
     const input = document.getElementById("cmd-palette-input");
-    if (overlay) overlay.classList.remove("hidden");
+    if (overlay) {
+        overlay.style.display = "flex";
+        overlay.classList.remove("hidden");
+    }
     if (input) { input.value = ""; input.focus(); }
     renderPaletteItems();
 }
 function closeCommandPalette() {
     _paletteOpen = false;
     const overlay = document.getElementById("cmd-palette-overlay");
-    if (overlay) overlay.classList.add("hidden");
+    if (overlay) {
+        overlay.style.display = "none";
+        overlay.classList.add("hidden");
+    }
 }
 function renderPaletteItems() {
     const list = document.getElementById("cmd-palette-list");

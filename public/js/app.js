@@ -46,80 +46,7 @@ function magColor(m) {
 }
 window.magColor = magColor;
 
-window._audioMuted = false;
-let audioCtx = null;
-window.playTacticalSound = function (type) {
-  if (window._audioMuted) return;
-  if (!audioCtx) {
-    try {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    } catch { return; }
-  }
-  if (audioCtx.state === "suspended") {
-    audioCtx.resume();
-  }
 
-  const osc = audioCtx.createOscillator();
-  const gainNode = audioCtx.createGain();
-  osc.connect(gainNode);
-  gainNode.connect(audioCtx.destination);
-
-  const t = audioCtx.currentTime;
-
-  if (type === "hover") {
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(800, t);
-    osc.frequency.exponentialRampToValueAtTime(1200, t + 0.05);
-    gainNode.gain.setValueAtTime(0, t);
-    gainNode.gain.linearRampToValueAtTime(0.05, t + 0.01);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
-    osc.start(t);
-    osc.stop(t + 0.1);
-  } else if (type === "click" || type === "tab") {
-    osc.type = "square";
-    osc.frequency.setValueAtTime(400, t);
-    osc.frequency.exponentialRampToValueAtTime(200, t + 0.1);
-    gainNode.gain.setValueAtTime(0, t);
-    gainNode.gain.linearRampToValueAtTime(0.08, t + 0.01);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
-    osc.start(t);
-    osc.stop(t + 0.1);
-  } else if (type === "success") {
-    osc.type = "triangle";
-    osc.frequency.setValueAtTime(600, t);
-    osc.frequency.setValueAtTime(800, t + 0.1);
-    osc.frequency.setValueAtTime(1000, t + 0.2);
-    gainNode.gain.setValueAtTime(0, t);
-    gainNode.gain.linearRampToValueAtTime(0.1, t + 0.05);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
-    osc.start(t);
-    osc.stop(t + 0.3);
-  }
-};
-
-window.toggleGlobalAudio = function () {
-  window._audioMuted = !window._audioMuted;
-  if (window._audioMuted) {
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
-    if (typeof window.toggleAmbience === "function" && window.isAmbiencePlaying) {
-      window.toggleAmbience();
-    }
-  }
-  const btn = document.getElementById("audio-icon");
-  const parentBtn = document.getElementById("audio-toggle-btn");
-  if (btn && parentBtn) {
-    if (window._audioMuted) {
-      btn.className = "fas fa-volume-mute text-2xl relative z-10";
-      parentBtn.classList.remove("text-emerald-400");
-      parentBtn.classList.add("text-red-400");
-    } else {
-      btn.className = "fas fa-volume-up text-2xl relative z-10";
-      parentBtn.classList.remove("text-red-400");
-      parentBtn.classList.add("text-emerald-400");
-      window.playTacticalSound("success");
-    }
-  }
-};
 
 function safeEl(id) {
   return document.getElementById(id);
@@ -141,7 +68,8 @@ function runWhenIdle(callback, timeout = 2000) {
   }
 }
 async function runBootSequence() {
-  
+  const savedTheme = localStorage.getItem('terminal-theme');
+  if (savedTheme === 'light') document.body.classList.add('light-theme');
 }
 
 function showBackendRequiredBanner() {
@@ -1030,7 +958,8 @@ function setupEventListeners() {
         .join("");
     }, 250);
   };
-  window.onkeydown = (e) => {
+  // Use addEventListener instead of window.onkeydown to avoid overwriting other listeners
+  window.addEventListener("keydown", (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === "k") {
       e.preventDefault();
       window.toggleSearch();
@@ -1042,26 +971,26 @@ function setupEventListeners() {
     if (e.key === "Escape") {
       const so = safeEl("search-overlay");
       const ao = safeEl("about-overlay");
-      if (so) so.classList.add("hidden");
-      if (ao) ao.classList.add("hidden");
+      if (so && !so.classList.contains("hidden")) { so.classList.add("hidden"); return; }
+      if (ao && !ao.classList.contains("hidden")) { ao.classList.add("hidden"); return; }
     }
-  };
+  });
 }
 function updateSystemTime() {
   const now = new Date();
   if (typeof window._timeOffsetHours === 'number' && window._timeOffsetHours !== 0) {
     now.setHours(now.getHours() + window._timeOffsetHours);
   }
-  setText(
-    "system-time",
-    now.toLocaleTimeString("en-US", {
-      timeZone: "Asia/Kolkata",
-      hour12: false,
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    }) + " IST",
-  );
+  // Show local system time (not hardcoded to IST)
+  const localTimeStr = now.toLocaleTimeString("en-US", {
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+  const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone || "LOCAL";
+  const shortTZ = tzName.split("/").pop().replace(/_/g, " ");
+  setText("system-time", localTimeStr + " " + shortTZ);
   if (countryUTCOffset) {
     const currentRealTime = new Date();
     if (typeof window._timeOffsetHours === 'number' && window._timeOffsetHours !== 0) {
@@ -1087,52 +1016,7 @@ function updateSystemTime() {
   }
 }
 window.activateVoice = () => {
-  window.playTacticalSound("click");
-  const SpeechRecognition =
-    window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    alert("Voice module offline (Browser not supported)");
-    return;
-  }
-  const recognition = new SpeechRecognition();
-  recognition.lang = "en-US";
-  recognition.start();
-  const btn = document.querySelector(".fa-microphone");
-  btn.classList.add("text-red-500", "animate-pulse");
-  recognition.onresult = (event) => {
-    const command = event.results[0][0].transcript
-      .toLowerCase()
-      .replace(".", "")
-      .trim();
-    btn.classList.remove("text-red-500", "animate-pulse");
-    if (window.showToast) window.showToast("Heard: " + command, "info");
-    if (command.includes("go to"))
-      window.selectFromSearch(command.replace("go to", "").trim());
-    else if (command.includes("analyze") || command.includes("intel")) window.switchTab("intel");
-    else if (command.includes("news")) window.switchTab("news");
-    else if (command.includes("market")) window.switchTab("markets");
-    else if (command.includes("weather") || command.includes("atmosphere")) window.switchTab("atmosphere");
-    else if (command.includes("econom")) window.switchTab("economic");
-    else if (command.includes("reset") || command.includes("global")) {
-      if (window.resetToGlobalCenter) window.resetToGlobalCenter();
-    } else if (command.includes("search") || command.includes("find")) {
-      if (window.toggleSearch) window.toggleSearch();
-    } else if (command.includes("about") || command.includes("terminal")) {
-      if (window.toggleAbout) window.toggleAbout(true);
-    } else if (command.includes("2d") || command.includes("two d")) {
-      if (window.projectionType === "3d" && window.toggleProjection) window.toggleProjection();
-    } else if (command.includes("3d") || command.includes("three d") || command.includes("globe")) {
-      if (window.projectionType === "2d" && window.toggleProjection) window.toggleProjection();
-    } else if (command.includes("zoom in")) {
-      if (window.zoomMap) window.zoomMap(1.6);
-    } else if (command.includes("zoom out")) {
-      if (window.zoomMap) window.zoomMap(0.6);
-    } else if (command.includes("shortcut")) {
-      if (window.toggleShortcuts) window.toggleShortcuts();
-    }
-  };
-  recognition.onerror = () =>
-    btn.classList.remove("text-red-500", "animate-pulse");
+  if (window.showToast) window.showToast("Voice module is unavailable in professional mode.", "info");
 };
 const RECENT_COUNTRIES_KEY = "newsatlas_recent_countries";
 const RECENT_COUNTRIES_MAX = 5;
@@ -1987,7 +1871,10 @@ window.toggleGDELTLayer = async function () {
 
   try {
     const url = `/api/gdelt?mode=geo&query=conflict&format=geojson&timespan=12H`;
-    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    const abortCtrl = new AbortController();
+    const abortTimer = setTimeout(() => abortCtrl.abort(), 8000);
+    const res = await fetch(url, { signal: abortCtrl.signal });
+    clearTimeout(abortTimer);
     if (!res.ok) throw new Error("GDELT fetch failed");
     const data = await res.json();
     processGDELTData(data.features || []);
@@ -2174,13 +2061,6 @@ window.renderTrendingHeader = () => {
 const _origResetGlobal = window.resetToGlobalCenter;
 if (_origResetGlobal) {
   window.resetToGlobalCenter = (fly) => {
-    // - [x] Update header widgets scale & spacing in `terminal.html`
-    // - [x] Add country flag placeholder in `terminal.html`
-    // - [x] Remove ghost 'thin box' by fixing mobile overlay border
-    // - [x] Add 2rem margin under `map-box` in `terminal.css`
-    // - [x] Style header flags and increase font sizes in `terminal.css`
-    // - [x] Implement dynamic flag updates in `app.js`
-    // - [x] Verify selection, spacing, and layout symmetry
     _origResetGlobal(fly);
     const headerFlagContainer = safeEl("search-flag-container");
     const headerSearchIcon = safeEl("search-icon-main");

@@ -1,117 +1,75 @@
+/* global-fx.css — Aligned to clean minimal design system */
+
 body {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
+/* Custom cursor — disabled */
 #custom-cursor {
-    display: none !important;
+  display: none !important;
 }
 
+/* Glass glow track — class kept for compatibility, no effect */
 .glass-glow-track {
-    position: relative;
-    overflow: hidden;
+  position: relative;
 }
 
 .glass-glow-track::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: inherit;
-    padding: 1px;
-
-    background: radial-gradient(600px circle at var(--mouse-x, -500px) var(--mouse-y, -500px),
-            rgba(255, 255, 255, 0.1),
-            transparent 40%);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    z-index: 10;
-    transition: opacity 0.3s ease;
-    opacity: 0;
-}
-
-.glass-glow-track:hover::before {
-    opacity: 0.8;
+  display: none;
 }
 
 .apple-glass,
 .glass-panel,
 .glass-glow-track {
-    position: relative;
+  position: relative;
 }
 
-.apple-glass {
-    transform: translate3d(0, 0, 0);
-}
-
-.hover-glow-blue:hover {
-    box-shadow: 0 0 25px rgba(59, 130, 246, 0.35);
-    border-color: rgba(59, 130, 246, 0.4) !important;
-    background: rgba(59, 130, 246, 0.08) !important;
-}
-
+/* Pseudo-element decorations — disabled */
 .apple-glass::after,
 .glass-panel::after {
-    display: none;
+  display: none;
 }
 
+/* Hover blue — simplified to flat border highlight */
+.hover-glow-blue:hover {
+  border-color: rgba(59, 130, 246, 0.3) !important;
+  background: rgba(59, 130, 246, 0.04) !important;
+}
+
+/* Parallax grid — removed */
 .parallax-grid-wrapper {
-    position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    z-index: -10;
-    transform: translate3d(0, 0, 0);
+  display: none;
 }
 
+/* Skeleton shimmer — flat, no animation */
 .skeleton-pulse {
-    animation: skeleton-pulse 1.5s ease-in-out infinite;
-    background: linear-gradient(-90deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 100%);
-    background-size: 400% 400%;
-}
-
-@keyframes skeleton-pulse {
-    0% {
-        background-position: 0% 0%;
-    }
-
-    100% {
-        background-position: -135% 0%;
-    }
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .skeleton-text-block {
-    height: 12px;
-    border-radius: 4px;
-    margin-bottom: 8px;
-    width: 100%;
+  height: 10px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .skeleton-text-block.short {
-    width: 60%;
+  width: 55%;
 }
 
+/* Audio pulse — no rings */
 .audio-pulse {
-    position: relative;
+  position: relative;
 }
 
 .audio-pulse::before {
-    content: '';
-    position: absolute;
-    inset: -4px;
-    border-radius: 50%;
-    background: rgba(16, 185, 129, 0.4);
-    animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
-    z-index: -1;
+  display: none;
 }
 
+/* Decrypt text — structural only */
 .decrypt-text span {
-    display: inline-block;
+  display: inline-block;
 }

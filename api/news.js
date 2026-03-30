@@ -389,6 +389,9 @@ const COUNTRY_FEEDS = {
     {
       url: "https://feeds.bbci.co.uk/portuguese/brazil/rss.xml",
       category: "world",
+      source: "BBC Brazil",
+    },
+    {
       url: "https://g1.globo.com/rss/g1/index.rss",
       category: "world",
       source: "Globo",

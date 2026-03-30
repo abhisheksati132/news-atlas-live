@@ -73,10 +73,15 @@ function renderTrending() {
 window.toggleSearch = () => {
   window.playTacticalSound("click");
   const overlay = document.getElementById("search-overlay");
-  overlay.classList.toggle("hidden");
-  if (!overlay.classList.contains("hidden")) {
-    document.getElementById("country-search").focus();
+  const isHidden = overlay.style.display === "none" || !overlay.style.display;
+  if (isHidden) {
+    overlay.style.display = "flex";
+    overlay.classList.remove("hidden");
+    document.getElementById("country-search")?.focus();
     renderTrending();
+  } else {
+    overlay.style.display = "none";
+    overlay.classList.add("hidden");
   }
 };
-window.renderTrending = renderTrending;
+window.renderTrending = renderTrending;

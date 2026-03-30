@@ -4,6 +4,17 @@ let currentNewsFilters = { search: "", time: "All Time", sort: "Most Recent" };
 let newsSearchQuery = "";
 let newsSearchTimer = null;
 let isLiveSearching = false;
+
+// Security: escape HTML special chars to prevent XSS from external RSS content
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 function getNewsSentiment(title, desc) {
   const text = ((title || "") + " " + (desc || "")).toLowerCase();
   const neg = /\b(war|attack|kill|crisis|conflict|crash|terror|dead|threat|sanction|protest|clash|bomb|missile|coup|unrest|disaster|explosion|violence|strike|riot|collapse|invasion|arrest|death|victim|destruction)\b/;
@@ -189,9 +200,9 @@ function displayNewsArticles(articles) {
         <span class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm ${sentiment.cls}">${sentiment.label}</span>
       </div>
       ${imgHtml}
-      <h3 class="font-bold ${isFeatured ? "text-lg" : "text-base"} text-slate-100 leading-snug mb-3 cursor-pointer hover:text-blue-400 transition-colors" onclick="window.open('${art.link}', '_blank')">${art.title}</h3>
+      <h3 class="font-bold ${isFeatured ? "text-lg" : "text-base"} text-slate-100 leading-snug mb-3 cursor-pointer hover:text-blue-400 transition-colors" onclick="window.open(this.dataset.href, '_blank')" data-href="${escapeHtml(art.link)}">${escapeHtml(art.title)}</h3>
       <div class="flex items-center gap-3 mt-auto pt-2 border-t border-white/5">
-        <button class="text-[9px] font-mono text-slate-500 hover:text-blue-400 transition-colors flex items-center gap-1" onclick="window.open('${art.link}', '_blank')">
+        <button class="text-[9px] font-mono text-slate-500 hover:text-blue-400 transition-colors flex items-center gap-1" onclick="window.open(this.dataset.href, '_blank')" data-href="${escapeHtml(art.link)}">
           <i class="fas fa-external-link-alt"></i> Read
         </button>
         ${isFeatured ? `<span class="text-[9px] font-mono text-blue-400/60 ml-auto"><i class="fas fa-star mr-1 text-[8px]"></i>TOP STORY</span>` : ""}

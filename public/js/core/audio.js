@@ -1,125 +1,16 @@
-let audioCtx;
-let ambienceOscillators = [];
-let ambienceGain = null;
+// Audio module — silenced. All functions are no-ops to preserve compatibility.
+window._audioMuted = true;
 window.isAmbiencePlaying = false;
-function initAudio() {
-  if (!audioCtx)
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === "suspended") audioCtx.resume();
-}
-window.toggleAmbience = () => {
-  initAudio();
-  if (window.isAmbiencePlaying || window._audioMuted) {
-    if (window.isAmbiencePlaying) {
-      ambienceOscillators.forEach((osc) => {
-        try { osc.stop(); osc.disconnect(); } catch (e) { }
-      });
-      if (ambienceGain) {
-        ambienceGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.5);
-        setTimeout(() => ambienceGain.disconnect(), 1000);
-      }
-      ambienceOscillators = [];
-      window.isAmbiencePlaying = false;
-    }
-    const el = document.getElementById("ambience-text");
-    if (el) { el.innerText = "OFF"; el.classList.remove("text-blue-400"); }
-    const btn = document.getElementById("ambience-toggle-btn");
-    if (btn) btn.classList.remove("active");
-  } else {
-    ambienceGain = audioCtx.createGain();
-    ambienceGain.gain.value = 0;
-    ambienceGain.gain.setTargetAtTime(0.08, audioCtx.currentTime, 2);
+window.playTacticalSound = () => {};
+window.toggleAmbience = () => {};
+window.toggleGlobalAudio = () => {};
 
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.value = 400;
-
-    const lfo = audioCtx.createOscillator();
-    lfo.type = "sine";
-    lfo.frequency.value = 0.05;
-    const lfoGain = audioCtx.createGain();
-    lfoGain.gain.value = 150;
-    lfo.connect(lfoGain);
-    lfoGain.connect(filter.frequency);
-    lfo.start();
-    ambienceOscillators.push(lfo);
-
-    filter.connect(ambienceGain);
-    ambienceGain.connect(audioCtx.destination);
-
-    const freqs = [49.00, 73.42, 98.00, 48.5];
-
-    freqs.forEach((f, i) => {
-      const osc = audioCtx.createOscillator();
-      osc.type = i === 1 ? "triangle" : "sine";
-      osc.frequency.setValueAtTime(f, audioCtx.currentTime);
-
-      const panner = audioCtx.createStereoPanner();
-      panner.pan.value = (i % 2 === 0 ? 1 : -1) * 0.4;
-
-      osc.connect(panner);
-      panner.connect(filter);
-      osc.start();
-      ambienceOscillators.push(osc);
-    });
-
-    window.isAmbiencePlaying = true;
-    const el = document.getElementById("ambience-text");
-    if (el) { el.innerText = "ON"; el.classList.add("text-blue-400"); }
-    const btn = document.getElementById("ambience-toggle-btn");
-    if (btn) btn.classList.add("active");
-  }
-};
-window.playTacticalSound = (type) => {
-  initAudio();
-  try {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    if (type === "tab") {
-      osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.1);
-    } else if (type === "click") {
-      osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(
-        0.001,
-        audioCtx.currentTime + 0.05,
-      );
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.05);
-    } else if (type === "hover") {
-      osc.frequency.setValueAtTime(1400, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.006, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(
-        0.001,
-        audioCtx.currentTime + 0.02,
-      );
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.02);
-    } else if (type === "success") {
-      osc.frequency.setValueAtTime(500, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(
-        1100,
-        audioCtx.currentTime + 0.25,
-      );
-      gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.3);
-    }
-  } catch (e) { }
-};
+// Dossier download is non-audio logic that lived in audio.js, kept here.
 function safeText(id) {
   const el = document.getElementById(id);
   return el ? el.innerText : "--";
 }
 window.downloadDossier = () => {
-  window.playTacticalSound("success");
   const cName = window.selectedCountry
     ? window.selectedCountry.properties.name
     : "GLOBAL_CONTEXT";

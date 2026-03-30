@@ -2626,5 +2626,119 @@
       };
     </script>
     <!-- Keyboard Shortcuts Disabled -->
+    <!-- About Overlay -->
+    <div id="about-overlay" class="fixed inset-0 z-[200] hidden" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(12px);">
+      <div class="flex items-center justify-center min-h-screen p-6">
+        <div style="background: rgba(15,23,42,0.95); border: 1px solid rgba(255,255,255,0.08); border-radius: 1.25rem; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto;" class="shadow-2xl">
+          
+          <!-- Header -->
+          <div style="padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.06);" class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div style="width: 36px; height: 36px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 10px;" class="flex items-center justify-center">
+                <i class="fas fa-satellite-dish text-blue-400 text-sm"></i>
+              </div>
+              <div>
+                <h2 style="font-size: 16px; font-weight: 700; color: white; margin: 0;">News<span style="color: #3b82f6;">Atlas</span></h2>
+                <p style="font-size: 11px; color: #64748b; margin: 0;">Global Intelligence Dashboard</p>
+              </div>
+            </div>
+            <button onclick="toggleAbout(false)" style="color: #64748b; background: none; border: none; cursor: pointer; padding: 8px;" class="hover:text-white transition-colors">
+              <i class="fas fa-times text-lg"></i>
+            </button>
+          </div>
+
+          <!-- Description -->
+          <div style="padding: 1.25rem 1.5rem;">
+            <p style="font-size: 13px; color: #94a3b8; line-height: 1.7; margin: 0;">
+              NewsAtlas is a real-time global news and intelligence dashboard. Click any country on the map to get live news, weather, economic data, and AI-powered analysis — all in one place.
+            </p>
+            
+            <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <span style="font-size: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(59,130,246,0.1); color: #60a5fa; border: 1px solid rgba(59,130,246,0.15); font-weight: 600;">Mapbox GL</span>
+              <span style="font-size: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.15); font-weight: 600;">GNews API</span>
+              <span style="font-size: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(168,85,247,0.1); color: #c084fc; border: 1px solid rgba(168,85,247,0.15); font-weight: 600;">Groq AI</span>
+              <span style="font-size: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(245,158,11,0.1); color: #fbbf24; border: 1px solid rgba(245,158,11,0.15); font-weight: 600;">React + Vite</span>
+            </div>
+          </div>
+
+          <!-- AI Assistant -->
+          <div style="padding: 0 1.5rem 1.5rem;">
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 0.75rem; overflow: hidden;">
+              <div style="padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-robot text-blue-400" style="font-size: 12px;"></i>
+                <span style="font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">AI Assistant</span>
+              </div>
+              <div id="about-ai-response" style="padding: 1rem; min-height: 80px; font-size: 12px; color: #cbd5e1; line-height: 1.6; font-family: 'JetBrains Mono', monospace;">
+                Ask me anything about global events, markets, or geopolitics.
+              </div>
+              <div style="padding: 0.75rem; border-top: 1px solid rgba(255,255,255,0.05); display: flex; gap: 0.5rem;">
+                <input 
+                  type="text" 
+                  id="about-ai-input" 
+                  placeholder="Ask a question..." 
+                  style="flex: 1; background: transparent; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 12px; color: white; font-size: 12px; outline: none; font-family: 'JetBrains Mono', monospace;"
+                  onkeydown="if(event.key==='Enter')sendAboutAI()"
+                />
+                <button onclick="sendAboutAI()" style="background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.2); border-radius: 8px; padding: 8px 12px; color: #60a5fa; cursor: pointer; font-size: 12px;" class="hover:bg-blue-500/25 transition-colors">
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div style="padding: 1rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); text-align: center;">
+            <p style="font-size: 11px; color: #475569; margin: 0;">Built with ❤️ · © 2025 NewsAtlas</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.toggleAbout = function(show) {
+        const el = document.getElementById('about-overlay');
+        if (!el) return;
+        if (show) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      };
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const about = document.getElementById('about-overlay');
+          if (about && !about.classList.contains('hidden')) {
+            about.classList.add('hidden');
+            return;
+          }
+          const search = document.getElementById('search-overlay');
+          if (search && !search.classList.contains('hidden')) {
+            search.classList.add('hidden');
+          }
+        }
+      });
+
+      window.sendAboutAI = async function() {
+        const input = document.getElementById('about-ai-input');
+        const response = document.getElementById('about-ai-response');
+        if (!input || !input.value.trim()) return;
+        const q = input.value.trim();
+        response.innerHTML = '<i class="fas fa-circle-notch fa-spin text-blue-400"></i> <span style="color:#64748b">Thinking...</span>';
+        input.value = '';
+        try {
+          const res = await fetch('/api/ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: q })
+          });
+          const data = await res.json();
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text || data.response || 'No response.';
+          response.innerText = text.replace(/\*\*/g, '').trim();
+        } catch (e) {
+          response.innerHTML = '<span style="color:#ef4444">Connection failed. Please try again.</span>';
+        }
+      };
+    </script>
   </body>
 </html>

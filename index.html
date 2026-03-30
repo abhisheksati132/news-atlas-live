@@ -596,10 +596,18 @@
                   </span>
                 </div>
                 <div
-                  id="react-ai-briefing"
+                  id="ai-briefing-text"
                   class="text-slate-300 font-mono text-[11px] leading-relaxed"
                 >
-                  <!-- React component will mount here -->
+                  Select a country on the map to generate a real-time AI summary.
+                </div>
+                <div id="ai-briefing-loading" class="hidden text-center py-4">
+                  <i class="fas fa-circle-notch fa-spin text-blue-400"></i>
+                </div>
+                <div id="ai-briefing-actions" class="hidden flex gap-2 mt-3 pt-3 border-t border-white/5">
+                  <button onclick="copyBriefingToClipboard()" class="text-[10px] text-slate-500 hover:text-white font-mono uppercase tracking-widest transition-colors">
+                    <i class="fas fa-copy mr-1"></i> Copy
+                  </button>
                 </div>
               </div>
 

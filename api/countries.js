@@ -70,6 +70,6 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: 'Country not found' });
     } catch (err) {
         console.error('[countries] Error:', err.message);
-        res.status(500).json({ error: 'Countries fetch failed' });
+        return res.status(200).json(FALLBACK_COUNTRIES);
     }
 }

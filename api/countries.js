@@ -1,3 +1,4 @@
+/** Minimal fallback list if restcountries.com is unavailable */
 const FALLBACK_COUNTRIES = [
     { name: { common: 'United States' }, cca2: 'US', cca3: 'USA', latlng: [38, -97], flags: { png: 'https://flagcdn.com/w320/us.png' }, region: 'Americas', population: 331000000, capital: ['Washington, D.C.'] },
     { name: { common: 'India' }, cca2: 'IN', cca3: 'IND', latlng: [20, 77], flags: { png: 'https://flagcdn.com/w320/in.png' }, region: 'Asia', population: 1380000000, capital: ['New Delhi'] },
@@ -13,34 +14,62 @@ const FALLBACK_COUNTRIES = [
     { name: { common: 'Ukraine' }, cca2: 'UA', cca3: 'UKR', latlng: [49, 32], flags: { png: 'https://flagcdn.com/w320/ua.png' }, region: 'Europe', population: 44000000, capital: ['Kyiv'] },
     { name: { common: 'Pakistan' }, cca2: 'PK', cca3: 'PAK', latlng: [30, 70], flags: { png: 'https://flagcdn.com/w320/pk.png' }, region: 'Asia', population: 220000000, capital: ['Islamabad'] },
 ];
+
+const CORS_HEADERS = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+};
+
 export default async function handler(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    Object.entries(CORS_HEADERS).forEach(([k, v]) => res.setHeader(k, v));
     if (req.method === 'OPTIONS') return res.status(200).end();
+
     const { all, name, code } = req.query;
+
     try {
+        // Return all countries for the global search index
         if (all === 'true') {
             const controller = new AbortController();
             const timer = setTimeout(() => controller.abort(), 6000);
             try {
-                const response = await fetch('https://restcountries.com/v3.1/all?fields=name,cca2,cca3,latlng,flags,population,capital,region,capitalInfo', { signal: controller.signal, headers: { 'User-Agent': 'NewsAtlas/1.0' } });
+                const response = await fetch(
+                    'https://restcountries.com/v3.1/all?fields=name,cca2,cca3,latlng,flags,population,capital,region,capitalInfo',
+                    { signal: controller.signal, headers: { 'User-Agent': 'NewsAtlas/1.0' } }
+                );
                 clearTimeout(timer);
                 if (response.ok) return res.status(200).json(await response.json());
-            } catch { clearTimeout(timer); }
+            } catch {
+                clearTimeout(timer);
+                console.warn('[countries] restcountries timed out, using fallback');
+            }
             return res.status(200).json(FALLBACK_COUNTRIES);
         }
+
+        // Lookup by ISO code
         if (code) {
             const response = await fetch(`https://restcountries.com/v3.1/alpha/${encodeURIComponent(code)}`);
             if (response.ok) return res.status(200).json(await response.json());
         }
+
+        // Lookup by name (exact first, then partial)
         if (name) {
             let response = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fullText=true`);
-            if (!response.ok) response = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}`);
+            if (!response.ok) {
+                response = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}`);
+            }
             if (response.ok) return res.status(200).json(await response.json());
-            const found = FALLBACK_COUNTRIES.find((c) => c.name.common.toLowerCase() === name.toLowerCase());
+
+            // Fallback to local list
+            const found = FALLBACK_COUNTRIES.find(
+                (c) => c.name.common.toLowerCase() === name.toLowerCase()
+            );
             if (found) return res.status(200).json([found]);
         }
+
         return res.status(404).json({ error: 'Country not found' });
-    } catch { return res.status(200).json(FALLBACK_COUNTRIES); }
+    } catch (err) {
+        console.error('[countries] Error:', err.message);
+        return res.status(200).json(FALLBACK_COUNTRIES);
+    }
 }

@@ -85,7 +85,7 @@ const AIBriefing = () => (
 
 const MarketTicker = () => (
   <div className="flex gap-4 overflow-hidden whitespace-nowrap text-[10px] font-bold text-emerald-400/80">
-    BITCOIN: $68,432 &bull; GOLD: $2,185 &bull; NASDAQ100: +1.4% &bull; USD/INR: 83.12
+    GOLD: $2,185 &bull; NASDAQ100: +1.4% &bull; USD/INR: 83.12 &bull; BRENT: $82.40
   </div>
 );
 

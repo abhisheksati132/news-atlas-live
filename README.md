@@ -15,21 +15,6 @@ NewsAtlas is a high-performance, minimalist global intelligence platform designe
 - **Orbital Atmosphere**: Aeronautical weather telemetry and global environmental monitoring.
 - **Dynamic Map**: Refined dark-mode 3D globe with seamless 2D/3D projection switching.
 
----
-
-## ⌨️ Tactical Shortcuts
-
-| Key | Navigation |
-| --- | --- |
-| `1` - `5` | Switch Dashboard Tabs |
-| `/` | Search Nations |
-| `P` | Toggle Projection (2D/3D) |
-| `R` | Reset Map View |
-| `?` | Keyboard Shortcuts |
-| `Ctrl+K` | Open Command Palette |
-| `Esc` | Close Overlays/Modals |
-
----
 
 ## 📄 Platform Credits
 Created by **Abhishek Sati**. Built with D3.js, Mapbox GL JS, and Groq-Llama 3 AI.

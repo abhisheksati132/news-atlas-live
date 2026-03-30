@@ -44,9 +44,32 @@
 
     <script type="module" src="/src/main.jsx"></script>
     <script type="module" src="/js/app.js"></script>
-    <link rel="stylesheet" href="/css/terminal.css" />
-    <link rel="stylesheet" href="/css/global-fx.css" />
+    <link rel="stylesheet" href="/css/style.css" />
     <style>.hidden { display: none !important; }</style>
+    <script>
+      function toggleAboutOverlay() {
+        var el = document.getElementById('about-overlay');
+        if (el) el.classList.toggle('hidden');
+      }
+      function closeAboutOverlay() {
+        var el = document.getElementById('about-overlay');
+        if (el) el.classList.add('hidden');
+      }
+      function toggleSearch() {
+        var el = document.getElementById('search-overlay');
+        if (el) el.classList.toggle('hidden');
+      }
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          closeAboutOverlay();
+          var so = document.getElementById('search-overlay');
+          if (so) so.classList.add('hidden');
+        }
+      });
+      window.toggleAboutOverlay = toggleAboutOverlay;
+      window.closeAboutOverlay = closeAboutOverlay;
+      window.toggleSearch = toggleSearch;
+    </script>
   </head>
 
   <body class="flex flex-col night-theme">
@@ -148,14 +171,23 @@
         </div>
       </div>
 
-      
-      <div class="hidden md:flex items-center gap-4"></div>
+      <!-- CENTER: Search + Clock -->
+      <div class="hidden md:flex items-center gap-4">
+        <button onclick="toggleSearch()" class="flex items-center gap-2 px-4 h-8 rounded-lg transition-all header-widget" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+          <i class="fas fa-search text-xs" style="color: #64748b"></i>
+          <span style="font-size: 11px; color: #94a3b8; font-weight: 500; font-family: 'JetBrains Mono', monospace;">Search</span>
+        </button>
+
+        <div class="px-3 h-8 flex items-center border-l border-white/5">
+          <span id="ist-time" style="font-size: 11px; font-weight: 500; color: #64748b; font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;">--:-- IST</span>
+        </div>
+      </div>
 
       <div class="flex items-center gap-2 shrink-0">
         <button onclick="downloadDossier()" class="header-widget p-2" title="Download report" style="color: #64748b">
           <i class="fas fa-file-download"></i>
         </button>
-        <button onclick="toggleNewsAtlasAbout(true)" class="header-widget p-2" title="About" style="color: #64748b">
+        <button onclick="window.toggleAboutOverlay()" class="header-widget p-2" title="About" style="color: #64748b">
           <i class="fas fa-info-circle"></i>
         </button>
         <button onclick="goToIndiaHome()" class="header-widget p-2" title="Home" style="color: #64748b">
@@ -398,7 +430,8 @@
             aria-selected="false"
             aria-controls="tab-markets"
             id="tab-btn-markets"
-            title="Markets: indices, forex, commodities"
+            title="Markets: indices, commodities, forex"
+            
             onclick="switchTab('markets')"
           >
             Markets
@@ -434,7 +467,35 @@
           <div id="tab-intel" class="tab-content active">
             <div class="content-scroll-area space-y-4">
 
-<div class="p-2"></div>
+              <div class="apple-glass p-5 mb-2">
+                <div class="flex justify-between items-center mb-3">
+                  <span
+                    class="text-xs text-blue-400 uppercase font-black tracking-widest"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace"
+                  >
+                    <i class="fas fa-search-location mr-2"></i>Find Country
+                  </span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <input
+                    type="text"
+                    id="intel-city-search"
+                    placeholder="Enter target city..."
+                    class="w-full bg-glass-dim border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-blue-400 focus:outline-none transition-colors shadow-inner"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace"
+                    onkeydown="
+                      if (event.key === 'Enter') searchCityForTab('intel');
+                    "
+                    autocomplete="off"
+                  />
+                  <button
+                    onclick="searchCityForTab('intel')"
+                    class="px-5 py-2 text-sm bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-bold tracking-widest uppercase rounded-xl transition-all border border-blue-500/20 shadow-sm"
+                  >
+                    SCAN
+                  </button>
+                </div>
+              </div>
               <div id="hierarchy-panel" class="hidden">
                 <div class="flex items-center gap-2 text-sm font-mono mb-3">
                   <span
@@ -561,7 +622,7 @@
                   id="ai-briefing-text"
                   class="text-slate-300 font-mono text-[11px] leading-relaxed"
                 >
-                  Select a country on the map for real-time analysis.
+                  Select a country on the map to generate a real-time AI summary.
                 </div>
                 <div id="ai-briefing-loading" class="hidden text-center py-4">
                   <i class="fas fa-circle-notch fa-spin text-blue-400"></i>
@@ -572,8 +633,6 @@
                   </button>
                 </div>
               </div>
-
-
             </div>
           </div>
 
@@ -723,131 +782,42 @@
             <div class="content-scroll-area space-y-4">
 
 
-              <div class="apple-glass p-5 mb-2">
-                <div class="flex justify-between items-center mb-3">
-                  <span
-                    class="text-xs text-emerald-400 uppercase font-black tracking-widest"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace"
-                  >
-                    <i class="fas fa-search-location mr-2"></i>Financial Zone
-                    Search
-                  </span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <input
-                    type="text"
-                    id="markets-city-search"
-                    placeholder="Enter target city..."
-                    class="w-full bg-glass-dim border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-emerald-400 focus:outline-none transition-colors shadow-inner"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace"
-                    onkeydown="
-                      if (event.key === 'Enter') searchCityForTab('markets');
-                    "
-                    autocomplete="off"
-                  />
-                  <button
-                    onclick="searchCityForTab('markets')"
-                    class="px-5 py-2 text-sm bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-bold tracking-widest uppercase rounded-xl transition-all border border-emerald-500/20 shadow-sm"
-                  >
-                    SCAN
-                  </button>
-                </div>
-              </div>
-
-
               <div class="apple-glass">
-                <div
-                  class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer"
-                  onclick="toggleMarketCategory('metals')"
-                >
-                  <span
-                    class="text-sm text-amber-400 uppercase font-black tracking-widest"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace"
-                  >
-                    <i class="fas fa-coins mr-2"></i>Precious Metals
+                <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer" onclick="toggleMarketCategory('metals')">
+                  <span class="text-sm text-amber-400 uppercase font-black tracking-widest" style="font-family: 'JetBrains Mono', monospace">
+                    <i class="fas fa-coins mr-2"></i>PRECIOUS METALS
                   </span>
-                  <i
-                    class="fas fa-chevron-up text-slate-500"
-                    id="metals-chevron"
-                  ></i>
+                  <i class="fas fa-chevron-up text-slate-500" id="metals-chevron"></i>
                 </div>
-                <div
-                  id="metals-content"
-                  class="grid grid-cols-2 md:grid-cols-3 gap-3"
-                ></div>
+                <div id="metals-content" class="grid grid-cols-2 md:grid-cols-3 gap-3"></div>
               </div>
-              <div
-                class="apple-glass rounded-2xl p-5 border border-white/5 shadow-sm"
-              >
-                <div
-                  class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer"
-                  onclick="toggleMarketCategory('indices')"
-                >
-                  <span
-                    class="text-sm text-blue-400 uppercase font-black tracking-widest"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace"
-                  >
-                    <i class="fas fa-chart-line mr-2"></i
-                    ><span id="indices-country">Global</span> Indices
+              <div class="apple-glass rounded-2xl p-5 border border-white/5 shadow-sm">
+                <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer" onclick="toggleMarketCategory('indices')">
+                  <span class="text-sm text-blue-400 uppercase font-black tracking-widest" style="font-family: 'JetBrains Mono', monospace">
+                    <i class="fas fa-chart-line mr-2"></i><span id="indices-country">GLOBAL</span> INDICES
                   </span>
-                  <i
-                    class="fas fa-chevron-up text-slate-500"
-                    id="indices-chevron"
-                  ></i>
+                  <i class="fas fa-chevron-up text-slate-500" id="indices-chevron"></i>
                 </div>
-                <div
-                  id="indices-content"
-                  class="grid grid-cols-1 md:grid-cols-2 gap-3"
-                ></div>
+                <div id="indices-content" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
               </div>
-
-              <div
-                class="apple-glass rounded-2xl p-5 border border-white/5 shadow-sm"
-              >
-                <div
-                  class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer"
-                  onclick="toggleMarketCategory('forex')"
-                >
-                  <span
-                    class="text-sm text-cyan-400 uppercase font-black tracking-widest"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace"
-                  >
-                    <i class="fas fa-exchange-alt mr-2"></i>Forex Pairs
+              <div class="apple-glass rounded-2xl p-5 border border-white/5 shadow-sm">
+                <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer" onclick="toggleMarketCategory('forex')">
+                  <span class="text-sm text-cyan-400 uppercase font-black tracking-widest" style="font-family: 'JetBrains Mono', monospace">
+                    <i class="fas fa-exchange-alt mr-2"></i>FOREX PAIRS
                   </span>
-                  <i
-                    class="fas fa-chevron-up text-slate-500"
-                    id="forex-chevron"
-                  ></i>
+                  <i class="fas fa-chevron-up text-slate-500" id="forex-chevron"></i>
                 </div>
-                <div
-                  id="forex-content"
-                  class="grid grid-cols-1 md:grid-cols-2 gap-3"
-                ></div>
+                <div id="forex-content" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
               </div>
-              <div
-                class="apple-glass rounded-2xl p-5 border border-white/5 shadow-sm"
-              >
-                <div
-                  class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer"
-                  onclick="toggleMarketCategory('commodities')"
-                >
-                  <span
-                    class="text-sm text-yellow-400 uppercase font-black tracking-widest"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace"
-                  >
-                    <i class="fas fa-oil-can mr-2"></i>Commodities
+              <div class="apple-glass rounded-2xl p-5 border border-white/5 shadow-sm">
+                <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3 cursor-pointer" onclick="toggleMarketCategory('commodities')">
+                  <span class="text-sm text-yellow-400 uppercase font-black tracking-widest" style="font-family: 'JetBrains Mono', monospace">
+                    <i class="fas fa-oil-can mr-2"></i>COMMODITIES
                   </span>
-                  <i
-                    class="fas fa-chevron-up text-slate-500"
-                    id="commodities-chevron"
-                  ></i>
+                  <i class="fas fa-chevron-up text-slate-500" id="commodities-chevron"></i>
                 </div>
-                <div
-                  id="commodities-content"
-                  class="grid grid-cols-2 md:grid-cols-3 gap-3"
-                ></div>
+                <div id="commodities-content" class="grid grid-cols-2 md:grid-cols-3 gap-3"></div>
               </div>
-
 
               <div class="apple-glass">
                 <div
@@ -1936,7 +1906,7 @@
     <div id="fact-demonym" class="hidden"></div>
     <div id="fact-gini" class="hidden"></div>
     <div id="fact-drive" class="hidden"></div>
-    
+    <!-- All modules are loaded via /js/app.js (in <head>) to avoid duplicate execution -->
 
 
     <div
@@ -2472,60 +2442,10 @@
         </div>
       </div>
     </div>
-    <script>
-      window.sendTabAI = async function (tabId) {
-        const input = document.getElementById(`ai-chat-input-${tabId}`);
-        const responseEl = document.getElementById(`ai-chat-response-${tabId}`);
-        if (!input || !responseEl) return;
-        const query = input.value.trim();
-        if (!query) return;
-        input.disabled = true;
-        const country = window.selectedCountry?.properties?.name || "Global";
-        const contextMap = {
-          intel: `You are a military intelligence analyst. The user is viewing intel on ${country}. Answer concisely in under 120 words with a tactical, authoritative tone.`,
-          news: `You are a senior news analyst. The user is reading news about ${country}. Summarize or explain in under 120 words.`,
-          markets: `You are a financial market analyst. The user is viewing market data. Answer the query in under 120 words with data-driven insight.`,
-          atmosphere: `You are a meteorologist. The user is viewing weather data for ${window._currentWeatherLocation || country}. Answer in under 120 words.`,
-          economic: `You are a macroeconomist. The user is viewing economic data for ${country}. Answer the query in under 120 words with key metrics.`,
-        };
-        const systemContext =
-          contextMap[tabId] ||
-          `Answer the question about ${country} in under 120 words.`;
-        responseEl.classList.add("open");
-        responseEl.innerHTML = `<div class="tab-ai-thinking"><span></span><span></span><span></span> <span style="color:#94a3b8;font-size:10px;margin-left:4px">Analyzing...</span></div>`;
-        try {
-          const res = await fetch("/api/ai", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              prompt: `${systemContext}\n\nUser question: ${query}`,
-            }),
-          });
-          const result = await res.json();
-          let text =
-            result.candidates?.[0]?.content?.parts?.[0]?.text ||
-            result.response ||
-            result.text ||
-            "No response received.";
-          text = text.replace(/\*\*/g, "").trim();
-          responseEl.innerHTML = `<span style="color:#60a5fa;font-size:9px;letter-spacing:.1em;font-weight:900;text-transform:uppercase">AI ›</span> ${text}`;
-          input.value = "";
 
-        } catch (e) {
-          responseEl.innerHTML = `<span style="color:#ef4444">Connection failed. Retry.</span>`;
-        } finally {
-          input.disabled = false;
-          input.focus();
-        }
-      };
-    </script>
-    
-    
-    <div id="_atlas_about_overlay" class="fixed inset-0 z-[200] hidden" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(12px);">
+    <div id="about-overlay" class="fixed inset-0 z-[200] hidden" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(12px);">
       <div class="flex items-center justify-center min-h-screen p-6">
         <div style="background: rgba(15,23,42,0.95); border: 1px solid rgba(255,255,255,0.08); border-radius: 1.25rem; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto;" class="shadow-2xl">
-          
-          
           <div style="padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.06);" class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div style="width: 36px; height: 36px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 10px;" class="flex items-center justify-center">
@@ -2536,17 +2456,14 @@
                 <p style="font-size: 11px; color: #64748b; margin: 0;">Global Intelligence Dashboard</p>
               </div>
             </div>
-            <button onclick="toggleNewsAtlasAbout(false)" style="color: #64748b; background: none; border: none; cursor: pointer; padding: 8px;" class="hover:text-white transition-colors">
+            <button onclick="window.toggleAboutOverlay()" style="color: #64748b; background: none; border: none; cursor: pointer; padding: 8px;" class="hover:text-white transition-colors">
               <i class="fas fa-times text-lg"></i>
             </button>
           </div>
-
-          
           <div style="padding: 1.25rem 1.5rem;">
             <p style="font-size: 13px; color: #94a3b8; line-height: 1.7; margin: 0;">
               NewsAtlas is a real-time global news and intelligence dashboard. Click any country on the map to get live news, weather, economic data, and AI-powered analysis — all in one place.
             </p>
-            
             <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
               <span style="font-size: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(59,130,246,0.1); color: #60a5fa; border: 1px solid rgba(59,130,246,0.15); font-weight: 600;">Mapbox GL</span>
               <span style="font-size: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.15); font-weight: 600;">GNews API</span>
@@ -2554,8 +2471,6 @@
               <span style="font-size: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(245,158,11,0.1); color: #fbbf24; border: 1px solid rgba(245,158,11,0.15); font-weight: 600;">React + Vite</span>
             </div>
           </div>
-
-          
           <div style="padding: 0 1.5rem 1.5rem;">
             <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 0.75rem; overflow: hidden;">
               <div style="padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 0.5rem;">
@@ -2570,7 +2485,7 @@
                   type="text" 
                   id="about-ai-input" 
                   placeholder="Ask a question..." 
-                  style="flex: 1; background: transparent; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 12px; color: white; font-size: 12px; outline: none; font-family: 'JetBrains Mono', monospace;"
+                  style="flex: 1; background: transparent; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px 12px; color: white; font-size: 12px; outline: none; font-family: 'JetBrains Mono', monospace;"
                   onkeydown="if(event.key==='Enter')sendAboutAI()"
                 />
                 <button onclick="sendAboutAI()" style="background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.2); border-radius: 8px; padding: 8px 12px; color: #60a5fa; cursor: pointer; font-size: 12px;" class="hover:bg-blue-500/25 transition-colors">
@@ -2579,32 +2494,19 @@
               </div>
             </div>
           </div>
-
-          
           <div style="padding: 1rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); text-align: center;">
             <p style="font-size: 11px; color: #475569; margin: 0;">Built with ❤️ · © 2025 NewsAtlas</p>
           </div>
         </div>
       </div>
     </div>
-
     <script>
-      window.toggleNewsAtlasAbout = function(show) {
-        const el = document.getElementById('_atlas_about_overlay');
-        if (!el) return;
-        if (show) {
-          el.classList.remove('hidden');
-        } else {
-          el.classList.add('hidden');
-        }
-      };
-
       window.sendAboutAI = async function() {
         const input = document.getElementById('about-ai-input');
         const response = document.getElementById('about-ai-response');
         if (!input || !input.value.trim()) return;
         const q = input.value.trim();
-        response.innerHTML = '<i class="fas fa-circle-notch fa-spin text-blue-400"></i> <span style="color:#64748b">Thinking...</span>';
+        response.innerHTML = '<i class="fas fa-circle-notch fa-spin text-blue-400"></i> Thinking...';
         input.value = '';
         try {
           const res = await fetch('/api/ai', {
@@ -2616,19 +2518,9 @@
           const text = data.candidates?.[0]?.content?.parts?.[0]?.text || data.response || 'No response.';
           response.innerText = text.replace(/\*\*/g, '').trim();
         } catch (e) {
-          response.innerHTML = '<span style="color:#ef4444">Connection failed. Please try again.</span>';
+          response.innerHTML = '<span style="color:#ef4444">Connection failed.</span>';
         }
       };
-
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          const about = document.getElementById('_atlas_about_overlay');
-          if (about && !about.classList.contains('hidden')) {
-            about.classList.add('hidden');
-          }
-        }
-      });
     </script>
-
   </body>
 </html>

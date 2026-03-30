@@ -37,7 +37,7 @@ class MapboxEngine {
 
         this.map = new mapboxgl.Map({
             container: this.containerId,
-            style: 'mapbox:
+            style: 'mapbox://styles/mapbox/satellite-streets-v12',
             center: [10, 0],
             zoom: 1.5,
             pitch: 0,
@@ -89,7 +89,7 @@ class MapboxEngine {
         if (!this.map.getSource('mapbox-dem')) {
             this.map.addSource('mapbox-dem', {
                 type: 'raster-dem',
-                url: 'mapbox:
+                url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
                 tileSize: 512,
                 maxzoom: 14
             });
@@ -278,7 +278,7 @@ class MapboxEngine {
 
     async initMapboxLayers() {
         try {
-            const res = await fetch('https:
+            const res = await fetch('https://unpkg.com/world-atlas@2.0.2/countries-110m.json');
             const data = await res.json();
             const features = topojson.feature(data, data.objects.countries);
 
@@ -530,7 +530,7 @@ class MapboxEngine {
 
     _startDeckAnimation() {
         if (typeof deck === 'undefined') return;
-        
+        // Deck.GL overlay initialised but no animated dots — reserved for data layers
         this.deckOverlay = new deck.MapboxOverlay({
             interleaved: true,
             layers: []

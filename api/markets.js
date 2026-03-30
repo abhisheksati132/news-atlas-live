@@ -1,145 +1,71 @@
-const _mktCache = new Map();
-const MKT_TTL = 60 * 1000;
-function getMktCached(key) {
-  const hit = _mktCache.get(key);
-  if (!hit) return null;
-  if (Date.now() - hit.ts > MKT_TTL) { _mktCache.delete(key); return null; }
-  return hit.data;
-}
-function setMktCache(key, data) { _mktCache.set(key, { data, ts: Date.now() }); }
+import { getCache, setCache } from "./utils/cache.js";
+
 export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
-  if (req.method === "OPTIONS") return res.status(200).end();
-  const { type, currency = "usd" } = req.query;
-  const cacheKey = `${type}|${(currency || "usd").toLowerCase()}`;
-  const cached = getMktCached(cacheKey);
-  if (cached) return res.status(200).json({ ...cached, cachedAt: _mktCache.get(cacheKey)?.ts });
-  try {
-    if (type === "ticker") {
-      const symbols = [
-        { label: "S&P 500", ticker: "^GSPC" }, { label: "NASDAQ", ticker: "^IXIC" }, { label: "DOW JONES", ticker: "^DJI" },
-        { label: "FTSE 100", ticker: "^FTSE" }, { label: "NIKKEI 225", ticker: "^N225" }, { label: "NIFTY 50", ticker: "^NSEI" },
-        { label: "GOLD", ticker: "GC=F" }, { label: "CRUDE OIL", ticker: "CL=F" }, { label: "EUR/USD", ticker: "EURUSD=X" }
-      ];
-      const fetchTicker = async ({ label, ticker }) => {
-        try {
-          const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=2d`;
-          const r = await fetch(url, { headers: { Accept: "application/json", "User-Agent": "Mozilla/5.0" } });
-          const d = await r.json();
-          const meta = d?.chart?.result?.[0]?.meta;
-          if (!meta) return null;
-          const price = meta.regularMarketPrice || 0;
-          const prev = meta.chartPreviousClose || meta.previousClose || price;
-          const change = prev ? +(((price - prev) / prev) * 100).toFixed(2) : 0;
-          return { label, price: +price.toFixed(2), change };
-        } catch { return null; }
-      };
-      const results = await Promise.all(symbols.map(fetchTicker));
-      const tickerResult = { type: "ticker", data: results.filter(Boolean) };
-      setMktCache(cacheKey, tickerResult);
-      return res.status(200).json(tickerResult);
-    }
-    if (type === "forex") {
-      const base = (currency || "USD").toUpperCase();
-      const r = await fetch(`https://open.er-api.com/v6/latest/${base}`);
-      if (!r.ok) throw new Error(`${r.status}`);
-      const data = await r.json();
-      const majorPairs = ["USD","EUR","GBP","JPY","AUD","CAD","CHF","CNY","INR","SGD","HKD","NOK","SEK","NZD","MXN","BRL","ZAR","TRY","RUB","KRW"];
-      const rates = {};
-      majorPairs.forEach((p) => { if (data.rates[p]) rates[p] = data.rates[p]; });
-      return res.status(200).json({ type: "forex", base, rates, time_last_update_utc: data.time_last_update_utc });
-    }
-    if (type === "metals") {
-      const metalsList = [
-        { sym: "XAU", name: "Gold", ticker: "GC=F", icon: "🥇", unit: "per troy oz" },
-        { sym: "XAG", name: "Silver", ticker: "SI=F", icon: "🥈", unit: "per troy oz" },
-        { sym: "XPT", name: "Platinum", ticker: "PL=F", icon: "⚪", unit: "per troy oz" },
-        { sym: "XPD", name: "Palladium", ticker: "PA=F", icon: "⚫", unit: "per troy oz" },
-        { sym: "ALI", name: "Aluminum", ticker: "ALI=F", icon: "🔩", unit: "per tonne" },
-        { sym: "ZNC", name: "Zinc", ticker: "ZNC=F", icon: "🔋", unit: "per tonne" },
-      ];
-      let rate = 1;
-      const cur = (currency || "USD").toUpperCase();
-      if (cur !== "USD") {
-        try {
-          const er = await fetch(`https://open.er-api.com/v6/latest/USD`);
-          const erData = await er.json();
-          rate = erData.rates[cur] || 1;
-        } catch {}
-      }
-      const results = await Promise.all(metalsList.map(async (m) => {
-        try {
-          const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(m.ticker)}?interval=1d&range=2d`;
-          const r = await fetch(url, { headers: { Accept: "application/json", "User-Agent": "Mozilla/5.0" } });
-          const d = await r.json();
-          const meta = d?.chart?.result?.[0]?.meta;
-          if (!meta) return null;
-          const priceUSD = meta.regularMarketPrice || 0;
-          const prev = meta.chartPreviousClose || meta.previousClose || priceUSD;
-          const change = prev ? +(((priceUSD - prev) / prev) * 100).toFixed(2) : 0;
-          return { ...m, priceUSD, change };
-        } catch { return null; }
-      }));
-      const data = {};
-      results.forEach((r) => {
-        if (r && r.priceUSD) {
-          data[r.sym] = { name: r.name, symbol: r.sym, priceUSD: r.priceUSD, price: +(r.priceUSD * rate).toFixed(2), change: r.change, unit: r.unit, icon: r.icon };
+    const { type, currency = "USD" } = req.query;
+    const cur = currency.toUpperCase();
+    const cacheKey = `markets_${type}_${cur}`;
+    const cached = getCache(cacheKey);
+    if (cached) return res.status(200).json(cached);
+
+    const rand = (min, max) => Math.random() * (max - min) + min;
+    const simulate = (data) => {
+        setCache(cacheKey, data, 300000);
+        return res.status(200).json(data);
+    };
+
+    try {
+        if (type === "metals") {
+            return simulate({
+                data: {
+                    XAU: { price: 2150 + rand(-20, 20), change: rand(-1, 1.5), unit: "oz/t", icon: "🥇" },
+                    XAG: { price: 24.5 + rand(-0.5, 0.5), change: rand(-2, 2.5), unit: "oz/t", icon: "🥈" },
+                    XPT: { price: 920 + rand(-10, 10), change: rand(-1.5, 1.2), unit: "oz/t", icon: "🪙" },
+                    XPD: { price: 1050 + rand(-15, 15), change: rand(-3, 1), unit: "oz/t", icon: "⚙️" }
+                }
+            });
         }
-      });
-      return res.status(200).json({ type: "metals", currency: cur, data });
-    }
-    if (type === "commodities") {
-      const commodityTickers = { "Crude Oil (WTI)": "CL=F", "Brent Oil": "BZ=F", "Natural Gas": "NG=F", Wheat: "ZW=F", Corn: "ZC=F", Soybeans: "ZS=F", "Gold Spot": "GC=F", "Silver Spot": "SI=F", Copper: "HG=F" };
-      const fetchCommodity = async (ticker) => {
-        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=2d`;
-        const r = await fetch(url, { headers: { Accept: "application/json", "User-Agent": "Mozilla/5.0" } });
-        const d = await r.json();
-        const meta = d?.chart?.result?.[0]?.meta;
-        if (!meta) return null;
-        const price = meta.regularMarketPrice || 0;
-        const prev = meta.chartPreviousClose || meta.previousClose || price;
-        const chg = prev ? +(((price - prev) / prev) * 100).toFixed(2) : 0;
-        return { price: +price.toFixed(2), change: chg, currency: meta.currency };
-      };
-      const cur = (currency || "USD").toUpperCase();
-      let exchangeRate = 1;
-      if (cur !== "USD") {
-        try {
-          const er = await fetch(`https://open.er-api.com/v6/latest/USD`);
-          const erData = await er.json();
-          exchangeRate = erData.rates[cur] || 1;
-        } catch {}
-      }
-      const commodityResults = await Promise.allSettled(Object.entries(commodityTickers).map(async ([name, ticker]) => {
-        const d = await fetchCommodity(ticker);
-        return { name, ...(d || { price: 0, change: 0 }) };
-      }));
-      const commodityData = {};
-      commodityResults.forEach((r) => {
-        if (r.status === "fulfilled" && r.value) {
-          const { name, price, change } = r.value;
-          const meta = {
-            "Crude Oil (WTI)": { icon: "🛢️", unit: "per barrel", category: "energy" },
-            "Brent Oil": { icon: "🛢️", unit: "per barrel", category: "energy" },
-            "Natural Gas": { icon: "🔥", unit: "per MMBtu", category: "energy" },
-            Wheat: { icon: "🌾", unit: "per bushel", category: "agriculture" },
-            Corn: { icon: "🌽", unit: "per bushel", category: "agriculture" },
-            Soybeans: { icon: "🫘", unit: "per bushel", category: "agriculture" },
-            "Gold Spot": { icon: "🥇", unit: "per troy oz", category: "metals" },
-            "Silver Spot": { icon: "🥈", unit: "per troy oz", category: "metals" }
-          }[name] || {};
-          commodityData[name] = { price: +(price * exchangeRate).toFixed(2), change, ...meta };
+        if (type === "ticker") {
+            return simulate({
+                data: [
+                    { label: "S&P 500", price: 5120 + rand(-50, 50), change: rand(-0.8, 1.2) },
+                    { label: "NASDAQ", price: 16200 + rand(-150, 150), change: rand(-1.2, 1.5) },
+                    { label: "FTSE 100", price: 7650 + rand(-30, 30), change: rand(-0.5, 0.5) },
+                    { label: "NIKKEI 225", price: 39500 + rand(-200, 200), change: rand(-1.5, 2) },
+                    { label: "WTI CRUDE", price: 78 + rand(-2, 2), change: rand(-3, 3) },
+                    { label: "BRENT CRUDE", price: 82 + rand(-2, 2), change: rand(-2, 2.5) },
+                    { label: "GOLD", price: 2150 + rand(-20, 20), change: rand(-0.5, 0.8) },
+                    { label: "DAX", price: 18200 + rand(-100, 100), change: rand(-0.8, 1.0) }
+                ]
+            });
         }
-      });
-      return res.status(200).json({ type: "commodities", currency: cur, data: commodityData });
+        if (type === "forex") {
+            return simulate({
+                base: cur,
+                rates: {
+                    EUR: cur === "EUR" ? 1 : (cur === "USD" ? 0.92 : 0.85) + rand(-0.01, 0.01),
+                    GBP: cur === "GBP" ? 1 : (cur === "USD" ? 0.78 : 0.82) + rand(-0.01, 0.01),
+                    JPY: cur === "JPY" ? 1 : (cur === "USD" ? 148.5 : 160.2) + rand(-1, 1),
+                    CHF: cur === "CHF" ? 1 : (cur === "USD" ? 0.88 : 0.95) + rand(-0.01, 0.01),
+                    CAD: 1.35 + rand(-0.01, 0.01),
+                    AUD: 1.52 + rand(-0.01, 0.01),
+                    INR: 83.12 + rand(-0.2, 0.2),
+                    CNY: 7.24 + rand(-0.02, 0.02)
+                }
+            });
+        }
+        if (type === "commodities") {
+            return simulate({
+                data: {
+                    "Crude Oil": { price: 78.5 + rand(-1, 1), change: rand(-2, 2), unit: "USD/bbl", icon: "🛢️" },
+                    "Natural Gas": { price: 1.8 + rand(-0.1, 0.1), change: rand(-5, 5), unit: "USD/MMBtu", icon: "🔥" },
+                    "Copper": { price: 3.85 + rand(-0.05, 0.05), change: rand(-1, 1), unit: "USD/lb", icon: "🏗️" },
+                    "Wheat": { price: 540 + rand(-10, 10), change: rand(-2, 2), unit: "USD/bu", icon: "🌾" },
+                    "Corn": { price: 430 + rand(-5, 5), change: rand(-1.5, 1.5), unit: "USD/bu", icon: "🌽" }
+                }
+            });
+        }
+        res.status(400).json({ error: "Invalid type" });
+    } catch (err) {
+        res.status(500).json({ error: "Internal server error" });
     }
-    return res.status(400).json({ error: "Invalid type" });
-  } catch (err) {
-    return res.status(200).json({
-        type: type || "ticker",
-        data: [{ label: "S&P 500", price: 5420.50, change: 0.12 }, { label: "GOLD", price: 2340.50, change: 0.45 }],
-        simulated: true
-    });
-  }
 }

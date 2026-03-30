@@ -5,7 +5,7 @@ let newsSearchQuery = "";
 let newsSearchTimer = null;
 let isLiveSearching = false;
 
-
+// Security: escape HTML special chars to prevent XSS from external RSS content
 function escapeHtml(str) {
   if (!str) return "";
   return String(str)
@@ -39,7 +39,7 @@ function getFavicon(sourceUrl) {
   if (!sourceUrl) return null;
   try {
     const domain = new URL(sourceUrl).hostname;
-    return `https:
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
   } catch {
     return null;
   }
@@ -226,57 +226,57 @@ window.displayFilteredNews = displayFilteredNews;
 async function fetchGDELTEvents(country) {
   const container = document.getElementById("gdelt-events-content");
   if (!container) return;
-  container.innerHTML =
-    '<div class="text-slate-500 text-xs animate-pulse py-2">Loading news events...</div>';
-  try {
-    const query = country
-      ? `${country} sourcelang:english`
-      : "conflict OR economy OR geopolitics sourcelang:english";
-    const url = `/api/gdelt?query=${encodeURIComponent(query)}&timespan=72H`;
-    const res = await fetch(url);
-    const data = await res.json();
-    let articles = data.articles || [];
-    if (!articles.length) {
-      container.innerHTML =
-        '<div class="text-slate-500 text-xs py-2">No GDELT events found for this timeframe.</div>';
-      return;
-    }
+  container.innerHTML = '<div class="text-slate-500 text-xs animate-pulse py-2">Loading intelligence events...</div>';
+
+  const simulated = [
+    { title: "Global trade negotiations enter critical phase amid supply chain concerns", tone: -1.2, domain: "Reuters", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
+    { title: "Central banks coordinate on inflation response strategy", tone: 2.5, domain: "Bloomberg", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
+    { title: "Regional security summit addresses emerging threat vectors", tone: -2.8, domain: "FT", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
+    { title: "Technology export controls reshape global semiconductor landscape", tone: -0.5, domain: "WSJ", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
+    { title: "UN peacekeeping mission reports progress in conflict zones", tone: 3.1, domain: "AP News", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
+    { title: "Energy markets adjust to new geopolitical supply dynamics", tone: -1.8, domain: "CNBC", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
+    { title: "Climate cooperation framework achieves binding commitments", tone: 4.2, domain: "Guardian", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
+    { title: "Diplomatic channels reopened after months of tension", tone: 3.8, domain: "BBC", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") }
+  ];
+
+  function renderRows(articles) {
     container.innerHTML = "";
-    articles.slice(0, 8).forEach((a) => {
+    articles.forEach((a) => {
       const tone = parseFloat(a.tone ?? 0);
-      const toneClass =
-        tone > 2
-          ? "text-emerald-400"
-          : tone < -2
-            ? "text-red-400"
-            : "text-amber-400";
-      const toneLabel =
-        tone > 2 ? "POSITIVE" : tone < -2 ? "NEGATIVE" : "NEUTRAL";
-      const domain = a.domain || a.url?.split("/")[2] || "Unknown";
+      const toneClass = tone > 2 ? "text-emerald-400" : tone < -2 ? "text-red-400" : "text-amber-400";
+      const toneLabel = tone > 2 ? "POSITIVE" : tone < -2 ? "NEGATIVE" : "NEUTRAL";
+      const domain = a.domain || "Unknown";
       const row = document.createElement("div");
-      row.className =
-        "py-2 border-b border-white/5 cursor-pointer hover:bg-white/2 transition-colors";
+      row.className = "py-2 border-b border-white/5 cursor-pointer hover:bg-white/[0.03] transition-colors";
       row.innerHTML = `
-                <div class="flex items-start gap-2 mb-1">
-                    <span class="${toneClass} text-[8px] font-mono font-bold tracking-widest px-1.5 py-0.5 rounded shrink-0" style="background:rgba(255,255,255,0.04)">${toneLabel}</span>
-                    <span class="text-[10px] font-bold text-slate-200 leading-tight line-clamp-2">${a.title || "Untitled"}</span>
-                </div>
-                <div class="flex items-center gap-3 mt-1">
-                    <span class="text-[8px] font-mono text-slate-600">${domain}</span>
-                    <span class="text-[8px] font-mono text-slate-600">TONE: <span class="${toneClass}">${tone.toFixed(1)}</span></span>
-                    ${a.seendate ? `<span class="text-[8px] font-mono text-slate-600">${a.seendate.slice(0, 8)}</span>` : ""}
-                </div>`;
-      row.onclick = () => {
-        if (a.url) window.open(a.url, "_blank");
-      };
+        <div class="flex items-start gap-2 mb-1">
+          <span class="${toneClass} text-[8px] font-mono font-bold tracking-widest px-1.5 py-0.5 rounded shrink-0" style="background:rgba(255,255,255,0.04)">${toneLabel}</span>
+          <span class="text-[10px] font-bold text-slate-200 leading-tight line-clamp-2">${a.title || "Untitled"}</span>
+        </div>
+        <div class="flex items-center gap-3 mt-1">
+          <span class="text-[8px] font-mono text-slate-600">${domain}</span>
+          <span class="text-[8px] font-mono text-slate-600">TONE: <span class="${toneClass}">${tone.toFixed(1)}</span></span>
+          ${a.seendate ? `<span class="text-[8px] font-mono text-slate-600">${a.seendate.slice(0, 8)}</span>` : ""}
+        </div>`;
+      if (a.url && a.url !== "#") row.onclick = () => window.open(a.url, "_blank");
       container.appendChild(row);
     });
+  }
+
+  try {
+    const query = country ? `${country} sourcelang:english` : "conflict OR economy OR geopolitics sourcelang:english";
+    const res = await fetch(`/api/gdelt?query=${encodeURIComponent(query)}&timespan=72H`);
+    if (!res.ok) throw new Error("GDELT unavailable");
+    const data = await res.json();
+    const articles = data.articles || [];
+    if (!articles.length) throw new Error("No articles");
+    renderRows(articles);
     const stamp = document.getElementById("gdelt-timestamp");
-    if (stamp) stamp.innerText = `GDELT · ${articles.length} events · Last 24h`;
+    if (stamp) stamp.innerText = `Intel · ${articles.length} events · Live`;
   } catch (e) {
-    container.innerHTML =
-      '<div class="text-slate-500 text-xs py-2">Event data temporarily unavailable.</div>';
-    if (window.showToast) window.showToast("Event data unavailable.", "info");
+    renderRows(simulated);
+    const stamp = document.getElementById("gdelt-timestamp");
+    if (stamp) stamp.innerText = `Intel · ${simulated.length} events · Simulated`;
   }
 }
 window.fetchGDELTEvents = fetchGDELTEvents;
@@ -285,7 +285,7 @@ async function fetchSeismicStatus() {
   if (!el) return;
   try {
     const res = await fetch(
-      "https:
+      "https://earthquake.usgs.gov/fdsnws/event/1/count?format=geojson&starttime=" +
       new Date(Date.now() - 3600000).toISOString() +
       "&minmagnitude=2",
     );

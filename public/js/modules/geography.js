@@ -92,7 +92,7 @@ async function selectState(countryName, stateName) {
 
     try {
       const geoRes = await fetch(
-        `https:
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(stateName + ", " + countryName)}&count=1&language=en&format=json`,
       );
       const geoData = await geoRes.json();
       if (geoData.results && geoData.results[0] && window.mapEngine?.map) {
@@ -142,7 +142,7 @@ async function selectCity(countryName, stateName, cityName) {
   if (nameEl) nameEl.innerText = cityName;
   try {
     const geoRes = await fetch(
-      `https:
+      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=en&format=json`,
     );
     const geoData = await geoRes.json();
     if (geoData.results && geoData.results[0]) {

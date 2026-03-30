@@ -1,10 +1,10 @@
 import { getCache, setCache } from "./utils/cache.js";
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-const BASE_URL = "https://newsapi.org/v2";
+const BASE_URL = "https://gnews.io/api/v4";
 
 export default async function handler(req, res) {
-    const { category, q, iso2, page = 1, pageSize = 30 } = req.query;
+    const { category, q, iso2, page = 1, pageSize = 10 } = req.query;
     const apiKey = process.env.NEWS_API_KEY;
 
     if (!apiKey) {
@@ -19,42 +19,27 @@ export default async function handler(req, res) {
     }
 
     try {
-        let endpoint, params;
+        const params = new URLSearchParams({
+            token: apiKey,
+            lang: "en",
+            max: Math.min(parseInt(pageSize), 10),
+        });
 
         if (q || iso2) {
-            // Search by country name or keyword
-            endpoint = `${BASE_URL}/everything`;
-            const query = q || iso2; // use country name as search query
-            params = new URLSearchParams({
-                q: query,
-                language: "en",
-                sortBy: "publishedAt",
-                pageSize: Math.min(parseInt(pageSize), 100),
-                page,
-                apiKey,
-            });
+            params.set("q", q || iso2);
         } else {
-            // Top headlines by category
-            endpoint = `${BASE_URL}/top-headlines`;
-            params = new URLSearchParams({
-                language: "en",
-                category: category || "general",
-                pageSize: Math.min(parseInt(pageSize), 100),
-                page,
-                apiKey,
-            });
+            params.set("topic", category || "breaking-news");
         }
 
-        const response = await fetch(`${endpoint}?${params}`);
+        const response = await fetch(`${BASE_URL}/search/titlesonly?${params}`);
         const data = await response.json();
 
-        if (data.status !== "ok") {
-            return res.status(502).json({ status: "error", message: data.message || "NewsAPI error" });
+        if (data.errors) {
+            return res.status(502).json({ status: "error", message: data.errors[0] || "GNews API error" });
         }
 
-        // Normalize article shape
         const results = (data.articles || [])
-            .filter(a => a.title && a.title !== "[Removed]")
+            .filter(a => a.title)
             .map(a => ({
                 title: a.title,
                 link: a.url,
@@ -62,13 +47,13 @@ export default async function handler(req, res) {
                 source: a.source?.name || "Unknown",
                 category: category || "general",
                 description: a.description || "",
-                image: a.urlToImage || null,
-                author: a.author || null,
+                image: a.image || null,
+                author: null,
             }));
 
         const payload = {
             status: "success",
-            totalResults: data.totalResults,
+            totalResults: data.totalArticles || results.length,
             results,
         };
 

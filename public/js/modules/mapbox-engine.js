@@ -37,7 +37,7 @@ class MapboxEngine {
 
         this.map = new mapboxgl.Map({
             container: this.containerId,
-            style: 'mapbox://styles/mapbox/satellite-v9',
+            style: 'mapbox://styles/mapbox/satellite-streets-v12',
             center: [10, 0],
             zoom: 1.5,
             pitch: 0,

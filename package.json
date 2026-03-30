@@ -14,14 +14,23 @@
     "deploy": "vercel --prod"
   },
   "dependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "axios": "^1.14.0",
     "compression": "^1.8.1",
     "concurrently": "^8.2.0",
+    "cors": "^2.8.6",
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^1.7.0",
     "node-fetch": "^3.3.2",
-    "rss-parser": "^3.13.0"
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-router-dom": "^7.13.2"
   },
   "devDependencies": {
+    "@vitejs/plugin-react": "^5.2.0",
     "autoprefixer": "^10.4.17",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",

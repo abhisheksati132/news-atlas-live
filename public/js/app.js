@@ -40,11 +40,11 @@ window.selectedCountry = selectedCountry;
 window.currencyCode = currencyCode;
 window.iso2Code = iso2Code;
 window.currentCategory = currentCategory;
-window._hexLayers = { seismic: [], gdelt: [], aq: [] };
+
 function magColor(m) {
   return m >= 7 ? "#ef4444" : m >= 6 ? "#f97316" : m >= 5 ? "#eab308" : "#10b981";
 }
-window.magColor = magColor;
+
 
 
 
@@ -315,9 +315,9 @@ function renderBriefingCards(rawText) {
 
     const key = headerMatch[1].trim();
     const bodyRaw = block.slice(block.indexOf(']') + 1).trim();
-    const ratingMatch = bodyRaw.match(/Tactical Rating:\s*(\d+)\s*\/\s*10/i);
+    const ratingMatch = bodyRaw.match(/Rating:\s*(\d+)\s*\/\s*10/i);
     const rating = ratingMatch ? parseInt(ratingMatch[1]) : null;
-    const paragraph = bodyRaw.replace(/Tactical Rating:\s*(\d+)\s*\/\s*10\n?/i, '').trim();
+    const paragraph = bodyRaw.replace(/Rating:\s*(\d+)\s*\/\s*10\n?/i, '').trim();
 
     if (!paragraph && !rating) return;
 
@@ -400,14 +400,14 @@ async function generateAIBriefing(loc) {
     }, 400);
   }
 
-  const briefingPrompt = `Target Sector: ${loc || 'Global Surveillance'}.
-Initiate Deep-Scan Strategic Intelligence Dossier.
+  const briefingPrompt = `Location: ${loc || 'Global Surveillance'}.
+Initiate Deep-Scan Detailed Analysis.
 Provide a comprehensive, high-density tactical analysis. 
 
 FORMATTING RULES:
 1. You MUST start with the [EXECUTIVE_SUMMARY] header.
 2. Follow with exactly 10 categories from the list below, each with its own [CATEGORY_NAME] header.
-3. For EVERY category, you MUST include 'Tactical Rating: X/10' on the very first line after the header.
+3. For EVERY category, you MUST include 'Rating: X/10' on the very first line after the header.
 4. Ensure headers use square brackets like [GOV_STABILITY].
 
 CATEGORIES TO USE (INCLUDE ALL 10):
@@ -454,7 +454,7 @@ TONE: Strict, authoritative military/intelligence analyst. Use high-fidelity tec
     }
     if (actions) actions.classList.remove("hidden");
     window.playTacticalSound("success");
-    if (window.showToast) window.showToast("Dossier compiled successfully", "success");
+    if (window.showToast) window.showToast("AI Analysis Complete", "success");
   } catch (e) {
     if (_cursorInterval) { clearInterval(_cursorInterval); _cursorInterval = null; }
     try {

@@ -1,15 +1,15 @@
 export default {
-    content: [
-        "./public/**/*.html",
-        "./public/**/*.js"
-    ],
-    theme: {
-        extend: {
-            fontFamily: {
-                mono: ["JetBrains Mono", "monospace"],
-                sans: ["Inter", "sans-serif"],
-            },
-        },
+  content: [
+    "./index.html",
+    "./src/**/*.{js,jsx,ts,tsx}",
+  ],
+  theme: {
+    extend: {
+      fontFamily: {
+        mono: ["JetBrains Mono", "monospace"],
+        sans: ["Inter", "sans-serif"],
+      },
     },
-    plugins: [],
+  },
+  plugins: [],
 }

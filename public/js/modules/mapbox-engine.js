@@ -91,7 +91,7 @@ class MapboxEngine {
                 'high-color': 'rgb(9, 12, 18)',
                 'horizon-blend': 0.03,
                 'space-color': 'rgb(3, 5, 10)',
-                'star-intensity': 0.5,
+                'star-intensity': 0,
                 'range': [0.5, 10]
             });
         } catch (e) {
@@ -170,7 +170,7 @@ class MapboxEngine {
               'high-color': 'rgb(2, 6, 18)',
               'horizon-blend': 0.02,
               'space-color': 'rgb(0, 1, 5)',
-              'star-intensity': 0.95
+              'star-intensity': 0
             });
         } else {
             this._applyAtmosphere();

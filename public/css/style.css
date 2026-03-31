@@ -71,6 +71,7 @@ header {
   border-radius: var(--radius);
   padding: var(--panel-pad);
   backdrop-filter: blur(12px) !important;
+  box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
 }
 .nav-tab {
   background: transparent;
@@ -103,6 +104,20 @@ header {
   border: 1px solid var(--border);
   color: var(--text-muted);
   cursor: pointer;
+}
+.map-locked {
+  filter: blur(40px);
+  pointer-events: none;
+}
+.map-unlocked {
+  filter: blur(0px) !important;
+  transition: filter 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: auto;
+}
+.intel-summary-text {
+  font-size: 15px !important;
+  line-height: 1.7;
+  color: var(--text);
 }
 .map-ctrl-btn.active {
   background: var(--accent-dim) !important;

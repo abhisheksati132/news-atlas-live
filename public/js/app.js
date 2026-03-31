@@ -233,9 +233,9 @@ function renderBriefingCards(rawText) {
     const bodyRaw = block.slice(block.indexOf(']') + 1).trim().replace(/Rating:\s*\d+\s*\/\s*10\n?/gi, '').replace(/\*\*/g, '');
     if (!bodyRaw) return;
     html += `
-      <div class="border-l-2 border-blue-500/30 pl-4">
+      <div class="mb-6">
         <h4 class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1.5">${displayName}</h4>
-        <p class="text-[13px] text-slate-300 leading-relaxed font-normal">${bodyRaw}</p>
+        <p class="intel-summary-text px-1">${bodyRaw}</p>
       </div>
     `;
   });
@@ -462,4 +462,17 @@ window.initializeMarkets = (loc) => {
 };
 window.fetchMarketIntel = (loc, cur) => {
     console.log("Market intel for", loc, cur);
+};
+window.activateMapInteraction = () => {
+    const map = document.getElementById('map-container');
+    const overlay = document.getElementById('map-interaction-overlay');
+    if (map) {
+        map.classList.remove('map-locked');
+        map.classList.add('map-unlocked');
+    }
+    if (overlay) overlay.classList.add('hidden');
+    if (window.playTacticalSound) window.playTacticalSound('success');
+    if (window.mapEngine && !window.mapEngine.ready) {
+        window.mapEngine.init();
+    }
 };

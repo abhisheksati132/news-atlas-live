@@ -30,9 +30,9 @@ async function displayPreciousMetals() {
                     <span class="text-[9px] text-slate-500 uppercase font-bold tracking-widest">${sym} / ${cur}</span>
                   </div>
                 </div>
-                <div class="flex flex-col items-end">
+                <div class="flex items-center gap-4">
                   <div class="text-[14px] font-black text-white font-mono">${(data.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                  <div class="${changeClass} text-[10px] font-bold font-mono">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
+                  <div class="${changeClass} text-[10px] font-bold font-mono min-w-[50px] text-right">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
                 </div>`;
       container.appendChild(row);
     });
@@ -63,9 +63,9 @@ async function displayCountryIndices(countryName) {
                     <span class="text-[9px] text-slate-500 uppercase font-bold tracking-widest">Market Index</span>
                   </div>
                 </div>
-                <div class="flex flex-col items-end">
+                <div class="flex items-center gap-4">
                   <div class="text-[14px] font-black text-white font-mono">${(data.price || 0).toLocaleString(undefined, { maximumFractionDigits: 1 })}</div>
-                  <div class="${changeClass} text-[10px] font-bold font-mono">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
+                  <div class="${changeClass} text-[10px] font-bold font-mono min-w-[50px] text-right">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
                 </div>`;
       container.appendChild(row);
     });
@@ -108,7 +108,7 @@ async function displayCommodities() {
       const change = data.change || 0;
       const changeClass = change >= 0 ? "text-emerald-400" : "text-red-400";
       const row = document.createElement("div");
-      row.className = "flex items-center justify-between py-3 px-4 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors";
+      row.className = "flex items-center justify-between py-3 px-4 hover:bg-white/[0.02] transition-colors group";
       row.innerHTML = `
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-none border border-white/5 flex items-center justify-center text-lg bg-orange-500/10">${data.icon || "📦"}</div>
@@ -117,9 +117,9 @@ async function displayCommodities() {
                     <span class="text-[9px] text-slate-500 uppercase font-black tracking-widest">${data.unit || "N/A"}</span>
                   </div>
                 </div>
-                <div class="flex flex-col items-end">
+                <div class="flex items-center gap-4">
                   <div class="text-[14px] font-black text-white font-mono">${(data.price || 0).toFixed(2)} <span class="text-[9px] text-slate-500">${cur}</span></div>
-                  <div class="${changeClass} text-[10px] font-bold font-mono">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
+                  <div class="${changeClass} text-[10px] font-bold font-mono min-w-[50px] text-right">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
                 </div>`;
       container.appendChild(row);
     });

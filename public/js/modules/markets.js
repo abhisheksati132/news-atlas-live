@@ -155,18 +155,40 @@ async function displayCrypto() {
     });
   } catch { container.innerHTML = '<div class="text-red-500 text-[10px] py-6 text-center uppercase font-black tracking-widest">Protocol Sync Failure</div>'; }
 }
+async function displayECBRates() {
+  const container = document.getElementById("ecb-rates-content");
+  if (!container) return;
+  try {
+    const res = await fetch(`/api/markets?type=ecb`);
+    const json = await res.json();
+    container.innerHTML = "";
+    Object.entries(json.rates || {}).slice(0, 10).forEach(([currency, rate]) => {
+      const row = document.createElement("div");
+      row.className = "flex items-center justify-between py-2 border-b border-white/[0.03] group hover:bg-white/[0.02] transition-colors px-2";
+      row.innerHTML = `
+        <div class="text-[11px] font-bold text-slate-400 group-hover:text-cyan-400 transition-colors uppercase font-mono">EUR / ${currency}</div>
+        <div class="text-[13px] font-black text-white font-mono">${(1 / rate).toFixed(4)}</div>
+      `;
+      container.appendChild(row);
+    });
+    const stamp = document.getElementById("ecb-timestamp");
+    if (stamp) stamp.innerText = new Date().toLocaleTimeString() + " Live";
+  } catch { container.innerHTML = '<div class="text-red-500/50 text-[10px] py-4 text-center">ECB LINK ERROR</div>'; }
+}
 function initializeMarkets(countryName) {
   displayPreciousMetals();
   displayCountryIndices(countryName || "Global");
   displayForex();
   displayCommodities();
   displayCrypto();
+  displayECBRates();
 }
 window.displayPreciousMetals = displayPreciousMetals;
 window.displayCountryIndices = displayCountryIndices;
 window.displayForex = displayForex;
 window.displayCommodities = displayCommodities;
 window.displayCrypto = displayCrypto;
+window.displayECBRates = displayECBRates;
 window.initializeMarkets = initializeMarkets;
 let _marketsRefreshTimer = null;
 function startMarketsAutoRefresh() {

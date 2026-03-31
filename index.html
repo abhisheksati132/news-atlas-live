@@ -500,7 +500,7 @@
             <div class="flex items-center justify-end px-1 pb-1">
               <span id="news-last-updated" class="text-[9px] font-mono text-slate-600 tracking-wide"></span>
             </div>
-            <div id="react-news-feed"></div>
+            <div id="articles-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0"></div>
           </div>
         </div>
 
@@ -631,7 +631,9 @@
                             font-family: &quot;JetBrains Mono&quot;, monospace;
                           ">Live Telemetry</span>
                     </div>
-                    <div id="react-weather-intel">
+                    <div id="atmo-intel-container" class="mt-2">
+                       <span id="atmo-temp" class="text-8xl md:text-9xl font-black text-white leading-none tracking-tighter drop-shadow-2xl antialiased">--&deg;</span>
+                       <div id="atmo-condition" class="text-sm font-bold text-blue-400 uppercase tracking-[0.4em] mt-1 drop-shadow-lg" style="font-family: 'JetBrains Mono', monospace">Initializing...</div>
                     </div>
                   </div>
                   <div class="flex gap-6 mt-4 pt-4 border-t border-white/5">

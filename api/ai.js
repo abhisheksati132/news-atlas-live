@@ -30,20 +30,23 @@ export default async function handler(req, res) {
                 interest_rate: rand(1, 10) + rand(0, 9) / 10,
                 debt_to_gdp: rand(20, 150),
                 major_exports: ["Raw Materials", "Sector Logistics", "Information Systems"],
-                market_summary: `The ${locName} market remains in a simulated steady-state. Tactical indicators are nominal.`
+                market_summary: `The ${locName} market remains in a strategic steady-state. Tactical indicators are nominal.`
             };
             const jsonText = JSON.stringify(jsonResp);
             return res.status(200).json({ candidates: [{ content: { parts: [{ text: jsonText }] } }] });
         }
 
-        let responseText = `[SITREP: SIMULATED]\n[SIGNAL_STATUS: ${reason.toUpperCase()}]\n\n[EXECUTIVE_SUMMARY]\nRating: ${rand(6,9)}/10\nSituational awareness for ${locName} sector complete. Tactical baseline maintained.`;
-        responseText += `\n\n[POLITICAL_STABILITY]\nRating: ${rand(5,9)}/10\nGovernment sectors in ${locName} are stable. Standard mission parameters active.`;
-        responseText += `\n\n[TRADE_RELATIONS]\nRating: ${rand(5,8)}/10\nCross-border relay for ${locName} is within monitored thresholds.`;
-        responseText += `\n\n[ECONOMY]\nRating: ${rand(4,7)}/10\nEconomic telemetry for ${locName} show mission-ready resilience.`;
-        responseText += `\n\n[TECHNOLOGY]\nRating: ${rand(7,9)}/10\nDigital infrastructure across ${locName} is operating at peak capacity.`;
-        responseText += `\n\n[INFLATION]\nRating: ${rand(3,6)}/10\nInflationary pressures in the ${locName} sector are currently stable.`;
-        responseText += `\n\n[FOREIGN_RELATIONS]\nRating: ${rand(6,9)}/10\n${locName} diplomatic channels are open and active.`;
-        responseText += `\n\n[INFRASTRUCTURE]\nRating: ${rand(7,9)}/10\nMission-critical infrastructure in ${locName} is fully operational.`;
+        // 10-Point Strategic Intelligence Report
+        let responseText = `[EXECUTIVE_SUMMARY]\nRating: ${rand(7,9)}/10\nStrategic situational awareness for ${locName} sector is complete. High-priority baselines are nominal.`;
+        responseText += `\n\n[POLITICAL_STABILITY]\nRating: ${rand(5,9)}/10\nInternal governance sectors in ${locName} maintain standard operational stability. No major tactical deviations detected.`;
+        responseText += `\n\n[TRADE_RELATIONS]\nRating: ${rand(6,9)}/10\nCross-border trade relays for ${locName} show mission-ready resilience and active strategic partnerships.`;
+        responseText += `\n\n[TECHNOLOGY]\nRating: ${rand(7,9)}/10\nDigital and industrial infrastructure across ${locName} is operating at optimized tactical capacity.`;
+        responseText += `\n\n[ECONOMY]\nRating: ${rand(5,8)}/10\nMacroeconomic telemetry for ${locName} indicates sustained growth patterns and sector-specific resilience.`;
+        responseText += `\n\n[SOCIAL_TRENDS]\nRating: ${rand(6,9)}/10\nPublic sentiment and social momentum in ${locName} align with standard development pathways.`;
+        responseText += `\n\n[ENERGY]\nRating: ${rand(6,8)}/10\nPower grid and resource management in ${locName} are maintaining peak operational efficiency.`;
+        responseText += `\n\n[SUPPLY_CHAIN]\nRating: ${rand(5,8)}/10\nLogistical channels and supply-side metrics for ${locName} are within monitored thresholds.`;
+        responseText += `\n\n[INFLATION]\nRating: ${rand(3,7)}/10\nConsumer price indices and inflationary metrics for ${locName} remain under tactical surveillance.`;
+        responseText += `\n\n[INFRASTRUCTURE]\nRating: ${rand(7,9)}/10\nPrimary and secondary infrastructure in ${locName} is fully mission-ready and resilient.`;
 
         if (isStream) {
             res.setHeader("Content-Type", "text/event-stream");

@@ -245,11 +245,10 @@ function renderBriefingCards(rawText) {
   container.innerHTML = html;
 }
 async function generateAIBriefing(loc) {
-  const box = safeEl("ai-briefing-box");
   const text = safeEl("ai-briefing-text");
   const loading = safeEl("ai-briefing-loading");
   const actions = safeEl("ai-briefing-actions");
-  if (box) box.classList.remove("hidden");
+  
   if (text) {
     text.innerHTML = `
       <div class="space-y-4 w-full mt-2">
@@ -258,40 +257,30 @@ async function generateAIBriefing(loc) {
         <div class="skeleton-pulse skeleton-text-block" style="width: 80%;"></div>
       </div>
     `;
-    text.classList.add("ai-streaming");
   }
   if (loading) loading.classList.remove("hidden");
   if (actions) actions.classList.add("hidden");
-  const briefingPrompt = `Location: ${loc || 'Global Overview'}. Deep news analysis. Categories: [POLITICAL_STABILITY], [TRADE_RELATIONS], [TECHNOLOGY], [ECONOMY], [SOCIAL_TRENDS], [ENERGY], [SUPPLY_CHAIN], [INFLATION], [DIPLOMACY], [INFRASTRUCTURE]. Give Rating: X/10 and a concise summary for each. Paragraphs only.`;
+
+  const briefingPrompt = `Location: ${loc || 'Global Overview'}. Strategic Intel Report. Categories: [EXECUTIVE_SUMMARY], [POLITICAL_STABILITY], [TRADE_RELATIONS], [TECHNOLOGY], [ECONOMY], [SOCIAL_TRENDS], [ENERGY], [SUPPLY_CHAIN], [INFLATION], [INFRASTRUCTURE]. Format: [CATEGORY_NAME] followed by a 2-sentence tactical summary. No bullets.`;
+  
   try {
-    const res = await fetch("/api/ai?stream=true", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: briefingPrompt }) });
-    if (!res.ok || !res.body) throw new Error("Stream unavailable");
+    const res = await fetch("/api/ai", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: briefingPrompt })
+    });
+    
+    if (!res.ok) throw new Error("Intelligence Uplink Failed");
+    const data = await res.json();
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || data.response || "No data received.";
+    
     if (loading) loading.classList.add("hidden");
-    if (text) { text.innerText = ""; text.__streaming = true; }
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let accumulated = "";
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value, { stream: true });
-      const lines = chunk.split("\n");
-      for (const line of lines) {
-        if (!line.startsWith("data: ")) continue;
-        const data = line.slice(6).trim();
-        if (data === "[DONE]") break;
-        try {
-          const parsed = JSON.parse(data);
-          const token = parsed?.choices?.[0]?.delta?.content || "";
-          if (token) { accumulated += token; if (text) text.innerText = accumulated.replace(/\*\*/g, "").trim(); }
-        } catch { }
-      }
-    }
-    if (text) { text.__streaming = false; text.classList.remove("ai-streaming"); renderBriefingCards(accumulated); }
     if (actions) actions.classList.remove("hidden");
+    
+    renderBriefingCards(rawText);
   } catch (e) {
     if (loading) loading.classList.add("hidden");
-    if (text) { text.innerText = "Briefing failed."; text.__streaming = false; }
+    if (text) text.innerHTML = `<p class="text-red-400 text-xs py-4 uppercase font-bold text-center">Protocol Intercepted: ${e.message}</p>`;
   }
 }
 window.generateAIBriefing = generateAIBriefing;

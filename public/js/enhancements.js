@@ -68,18 +68,6 @@ window.updateWatchlistBtn = function (name) {
         : `<i class="fas fa-star text-slate-600 text-xs"></i>`;
     btn.title = active ? "Remove from watchlist" : "Add to watchlist";
 };
-// document.addEventListener("DOMContentLoaded", () => {
-//     const sectorDisplay = document.getElementById("active-sector-display");
-//     if (sectorDisplay) {
-//         const btn = document.createElement("button");
-//         btn.id = "watchlist-star-btn";
-//         btn.className = "tactical-btn p-1 hover:text-amber-400 transition-colors";
-//         btn.title = "Add to watchlist";
-//         btn.innerHTML = `<i class="fas fa-star text-slate-600 text-xs"></i>`;
-//         btn.onclick = () => window.toggleWatchlist(window.selectedCountry?.properties?.name || window.selectedCountry);
-//         sectorDisplay.appendChild(btn);
-//     }
-// });
 const _origToggleSearch = window.toggleSearch;
 window.toggleSearch = function () {
     if (typeof _origToggleSearch === "function") _origToggleSearch();

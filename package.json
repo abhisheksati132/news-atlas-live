@@ -9,7 +9,7 @@
     "api": "node server.js",
     "frontend": "vite",
     "dev": "concurrently \"npm run api\" \"npm run frontend\"",
-    "build": "vite build",
+    "build": "vite build && node scripts/postbuild.js",
     "preview": "vite preview",
     "deploy": "vercel --prod"
   },

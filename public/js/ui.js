@@ -158,6 +158,26 @@ window.toggleSearch = () => {
     overlay.classList.add("hidden");
   }
 };
+window.selectFromSearch = (name) => {
+    window.toggleSearch();
+    if (window.handleCountryClickByName) {
+        window.handleCountryClickByName(name);
+    }
+    if (window.onCountrySelected) {
+        window.onCountrySelected(name);
+    }
+    // Deep geocoding link for cities/states
+    if (window.mapEngine && window.mapEngine.map) {
+        fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(name)}.json?access_token=${mapboxToken}&limit=1`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.features && data.features[0]) {
+                    const [lng, lat] = data.features[0].center;
+                    window.mapEngine.map.flyTo({ center: [lng, lat], zoom: 6, duration: 2000 });
+                }
+            }).catch(e => console.warn("Selection geocoding failed"));
+    }
+};
 window.renderTrending = renderTrending;
 
 let _cliExpanded = false;
@@ -353,13 +373,21 @@ window._cliPrint = cliPrint;
 document.addEventListener("DOMContentLoaded", () => {
   initDrag();
   const inp = document.getElementById("floating-cli-input");
-  if (!inp) return;
-  inp.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") { e.preventDefault(); const v = inp.value; inp.value = ""; processCLICommand(v); }
-    else if (e.key === "ArrowUp") { e.preventDefault(); _cliHistoryIndex = Math.min(_cliHistoryIndex + 1, _cliHistory.length - 1); inp.value = _cliHistory[_cliHistoryIndex] || ""; }
-    else if (e.key === "ArrowDown") { e.preventDefault(); _cliHistoryIndex = Math.max(_cliHistoryIndex - 1, -1); inp.value = _cliHistoryIndex >= 0 ? _cliHistory[_cliHistoryIndex] : ""; }
-    else if (e.key === "Escape") { window.toggleCLI(); }
-  });
+  if (inp) {
+    inp.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); const v = inp.value; inp.value = ""; processCLICommand(v); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); _cliHistoryIndex = Math.min(_cliHistoryIndex + 1, _cliHistory.length - 1); inp.value = _cliHistory[_cliHistoryIndex] || ""; }
+      else if (e.key === "ArrowDown") { e.preventDefault(); _cliHistoryIndex = Math.max(_cliHistoryIndex - 1, -1); inp.value = _cliHistoryIndex >= 0 ? _cliHistory[_cliHistoryIndex] : ""; }
+      else if (e.key === "Escape") { window.toggleCLI(); }
+    });
+  }
+  const searchInp = document.getElementById("country-search");
+  if (searchInp) {
+    searchInp.addEventListener("input", () => window.renderTrending());
+    searchInp.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") window.toggleSearch();
+    });
+  }
   document.addEventListener("keydown", (e) => {
     if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
     if (e.key === "`") { e.preventDefault(); window.toggleCLI(); }

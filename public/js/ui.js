@@ -42,9 +42,64 @@ window.showToast = function (message, type = "info") {
   if (!toastTimeout) showNextToast();
 };
 
+let mapboxToken = null;
+fetch('/api/config').then(r => r.json()).then(d => mapboxToken = d.mapboxToken);
+
 function renderTrending() {
   const resContainer = document.getElementById("search-results");
-  if (!resContainer) return;
+  const searchInput = document.getElementById("country-search");
+  if (!resContainer || !searchInput) return;
+  
+  const query = searchInput.value.trim().toLowerCase();
+  
+  if (query && window.globalSearchData) {
+    const countries = window.globalSearchData.filter(c => 
+      c.name.common.toLowerCase().includes(query) || 
+      (c.name.official && c.name.official.toLowerCase().includes(query))
+    ).slice(0, 8);
+    
+    let html = `<div style="padding: 1.25rem 1.5rem 0.75rem; font-size: 11px; font-weight: 900; color: #475569; text-transform: uppercase; letter-spacing: 0.15em; font-family: 'JetBrains Mono', monospace;">Nations Found</div>`;
+    
+    if (countries.length > 0) {
+        html += countries.map(c => {
+            const name = c.name.common;
+            return `<div class="flex items-center gap-5 px-6 py-4 hover:bg-white/[0.03] cursor-pointer transition-all group" onclick="window.selectFromSearch('${name.replace(/'/g, "\\'")}')">
+              <div class="w-10 h-6.5 rounded shadow-sm overflow-hidden border border-white/10 shrink-0"><img src="${c.flags.svg}" class="w-full h-full object-cover"></div>
+              <span class="font-bold text-white text-base tracking-tight group-hover:text-blue-400 transition-colors">${name}</span>
+              <i class="fas fa-chevron-right ml-auto text-[11px] text-slate-700 group-hover:text-blue-400 transition-all group-hover:translate-x-0.5"></i>
+            </div>`;
+        }).join("");
+    } else {
+        html = `<div class="px-6 py-4 text-slate-500 text-[11px] uppercase font-bold">Searching Global Registry...</div>`;
+    }
+
+    resContainer.innerHTML = html;
+
+    // Background scan for cities/states
+    if (query.length > 2 && mapboxToken) {
+        clearTimeout(window._searchDebounce);
+        window._searchDebounce = setTimeout(async () => {
+            try {
+                const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&types=place,region,locality&limit=5`);
+                const json = await res.json();
+                if (json.features && json.features.length > 0) {
+                    const registryHtml = `<div style="padding: 1.25rem 1.5rem 0.75rem; font-size: 11px; font-weight: 900; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.15em; font-family: 'JetBrains Mono', monospace;">Registry Matches (Cities/States)</div>` + 
+                    json.features.map(f => `
+                        <div class="flex items-center gap-5 px-6 py-4 hover:bg-white/[0.03] cursor-pointer transition-all group" onclick="window.selectFromSearch('${f.place_name.replace(/'/g, "\\'")}')">
+                          <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-blue-500/10 border border-blue-500/20 text-blue-400 shrink-0"><i class="fas fa-map-marker-alt"></i></div>
+                          <div class="flex flex-col">
+                            <span class="font-bold text-white text-[13px] tracking-tight group-hover:text-blue-400">${f.text}</span>
+                            <span class="text-[10px] text-slate-500 truncate">${f.place_name}</span>
+                          </div>
+                        </div>`).join("");
+                    resContainer.innerHTML = html + registryHtml;
+                }
+            } catch (e) { console.warn("Geocoding sync failed"); }
+        }, 500);
+    }
+    return;
+  }
+
   if (!window.globalSearchData || window.globalSearchData.length === 0) {
     resContainer.innerHTML = `
       <div class="col-span-full p-8 text-center">
@@ -65,13 +120,13 @@ function renderTrending() {
       recent.map((name) => {
         const c = window.globalSearchData.find((curr) => curr.name.common === name);
         if (!c) return "";
-        return `<div class="flex items-center gap-5 px-6 py-4 hover:bg-white/[0.03] cursor-pointer border-b border-white/[0.04] transition-all group" onclick="window.selectFromSearch('${name.replace(/'/g, "\\'")}')">
+        return `<div class="flex items-center gap-5 px-6 py-4 hover:bg-white/[0.03] cursor-pointer transition-all group" onclick="window.selectFromSearch('${name.replace(/'/g, "\\'")}')">
           <div class="w-10 h-6.5 rounded shadow-sm overflow-hidden border border-white/10 shrink-0"><img src="${c.flags.svg}" class="w-full h-full object-cover"></div>
           <span class="font-bold text-white text-base tracking-tight group-hover:text-blue-400 transition-colors">${name}</span>
           <i class="fas fa-chevron-right ml-auto text-[11px] text-slate-700 group-hover:text-blue-400 transition-all group-hover:translate-x-0.5"></i>
         </div>`;
       }).join("") +
-      `<div style="${headerStyle} border-top: 1px solid rgba(255,255,255,0.05); margin-top: 0.5rem;">High Traffic Sectors</div>`;
+      `<div style="${headerStyle} margin-top: 0.5rem;">High Traffic Sectors</div>`;
   } else {
     recentHtml = `<div style="${headerStyle}">High Traffic Sectors</div>`;
   }
@@ -83,7 +138,7 @@ function renderTrending() {
       (name === "Russia" && curr.name.common.includes("Russian")),
     );
     if (!c) return "";
-    return `<div class="flex items-center gap-5 px-6 py-4 hover:bg-white/[0.03] cursor-pointer border-b border-white/[0.04] transition-all group" onclick="window.selectFromSearch('${name}')">
+    return `<div class="flex items-center gap-5 px-6 py-4 hover:bg-white/[0.03] cursor-pointer transition-all group" onclick="window.selectFromSearch('${name}')">
       <div class="w-10 h-6.5 rounded shadow-sm overflow-hidden border border-white/10 shrink-0"><img src="${c.flags.svg}" class="w-full h-full object-cover"></div>
       <span class="font-bold text-white text-base tracking-tight group-hover:text-blue-400 transition-colors">${name}</span>
       <i class="fas fa-chevron-right ml-auto text-[11px] text-slate-700 group-hover:text-blue-400 transition-all group-hover:translate-x-0.5"></i>

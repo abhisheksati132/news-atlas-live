@@ -26,6 +26,8 @@ body {
   font-family: "Plus Jakarta Sans", system-ui, sans-serif;
   font-size: 14px;
   background-color: var(--bg);
+  background-image: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+                    radial-gradient(circle at 0% 100%, rgba(139, 92, 246, 0.03) 0%, transparent 40%);
   color: var(--text);
   overflow-x: hidden;
   padding-top: calc(var(--header-h) + 20px);
@@ -34,6 +36,53 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  position: relative;
+}
+
+/* ATMOSPHERIC AURORA ENGINE */
+.aurora-container {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: #020617; /* Deep Space Base */
+}
+
+.aurora-glow {
+  position: absolute;
+  filter: blur(100px);
+  opacity: 0.4;
+  mix-blend-mode: screen;
+  animation: aurora-flow 25s ease-in-out infinite alternate;
+}
+
+.aurora-1 {
+  top: -10%; left: -10%;
+  width: 60vw; height: 60vh;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+  animation-delay: 0s;
+}
+
+.aurora-2 {
+  bottom: -10%; right: -10%;
+  width: 70vw; height: 50vh;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+  animation-delay: -5s;
+}
+
+.aurora-3 {
+  top: 20%; right: 10%;
+  width: 50vw; height: 50vh;
+  background: radial-gradient(circle, rgba(20, 184, 166, 0.1) 0%, transparent 70%);
+  animation-delay: -10s;
+}
+
+@keyframes aurora-flow {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  33% { transform: translate(5%, 10%) scale(1.1) rotate(5deg); }
+  66% { transform: translate(-5%, 5%) scale(0.9) rotate(-3deg); }
+  100% { transform: translate(0, 0) scale(1) rotate(0deg); }
 }
 header {
   height: var(--header-h);

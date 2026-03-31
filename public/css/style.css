@@ -92,9 +92,10 @@ header {
   justify-content: space-between;
   position: fixed;
   top: 0; left: 0; right: 0;
-  z-index: 50;
-  background: var(--surface);
+  z-index: 1000;
+  background: rgba(15, 23, 42, 0.85); /* Slightly transparent for depth */
   border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(16px);
 }
 .main-content {
   padding: 1.5rem 8vw;
@@ -119,7 +120,7 @@ header {
   inset: 0;
   background: rgba(2, 6, 23, 0.45);
   backdrop-filter: blur(12px);
-  z-index: 100;
+  z-index: 150;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -201,7 +202,7 @@ header {
 #about-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: 2100;
   background: rgba(0,0,0,0.8);
   display: flex;
   align-items: center;

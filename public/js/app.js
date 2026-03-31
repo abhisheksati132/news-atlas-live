@@ -397,11 +397,30 @@ window.zoomMap = function(factor) {
 };
 function setupEventListeners() {
   window.addEventListener("keydown", (e) => {
+    // Esc handling
     if (e.key === "Escape") {
       const so = safeEl("search-overlay");
       const ao = safeEl("about-overlay");
       if (so && !so.classList.contains("hidden")) so.classList.add("hidden");
       if (ao && !ao.classList.contains("hidden")) ao.classList.add("hidden");
+    }
+
+    // Tab Navigation (1-5)
+    // Ignore if user is typing in an input field
+    if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+
+    const navMap = {
+      "1": "summary",
+      "2": "news",
+      "3": "markets",
+      "4": "weather",
+      "5": "economic"
+    };
+
+    if (navMap[e.key]) {
+      e.preventDefault();
+      window.switchTab(navMap[e.key]);
+      if (window.playTacticalSound) window.playTacticalSound("click");
     }
   });
 }

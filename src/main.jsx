@@ -78,7 +78,7 @@ const AIAssistant = () => {
 };
 
 const AIBriefing = () => (
-  <div className="p-4 bg-blue-500/[0.02] border border-blue-500/10 rounded-2xl text-[11px] text-slate-400 font-medium">
+  <div id="ai-briefing-text" className="p-4 bg-blue-500/[0.02] border border-blue-500/10 rounded-none text-[11px] text-slate-400 font-medium">
     Select a country on the map to generate a real-time summary.
   </div>
 );
@@ -90,7 +90,7 @@ const MarketTicker = () => (
 );
 
 const NewsFeed = () => (
-  <div className="text-center py-12 text-slate-500 text-xs font-medium">
+  <div id="articles-container" className="text-center py-12 text-slate-500 text-xs font-medium">
     <i className="fas fa-rss-square block text-2xl mb-3 opacity-20"></i>
     Click a sector to populate global news feeds.
   </div>
@@ -98,8 +98,9 @@ const NewsFeed = () => (
 
 const WeatherIntel = () => (
   <div className="flex flex-col items-center">
-    <div className="text-5xl font-black text-white leading-none">--&deg;</div>
-    <div className="text-[10px] text-blue-400 font-bold uppercase tracking-[.2em] mt-2">WEATHER_OFFLINE</div>
+    <i id="atmo-main-icon" className="fas fa-cloud text-5xl mb-4 text-blue-500/20"></i>
+    <div id="atmo-temp" className="text-5xl font-black text-white leading-none">--&deg;</div>
+    <div id="atmo-condition" className="text-[10px] text-blue-400 font-bold uppercase tracking-[.2em] mt-2">WEATHER_OFFLINE</div>
   </div>
 );
 

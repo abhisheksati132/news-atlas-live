@@ -1,10 +1,10 @@
 import { getCache, setCache } from "./utils/cache.js";
 
 const CACHE_TTL = 5 * 60 * 1000;
-const BASE_URL = "https://gnews.io/api/v4";
+const BASE_URL = "https://newsapi.org/v2";
 
 export default async function handler(req, res) {
-    const { category, q, iso2, page = 1, pageSize = 10 } = req.query;
+    const { category, q, iso2, page = 1, pageSize = 12 } = req.query;
     const apiKey = process.env.NEWS_API_KEY;
 
     if (!apiKey) {
@@ -29,43 +29,51 @@ export default async function handler(req, res) {
 
     try {
         const params = new URLSearchParams({
-            token: apiKey,
-            lang: "en",
-            max: Math.min(parseInt(pageSize), 10),
+            apiKey,
+            language: "en",
+            pageSize: Math.min(parseInt(pageSize), 50),
+            page: parseInt(page)
         });
 
-        if (q || iso2) {
-            params.set("q", q || iso2);
+        // NewsAPI.org: if we have a search query, use /everything, else use /top-headlines
+        let endpoint = `${BASE_URL}/top-headlines?${params}`;
+
+        if (q) {
+            endpoint = `${BASE_URL}/everything?${params}&q=${encodeURIComponent(q)}`;
         } else {
-            params.set("topic", category || "breaking-news");
+            if (iso2) params.set("country", iso2.toLowerCase());
+            if (category) params.set("category", category === 'breaking-news' ? 'general' : category);
+            // Default to 'general' if absolutely nothing is specified
+            if (!iso2 && !category) params.set("category", "general");
+            endpoint = `${BASE_URL}/top-headlines?${params}`;
         }
 
-        const response = await fetch(`${BASE_URL}/search?${params}`);
+        const response = await fetch(endpoint);
         const data = await response.json();
 
-        if (data.errors) {
-            return res.status(502).json({ status: "error", message: data.errors[0] || "GNews API error" });
+        if (data.status === 'error') {
+            return res.status(502).json({ status: "error", message: data.message || "NewsAPI.org error" });
         }
 
         const results = (data.articles || [])
-            .filter(a => a.title)
+            .filter(a => a.title && a.title !== '[Removed]')
             .map(a => ({
                 title: a.title,
                 link: a.url,
                 pubDate: a.publishedAt,
-                source: a.source?.name || "Unknown",
-                source_id: a.source?.name || "Unknown",
-                source_url: a.source?.url || "",
+                source: a.source?.name || "Global News",
+                source_id: a.source?.id || "newsapi",
+                source_url: a.url,
                 category: category || "general",
                 description: a.description || "",
-                image: a.image || null,
-                image_url: a.image || null,
-                author: null,
+                image: a.urlToImage || null,
+                image_url: a.urlToImage || null,
+                author: a.author || null,
             }));
 
         const payload = {
             status: "success",
-            totalResults: data.totalArticles || results.length,
+            totalResults: data.totalResults || results.length,
             results,
         };
 

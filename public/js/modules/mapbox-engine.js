@@ -43,11 +43,11 @@ class MapboxEngine {
             pitch: 0,
             projection: 'globe',
             attributionControl: false,
-            cooperativeGestures: true,
-            scrollZoom: false,
-            dragPan: false,
-            dragRotate: false,
-            touchZoomRotate: false
+            cooperativeGestures: false,
+            scrollZoom: true,
+            dragPan: true,
+            dragRotate: true,
+            touchZoomRotate: true
         });
 
         this.map.on('style.load', () => {

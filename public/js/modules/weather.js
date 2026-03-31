@@ -383,67 +383,28 @@ Current data: ${weatherData.temp}°C (feels like ${weatherData.feels_like}°C), 
 }
 
 function renderWeatherCards(rawText, container) {
-  const weatherIconMap = {
-    'EXECUTIVE': { icon: 'fa-cloud-sun', color: '#06b6d4' },
-    'WEATHER': { icon: 'fa-temperature-half', color: '#3b82f6' },
-    'TRAVEL': { icon: 'fa-plane-departure', color: '#f59e0b' },
-    'HEALTH': { icon: 'fa-heart-pulse', color: '#10b981' },
-    'OUTDOOR': { icon: 'fa-person-hiking', color: '#8b5cf6' },
-    'RECOMMENDED': { icon: 'fa-shield-halved', color: '#ef4444' },
-  };
-
   let clean = rawText.replace(/\*\*/g, '').trim();
   const parts = clean.split(/(?=\[[A-Z][A-Z_ ]+\])/);
-  let html = '';
+  let html = '<div class="space-y-6 pt-2">';
 
   parts.forEach(block => {
     const headerMatch = block.match(/\[([A-Z][A-Z_ ]+)\]/);
     if (!headerMatch) return;
     const key = headerMatch[1].trim();
-    const bodyRaw = block.slice(block.indexOf(']') + 1).trim();
-    const ratingMatch = bodyRaw.match(/Tactical Rating:\s*(\d+)\s*\/\s*10/i);
-    const rating = ratingMatch ? parseInt(ratingMatch[1]) : null;
-    const paragraph = bodyRaw.replace(/Tactical Rating:\s*\d+\s*\/\s*10\n?/i, '').trim();
-    if (!paragraph && !rating) return;
-
-    const mapKey = Object.keys(weatherIconMap).find(k => key.includes(k)) || 'EXECUTIVE';
-    const { icon, color } = weatherIconMap[mapKey];
     const displayName = key.replace(/_/g, ' ');
-    const ratingColor = !rating ? color : (rating >= 8 ? '#10b981' : rating >= 5 ? '#f59e0b' : '#ef4444');
+    const bodyRaw = block.slice(block.indexOf(']') + 1).trim().replace(/Tactical Rating:\s*\d+\s*\/\s*10\n?/gi, '').replace(/\*\*/g, '');
+    if (!bodyRaw) return;
 
     html += `
-      <div class="apple-glass group p-5 mb-4 relative overflow-hidden transition-all duration-300 hover:bg-white/[0.05]" style="border: 1px solid ${color}22;">
-        <div class="absolute -inset-[1px] bg-gradient-to-br from-white/10 to-transparent opacity-20 pointer-events-none"></div>
-        <div class="flex justify-between items-start mb-4 relative z-10">
-          <div class="flex items-center gap-4">
-            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white"
-                 style="background: ${color}33; border: 1px solid ${color}55; box-shadow: 0 0 15px ${color}22;">
-              <i class="fas ${icon} text-[18px]" style="color: ${color};"></i>
-            </div>
-            <div class="flex flex-col">
-              <span class="text-[11px] font-bold uppercase tracking-[0.2em] text-cyan-400/80">Weather Analysis</span>
-              <span class="text-[15px] font-bold text-white uppercase tracking-wider">${displayName}</span>
-            </div>
-          </div>
-          ${rating ? `
-            <div class="bg-black/40 rounded-xl px-4 py-2 flex flex-col items-center" style="border: 1px solid ${ratingColor}44;">
-              <span class="text-[20px] font-black font-mono leading-none" style="color: ${ratingColor};">${rating}<span class="text-[12px] opacity-40">/10</span></span>
-              <div class="w-14 h-1 bg-white/10 rounded-full mt-2 overflow-hidden">
-                <div class="h-full rounded-full" style="width: ${rating * 10}%; background: ${ratingColor};"></div>
-              </div>
-            </div>
-          ` : ''}
-        </div>
-        <p class="text-[14px] text-white/85 leading-relaxed font-mono relative z-10" style="font-weight: 400;">${paragraph}</p>
+      <div class="border-l-2 border-amber-500/30 pl-4">
+        <h4 class="text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-1.5">${displayName}</h4>
+        <p class="text-[13px] text-slate-300 leading-relaxed font-normal">${bodyRaw}</p>
       </div>
     `;
   });
 
-  if (html) {
-    container.innerHTML = html;
-  } else {
-    container.innerHTML = `<div class="apple-glass p-6 text-[13px] text-slate-400 font-mono leading-relaxed">${clean.replace(/\n/g, '<br>')}</div>`;
-  }
+  html += '</div>';
+  container.innerHTML = html;
 }
 function generateWeatherAlerts(weatherData) {
   const alerts = [];

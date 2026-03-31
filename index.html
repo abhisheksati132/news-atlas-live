@@ -36,7 +36,7 @@
     />
     <meta
       name="description"
-      content="NewsAtlas: Real-time Global Intelligence Terminal."
+      content="NewsAtlas: Real-time Global News and Market Dashboard."
     />
     <meta name="theme-color" content="#020617" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%233b82f6' d='M352 256c0 22.2-1.2 43.6-3.3 64H163.3c-2.2-20.4-3.3-41.8-3.3-64s1.2-43.6 3.3-64h185.4c2.2 20.4 3.3 41.8 3.3 64zm28.8-64h74.7c-9.1-37.4-28.7-71.1-55.4-97.7-18.1 19.3-33.1 41.9-44 67.2 9.6 9.4 18.2 20 24.7 30.5zM182.2 94.3c-18.1 19.3-33.1 41.9-44 67.2 9.6 9.4 18.2 20 24.7 30.5h74.7c-9.1-37.4-28.7-71.1-55.4-97.7zM163.3 320h185.4c-2.1 20.4-3.3 41.8-3.3 64s1.2 43.6 3.3 64H163.3c2.1-20.4 3.3-41.8 3.3-64s-1.2-43.6-3.3-64z'/%3E%3C/svg%3E" type="image/svg+xml" />
@@ -75,12 +75,11 @@
   <body class="flex flex-col night-theme">
     <div
       id="map-tooltip"
-      class="fixed hidden text-white rounded-xl border-l-4 border-l-emerald-500 overflow-hidden"
+      class="fixed hidden text-white rounded-sm border-l-2 border-l-blue-500 overflow-hidden"
       style="
-        background: rgba(4, 10, 25, 0.95);
-        border: 1px solid rgba(16, 185, 129, 0.2);
-        border-left: 4px solid #10b981;
-        min-width: 160px;
+        background: #0f172a;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        min-width: 140px;
       "
     >
       <div
@@ -132,12 +131,12 @@
       class="fixed inset-0 hidden flex items-center justify-center z-[100] px-6"
     >
       <div
-        class="glass-panel max-w-xl w-full border-blue-500/20 flex flex-col max-h-[75vh] overflow-hidden p-0"
+        class="glass-panel max-w-xl w-full border-blue-500/30 flex flex-col max-h-[75vh] overflow-hidden p-0"
       >
         <div
           class="flex items-center p-6 gap-6 shrink-0 border-b border-white/8"
         >
-          <i class="fas fa-crosshairs text-[#3b82f6] text-2xl"></i>
+          <i class="fas fa-search text-[#3b82f6] text-xl"></i>
           <input
             type="text"
             id="country-search"
@@ -165,7 +164,7 @@
             class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
             style="background: #141b2c; border: 1px solid rgba(59, 130, 246, 0.2);"
           >
-            <i class="fas fa-satellite-dish text-sm text-blue-400"></i>
+            <i class="fas fa-globe text-sm text-blue-400"></i>
           </div>
           <h1 class="text-sm font-semibold tracking-tight text-white leading-none">News<span style="color: #3b82f6;">Atlas</span></h1>
         </div>
@@ -203,8 +202,8 @@
         >
           <div id="map-status-area" class="flex items-center gap-2 shrink-0">
             <div class="flex items-center gap-2 px-2.5 h-7 rounded-lg border border-white/[0.08] bg-white/[0.04]">
-              <span class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></span>
-              <span class="text-[9px] font-black text-blue-300 uppercase tracking-widest">Map Ready</span>
+              <span class="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
+              <span class="text-[9px] font-bold text-blue-300 uppercase tracking-widest">Dashboard Ready</span>
             </div>
           </div>
 
@@ -2445,15 +2444,15 @@
 
     <div id="about-overlay" class="fixed inset-0 z-[200] hidden" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(12px);">
       <div class="flex items-center justify-center min-h-screen p-6">
-        <div style="background: rgba(15,23,42,0.95); border: 1px solid rgba(255,255,255,0.08); border-radius: 1.25rem; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto;" class="shadow-2xl">
+        <div style="background: rgba(15,23,42,0.95); border: 1px solid rgba(255,255,255,0.08); border-radius: 0; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto;" class="shadow-2xl">
           <div style="padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.06);" class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div style="width: 36px; height: 36px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 10px;" class="flex items-center justify-center">
-                <i class="fas fa-satellite-dish text-blue-400 text-sm"></i>
+                <i class="fas fa-globe text-blue-400 text-sm"></i>
               </div>
               <div>
                 <h2 style="font-size: 16px; font-weight: 700; color: white; margin: 0;">News<span style="color: #3b82f6;">Atlas</span></h2>
-                <p style="font-size: 11px; color: #64748b; margin: 0;">Global Intelligence Dashboard</p>
+                <p style="font-size: 11px; color: #64748b; margin: 0;">Global News and Market Overview</p>
               </div>
             </div>
             <button onclick="window.toggleAboutOverlay()" style="color: #64748b; background: none; border: none; cursor: pointer; padding: 8px;" class="hover:text-white transition-colors">
@@ -2462,13 +2461,13 @@
           </div>
           <div style="padding: 1.25rem 1.5rem;">
             <p style="font-size: 13px; color: #94a3b8; line-height: 1.7; margin: 0;">
-              NewsAtlas is a real-time global news and intelligence dashboard. Click any country on the map to get live news, weather, economic data, and AI-powered analysis — all in one place.
+              NewsAtlas is a real-time global news and market dashboard. Click any country on the map to get live headlines, weather, economic indicators, and analyst briefings — all in one place.
             </p>
             <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-              <span style="font-size: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(59,130,246,0.1); color: #60a5fa; border: 1px solid rgba(59,130,246,0.15); font-weight: 600;">Mapbox GL</span>
-              <span style="font-size: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.15); font-weight: 600;">GNews API</span>
-              <span style="font-size: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(168,85,247,0.1); color: #c084fc; border: 1px solid rgba(168,85,247,0.15); font-weight: 600;">Groq AI</span>
-              <span style="font-size: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(245,158,11,0.1); color: #fbbf24; border: 1px solid rgba(245,158,11,0.15); font-weight: 600;">React + Vite</span>
+              <span style="font-size: 10px; padding: 4px 10px; border-radius: 0; background: rgba(59,130,246,0.1); color: #60a5fa; border: 1px solid rgba(59,130,246,0.15); font-weight: 600;">Mapbox GL</span>
+              <span style="font-size: 10px; padding: 4px 10px; border-radius: 0; background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.15); font-weight: 600;">GNews API</span>
+              <span style="font-size: 10px; padding: 4px 10px; border-radius: 0; background: rgba(168,85,247,0.1); color: #c084fc; border: 1px solid rgba(168,85,247,0.15); font-weight: 600;">Groq AI</span>
+              <span style="font-size: 10px; padding: 4px 10px; border-radius: 0; background: rgba(245,158,11,0.1); color: #fbbf24; border: 1px solid rgba(245,158,11,0.15); font-weight: 600;">React + Vite</span>
             </div>
           </div>
           <div style="padding: 0 1.5rem 1.5rem;">
@@ -2495,7 +2494,7 @@
             </div>
           </div>
           <div style="padding: 1rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); text-align: center;">
-            <p style="font-size: 11px; color: #475569; margin: 0;">Built with ❤️ · © 2025 NewsAtlas</p>
+            <p style="font-size: 11px; color: #475569; margin: 0;">© 2025 NewsAtlas · Live Global Data</p>
           </div>
         </div>
       </div>

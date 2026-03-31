@@ -19,7 +19,7 @@ function showNextToast() {
   const { message, type } = toastQueue.shift();
   const div = document.createElement("div");
   div.className =
-    "toast-item px-4 py-3 rounded-xl border font-mono text-xs font-bold tracking-widest shadow-lg pointer-events-auto animate-toast-in " +
+    "toast-item px-4 py-3 rounded-sm border font-bold tracking-widest shadow-md pointer-events-auto animate-toast-in " +
     (type === "success"
       ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
       : type === "error"
@@ -47,9 +47,13 @@ function renderTrending() {
   if (!resContainer) return;
   if (!window.globalSearchData || window.globalSearchData.length === 0) {
     resContainer.innerHTML = `
-      <div class="p-8 text-center flex flex-col items-center gap-3 animate-pulse">
-        <i class="fas fa-satellite-dish text-blue-500 text-xl"></i>
-        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Downloading Global Index...</span>
+      <div class="col-span-full p-8 text-center">
+        <div class="inline-flex items-center gap-3 px-5 py-3 rounded-sm" style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.3)">
+          <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+          <span class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">
+            RETRIEVING DATA...
+          </span>
+        </div>
       </div>`;
     return;
   }

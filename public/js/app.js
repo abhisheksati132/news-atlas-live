@@ -87,10 +87,10 @@ async function initTerminal() {
         if (u) {
           const idEl = safeEl("neural-id");
           if (idEl && !u.isAnonymous && u.displayName) {
-            idEl.innerText = `ID: ${u.displayName.toUpperCase()}`;
+            idEl.innerText = `SESSION: ${u.displayName.toUpperCase()}`;
             idEl.classList.add("text-emerald-500");
           } else if (idEl && u.isAnonymous) {
-            idEl.innerText = `ID: ${u.uid.substring(0, 8).toUpperCase()}`;
+            idEl.innerText = `SESSION: ${u.uid.substring(0, 8).toUpperCase()}`;
           }
           try {
             const userRef = window.firebaseCore.doc(db, "visitors", u.uid);
@@ -99,11 +99,10 @@ async function initTerminal() {
         }
       });
     } catch (e) {
-      console.warn("Firebase Auth failed:", e);
-      setText("neural-id", "LOCAL MODE (OFFLINE)");
-      if (window.showToast) window.showToast("Auth offline. Using local mode.", "info");
+      console.warn("Auth limited:", e);
+      setText("neural-id", "GUEST SESSION");
     }
-  } else { setText("neural-id", "LOCAL MODE (OFFLINE)"); }
+  } else { setText("neural-id", "GUEST SESSION"); }
   try {
     const res = await fetch("/api/countries?all=true");
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -223,54 +222,25 @@ window.fetchAllData = fetchAllData;
 function renderBriefingCards(rawText) {
   const container = safeEl("ai-briefing-text");
   if (!container) return;
-  let clean = rawText.replace(/\[STRATEGIC METRICS DASHBOARD\]\s*/gi, '').replace(/\*\*/g, '').replace(/Ã¢â‚¬Â¢/g, '-').replace(/Â·/g, '-').replace(/Â°/g, '°').replace(/Â/g, '').trim();
+  let clean = rawText.replace(/\[(STRATEGIC METRICS DASHBOARD|OVERVIEW)\]\s*/gi, '').trim();
   const parts = clean.split(/(?=\[[A-Z_ ]+\])/);
-  let html = '';
+  let html = '<div class="space-y-6 pt-2">';
   parts.forEach(block => {
     const headerMatch = block.match(/\[([A-Z_ ]+)\]/);
     if (!headerMatch) return;
     const key = headerMatch[1].trim();
-    const bodyRaw = block.slice(block.indexOf(']') + 1).trim();
-    const ratingMatch = bodyRaw.match(/Rating:\s*(\d+)\s*\/\s*10/i);
-    const rating = ratingMatch ? parseInt(ratingMatch[1]) : null;
-    const paragraph = bodyRaw.replace(/Rating:\s*(\d+)\s*\/\s*10\n?/i, '').trim();
-    if (!paragraph && !rating) return;
-    const isExec = key.includes('EXECUTIVE');
-    const color = isExec ? '#3b82f6' : (rating >= 8 ? '#10b981' : rating >= 5 ? '#f59e0b' : rating ? '#ef4444' : '#3b82f6');
-    const iconMap = { GOV: 'fa-landmark', BORDER: 'fa-map-marked-alt', CYBER: 'fa-shield-alt', CIVIL: 'fa-users', MILITARY: 'fa-fighter-jet', ENERGY: 'fa-bolt', SUPPLY: 'fa-truck', INFLATION: 'fa-chart-line', FOREIGN: 'fa-handshake', INFRA: 'fa-network-wired', EXECUTIVE: 'fa-satellite-dish' };
-    const iconKey = Object.keys(iconMap).find(k => key.includes(k)) || 'EXECUTIVE';
-    const icon = iconMap[iconKey] || 'fa-crosshairs';
     const displayName = key.replace(/_/g, ' ');
+    const bodyRaw = block.slice(block.indexOf(']') + 1).trim().replace(/Rating:\s*\d+\s*\/\s*10\n?/gi, '').replace(/\*\*/g, '');
+    if (!bodyRaw) return;
     html += `
-      <div class="apple-glass group p-5 mb-4 relative overflow-hidden transition-all duration-300 hover:bg-white/[0.05]" style="border: 1px solid ${color}22">
-        <div class="absolute -inset-[1px] bg-gradient-to-br from-white/10 to-transparent opacity-20 pointer-events-none"></div>
-        <div class="flex justify-between items-start mb-4 relative z-10">
-          <div class="flex items-center gap-4">
-            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white" style="background: ${color}44; border: 1px solid ${color}66; box-shadow: 0 0 15px ${color}33;">
-              <i class="fas ${icon} text-[18px]"></i>
-            </div>
-            <div class="flex flex-col">
-              <span class="text-[11px] font-bold uppercase tracking-[0.2em] text-blue-400/80">Sector Analysis</span>
-              <span class="text-[16px] font-bold text-white uppercase tracking-wider">${displayName}</span>
-            </div>
-          </div>
-          ${rating ? `
-            <div class="bg-black/40 rounded-xl px-4 py-2 flex flex-col items-center" style="border: 1px solid ${color}44;">
-              <span class="text-[20px] font-black font-mono leading-none" style="color: ${color};">${rating}<span class="text-[12px] opacity-40">/10</span></span>
-              <div class="w-14 h-1 bg-white/10 rounded-full mt-2 overflow-hidden">
-                <div class="h-full" style="width: ${rating * 10}%; background: ${color}; shadow: 0 0 10px ${color};"></div>
-              </div>
-            </div>
-          ` : ''}
-        </div>
-        <p class="text-[14.5px] text-white/90 leading-relaxed font-mono relative z-10" style="font-weight: 400; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
-          ${paragraph}
-        </p>
+      <div class="border-l-2 border-blue-500/30 pl-4">
+        <h4 class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1.5">${displayName}</h4>
+        <p class="text-[13px] text-slate-300 leading-relaxed font-normal">${bodyRaw}</p>
       </div>
     `;
   });
-  if (html) container.innerHTML = html;
-  else container.innerHTML = `<div class="apple-glass p-6 text-[13px] text-slate-400 font-mono leading-relaxed">${clean.replace(/\n/g, '<br>')}</div>`;
+  html += '</div>';
+  container.innerHTML = html;
 }
 async function generateAIBriefing(loc) {
   const box = safeEl("ai-briefing-box");
@@ -290,7 +260,7 @@ async function generateAIBriefing(loc) {
   }
   if (loading) loading.classList.remove("hidden");
   if (actions) actions.classList.add("hidden");
-  const briefingPrompt = `Location: ${loc || 'Global Surveillance'}. Technical tactical analysis. 10 categories: [GOV_STABILITY], [BORDER_INTEGRITY], [CYBER_THREAT], [CIVIL_UNREST], [MILITARY_READINESS], [ENERGY_RESERVES], [SUPPLY_CHAIN], [INFLATION_PRESSURE], [FOREIGN_RELATIONS], [INFRASTRUCTURE]. Use Rating: X/10. Paragraphs only.`;
+  const briefingPrompt = `Location: ${loc || 'Global Overview'}. Deep news analysis. Categories: [POLITICAL_STABILITY], [TRADE_RELATIONS], [TECHNOLOGY], [ECONOMY], [SOCIAL_TRENDS], [ENERGY], [SUPPLY_CHAIN], [INFLATION], [DIPLOMACY], [INFRASTRUCTURE]. Give Rating: X/10 and a concise summary for each. Paragraphs only.`;
   try {
     const res = await fetch("/api/ai?stream=true", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: briefingPrompt }) });
     if (!res.ok || !res.body) throw new Error("Stream unavailable");
@@ -444,18 +414,6 @@ setupEventListeners();
 setInterval(updateSystemTime, 1000);
 window.playTacticalSound = function() {};
 window.showToast = function() {};
-window.toggleAboutOverlay = () => {
-    const el = safeEl("about-overlay");
-    if (el) el.classList.toggle("hidden");
-};
-window.closeAboutOverlay = () => {
-    const el = safeEl("about-overlay");
-    if (el) el.classList.add("hidden");
-};
-window.toggleSearch = () => {
-    const el = safeEl("search-overlay");
-    if (el) el.classList.toggle("hidden");
-};
 window.toggleShortcuts = () => {
     window.showToast("Shortcuts: Esc=Close, Ctrl+K=Search, ?=Help", "info");
 };

@@ -41,10 +41,13 @@ export default async function handler(req, res) {
         if (q) {
             endpoint = `${BASE_URL}/everything?${params}&q=${encodeURIComponent(q)}`;
         } else {
-            if (iso2) params.set("country", iso2.toLowerCase());
-            if (category) params.set("category", category === 'breaking-news' ? 'general' : category);
-            // Default to 'general' if absolutely nothing is specified
-            if (!iso2 && !category) params.set("category", "general");
+            const supportedCountries = ['ae','ar','at','au','be','bg','br','ca','ch','cn','co','cu','cz','de','eg','fr','gb','gr','hk','hu','id','ie','il','in','it','jp','kr','lt','lv','ma','mx','my','ng','nl','no','nz','ph','pl','pt','ro','rs','ru','sa','se','sg','si','sk','th','tr','tw','ua','us','ve','za'];
+            if (iso2 && supportedCountries.includes(iso2.toLowerCase())) params.set("country", iso2.toLowerCase());
+            
+            const validCats = ['business','entertainment','general','health','science','sports','technology'];
+            let targetCat = (category || 'general').toLowerCase();
+            if (targetCat === 'top' || !validCats.includes(targetCat)) targetCat = 'general';
+            params.set("category", targetCat);
             endpoint = `${BASE_URL}/top-headlines?${params}`;
         }
 

@@ -65,8 +65,8 @@ header {
   overflow: hidden;
   position: relative;
 }
-.glass-panel, .apple-glass {
-  background: var(--surface);
+.glass-panel, .apple-glass, .dossier-card {
+  background: transparent !important;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: var(--panel-pad);
@@ -164,12 +164,11 @@ input[type="text"]:focus { border-color: var(--accent); }
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
-.ticker-item {
-  display: inline-flex;
-  align-items: center;
-  padding: 0 1.5rem;
-  font-size: 11px;
-}
+.ticker-item { display: inline-flex; align-items: center; white-space: nowrap; font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 0 10px; border-right: 1px solid rgba(255,255,255,0.05); }
+.news-card-animate { animation: slideInUp 0.3s ease-out forwards; opacity: 0; }
+@keyframes slideInUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.intel-row { border-bottom: 1px solid var(--border); transition: background 0.2s; }
+.intel-row:hover { background: rgba(59, 130, 246, 0.05); }
 .holo-hud-marker {
   background: rgba(22, 27, 39, 0.9);
   border: 1px solid var(--accent);

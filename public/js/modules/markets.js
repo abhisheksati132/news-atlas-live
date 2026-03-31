@@ -9,108 +9,122 @@ window.toggleMarketCategory = (category) => {
 async function displayPreciousMetals() {
   const container = document.getElementById("metals-content");
   if (!container) return;
-  container.innerHTML = '<div class="col-span-3 text-slate-500 text-xs py-2">Fetching live prices...</div>';
+  container.innerHTML = '<div class="text-slate-500 text-[10px] py-4 uppercase font-bold tracking-widest text-center animate-pulse">Establishing Metal Exchange Uplink...</div>';
   try {
     const cur = (window.currencyCode || "USD").toUpperCase();
     const res = await fetch(`/api/markets?type=metals&currency=${cur}`);
     const json = await res.json();
     container.innerHTML = "";
-    const metalDisplay = { XAU: "Gold (XAU)", XAG: "Silver (XAG)", XPT: "Platinum (XPT)", XPD: "Palladium (XPD)" };
+    const metalDisplay = { XAU: "Gold (Spot)", XAG: "Silver (Spot)", XPT: "Platinum (Spot)", XPD: "Palladium" };
     Object.entries(json.data || {}).forEach(([sym, data]) => {
       const name = metalDisplay[sym] || sym;
-      const changeClass = (data.change || 0) >= 0 ? "text-emerald-400" : "text-red-400";
-      const changeIcon = (data.change || 0) >= 0 ? "▲" : "▼";
-      const card = document.createElement("div");
-      card.className = "apple-glass rounded-2xl p-4 border border-white/10 relative overflow-hidden group hover:border-white/20 transition-all shadow-lg";
-      card.innerHTML = `
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-2xl">${data.icon || "🪙"}</span>
-                  <span class="${changeClass} text-xs font-mono font-bold">${changeIcon} ${Math.abs(data.change || 0).toFixed(2)}%</span>
+      const change = data.change || 0;
+      const changeClass = change >= 0 ? "text-emerald-400" : "text-red-400";
+      const row = document.createElement("div");
+      row.className = "flex items-center justify-between py-3 px-4 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors group";
+      row.innerHTML = `
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-none border border-white/5 flex items-center justify-center text-lg bg-white/5">${data.icon || "🪙"}</div>
+                  <div class="flex flex-col">
+                    <span class="text-[12px] font-bold text-white uppercase tracking-tight">${name}</span>
+                    <span class="text-[9px] text-slate-500 uppercase font-bold tracking-widest">${sym} / ${cur}</span>
+                  </div>
                 </div>
-                <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">${name}</div>
-                <div class="text-xl font-black text-white font-mono">${cur} ${(data.price || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
-                <div class="text-[9px] text-slate-600 mt-1">${data.unit || ""}</div>`;
-      container.appendChild(card);
+                <div class="flex flex-col items-end">
+                  <div class="text-[14px] font-black text-white font-mono">${(data.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                  <div class="${changeClass} text-[10px] font-bold font-mono">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
+                </div>`;
+      container.appendChild(row);
     });
-    if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-xs col-span-3">No metals data</div>';
-  } catch { container.innerHTML = '<div class="text-slate-500 text-xs col-span-3">Data unavailable</div>'; }
+    if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-[10px] py-6 text-center uppercase font-black">Link Offline</div>';
+  } catch { container.innerHTML = '<div class="text-red-500 text-[10px] py-6 text-center uppercase font-black tracking-widest">Protocol Sync Failure</div>'; }
 }
+
 async function displayCountryIndices(countryName) {
   const container = document.getElementById("indices-content");
   if (!container) return;
   const indicesLabelEl = document.getElementById("indices-country");
   if (indicesLabelEl) indicesLabelEl.innerText = "GLOBAL";
-  container.innerHTML = '<div class="col-span-2 text-slate-500 text-xs py-2">Fetching live indices...</div>';
+  container.innerHTML = '<div class="text-slate-500 text-[10px] py-4 uppercase font-bold tracking-widest text-center animate-pulse">Scanning Global Sector Indices...</div>';
   try {
     const res = await fetch("/api/markets?type=ticker");
     const json = await res.json();
     container.innerHTML = "";
     (json.data || []).forEach((data) => {
-      const changeClass = (data.change || 0) >= 0 ? "text-emerald-400" : "text-red-400";
-      const changeIcon = (data.change || 0) >= 0 ? "▲" : "▼";
-      const card = document.createElement("div");
-      card.className = "apple-glass rounded-2xl p-4 border border-white/10 relative overflow-hidden group hover:border-white/20 transition-all shadow-lg";
-      card.innerHTML = `
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-xl">📈</span>
-                  <span class="${changeClass} text-xs font-mono font-bold">${changeIcon} ${Math.abs(data.change || 0).toFixed(2)}%</span>
+      const change = data.change || 0;
+      const changeClass = change >= 0 ? "text-emerald-400" : "text-red-400";
+      const row = document.createElement("div");
+      row.className = "flex items-center justify-between py-3 px-4 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors group";
+      row.innerHTML = `
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-none border border-white/5 flex items-center justify-center text-sm bg-blue-500/10 text-blue-400 font-bold">IDX</div>
+                  <div class="flex flex-col">
+                    <span class="text-[12px] font-bold text-white uppercase tracking-tight">${data.label}</span>
+                    <span class="text-[9px] text-slate-500 uppercase font-bold tracking-widest">Market Index</span>
+                  </div>
                 </div>
-                <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">${data.label}</div>
-                <div class="text-lg font-black text-white font-mono">${(data.price || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>`;
-      container.appendChild(card);
+                <div class="flex flex-col items-end">
+                  <div class="text-[14px] font-black text-white font-mono">${(data.price || 0).toLocaleString(undefined, { maximumFractionDigits: 1 })}</div>
+                  <div class="${changeClass} text-[10px] font-bold font-mono">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
+                </div>`;
+      container.appendChild(row);
     });
-    if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-xs col-span-2">No indices data</div>';
-  } catch { container.innerHTML = '<div class="text-slate-500 text-xs col-span-2">Data unavailable</div>'; }
+    if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-[10px] py-6 text-center uppercase font-black">Data Unavailable</div>';
+  } catch { container.innerHTML = '<div class="text-red-500 text-[10px] py-6 text-center uppercase font-black">Sync Failure</div>'; }
 }
 window.getIndicesForCountry = () => ({});
 async function displayForex() {
   const container = document.getElementById("forex-content");
   if (!container) return;
-  container.innerHTML = '<div class="text-slate-500 text-xs py-2">Fetching live rates...</div>';
+  container.innerHTML = '<div class="text-slate-500 text-[10px] py-4 uppercase font-bold tracking-widest text-center animate-pulse">Syncing International Exchange Rates...</div>';
   try {
     const base = (window.currencyCode || "USD").toUpperCase();
     const res = await fetch(`/api/markets?type=forex&currency=${base}`);
     const json = await res.json();
     container.innerHTML = "";
     Object.entries(json.rates || {}).filter(([c]) => c !== base).slice(0, 16).forEach(([pair, rate]) => {
-      const card = document.createElement("div");
-      card.className = "apple-glass rounded-2xl p-4 border border-white/10 flex justify-between items-center hover:border-white/20 transition-all shadow-lg";
-      card.innerHTML = `
-                <div>
-                  <div class="text-sm font-black text-white">${base}/${pair}</div>
-                  <div class="text-[9px] text-slate-500 mt-0.5">Live rate</div>
+      const row = document.createElement("div");
+      row.className = "flex items-center justify-between py-2.5 px-4 border-b border-white/[0.03] hover:bg-white/[0.02] transition-all";
+      row.innerHTML = `
+                <div class="flex flex-col">
+                  <div class="text-[13px] font-bold text-white tracking-tight">${base} <span class="text-cyan-500">/</span> ${pair}</div>
+                  <div class="text-[9px] text-slate-500 uppercase font-black tracking-widest">Pair</div>
                 </div>
-                <div class="text-xl font-mono font-black text-cyan-400">${rate.toFixed(4)}</div>`;
-      container.appendChild(card);
+                <div class="text-[15px] font-mono font-black text-cyan-400">${rate.toFixed(4)}</div>`;
+      container.appendChild(row);
     });
-  } catch { container.innerHTML = '<div class="text-slate-500 text-xs">Data unavailable</div>'; }
+  } catch { container.innerHTML = '<div class="text-slate-500 text-[10px] py-6 text-center uppercase font-black">Exchange Offline</div>'; }
 }
 async function displayCommodities() {
   const container = document.getElementById("commodities-content");
   if (!container) return;
-  container.innerHTML = '<div class="col-span-3 text-slate-500 text-xs py-2">Fetching live prices...</div>';
+  container.innerHTML = '<div class="text-slate-500 text-[10px] py-4 uppercase font-black tracking-widest text-center animate-pulse">Fetching Commodity Pipeline Data...</div>';
   try {
     const cur = (window.currencyCode || "USD").toUpperCase();
     const res = await fetch(`/api/markets?type=commodities&currency=${cur}`);
     const json = await res.json();
     container.innerHTML = "";
     Object.entries(json.data || {}).forEach(([name, data]) => {
-      const changeClass = (data.change || 0) >= 0 ? "text-emerald-400" : "text-red-400";
-      const changeIcon = (data.change || 0) >= 0 ? "▲" : "▼";
-      const card = document.createElement("div");
-      card.className = "apple-glass rounded-2xl p-4 border border-white/10 relative overflow-hidden group hover:border-white/20 transition-all shadow-lg";
-      card.innerHTML = `
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-xl">${data.icon || "📦"}</span>
-                  <span class="${changeClass} text-xs font-mono font-bold">${changeIcon} ${Math.abs(data.change || 0).toFixed(2)}%</span>
+      const change = data.change || 0;
+      const changeClass = change >= 0 ? "text-emerald-400" : "text-red-400";
+      const row = document.createElement("div");
+      row.className = "flex items-center justify-between py-3 px-4 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors";
+      row.innerHTML = `
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-none border border-white/5 flex items-center justify-center text-lg bg-orange-500/10">${data.icon || "📦"}</div>
+                  <div class="flex flex-col">
+                    <span class="text-[12px] font-bold text-white uppercase tracking-tight">${name}</span>
+                    <span class="text-[9px] text-slate-500 uppercase font-black tracking-widest">${data.unit || "N/A"}</span>
+                  </div>
                 </div>
-                <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">${name}</div>
-                <div class="text-lg font-black text-white font-mono">${cur} ${(data.price || 0).toFixed(2)}</div>
-                <div class="text-[8px] text-slate-600 mt-1">${data.unit || ""}</div>`;
-      container.appendChild(card);
+                <div class="flex flex-col items-end">
+                  <div class="text-[14px] font-black text-white font-mono">${(data.price || 0).toFixed(2)} <span class="text-[9px] text-slate-500">${cur}</span></div>
+                  <div class="${changeClass} text-[10px] font-bold font-mono">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
+                </div>`;
+      container.appendChild(row);
     });
-    if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-xs col-span-3">No commodity data</div>';
-  } catch { container.innerHTML = '<div class="text-slate-500 text-xs col-span-3">Data unavailable</div>'; }
+    if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-[10px] py-6 text-center uppercase font-black">Data Offline</div>';
+  } catch { container.innerHTML = '<div class="text-red-500 text-[10px] py-6 text-center uppercase font-black">Pipeline Failure</div>'; }
 }
 function initializeMarkets(countryName) {
   displayPreciousMetals();

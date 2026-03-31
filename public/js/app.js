@@ -323,7 +323,7 @@ window.handleCountryClick = async function (event, d) {
     if (backWrap) backWrap.classList.remove("hidden");
     fetchAllData(countryName);
     if (window.mapEngine && window.mapEngine.ready) {
-      if (event && event.lngLat) { window.mapEngine.flyToCountry(event.lngLat, 4.5); window.mapEngine.setHoloHUD(event.lngLat, countryName, { STATUS: "ACTIVE" }); }
+      if (event && event.lngLat) { window.mapEngine.flyToCountry(event.lngLat, 4.5); }
     }
     generateAIBriefing(countryName);
   }
@@ -348,9 +348,39 @@ window.resetToGlobalCenter = () => {
 };
 window.toggleTheme = function() {
   const isLight = document.body.classList.toggle('light-theme');
-  const icon = document.getElementById('theme-icon');
-  if (icon) icon.className = isLight ? 'fas fa-sun text-sm' : 'fas fa-moon text-sm';
   localStorage.setItem('terminal-theme', isLight ? 'light' : 'dark');
+};
+
+window.toggleMapProjection = function() {
+  if (!window.mapEngine) return;
+  const current = window.mapEngine.getProjection();
+  const next = current === 'globe' ? 'mercator' : 'globe';
+  window.mapEngine.setProjection(next);
+  const btn = document.getElementById('projection-toggle-btn');
+  if (btn) btn.innerHTML = next === 'globe' ? '<i class="fas fa-globe text-sm"></i>' : '<i class="fas fa-map text-sm"></i>';
+};
+
+window.toggleMapStyle = function() {
+  if (!window.mapEngine) return;
+  const styles = ['dark-v11', 'light-v11', 'satellite-v9'];
+  window._styleIdx = (window._styleIdx || 0) + 1;
+  if (window._styleIdx >= styles.length) window._styleIdx = 0;
+  window.mapEngine.setStyle('mapbox://styles/mapbox/' + styles[window._styleIdx]);
+};
+
+window.toggleGlobeTheme = function() {
+  window.toggleTheme();
+  if (window.mapEngine) {
+    const isLight = document.body.classList.contains('light-theme');
+    window.mapEngine.setStyle(isLight ? 'mapbox://styles/mapbox/light-v11' : 'mapbox://styles/mapbox/dark-v11');
+  }
+};
+
+window.zoomMap = function(factor) {
+  if (window.mapEngine && window.mapEngine.map) {
+    const current = window.mapEngine.map.getZoom();
+    window.mapEngine.map.zoomTo(factor > 1 ? current + 1 : current - 1);
+  }
 };
 function setupEventListeners() {
   window.addEventListener("keydown", (e) => {

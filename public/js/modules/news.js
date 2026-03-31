@@ -167,48 +167,42 @@ function displayNewsArticles(articles) {
   if (!articles || articles.length === 0) {
     container.innerHTML = `
       <div class="col-span-full p-10 text-center">
-        <p class="text-[12px] text-slate-500 font-black uppercase tracking-widest mb-3">No articles found.</p>
-        <p class="text-[11px] text-slate-600 mb-4">Try a different category or clear your search.</p>
-        <button type="button" onclick="window.clearNewsSearch(); window.fetchNews();" class="px-4 py-2 rounded-lg border border-white/20 text-slate-400 text-xs font-mono hover:bg-white/5 transition-all">Clear &amp; Refresh</button>
+        <p class="text-[12px] text-slate-500 font-black uppercase tracking-widest mb-3">No intelligence feeds found.</p>
+        <p class="text-[11px] text-slate-600 mb-4">Try a different category or clear filters.</p>
+        <button type="button" onclick="window.clearNewsSearch(); window.fetchNews();" class="px-4 py-2 border border-white/20 text-slate-400 text-xs font-mono hover:bg-white/5 transition-all">Clear & Refresh</button>
       </div>`;
     return;
   }
   articles.forEach((art, i) => {
-    const card = document.createElement("div");
-    const isFeatured = i === 0;
     const sentiment = getNewsSentiment(art.title, art.description);
     const timeAgo = relativeTime(art.pubDate);
     const favicon = getFavicon(art.source_url);
     const faviconHtml = favicon
-      ? `<img src="${favicon}" alt="" class="w-4 h-4 rounded object-cover shrink-0" onerror="this.style.display='none'">`
-      : `<i class="fas fa-newspaper text-[10px] text-slate-500"></i>`;
-    const imgHtml = art.image_url
-      ? `<div class="w-full mb-3 rounded-lg border border-white/[0.05] overflow-hidden bg-slate-900/50" 
-              style="height: 200px;">
-              <img src="${art.image_url}" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'">
-         </div>`
-      : "";
-    card.className = `apple-glass news-card-animate p-4 mb-4 transition-all duration-200 hover:border-blue-500/50 ${isFeatured ? "border-blue-500/30" : ""}`;
-    card.style.animationDelay = `${i * 45}ms`;
-    card.onmouseenter = () => window.playTacticalSound("hover");
-    card.innerHTML = `
-      <div class="flex items-center gap-2 mb-3">
-        ${faviconHtml}
-        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate max-w-[140px]">${art.source_id || "UPLINK"}</span>
-        <div class="flex-1"></div>
-        <span class="text-[10px] font-mono text-slate-500">${timeAgo}</span>
-        <span class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm ${sentiment.cls}">${sentiment.label}</span>
-      </div>
-      ${imgHtml}
-      <h3 class="font-bold ${isFeatured ? "text-lg" : "text-base"} text-slate-100 leading-snug mb-3 cursor-pointer hover:text-blue-400 transition-colors" onclick="window.open(this.dataset.href, '_blank')" data-href="${escapeHtml(art.link)}">${escapeHtml(art.title)}</h3>
-      <div class="flex items-center gap-3 mt-auto pt-2 border-t border-white/5">
-        <button class="text-[9px] font-mono text-slate-500 hover:text-blue-400 transition-colors flex items-center gap-1" onclick="window.open(this.dataset.href, '_blank')" data-href="${escapeHtml(art.link)}">
-          <i class="fas fa-external-link-alt"></i> Read
-        </button>
-        ${isFeatured ? `<span class="text-[9px] font-mono text-blue-400/60 ml-auto"><i class="fas fa-star mr-1 text-[8px]"></i>TOP STORY</span>` : ""}
+      ? `<img src="${favicon}" alt="" class="w-3 h-3 rounded-full object-cover grayscale opacity-60">`
+      : `<i class="fas fa-newspaper text-[8px] text-slate-500"></i>`;
+    
+    const row = document.createElement("div");
+    row.className = `py-3 border-b border-white/5 cursor-pointer hover:bg-white/[0.03] transition-colors news-card-animate`;
+    row.style.animationDelay = `${i * 30}ms`;
+    row.innerHTML = `
+      <div class="flex items-center gap-3">
+        <div class="flex flex-col gap-1 flex-1">
+          <div class="flex items-center gap-2">
+            ${faviconHtml}
+            <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest truncate max-w-[120px]">${art.source_id || "UPLINK"}</span>
+            <span class="text-[8px] font-mono text-slate-600">/</span>
+            <span class="text-[8px] font-mono text-slate-600 uppercase">${timeAgo}</span>
+            ${i < 3 ? '<span class="text-[8px] font-bold text-blue-500/80 uppercase ml-auto">TOP STORY</span>' : ''}
+          </div>
+          <h3 class="text-sm font-bold text-slate-200 leading-tight hover:text-blue-400 transition-colors py-0.5" onclick="window.open('${escapeHtml(art.link)}', '_blank')">${escapeHtml(art.title)}</h3>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span class="text-[8px] font-bold px-1.5 py-0.5 rounded-sm ${sentiment.cls} uppercase">${sentiment.label}</span>
+            ${art.description ? `<p class="text-[11px] text-slate-500 truncate italic">${escapeHtml(art.description)}</p>` : ''}
+          </div>
+        </div>
       </div>
     `;
-    container.appendChild(card);
+    container.appendChild(row);
   });
 }
 window.loadMoreNews = () => {

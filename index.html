@@ -170,13 +170,20 @@
         </div>
       </div>
 
-      <!-- CENTER: Search + Clock -->
-      <div class="hidden md:flex items-center gap-4">
-        <button onclick="toggleSearch()" class="flex items-center gap-2 px-4 h-8 rounded-lg transition-all header-widget" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
-          <i class="fas fa-search text-xs" style="color: #64748b"></i>
-          <span style="font-size: 11px; color: #94a3b8; font-weight: 500; font-family: 'JetBrains Mono', monospace;">Search</span>
-        </button>
+      <!-- CENTER: Tactical Shortcuts -->
+      <div class="hidden lg:flex items-center gap-1.5 px-4 h-9 bg-white/[0.03] border border-white/5 rounded-full">
+        <button onclick="switchTab('tab-monitor')" class="px-3 h-7 text-[10px] font-black uppercase tracking-tighter text-slate-500 hover:text-blue-400 transition-colors border-r border-white/5">Monitor</button>
+        <button onclick="switchTab('tab-intel')" class="px-3 h-7 text-[10px] font-black uppercase tracking-tighter text-slate-500 hover:text-blue-400 transition-colors border-r border-white/5">Intel</button>
+        <button onclick="switchTab('tab-markets')" class="px-3 h-7 text-[10px] font-black uppercase tracking-tighter text-slate-500 hover:text-blue-400 transition-colors border-r border-white/5">Markets</button>
+        <button onclick="switchTab('tab-atmosphere')" class="px-3 h-7 text-[10px] font-black uppercase tracking-tighter text-slate-500 hover:text-blue-400 transition-colors border-r border-white/5">Atmo</button>
+        <button onclick="switchTab('tab-output')" class="px-3 h-7 text-[10px] font-black uppercase tracking-tighter text-slate-500 hover:text-blue-400 transition-colors">Terminal</button>
+      </div>
 
+      <div class="flex items-center gap-4">
+        <button onclick="toggleSearch()" class="flex items-center gap-2 px-3 h-8 rounded-lg transition-all header-widget" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+          <i class="fas fa-search text-xs text-slate-500"></i>
+          <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest hidden xl:inline">Search</span>
+        </button>
         <div class="px-3 h-8 flex items-center border-l border-white/5">
           <span id="ist-time" style="font-size: 11px; font-weight: 500; color: #64748b; font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;">--:-- IST</span>
         </div>
@@ -2235,10 +2242,10 @@
                   type="text" 
                   id="about-ai-input" 
                   placeholder="Ask a question..." 
-                  style="flex: 1; background: transparent; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px 12px; color: white; font-size: 12px; outline: none; font-family: 'JetBrains Mono', monospace;"
+                  style="flex: 1; background: transparent; border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 12px 12px; color: white; font-size: 12px; outline: none; font-family: 'JetBrains Mono', monospace;"
                   onkeydown="if(event.key==='Enter')sendAboutAI()"
                 />
-                <button onclick="sendAboutAI()" style="background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.2); border-radius: 8px; padding: 8px 12px; color: #60a5fa; cursor: pointer; font-size: 12px;" class="hover:bg-blue-500/25 transition-colors">
+                <button onclick="sendAboutAI()" style="background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.2); border-radius: var(--radius-sm); padding: 8px 12px; color: #60a5fa; cursor: pointer; font-size: 12px;" class="hover:bg-blue-500/25 transition-colors">
                   <i class="fas fa-paper-plane"></i>
                 </button>
               </div>

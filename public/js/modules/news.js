@@ -181,25 +181,28 @@ function displayNewsArticles(articles) {
       ? `<img src="${favicon}" alt="" class="w-3 h-3 rounded-full object-cover grayscale opacity-60">`
       : `<i class="fas fa-newspaper text-[8px] text-slate-500"></i>`;
     
+    const imgHtml = art.image_url
+      ? `<div class="w-full mt-3 rounded-xl border border-white/[0.05] overflow-hidden bg-slate-900/50" 
+              style="height: 180px;">
+              <img src="${art.image_url}" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'">
+         </div>`
+      : "";
+
     const row = document.createElement("div");
-    row.className = `py-3 border-b border-white/5 cursor-pointer hover:bg-white/[0.03] transition-colors news-card-animate`;
+    row.className = `p-4 border-b border-white/5 cursor-pointer hover:bg-white/[0.03] transition-colors news-card-animate whitespace-normal`;
     row.style.animationDelay = `${i * 30}ms`;
     row.innerHTML = `
-      <div class="flex items-center gap-3">
-        <div class="flex flex-col gap-1 flex-1">
-          <div class="flex items-center gap-2">
-            ${faviconHtml}
-            <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest truncate max-w-[120px]">${art.source_id || "UPLINK"}</span>
-            <span class="text-[8px] font-mono text-slate-600">/</span>
-            <span class="text-[8px] font-mono text-slate-600 uppercase">${timeAgo}</span>
-            ${i < 3 ? '<span class="text-[8px] font-bold text-blue-500/80 uppercase ml-auto">TOP STORY</span>' : ''}
-          </div>
-          <h3 class="text-sm font-bold text-slate-200 leading-tight hover:text-blue-400 transition-colors py-0.5" onclick="window.open('${escapeHtml(art.link)}', '_blank')">${escapeHtml(art.title)}</h3>
-          <div class="flex items-center gap-2 mt-0.5">
-            <span class="text-[8px] font-bold px-1.5 py-0.5 rounded-sm ${sentiment.cls} uppercase">${sentiment.label}</span>
-            ${art.description ? `<p class="text-[11px] text-slate-500 truncate italic">${escapeHtml(art.description)}</p>` : ''}
-          </div>
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center gap-2">
+          ${faviconHtml}
+          <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">${art.source_id || "UPLINK"}</span>
+          <span class="text-[8px] font-mono text-slate-600">/</span>
+          <span class="text-[8px] font-mono text-slate-600 uppercase">${timeAgo}</span>
+          <span class="text-[8px] font-bold px-1.5 py-0.5 rounded-sm ${sentiment.cls} uppercase ml-auto">${sentiment.label}</span>
         </div>
+        ${imgHtml}
+        <h3 class="text-base font-bold text-slate-100 leading-tight hover:text-blue-400 transition-colors pt-1" onclick="window.open('${escapeHtml(art.link)}', '_blank')">${escapeHtml(art.title)}</h3>
+        ${art.description ? `<p class="text-[12px] text-slate-400 leading-relaxed font-normal line-clamp-3">${escapeHtml(art.description)}</p>` : ''}
       </div>
     `;
     container.appendChild(row);

@@ -21,7 +21,7 @@ async function displayPreciousMetals() {
       const change = data.change || 0;
       const changeClass = change >= 0 ? "text-emerald-400" : "text-red-400";
       const row = document.createElement("div");
-      row.className = "flex items-center justify-between py-3 px-4 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors group";
+      row.className = "flex items-center justify-between py-3 px-4 hover:bg-white/[0.02] transition-colors group";
       row.innerHTML = `
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-none border border-white/5 flex items-center justify-center text-lg bg-white/5">${data.icon || "🪙"}</div>
@@ -54,7 +54,7 @@ async function displayCountryIndices(countryName) {
       const change = data.change || 0;
       const changeClass = change >= 0 ? "text-emerald-400" : "text-red-400";
       const row = document.createElement("div");
-      row.className = "flex items-center justify-between py-3 px-4 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors group";
+      row.className = "flex items-center justify-between py-3 px-4 hover:bg-white/[0.02] transition-colors group";
       row.innerHTML = `
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-none border border-white/5 flex items-center justify-center text-sm bg-blue-500/10 text-blue-400 font-bold">IDX</div>
@@ -84,7 +84,7 @@ async function displayForex() {
     container.innerHTML = "";
     Object.entries(json.rates || {}).filter(([c]) => c !== base).slice(0, 16).forEach(([pair, rate]) => {
       const row = document.createElement("div");
-      row.className = "flex items-center justify-between py-2.5 px-4 border-b border-white/[0.03] hover:bg-white/[0.02] transition-all";
+      row.className = "flex items-center justify-between py-2.5 px-4 hover:bg-white/[0.02] transition-all";
       row.innerHTML = `
                 <div class="flex flex-col">
                   <div class="text-[13px] font-bold text-white tracking-tight">${base} <span class="text-cyan-500">/</span> ${pair}</div>
@@ -146,4 +146,4 @@ function startMarketsAutoRefresh() {
         }
     }, 60 * 1000);
 }
-startMarketsAutoRefresh();
+startMarketsAutoRefresh();

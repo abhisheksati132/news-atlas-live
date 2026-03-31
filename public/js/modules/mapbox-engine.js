@@ -38,28 +38,22 @@ class MapboxEngine {
         this.map = new mapboxgl.Map({
             container: this.containerId,
             style: 'mapbox://styles/mapbox/satellite-streets-v12',
-            center: [10, 0],
-            zoom: 1.5,
+            center: [10, 10],
+            zoom: 1.6,
             pitch: 0,
+            bearing: 0,
             projection: 'globe',
             attributionControl: false,
-            cooperativeGestures: false,
-            scrollZoom: true,
-            dragPan: true,
-            dragRotate: true,
-            touchZoomRotate: true
+            antialias: true
         });
 
         this.map.on('style.load', () => {
+            this.map.resize();
             this._applyAtmosphere();
             this._addTerrain();
-
             this.initMapboxLayers();
-
             this._startDeckAnimation();
-
             this.ready = true;
-            console.log('✅ Mapbox Engine Online — Full Feature Suite Active');
             this.onReady();
         });
 
@@ -68,6 +62,26 @@ class MapboxEngine {
         });
 
         return true;
+    }
+
+    getProjection() {
+        if (!this.map) return 'globe';
+        return this.map.getProjection()?.name || 'globe';
+    }
+
+    setProjection(name) {
+        if (!this.map) return;
+        this.map.setProjection(name === 'globe' ? 'globe' : 'mercator');
+    }
+
+    setStyle(style) {
+        if (!this.map) return;
+        this.map.setStyle(style);
+    }
+
+    getStyle() {
+        if (!this.map) return null;
+        return this.map.getStyle();
     }
 
     _applyAtmosphere() {
@@ -230,7 +244,6 @@ class MapboxEngine {
         const isGlobeView = currentZoom < 3;
 
         if (isGlobeView) {
-
             this.map.easeTo({ zoom: 1.8, pitch: 0, bearing: 0, duration: 600 });
             setTimeout(() => {
                 this.map.flyTo({
@@ -245,7 +258,6 @@ class MapboxEngine {
                 });
             }, 700);
         } else {
-
             this.map.flyTo({
                 center: lngLat,
                 zoom,
@@ -272,7 +284,6 @@ class MapboxEngine {
     }
 
     onReady() {
-
         window.mapEngine = this;
     }
 
@@ -354,7 +365,6 @@ class MapboxEngine {
             });
 
             let hoveredId = null;
-
             let hoverUpdateRequested = false;
             this.map.on('mousemove', 'country-fills', (e) => {
                 if (hoverUpdateRequested) return;
@@ -406,110 +416,23 @@ class MapboxEngine {
         }
     }
 
-    addGDELTHeatmap(geojsonData) {
-        if (!this.map || !this.ready) return;
-
-        if (this.map.getSource('gdelt-heat-src')) {
-            this.map.getSource('gdelt-heat-src').setData(geojsonData);
-            return;
-        }
-
-        this.map.addSource('gdelt-heat-src', { type: 'geojson', data: geojsonData });
-
-        this.map.addLayer({
-            id: 'gdelt-heatmap',
-            type: 'heatmap',
-            source: 'gdelt-heat-src',
-            maxzoom: 8,
-            paint: {
-                'heatmap-weight': ['interpolate', ['linear'], ['get', 'goldstein_scale'], -10, 1, 10, 0],
-                'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 0.6, 8, 1.8],
-                'heatmap-color': [
-                    'interpolate', ['linear'], ['heatmap-density'],
-                    0, 'rgba(239,68,68,0)',
-                    0.2, 'rgba(239,68,68,0.4)',
-                    0.5, 'rgba(249,115,22,0.7)',
-                    0.8, 'rgba(234,179,8,0.85)',
-                    1, 'rgba(255,255,200,1)'
-                ],
-                'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 18, 8, 40],
-                'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 6, 0.9, 8, 0.6]
-            }
-        }, 'country-fills');
-
-        this.map.addLayer({
-            id: 'gdelt-core',
-            type: 'circle',
-            source: 'gdelt-heat-src',
-            minzoom: 6,
-            paint: {
-                'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 3, 12, 8],
-                'circle-color': '#ef4444',
-                'circle-opacity': ['interpolate', ['linear'], ['zoom'], 6, 0, 8, 0.85],
-                'circle-stroke-width': 1,
-                'circle-stroke-color': 'rgba(255,255,255,0.3)'
-            }
-        });
-
-        this.map.on('mouseenter', 'gdelt-core', (e) => {
-            this.map.getCanvas().style.cursor = 'crosshair';
-            const props = e.features[0].properties;
-            const t = document.getElementById('map-tooltip');
-            if (t) {
-                const name = props.name || props.actor1name || 'Conflict Event';
-                document.getElementById('tooltip-name').textContent = name;
-                const tf = document.getElementById('tooltip-flag');
-                if (tf) tf.classList.add('hidden');
-                document.getElementById('tooltip-label-1').textContent = 'Tone';
-                document.getElementById('tooltip-label-2').textContent = 'Source';
-                document.getElementById('tooltip-capital').textContent = props.goldstein_scale?.toFixed(1) ?? '—';
-                document.getElementById('tooltip-pop').textContent = props.domain || '—';
-                t.style.left = e.originalEvent.pageX + 15 + 'px';
-                t.style.top = e.originalEvent.pageY - 15 + 'px';
-                t.classList.remove('hidden');
-            }
-        });
-        this.map.on('mouseleave', 'gdelt-core', () => {
-            this.map.getCanvas().style.cursor = '';
-            const t = document.getElementById('map-tooltip');
-            if (t) t.classList.add('hidden');
-        });
-    }
-
-    removeGDELTHeatmap() {
-        if (!this.map) return;
-        ['gdelt-heatmap', 'gdelt-core'].forEach(id => {
-            if (this.map.getLayer(id)) this.map.removeLayer(id);
-        });
-        if (this.map.getSource('gdelt-heat-src')) this.map.removeSource('gdelt-heat-src');
-    }
-
-    clearSelection() {
-        if (this._selectedCountryId !== null && this.map) {
-            this.map.setFeatureState({ source: 'countries', id: this._selectedCountryId }, { selected: false });
-            this._selectedCountryId = null;
-        }
-        this.resetToGlobe();
-        this.clearHoloHUD();
-    }
-
     setHoloHUD(lngLat, title, stats) {
         this.clearHoloHUD();
 
         let statHTML = '';
         if (stats) {
             Object.entries(stats).forEach(([k, v]) => {
-                statHTML += `<div class="hud-stat">${k} <span>${v}</span></div>`;
+                statHTML += `<div class=\"hud-stat\">${k} <span>${v}</span></div>`;
             });
         }
 
         const el = document.createElement('div');
         el.className = 'holo-hud-marker';
         el.innerHTML = `
-            <div class="hud-title">${title}</div>
+            <div class=\"hud-title\">${title}</div>
             ${statHTML}
-            <div class="holo-hud-line"></div>
-            <div class="holo-hud-base"></div>
+            <div class=\"holo-hud-line\"></div>
+            <div class=\"holo-hud-base\"></div>
         `;
 
         this._hudMarker = new mapboxgl.Marker({
@@ -530,7 +453,6 @@ class MapboxEngine {
 
     _startDeckAnimation() {
         if (typeof deck === 'undefined') return;
-        // Deck.GL overlay initialised but no animated dots — reserved for data layers
         this.deckOverlay = new deck.MapboxOverlay({
             interleaved: true,
             layers: []
@@ -544,7 +466,6 @@ class MapboxEngine {
         this.map.dragPan.enable();
         this.map.dragRotate.enable();
         this.map.touchZoomRotate.enable();
-        console.log('📡 Map Telemetry Uplink: Interactivity Enabled');
     }
 
     disableInteractions() {
@@ -553,7 +474,6 @@ class MapboxEngine {
         this.map.dragPan.disable();
         this.map.dragRotate.disable();
         this.map.touchZoomRotate.disable();
-        console.log('📡 Map Telemetry Status: Interactivity Locked');
     }
 }
 

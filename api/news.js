@@ -31,7 +31,7 @@ export default async function handler(req, res) {
         const params = new URLSearchParams({
             apiKey,
             language: "en",
-            pageSize: Math.min(parseInt(pageSize), 50),
+            pageSize: 100,
             page: parseInt(page)
         });
 

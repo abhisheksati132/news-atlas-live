@@ -16,12 +16,12 @@
   --yellow: #eab308;
   --cyan: #06b6d4;
   --header-h: 48px;
-  --radius: 0px;
-  --radius-sm: 0px;
+  --radius: 12px;
+  --radius-sm: 8px;
   --gap: 1rem;
   --panel-pad: 1rem;
 }
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; border-radius: 0 !important; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: "Plus Jakarta Sans", system-ui, sans-serif;
   font-size: 14px;
@@ -66,12 +66,11 @@ header {
   position: relative;
 }
 .glass-panel, .apple-glass, .dossier-card {
-  background: transparent !important;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: var(--panel-pad);
-  backdrop-filter: none !important;
-  box-shadow: none !important;
+  backdrop-filter: blur(12px) !important;
 }
 .nav-tab {
   background: transparent;

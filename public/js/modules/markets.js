@@ -44,10 +44,10 @@ async function displayCountryIndices(countryName) {
   const container = document.getElementById("indices-content");
   if (!container) return;
   const indicesLabelEl = document.getElementById("indices-country");
-  if (indicesLabelEl) indicesLabelEl.innerText = "GLOBAL";
-  container.innerHTML = '<div class="text-slate-500 text-[10px] py-4 uppercase font-bold tracking-widest text-center animate-pulse">Scanning Global Sector Indices...</div>';
+  if (indicesLabelEl) indicesLabelEl.innerText = `${countryName.toUpperCase()} MARKET INDICES`;
+  container.innerHTML = `<div class="text-slate-500 text-[10px] py-4 uppercase font-bold tracking-widest text-center animate-pulse">Scanning ${countryName.toUpperCase()} Sector Indices...</div>`;
   try {
-    const res = await fetch("/api/markets?type=ticker");
+    const res = await fetch(`/api/markets?type=ticker&country=${encodeURIComponent(countryName)}`);
     const json = await res.json();
     container.innerHTML = "";
     (json.data || []).forEach((data) => {

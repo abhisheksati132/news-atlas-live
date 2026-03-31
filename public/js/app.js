@@ -211,7 +211,7 @@ async function fetchAllData(countryName) {
       setText("fact-gini-2", c.gini ? Object.values(c.gini)[0] : "N/A");
       setText("fact-demonym-2", c.demonyms?.eng?.m || "--");
       setText("fact-area-2", c.area ? c.area.toLocaleString() + " km²" : "--");
-      window.fetchNews();
+      window.fetchNews(c.name.common);
       if (window.fetchDetailedEconomics) window.fetchDetailedEconomics(c.name.common);
       if (window.generateAIBriefing) window.generateAIBriefing(c.name.common);
     }

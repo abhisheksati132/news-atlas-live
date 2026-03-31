@@ -460,6 +460,15 @@ class MapboxEngine {
         this.map.addControl(this.deckOverlay);
     }
 
+    clearSelection() {
+        if (!this.map) return;
+        if (this._selectedCountryId !== null) {
+            this.map.setFeatureState({ source: 'countries', id: this._selectedCountryId }, { selected: false });
+            this._selectedCountryId = null;
+        }
+        this.clearHoloHUD();
+    }
+
     enableInteractions() {
         if (!this.map) return;
         this.map.scrollZoom.enable();

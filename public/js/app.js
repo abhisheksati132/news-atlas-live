@@ -213,6 +213,7 @@ async function fetchAllData(countryName) {
       setText("fact-area-2", c.area ? c.area.toLocaleString() + " km²" : "--");
       window.fetchNews();
       if (window.fetchDetailedEconomics) window.fetchDetailedEconomics(c.name.common);
+      if (window.generateAIBriefing) window.generateAIBriefing(c.name.common);
     }
   } catch (e) {
     console.error("Data Fetch Error", e);
@@ -371,6 +372,14 @@ window.toggleMapProjection = function() {
   window.mapEngine.setProjection(next);
   const btn = document.getElementById('projection-toggle-btn');
   if (btn) btn.innerHTML = next === 'globe' ? '<i class="fas fa-globe text-sm"></i>' : '<i class="fas fa-map text-sm"></i>';
+};
+
+window.goToIndiaHome = function() {
+  if (window.mapEngine && window.mapEngine.map) {
+    window.mapEngine.map.flyTo({ center: [78.9629, 20.5937], zoom: 4.5, duration: 2000 });
+    if (window.fetchAllData) window.fetchAllData("India");
+    if (window.playTacticalSound) window.playTacticalSound("success");
+  }
 };
 
 window.toggleMapStyle = function() {

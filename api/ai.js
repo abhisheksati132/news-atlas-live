@@ -16,6 +16,26 @@ export default async function handler(req, res) {
 
     const returnSimulation = (reason = "Key Probe Failed") => {
         const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        
+        // Detect if prompt is requesting JSON data
+        const isJsonReq = promptText.includes("json") || promptText.includes("{");
+
+        if (isJsonReq) {
+            const jsonResp = {
+                gdp_billions: rand(500, 4500),
+                gdp_growth_percent: rand(1, 8) + rand(0, 9) / 10,
+                gdp_per_capita: rand(2000, 65000),
+                inflation_rate: rand(2, 12) + rand(0, 9) / 10,
+                unemployment_rate: rand(3, 15) + rand(0, 9) / 10,
+                interest_rate: rand(1, 10) + rand(0, 9) / 10,
+                debt_to_gdp: rand(20, 150),
+                major_exports: ["Raw Materials", "Sector Logistics", "Information Systems"],
+                market_summary: `The ${locName} market remains in a simulated steady-state. Tactical indicators are nominal.`
+            };
+            const jsonText = JSON.stringify(jsonResp);
+            return res.status(200).json({ candidates: [{ content: { parts: [{ text: jsonText }] } }] });
+        }
+
         let responseText = `[SITREP: SIMULATED]\n[SIGNAL_STATUS: ${reason.toUpperCase()}]\n\n[EXECUTIVE_SUMMARY]\nRating: ${rand(6,9)}/10\nSituational awareness for ${locName} sector complete. Tactical baseline maintained.`;
         responseText += `\n\n[POLITICAL_STABILITY]\nRating: ${rand(5,9)}/10\nGovernment sectors in ${locName} are stable. Standard mission parameters active.`;
         responseText += `\n\n[TRADE_RELATIONS]\nRating: ${rand(5,8)}/10\nCross-border relay for ${locName} is within monitored thresholds.`;

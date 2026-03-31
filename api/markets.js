@@ -66,18 +66,29 @@ export default async function handler(req, res) {
             return simulate({ data });
         }
         if (type === "forex") {
-            return simulate({
-                base: cur,
-                rates: {
-                    EUR: cur === "EUR" ? 1 : (cur === "USD" ? 0.92 : 0.85) + rand(-0.01, 0.01),
-                    GBP: cur === "GBP" ? 1 : (cur === "USD" ? 0.78 : 0.82) + rand(-0.01, 0.01),
-                    JPY: cur === "JPY" ? 1 : (cur === "USD" ? 148.5 : 160.2) + rand(-1, 1),
-                    CHF: cur === "CHF" ? 1 : (cur === "USD" ? 0.88 : 0.95) + rand(-0.01, 0.01),
-                    CAD: 1.35 + rand(-0.01, 0.01),
-                    AUD: 1.52 + rand(-0.01, 0.01),
-                    INR: 83.12 + rand(-0.2, 0.2),
-                    CNY: 7.24 + rand(-0.02, 0.02)
-                }
+            const matrix = {
+                USD: { EUR: 0.92, GBP: 0.79, JPY: 151.2, CHF: 0.90, CAD: 1.36, AUD: 1.53, INR: 83.3, CNY: 7.23, SGD: 1.35 },
+                EUR: { USD: 1.08, GBP: 0.85, JPY: 164.5, CHF: 0.98, CAD: 1.48, AUD: 1.66, INR: 90.6, CNY: 7.86, SGD: 1.47 },
+                GBP: { USD: 1.26, EUR: 1.17, JPY: 192.4, CHF: 1.15, CAD: 1.72, AUD: 1.94, INR: 105.8, CNY: 9.18, SGD: 1.71 },
+                INR: { USD: 0.012, EUR: 0.011, GBP: 0.009, JPY: 1.81, CAD: 0.016, CNY: 0.087, AED: 0.044, SGD: 0.016 }
+            };
+
+            const baseSet = matrix[cur] || matrix.USD;
+            const rates = { [cur]: 1.0000 };
+            
+            Object.entries(baseSet).forEach(([symbol, baseVal]) => {
+                rates[symbol] = baseVal + rand(-baseVal * 0.002, baseVal * 0.002);
+            });
+
+            // Extra cross rates for richness
+            if (!rates.HKD) rates.HKD = (rates.USD || 1.0) * (7.82 + rand(-0.01, 0.01));
+            if (!rates.BRL) rates.BRL = (rates.USD || 1.0) * (5.05 + rand(-0.03, 0.03));
+
+            return simulate({ 
+                base: cur, 
+                rates: rates,
+                uplink: cur === "EUR" ? "ECB_REFERENCE" : "INTERBANK_SPOT",
+                timestamp: new Date().toISOString()
             });
         }
         if (type === "commodities") {
@@ -90,6 +101,53 @@ export default async function handler(req, res) {
                     "Corn": { price: 430 + rand(-5, 5), change: rand(-1.5, 1.5), unit: "USD/bu", icon: "🌽" }
                 }
             });
+        }
+        if (type === "crypto") {
+            const symbols = {
+                bitcoin: { symbol: "BTC", icon: "₿", fallbackPrice: 65000 },
+                ethereum: { symbol: "ETH", icon: "Ξ", fallbackPrice: 3500 },
+                solana: { symbol: "SOL", icon: "S", fallbackPrice: 145 },
+                ripple: { symbol: "XRP", icon: "X", fallbackPrice: 0.60 },
+                cardano: { symbol: "ADA", icon: "₳", fallbackPrice: 0.45 },
+                polkadot: { symbol: "DOT", icon: "P", fallbackPrice: 7.20 }
+            };
+            
+            try {
+                const ids = Object.keys(symbols).join(',');
+                const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
+                const data = await res.json();
+                
+                const results = {};
+                Object.entries(symbols).forEach(([id, meta]) => {
+                    if (data[id]) {
+                        results[meta.symbol] = {
+                            price: data[id].usd,
+                            change: data[id].usd_24h_change || 0,
+                            icon: meta.icon,
+                            name: id.charAt(0).toUpperCase() + id.slice(1)
+                        };
+                    } else {
+                        results[meta.symbol] = {
+                            price: meta.fallbackPrice + rand(-meta.fallbackPrice*0.02, meta.fallbackPrice*0.02),
+                            change: rand(-5, 5),
+                            icon: meta.icon,
+                            name: id.charAt(0).toUpperCase() + id.slice(1)
+                        };
+                    }
+                });
+                return simulate({ data: results });
+            } catch (e) {
+                const results = {};
+                Object.entries(symbols).forEach(([id, meta]) => {
+                    results[meta.symbol] = {
+                        price: meta.fallbackPrice + rand(-meta.fallbackPrice*0.02, meta.fallbackPrice*0.02),
+                        change: rand(-5, 5),
+                        icon: meta.icon,
+                        name: id.charAt(0).toUpperCase() + id.slice(1)
+                    };
+                });
+                return simulate({ data: results });
+            }
         }
         res.status(400).json({ error: "Invalid type" });
     } catch (err) {

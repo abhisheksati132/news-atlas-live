@@ -126,16 +126,47 @@ async function displayCommodities() {
     if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-[10px] py-6 text-center uppercase font-black">Data Offline</div>';
   } catch { container.innerHTML = '<div class="text-red-500 text-[10px] py-6 text-center uppercase font-black">Pipeline Failure</div>'; }
 }
+async function displayCrypto() {
+  const container = document.getElementById("crypto-content");
+  if (!container) return;
+  container.innerHTML = '<div class="text-slate-500 text-[10px] py-4 uppercase font-black tracking-widest text-center animate-pulse">Initializing Digital Ledger Link...</div>';
+  try {
+    const res = await fetch(`/api/markets?type=crypto`);
+    const json = await res.json();
+    container.innerHTML = "";
+    Object.entries(json.data || {}).forEach(([sym, data]) => {
+      const change = data.change || 0;
+      const changeClass = change >= 0 ? "text-emerald-400" : "text-red-400";
+      const row = document.createElement("div");
+      row.className = "flex items-center justify-between py-3 px-4 hover:bg-white/[0.02] transition-colors group";
+      row.innerHTML = `
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-none border border-white/5 flex items-center justify-center text-lg bg-orange-500/10 text-orange-400 font-bold">${data.icon || "₿"}</div>
+                  <div class="flex flex-col">
+                    <span class="text-[12px] font-bold text-white uppercase tracking-tight">${data.name || sym}</span>
+                    <span class="text-[9px] text-slate-500 uppercase font-bold tracking-widest">${sym} / USD</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div class="text-[14px] font-black text-white font-mono">${(data.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: (data.price < 5 ? 4 : 2) })}</div>
+                  <div class="${changeClass} text-[10px] font-bold font-mono min-w-[50px] text-right">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
+                </div>`;
+      container.appendChild(row);
+    });
+  } catch { container.innerHTML = '<div class="text-red-500 text-[10px] py-6 text-center uppercase font-black tracking-widest">Protocol Sync Failure</div>'; }
+}
 function initializeMarkets(countryName) {
   displayPreciousMetals();
   displayCountryIndices(countryName || "Global");
   displayForex();
   displayCommodities();
+  displayCrypto();
 }
 window.displayPreciousMetals = displayPreciousMetals;
 window.displayCountryIndices = displayCountryIndices;
 window.displayForex = displayForex;
 window.displayCommodities = displayCommodities;
+window.displayCrypto = displayCrypto;
 window.initializeMarkets = initializeMarkets;
 let _marketsRefreshTimer = null;
 function startMarketsAutoRefresh() {

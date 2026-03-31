@@ -54,6 +54,24 @@ export default async function handler(req, res) {
         const response = await fetch(endpoint);
         const data = await response.json();
 
+        // FALLBACK LOGIC: If top-headlines returned 0 results for a country, try /everything with the country/category as a query
+        if ((!data.results || data.results.length === 0) && (!data.articles || data.articles.length === 0) && !q && iso2) {
+            console.log(`[news] No headlines for ${iso2}, falling back to Everything search...`);
+            const fallbackParams = new URLSearchParams({
+                apiKey,
+                language: "en",
+                pageSize: 40,
+                q: iso2, // Search for the country ID as a keyword
+                sortBy: "relevance"
+            });
+            const fallbackRes = await fetch(`${BASE_URL}/everything?${fallbackParams}`);
+            const fallbackData = await fallbackRes.json();
+            if (fallbackData.status !== 'error') {
+                data.articles = (data.articles || []).concat(fallbackData.articles || []);
+                data.totalResults = (data.totalResults || 0) + (fallbackData.totalResults || 0);
+            }
+        }
+
         if (data.status === 'error') {
             return res.status(502).json({ status: "error", message: data.message || "NewsAPI.org error" });
         }

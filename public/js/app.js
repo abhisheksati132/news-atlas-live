@@ -143,7 +143,8 @@ async function startStockTicker() {
   async function fetchAndRender() {
     try {
       const fetcher = window.fetchWithRetry || fetch;
-      const res = await fetcher("/api/markets?type=ticker", {}, { retries: 1, timeoutMs: 10000 });
+      const url = `/api/markets?type=ticker&region=${window._isoAlpha3 || 'IN'}`;
+      const res = await fetcher(url, {}, { retries: 1, timeoutMs: 10000 });
       if (!res.ok) throw new Error();
       const data = await res.json();
       if (data.data && data.data.length > 0) {

@@ -6,9 +6,7 @@
         {
             "src": "package.json",
             "use": "@vercel/static-build",
-            "config": {
-                "distDir": "dist"
-            }
+            "config": { "distDir": "dist" }
         },
         {
             "src": "api/*.js",
@@ -16,24 +14,10 @@
         }
     ],
     "routes": [
-        {
-            "src": "/api/([^.]+)",
-            "dest": "/api/$1.js"
-        },
-        {
-            "src": "/api/(.*)",
-            "dest": "/api/$1"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/$1"
-        }
-    ],
-    "redirects": [
-        {
-            "source": "/:path*.html",
-            "destination": "/:path*",
-            "permanent": true
-        }
+        { "src": "/api/([^.]+)", "dest": "/api/$1.js" },
+        { "src": "/api/(.*)", "dest": "/api/$1" },
+        { "src": "/app", "dest": "/index.html" },
+        { "src": "/", "dest": "/landing.html" },
+        { "src": "/(.*)", "dest": "/$1" }
     ]
 }

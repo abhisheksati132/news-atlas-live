@@ -183,11 +183,12 @@ async function fetchAllData(countryName) {
       setText("fact-drive", c.car ? c.car.side.toUpperCase() : "--");
       const flagEl = safeEl("sector-flag");
       const nameEl = safeEl("sector-name");
-      const box = safeEl("active-sector-display");
-      if (flagEl && nameEl && box) {
+      const globeIcon = safeEl("sector-globe-icon");
+      if (flagEl && nameEl) {
         flagEl.src = c.flags?.svg || "";
+        flagEl.classList.remove("hidden");
+        if (globeIcon) globeIcon.classList.add("hidden");
         nameEl.innerText = c.name.common;
-        box.classList.remove("hidden");
       }
       const headerFlagContainer = safeEl("search-flag-container");
       const headerFlagImg = safeEl("search-active-flag");
@@ -332,12 +333,24 @@ window.resetToGlobalCenter = () => {
   selectedCountry = null;
   window.selectedCountry = null;
   setText("selected-country-name", "Worldwide");
-  const flagEl = document.getElementById("header-country-flag");
-  if (flagEl) flagEl.classList.add("hidden");
+  
+  // Reset Sector HUD
+  const globeIcon = document.getElementById("sector-globe-icon");
+  const flagImg = document.getElementById("sector-flag");
+  const sectorName = document.getElementById("sector-name");
+  if (globeIcon) globeIcon.classList.remove("hidden");
+  if (flagImg) flagImg.classList.add("hidden");
+  if (sectorName) sectorName.innerText = "Global Sector";
+
   const backWrap = safeEl("back-to-global-wrap");
   if (backWrap) backWrap.classList.add("hidden");
   if (window.generateAIBriefing) window.generateAIBriefing("Global Context");
-  if (window.mapEngine) window.mapEngine.clearSelection();
+  
+  if (window.mapEngine && window.mapEngine.map) {
+    window.mapEngine.clearSelection();
+    window.mapEngine.map.flyTo({ center: [20, 20], zoom: 1.6, duration: 2000 });
+  }
+  
   window.fetchNews();
   const headerFlagContainer = safeEl("search-flag-container");
   const headerSearchIcon = safeEl("search-icon-main");
@@ -362,7 +375,7 @@ window.toggleMapProjection = function() {
 
 window.toggleMapStyle = function() {
   if (!window.mapEngine) return;
-  const styles = ['dark-v11', 'light-v11', 'satellite-v9'];
+  const styles = ['dark-v11', 'light-v11', 'satellite-streets-v12'];
   window._styleIdx = (window._styleIdx || 0) + 1;
   if (window._styleIdx >= styles.length) window._styleIdx = 0;
   window.mapEngine.setStyle('mapbox://styles/mapbox/' + styles[window._styleIdx]);

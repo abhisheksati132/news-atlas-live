@@ -149,6 +149,16 @@ export default async function handler(req, res) {
                 return simulate({ data: results });
             }
         }
+        if (type === "ecb") {
+            const matrix = {
+                USD: 1.08, GBP: 0.85, JPY: 164.5, CHF: 0.98, CAD: 1.48, AUD: 1.66, INR: 90.6, CNY: 7.86, SGD: 1.47, BRL: 5.45
+            };
+            const rates = {};
+            Object.entries(matrix).forEach(([cur, rate]) => {
+                rates[cur] = rate + rand(-rate * 0.003, rate * 0.003);
+            });
+            return simulate({ base: "EUR", rates: rates, timestamp: new Date().toISOString() });
+        }
         res.status(400).json({ error: "Invalid type" });
     } catch (err) {
         res.status(500).json({ error: "Internal server error" });

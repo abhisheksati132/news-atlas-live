@@ -129,7 +129,7 @@ async function displayCommodities() {
 async function displayCrypto() {
   const container = document.getElementById("crypto-content");
   if (!container) return;
-  container.innerHTML = '<div class="text-slate-500 text-[10px] py-4 uppercase font-black tracking-widest text-center animate-pulse">Initializing Digital Ledger Link...</div>';
+  container.innerHTML = '<div class="text-slate-500 text-[10px] py-6 uppercase font-bold tracking-[0.3em] text-center animate-pulse">Establishing High-Precision Digital Link...</div>';
   try {
     const res = await fetch(`/api/markets?type=crypto`);
     const json = await res.json();

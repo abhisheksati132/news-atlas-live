@@ -213,6 +213,7 @@ async function fetchAllData(countryName) {
       setText("fact-demonym-2", c.demonyms?.eng?.m || "--");
       setText("fact-area-2", c.area ? c.area.toLocaleString() + " km²" : "--");
       window.fetchNews(c.name.common);
+      if (window.initializeMarkets) window.initializeMarkets(c.name.common);
       if (window.fetchDetailedEconomics) window.fetchDetailedEconomics(c.name.common);
       if (window.generateAIBriefing) window.generateAIBriefing(c.name.common);
     }
@@ -463,10 +464,13 @@ window.switchTab = (id) => {
   contents.forEach(c => c.classList.remove("active"));
   
   targetTab.classList.add("active");
+  window._currentTab = targetContentId;
   const targetContent = document.getElementById(targetContentId);
   if (targetContent) {
     targetContent.classList.add("active");
-    // Trigger any resize or refresh events
+    if (targetContentId === 'markets' && window.initializeMarkets) {
+        window.initializeMarkets(window._currentCountryName || "Global");
+    }
     window.dispatchEvent(new Event('resize'));
   }
 

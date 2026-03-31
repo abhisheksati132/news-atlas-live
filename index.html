@@ -337,21 +337,11 @@
 
           <script>
             window.activateMapInteraction = function () {
-              const overlay = document.getElementById(
-                "map-interaction-overlay",
-              );
+              const overlay = document.getElementById("map-interaction-overlay");
               if (!overlay) return;
-
-              overlay.style.opacity = "0";
-              overlay.style.pointerEvents = "none";
-              setTimeout(() => {
-                overlay.style.display = "none";
-              }, 600);
-
+              overlay.classList.add("hidden");
               if (window.mapEngine) window.mapEngine.enableInteractions();
-
-              if (window.playTacticalSound) window.playTacticalSound("click");
-              if (window.initializeEffects) window.initializeEffects();
+              if (window.playTacticalSound) window.playTacticalSound("success");
             };
           </script>
 

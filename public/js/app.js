@@ -394,9 +394,57 @@ function setupEventListeners() {
 }
 function updateSystemTime() {
   const now = new Date();
-  const localTimeStr = now.toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
-  setText("system-time", localTimeStr);
+  const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Kolkata' };
+  const timeStr = now.toLocaleTimeString('en-US', options);
+  setText("ist-time", `${timeStr} IST`);
 }
+
+window.switchTab = (id) => {
+  const tabs = document.querySelectorAll(".nav-tab");
+  const contents = document.querySelectorAll(".tab-content");
+  
+  // 1. Try to find by custom data-target or ID if 'id' looks like an ID
+  let targetTab = document.getElementById(`tab-btn-${id}`) || 
+                  Array.from(tabs).find(t => t.id === id || t.getAttribute("data-target") === id);
+
+  // 2. If not found, try text match
+  if (!targetTab) {
+    tabs.forEach(tab => {
+        const txt = tab.innerText.trim().toLowerCase();
+        if (txt.includes(id.toLowerCase())) {
+            targetTab = tab;
+        }
+    });
+  }
+
+  if (!targetTab) {
+    console.warn("Sector Uplink Lost: Tab not found for", id);
+    return;
+  }
+
+  const targetContentId = targetTab.getAttribute("aria-controls") || 
+                          targetTab.getAttribute("data-target") || 
+                          (targetTab.id ? targetTab.id.replace('btn-', '') : null);
+  
+  if (!targetContentId) return;
+
+  tabs.forEach(t => t.classList.remove("active"));
+  contents.forEach(c => c.classList.remove("active"));
+  
+  targetTab.classList.add("active");
+  const targetContent = document.getElementById(targetContentId);
+  if (targetContent) {
+    targetContent.classList.add("active");
+    // Trigger any resize or refresh events
+    window.dispatchEvent(new Event('resize'));
+  }
+
+  const sidebar = document.getElementById("sidebar");
+  if (sidebar && targetTab) {
+    targetTab.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+};
+
 async function fetchGlobalSearchData() {
   try {
     const res = await fetch("/api/countries?all=true");

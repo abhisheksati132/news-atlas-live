@@ -102,63 +102,6 @@ export default async function handler(req, res) {
                 }
             });
         }
-        if (type === "crypto") {
-            const symbols = {
-                bitcoin: { symbol: "BTC", icon: "₿", fallbackPrice: 65000 },
-                ethereum: { symbol: "ETH", icon: "Ξ", fallbackPrice: 3500 },
-                solana: { symbol: "SOL", icon: "S", fallbackPrice: 145 },
-                ripple: { symbol: "XRP", icon: "X", fallbackPrice: 0.60 },
-                cardano: { symbol: "ADA", icon: "₳", fallbackPrice: 0.45 },
-                polkadot: { symbol: "DOT", icon: "P", fallbackPrice: 7.20 }
-            };
-            
-            try {
-                const ids = Object.keys(symbols).join(',');
-                const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
-                const data = await res.json();
-                
-                const results = {};
-                Object.entries(symbols).forEach(([id, meta]) => {
-                    if (data[id]) {
-                        results[meta.symbol] = {
-                            price: data[id].usd,
-                            change: data[id].usd_24h_change || 0,
-                            icon: meta.icon,
-                            name: id.charAt(0).toUpperCase() + id.slice(1)
-                        };
-                    } else {
-                        results[meta.symbol] = {
-                            price: meta.fallbackPrice + rand(-meta.fallbackPrice*0.02, meta.fallbackPrice*0.02),
-                            change: rand(-5, 5),
-                            icon: meta.icon,
-                            name: id.charAt(0).toUpperCase() + id.slice(1)
-                        };
-                    }
-                });
-                return simulate({ data: results });
-            } catch (e) {
-                const results = {};
-                Object.entries(symbols).forEach(([id, meta]) => {
-                    results[meta.symbol] = {
-                        price: meta.fallbackPrice + rand(-meta.fallbackPrice*0.02, meta.fallbackPrice*0.02),
-                        change: rand(-5, 5),
-                        icon: meta.icon,
-                        name: id.charAt(0).toUpperCase() + id.slice(1)
-                    };
-                });
-                return simulate({ data: results });
-            }
-        }
-        if (type === "ecb") {
-            const matrix = {
-                USD: 1.08, GBP: 0.85, JPY: 164.5, CHF: 0.98, CAD: 1.48, AUD: 1.66, INR: 90.6, CNY: 7.86, SGD: 1.47, BRL: 5.45
-            };
-            const rates = {};
-            Object.entries(matrix).forEach(([cur, rate]) => {
-                rates[cur] = rate + rand(-rate * 0.003, rate * 0.003);
-            });
-            return simulate({ base: "EUR", rates: rates, timestamp: new Date().toISOString() });
-        }
         res.status(400).json({ error: "Invalid type" });
     } catch (err) {
         res.status(500).json({ error: "Internal server error" });

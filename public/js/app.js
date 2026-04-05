@@ -546,13 +546,210 @@ window.searchCityForTab = async (tabId) => {
         if (window.mapEngine.setHoloHUD) window.mapEngine.setHoloHUD([city.longitude, city.latitude], city.name, { TARGET: "CITY" });
       }
       setText("selected-country-name", city.name.toUpperCase());
+window.backToOrbital = () => {
+  const modSector = document.getElementById("modular-intelligence-sector");
+  if (modSector) {
+    modSector.classList.remove("active");
+  }
+  document.querySelectorAll(".nav-sector-link").forEach(link => {
+    link.classList.remove("active");
+    if (link.getAttribute('onclick') === 'backToOrbital()') {
+      link.classList.add("active");
+    }
+  });
+  window.history.pushState({}, "", "/app");
+  window.dispatchEvent(new Event('resize'));
+};
+
+// ── LIVE IST CLOCK ──
+setInterval(() => {
+  const time = new Date().toLocaleTimeString("en-GB", {
+    timeZone: "Asia/Kolkata",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false
+  });
+  const el = document.getElementById("ist-time");
+  if (el) el.innerText = `${time} IST`;
+}, 1000);
+window.handleCountryClick = async function (event, d) {
+  window.playTacticalSound("click");
+  selectedCountry = d;
+  window.selectedCountry = d;
+  window.switchTab("intel");
+  if (d && d.properties) {
+    const countryName = d.properties.name;
+    setText("selected-country-name", countryName);
+    const flagEl = document.getElementById("header-country-flag");
+    if (flagEl) {
+      const iso = d.properties.iso_a2 || d.properties.ISO_A2;
+      if (iso) { flagEl.src = `https://flagcdn.com/w40/${iso.toLowerCase()}.png`; flagEl.classList.remove("hidden"); }
+      else flagEl.classList.add("hidden");
+    }
+    const backWrap = safeEl("back-to-global-wrap");
+    if (backWrap) backWrap.classList.remove("hidden");
+    fetchAllData(countryName);
+    if (window.mapEngine && window.mapEngine.ready) {
+      if (event && event.lngLat) { window.mapEngine.flyToCountry(event.lngLat, 4.5); }
+    }
+    generateAIBriefing(countryName);
+  }
+};
+window.resetToGlobalCenter = () => {
+  selectedCountry = null;
+  window.selectedCountry = null;
+  setText("selected-country-name", "Worldwide");
+  
+  if (window.backToOrbital) window.backToOrbital();
+
+  // Reset Sector HUD
+  const globeIcon = document.getElementById("sector-globe-icon");
+  const flagImg = document.getElementById("sector-flag");
+  const sectorName = document.getElementById("sector-name");
+  if (globeIcon) globeIcon.classList.remove("hidden");
+  if (flagImg) flagImg.classList.add("hidden");
+  if (sectorName) sectorName.innerText = "Global Sector";
+
+  const backWrap = safeEl("back-to-global-wrap");
+  if (backWrap) backWrap.classList.add("hidden");
+  if (window.generateAIBriefing) window.generateAIBriefing("Global Context");
+  
+  if (window.mapEngine && window.mapEngine.map) {
+    window.mapEngine.clearSelection();
+    window.mapEngine.map.flyTo({ center: [20, 20], zoom: 1.6, duration: 2000 });
+  }
+  
+  window.fetchNews();
+  const headerFlagContainer = safeEl("search-flag-container");
+  const headerSearchIcon = safeEl("search-icon-main");
+  const headerInput = safeEl("map-search-input");
+  if (headerFlagContainer) headerFlagContainer.classList.add("hidden");
+  if (headerSearchIcon) headerSearchIcon.classList.remove("hidden");
+  if (headerInput) headerInput.value = "";
+};
+window.toggleGlobeTheme = function() {
+  if (window.toggleTheme) window.toggleTheme();
+};
+
+window.toggleMapProjection = function() {
+  if (!window.mapEngine) return;
+  const current = window.mapEngine.getProjection();
+  const next = current === 'globe' ? 'mercator' : 'globe';
+  window.mapEngine.setProjection(next);
+  const btn = document.getElementById('projection-toggle-btn');
+  if (btn) btn.innerHTML = next === 'globe' ? '<i class="fas fa-globe text-sm"></i>' : '<i class="fas fa-map text-sm"></i>';
+};
+
+window.goToIndiaHome = function() {
+  if (window.mapEngine && window.mapEngine.map) {
+    window.mapEngine.map.flyTo({ center: [78.9629, 20.5937], zoom: 4.5, duration: 2000 });
+    if (window.fetchAllData) window.fetchAllData("India");
+    if (window.playTacticalSound) window.playTacticalSound("success");
+  }
+};
+
+window.toggleMapStyle = function() {
+  if (!window.mapEngine) return;
+  const styles = ['dark-v11', 'satellite-streets-v12'];
+  window._styleIdx = (window._styleIdx || 0) + 1;
+  if (window._styleIdx >= styles.length) window._styleIdx = 0;
+  window.mapEngine.setStyle('mapbox://styles/mapbox/' + styles[window._styleIdx]);
+};
+
+window.zoomMap = function(factor) {
+  if (window.mapEngine && window.mapEngine.map) {
+    const current = window.mapEngine.map.getZoom();
+    window.mapEngine.map.zoomTo(factor > 1 ? current + 1 : current - 1);
+  }
+};
+function setupEventListeners() {
+  window.addEventListener("keydown", (e) => {
+    // Esc handling
+    if (e.key === "Escape") {
+      const so = safeEl("search-overlay");
+      const ao = safeEl("about-overlay");
+      if (so && !so.classList.contains("hidden")) so.classList.add("hidden");
+      if (ao && !ao.classList.contains("hidden")) ao.classList.add("hidden");
+    }
+
+    // Tab Navigation (1-6)
+    // Ignore if user is typing in an input field
+    if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+
+    const navMap = {
+      "1": "map",
+      "2": "summary",
+      "3": "news",
+      "4": "markets",
+      "5": "weather",
+      "6": "economic"
+    };
+
+    if (navMap[e.key]) {
+      e.preventDefault();
+      if (navMap[e.key] === "map") {
+        window.backToOrbital();
+      } else {
+        window.switchTab(navMap[e.key]);
+      }
+      if (window.playTacticalSound) window.playTacticalSound("click");
+    }
+  });
+}
+function updateSystemTime() {
+  const now = new Date();
+  const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Kolkata' };
+  const timeStr = now.toLocaleTimeString('en-US', options);
+  setText("ist-time", `${timeStr} IST`);
+}
+
+// Duplicate switchTab removed.
+
+async function fetchGlobalSearchData() {
+  try {
+    const res = await fetch("/api/countries?all=true");
+    if (!res.ok) throw new Error("Index relay failed");
+    window.globalSearchData = await res.json();
+    if (window.renderTrendingHeader) window.renderTrendingHeader();
+  } catch (e) { window.globalSearchData = []; }
+}
+window.renderTrendingHeader = () => {
+  const container = document.getElementById("trending-quick-container");
+  if (!container || !window.globalSearchData || window.globalSearchData.length === 0) return;
+  const trending = ["India", "United States", "Japan", "Russia", "United Kingdom"];
+  container.innerHTML = trending.map(name => {
+    const c = window.globalSearchData.find(x => x.name.common === name || (name === "United States" && x.name.common === "United States of America"));
+    if (!c) return "";
+    return `<button onclick="window.handleCountryClick(null, {properties:{name:'${c.name.common.replace(/'/g, "\\'")}',iso_a2:'${c.cca2}'}})" class="w-7 h-4.5 rounded-sm overflow-hidden border border-white/10 hover:border-blue-400 hover:scale-110 transition-all shadow-sm">
+               <img src="${c.flags.svg}" class="w-full h-full object-cover">
+             </button>`;
+  }).join("");
+};
+window.searchCityForTab = async (tabId) => {
+  const inputEl = document.getElementById(`${tabId}-city-search`);
+  if (!inputEl) return;
+  const q = inputEl.value.trim();
+  if (!q) return;
+  try {
+    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=1&format=json`);
+    const data = await res.json();
+    if (data.results && data.results.length > 0) {
+      const city = data.results[0];
+      if (window.mapEngine && window.mapEngine.map) {
+        window.mapEngine.map.flyTo({ center: [city.longitude, city.latitude], zoom: 9, duration: 2000 });
+        if (window.mapEngine.setHoloHUD) window.mapEngine.setHoloHUD([city.longitude, city.latitude], city.name, { TARGET: "CITY" });
+      }
+      setText("selected-country-name", city.name.toUpperCase());
       window.generateAIBriefing(city.name);
       inputEl.value = "";
     }
   } catch (e) { }
 };
 window.mapEngine = new MapboxEngine('map-container');
-window.mapEngine.init();
+window.mapEngine.init().then(() => {
+    if (window.mapEngine.ready) window.mapEngine.enableInteractions();
+});
 initTerminal();
 setupEventListeners();
 // Single IST clock interval (duplicate updateSystemTime removed)
@@ -593,25 +790,4 @@ window.initializeMarkets = (loc) => {
 };
 window.fetchMarketIntel = (loc, cur) => {
     if (window.initializeMarkets) window.initializeMarkets(loc);
-};
-window.activateMapInteraction = () => {
-    const overlay = document.getElementById('map-interaction-overlay');
-    if (overlay) {
-        overlay.classList.add('hidden');
-        overlay.style.pointerEvents = 'none';
-        overlay.style.display = 'none';
-    }
-    
-    if (window.mapEngine) {
-        // Ensure map is interactive
-        window.mapEngine.init().then(() => {
-            window.mapEngine.enableInteractions();
-            // Initial fly-to to wake up the engine
-            if (window.mapEngine.map) {
-                window.mapEngine.map.flyTo({ zoom: 2.2, duration: 1500 });
-            }
-        });
-    }
-    
-    if (window.playTacticalSound) window.playTacticalSound('success');
 };

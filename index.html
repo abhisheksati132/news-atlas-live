@@ -183,17 +183,8 @@
     <div id="map-layer" class="fixed inset-0 z-0 bg-[#02040a]">
       <div id="map-container" class="w-full h-full"></div>
       
-      <!-- INITIAL INTERACTION GATEWAY -->
-      <div id="map-interaction-overlay" class="map-interaction-overlay">
-        <button onclick="window.activateMapInteraction()"
-          class="group relative px-8 py-4 rounded-full overflow-hidden transition-all hover:scale-105 active:scale-95">
-          <div class="absolute inset-0 bg-blue-600/20 backdrop-blur-md border border-blue-500/30"></div>
-          <div class="relative flex items-center gap-4 text-blue-400 group-hover:text-white transition-colors">
-            <i class="fas fa-radar animate-pulse"></i>
-            <span class="text-[12px] font-black uppercase tracking-[0.4em] font-mono">Activate Tactical View</span>
-          </div>
-        </button>
-      </div>
+      <!-- INITIAL INTERACTION GATEWAY REMOVED - MAP IS NOW ALWAYS ACTIVE -->
+
 
       <!-- MAP CONTROLS HUB -->
       <div id="map-controls" class="fixed bottom-12 right-12 z-[100] flex flex-col gap-4">

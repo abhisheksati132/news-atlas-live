@@ -43,8 +43,8 @@ function runWhenIdle(callback, timeout = 2000) {
   }
 }
 async function runBootSequence() {
-  const savedTheme = localStorage.getItem('terminal-theme');
-  if (savedTheme === 'light') document.body.classList.add('light-theme');
+  // Dark mode is permanent default — no theme loading needed.
+  // Firebase and session setup happens below in initTerminal.
 }
 function showBackendRequiredBanner() {
   if (document.getElementById("backend-required-banner")) return;
@@ -287,17 +287,97 @@ async function generateAIBriefing(loc) {
 }
 window.generateAIBriefing = generateAIBriefing;
 window.switchTab = (id) => {
+  console.log("INITIALIZING SECTOR SHIFT:", id);
+  // Sector ID Normalization
+  if (id === 'summary') id = 'intel';
+  if (id === 'weather') id = 'atmosphere';
+
+  const modSector = document.getElementById("modular-intelligence-sector");
+  if (modSector) {
+    modSector.classList.add("active");
+  }
+
   window.playTacticalSound("tab");
-  document.querySelectorAll(".nav-tab").forEach((t) => { t.classList.remove("active"); t.setAttribute("aria-selected", "false"); });
-  document.querySelectorAll(".tab-content").forEach((c) => c.classList.remove("active"));
-  const tabBtn = Array.from(document.querySelectorAll(".nav-tab")).find((btn) => btn.innerText.toLowerCase().trim().includes(id.toLowerCase()));
-  if (tabBtn) { tabBtn.classList.add("active"); tabBtn.setAttribute("aria-selected", "true"); }
+
+  // ── TELEMETRY ANIMATION TRIGGER ──
+  document.body.classList.add("telemetry-active");
+  setTimeout(() => {
+    document.body.classList.remove("telemetry-active");
+  }, 800);
+
+  // Update Navigation Active State
+  document.querySelectorAll(".nav-sector-link").forEach(link => {
+    const action = link.getAttribute('onclick') || "";
+    if (action.includes(`'${id}'`) || 
+        (id === 'intel' && (action.includes("'summary'") || action.includes("'intel'"))) || 
+        (id === 'atmosphere' && (action.includes("'weather'") || action.includes("'atmosphere'")))) {
+      link.classList.add("active");
+    } else {
+      link.classList.remove("active");
+    }
+  });
+
+  // Update Tab Content
+  document.querySelectorAll(".tab-content").forEach((c) => {
+    c.classList.remove("active");
+    c.style.display = 'none';
+  });
+  
   const targetContent = document.getElementById(`tab-${id}`);
-  if (targetContent) targetContent.classList.add("active");
-  if (id === "intel") { if (window.fetchGDELTEvents) window.fetchGDELTEvents(window.selectedCountry); }
+  if (targetContent) {
+    targetContent.style.display = 'block';
+    // Small delay to let browser reflow before animation starts
+    requestAnimationFrame(() => {
+      targetContent.classList.add("active");
+    });
+  }
+
+  // Reset scroll to top on tab switch
+  const sidebarContent = document.getElementById('sidebar-content');
+  if (sidebarContent) sidebarContent.scrollTop = 0;
+
+  // History Sync
+  const pathId = id === 'intel' ? 'summary' : (id === 'atmosphere' ? 'weather' : id);
+  const newPath = `/app/${pathId}`;
+  if (window.location.pathname !== newPath) {
+    window.history.pushState({ sector: id }, "", newPath);
+  }
+
+  // Trigger Module Loaders
+  if (id === "intel") { if (window.fetchGDELTEvents) window.fetchGDELTEvents(window.selectedCountry || "Global"); }
   if (id === "economic") { if (window.fetchECBRates) window.fetchECBRates(); }
   if (id === "markets") { if (window.initializeMarkets) window.initializeMarkets(window.selectedCountry || "Global"); }
+  
+  window.dispatchEvent(new Event('resize'));
 };
+
+window.backToOrbital = () => {
+  const modSector = document.getElementById("modular-intelligence-sector");
+  if (modSector) {
+    modSector.classList.remove("active");
+  }
+  document.querySelectorAll(".nav-sector-link").forEach(link => {
+    link.classList.remove("active");
+    if (link.getAttribute('onclick') === 'backToOrbital()') {
+      link.classList.add("active");
+    }
+  });
+  window.history.pushState({}, "", "/app");
+  window.dispatchEvent(new Event('resize'));
+};
+
+// ── LIVE IST CLOCK ──
+setInterval(() => {
+  const time = new Date().toLocaleTimeString("en-GB", {
+    timeZone: "Asia/Kolkata",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false
+  });
+  const el = document.getElementById("ist-time");
+  if (el) el.innerText = `${time} IST`;
+}, 1000);
 window.handleCountryClick = async function (event, d) {
   window.playTacticalSound("click");
   selectedCountry = d;
@@ -326,6 +406,8 @@ window.resetToGlobalCenter = () => {
   window.selectedCountry = null;
   setText("selected-country-name", "Worldwide");
   
+  if (window.backToOrbital) window.backToOrbital();
+
   // Reset Sector HUD
   const globeIcon = document.getElementById("sector-globe-icon");
   const flagImg = document.getElementById("sector-flag");
@@ -351,9 +433,8 @@ window.resetToGlobalCenter = () => {
   if (headerSearchIcon) headerSearchIcon.classList.remove("hidden");
   if (headerInput) headerInput.value = "";
 };
-window.toggleTheme = function() {
-  const isLight = document.body.classList.toggle('light-theme');
-  localStorage.setItem('terminal-theme', isLight ? 'light' : 'dark');
+window.toggleGlobeTheme = function() {
+  if (window.toggleTheme) window.toggleTheme();
 };
 
 window.toggleMapProjection = function() {
@@ -375,18 +456,10 @@ window.goToIndiaHome = function() {
 
 window.toggleMapStyle = function() {
   if (!window.mapEngine) return;
-  const styles = ['dark-v11', 'light-v11', 'satellite-streets-v12'];
+  const styles = ['dark-v11', 'satellite-streets-v12'];
   window._styleIdx = (window._styleIdx || 0) + 1;
   if (window._styleIdx >= styles.length) window._styleIdx = 0;
   window.mapEngine.setStyle('mapbox://styles/mapbox/' + styles[window._styleIdx]);
-};
-
-window.toggleGlobeTheme = function() {
-  window.toggleTheme();
-  if (window.mapEngine) {
-    const isLight = document.body.classList.contains('light-theme');
-    window.mapEngine.setStyle(isLight ? 'mapbox://styles/mapbox/light-v11' : 'mapbox://styles/mapbox/dark-v11');
-  }
 };
 
 window.zoomMap = function(factor) {
@@ -405,21 +478,26 @@ function setupEventListeners() {
       if (ao && !ao.classList.contains("hidden")) ao.classList.add("hidden");
     }
 
-    // Tab Navigation (1-5)
+    // Tab Navigation (1-6)
     // Ignore if user is typing in an input field
     if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
 
     const navMap = {
-      "1": "summary",
-      "2": "news",
-      "3": "markets",
-      "4": "weather",
-      "5": "economic"
+      "1": "map",
+      "2": "summary",
+      "3": "news",
+      "4": "markets",
+      "5": "weather",
+      "6": "economic"
     };
 
     if (navMap[e.key]) {
       e.preventDefault();
-      window.switchTab(navMap[e.key]);
+      if (navMap[e.key] === "map") {
+        window.backToOrbital();
+      } else {
+        window.switchTab(navMap[e.key]);
+      }
       if (window.playTacticalSound) window.playTacticalSound("click");
     }
   });
@@ -431,54 +509,7 @@ function updateSystemTime() {
   setText("ist-time", `${timeStr} IST`);
 }
 
-window.switchTab = (id) => {
-  const tabs = document.querySelectorAll(".nav-tab");
-  const contents = document.querySelectorAll(".tab-content");
-  
-  // 1. Try to find by custom data-target or ID if 'id' looks like an ID
-  let targetTab = document.getElementById(`tab-btn-${id}`) || 
-                  Array.from(tabs).find(t => t.id === id || t.getAttribute("data-target") === id);
-
-  // 2. If not found, try text match
-  if (!targetTab) {
-    tabs.forEach(tab => {
-        const txt = tab.innerText.trim().toLowerCase();
-        if (txt.includes(id.toLowerCase())) {
-            targetTab = tab;
-        }
-    });
-  }
-
-  if (!targetTab) {
-    console.warn("Sector Uplink Lost: Tab not found for", id);
-    return;
-  }
-
-  const targetContentId = targetTab.getAttribute("aria-controls") || 
-                          targetTab.getAttribute("data-target") || 
-                          (targetTab.id ? targetTab.id.replace('btn-', '') : null);
-  
-  if (!targetContentId) return;
-
-  tabs.forEach(t => t.classList.remove("active"));
-  contents.forEach(c => c.classList.remove("active"));
-  
-  targetTab.classList.add("active");
-  window._currentTab = targetContentId;
-  const targetContent = document.getElementById(targetContentId);
-  if (targetContent) {
-    targetContent.classList.add("active");
-    if (targetContentId === 'markets' && window.initializeMarkets) {
-        window.initializeMarkets(window._currentCountryName || "Global");
-    }
-    window.dispatchEvent(new Event('resize'));
-  }
-
-  const sidebar = document.getElementById("sidebar");
-  if (sidebar && targetTab) {
-    targetTab.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-};
+// Duplicate switchTab removed.
 
 async function fetchGlobalSearchData() {
   try {
@@ -524,15 +555,32 @@ window.mapEngine = new MapboxEngine('map-container');
 window.mapEngine.init();
 initTerminal();
 setupEventListeners();
-setInterval(updateSystemTime, 1000);
+// Single IST clock interval (duplicate updateSystemTime removed)
 window.playTacticalSound = function() {};
 window.showToast = function() {};
 window.toggleShortcuts = () => {
     window.showToast("Shortcuts: Esc=Close, Ctrl+K=Search, ?=Help", "info");
 };
-window.onCountrySelected = (name) => {
-    console.log("Country selected:", name);
-};
+
+// Sector URL Routing Hub
+function handleInitialRoute() {
+  const path = window.location.pathname;
+  if (path.startsWith('/app/')) {
+    const sector = path.split('/').pop();
+    if (sector) window.switchTab(sector);
+  }
+}
+
+window.addEventListener('popstate', (event) => {
+  if (event.state && event.state.sector) {
+    window.switchTab(event.state.sector);
+  } else {
+    handleInitialRoute();
+  }
+});
+
+// Run once on load
+handleInitialRoute();
 window.resetWeatherData = () => {
     setText("atmo-feels", "--");
     setText("atmo-hl", "-- / --");
@@ -544,7 +592,7 @@ window.initializeMarkets = (loc) => {
     if (window.displayCommodities) window.displayCommodities();
 };
 window.fetchMarketIntel = (loc, cur) => {
-    console.log("Market intel for", loc, cur);
+    if (window.initializeMarkets) window.initializeMarkets(loc);
 };
 window.activateMapInteraction = () => {
     const map = document.getElementById('map-container');

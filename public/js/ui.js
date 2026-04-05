@@ -63,10 +63,10 @@ function renderTrending() {
     if (countries.length > 0) {
         html += countries.map(c => {
             const name = c.name.common;
-            return `<div class="flex items-center gap-5 px-6 py-4 hover:bg-white/[0.03] cursor-pointer transition-all group" onclick="window.selectFromSearch('${name.replace(/'/g, "\\'")}')">
-              <div class="w-10 h-6.5 rounded shadow-sm overflow-hidden border border-white/10 shrink-0"><img src="${c.flags.svg}" class="w-full h-full object-cover"></div>
-              <span class="font-bold text-white text-base tracking-tight group-hover:text-blue-400 transition-colors">${name}</span>
-              <i class="fas fa-chevron-right ml-auto text-[11px] text-slate-700 group-hover:text-blue-400 transition-all group-hover:translate-x-0.5"></i>
+            return `<div class="flex items-center gap-6 px-8 py-5 hover:bg-white/[0.04] cursor-pointer transition-all border-b border-white/[0.03] group" onclick="window.selectFromSearch('${name.replace(/'/g, "\\'")}')">
+              <div class="w-8 h-5 border border-white/10 shrink-0"><img src="${c.flags.svg}" class="w-full h-full object-cover"></div>
+              <span class="text-[15px] font-bold text-white uppercase tracking-wider group-hover:text-slate-300 transition-colors" style="font-family: 'Plus Jakarta Sans', sans-serif;">${name}</span>
+              <span class="text-[9px] font-bold text-slate-700 ml-auto tracking-[0.2em] font-mono group-hover:text-white transition-all">TERMINAL_SELECT</span>
             </div>`;
         }).join("");
     } else {
@@ -83,13 +83,13 @@ function renderTrending() {
                 const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&types=place,region,locality&limit=5`);
                 const json = await res.json();
                 if (json.features && json.features.length > 0) {
-                    const registryHtml = `<div style="padding: 1.25rem 1.5rem 0.75rem; font-size: 11px; font-weight: 900; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.15em; font-family: 'JetBrains Mono', monospace;">Registry Matches (Cities/States)</div>` + 
+                    const registryHtml = `<div style="padding: 1.25rem 2rem 0.75rem; font-size: 11px; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: 0.15em; font-family: 'JetBrains Mono', monospace;">Registry Matches</div>` + 
                     json.features.map(f => `
-                        <div class="flex items-center gap-5 px-6 py-4 hover:bg-white/[0.03] cursor-pointer transition-all group" onclick="window.selectFromSearch('${f.place_name.replace(/'/g, "\\'")}')">
-                          <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-blue-500/10 border border-blue-500/20 text-blue-400 shrink-0"><i class="fas fa-map-marker-alt"></i></div>
+                        <div class="flex items-center gap-6 px-8 py-5 hover:bg-white/[0.04] cursor-pointer transition-all border-b border-white/[0.03] group" onclick="window.selectFromSearch('${f.place_name.replace(/'/g, "\\'")}')">
+                          <div class="w-2 h-2 rounded-full bg-white/20 group-hover:bg-white transition-colors shrink-0"></div>
                           <div class="flex flex-col">
-                            <span class="font-bold text-white text-[13px] tracking-tight group-hover:text-blue-400">${f.text}</span>
-                            <span class="text-[10px] text-slate-500 truncate">${f.place_name}</span>
+                            <span class="text-[13px] font-bold text-white uppercase tracking-wider group-hover:text-slate-300 transition-colors" style="font-family: 'JetBrains Mono', monospace;">${f.text}</span>
+                            <span class="text-[10px] text-slate-600 font-mono mt-1">${f.place_name}</span>
                           </div>
                         </div>`).join("");
                     resContainer.innerHTML = html + registryHtml;
@@ -152,10 +152,12 @@ window.toggleSearch = () => {
   const isHidden = overlay.classList.contains("hidden");
   if (isHidden) {
     overlay.classList.remove("hidden");
+    overlay.style.display = 'flex';
     document.getElementById("country-search")?.focus();
     renderTrending();
   } else {
     overlay.classList.add("hidden");
+    overlay.style.display = '';
   }
 };
 window.selectFromSearch = (name) => {
@@ -444,16 +446,16 @@ function renderPaletteItems() {
     return;
   }
   list.innerHTML = _paletteFiltered.map((cmd, i) => `
-    <div class="cmd-palette-item flex items-center gap-4 px-4 py-3 cursor-pointer transition-all border-l-2 ${i === _paletteSelected ? "bg-blue-500/15 border-blue-400" : "border-transparent hover:bg-white/4"}"
+    <div class="cmd-palette-item flex items-center gap-6 px-6 py-4 cursor-pointer transition-all border-l ${i === _paletteSelected ? "bg-white/[0.05] border-white" : "border-transparent hover:bg-white/[0.03]"} "
       onclick="window._executePaletteCmd(${i})" onmouseenter="window._paletteHover(${i})">
-      <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${i === _paletteSelected ? "bg-blue-400 text-[#020617]" : "bg-white/5 text-blue-400"}">
+      <div class="w-6 h-6 flex items-center justify-center shrink-0 ${i === _paletteSelected ? "text-white" : "text-slate-600"}">
         <i class="fas ${cmd.icon} text-sm"></i>
       </div>
       <div class="flex flex-col flex-1 min-w-0">
-        <span class="text-[13px] font-bold text-white leading-none">${cmd.label}</span>
-        ${cmd.desc ? `<span class="text-[10px] text-slate-500 font-medium mt-1 truncate tracking-tight uppercase">${cmd.desc}</span>` : ""}
+        <span class="text-[14px] font-bold text-white uppercase tracking-wider" style="font-family: 'JetBrains Mono', monospace;">${cmd.label}</span>
+        ${cmd.desc ? `<span class="text-[10px] text-slate-500 font-bold mt-1 truncate tracking-widest uppercase font-mono">${cmd.desc}</span>` : ""}
       </div>
-      ${cmd.shortcut ? `<kbd class="text-[9px] font-mono text-slate-500 px-1.5 py-0.5 rounded bg-white/6 border border-white/10 uppercase">${cmd.shortcut}</kbd>` : ""}
+      ${cmd.shortcut ? `<kbd class="text-[10px] font-mono text-slate-600 px-2 py-0.5 rounded border border-white/5 uppercase">${cmd.shortcut}</kbd>` : ""}
     </div>
   `).join("");
 }

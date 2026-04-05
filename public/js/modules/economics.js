@@ -67,9 +67,8 @@ async function fetchDetailedEconomics(country) {
       ecoEl("eco-exports").innerHTML = eco.major_exports
         .map(
           (item) =>
-            `<div class="apple-glass px-3 py-1.5 border border-blue-500/20 flex items-center gap-2 rounded-full">
-               <div class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></div>
-               <span class="text-[10px] text-white font-black uppercase tracking-wider">${item}</span>
+            `<div class="border border-white/10 px-3 py-1 flex items-center gap-2 rounded-sm bg-white/5">
+               <span class="text-[10px] text-white font-bold uppercase tracking-widest font-mono">${item}</span>
              </div>`,
         )
         .join("");
@@ -310,24 +309,22 @@ function renderMarketCards(rawText, container) {
       .map(line => line.trim().startsWith('-') ? `<span class="block pl-2 border-l-2 border-white/10 mb-1">${line.slice(1).trim()}</span>` : `<span>${line}</span>`)
       .join('');
     html += `
-      <div class="apple-glass group p-5 mb-4 relative overflow-hidden transition-all duration-300 hover:bg-white/[0.05]" style="border:1px solid ${color}22;">
-        <div class="absolute -inset-[1px] bg-gradient-to-br from-white/10 to-transparent opacity-20 pointer-events-none"></div>
-        <div class="flex justify-between items-start mb-4 relative z-10">
-          <div class="flex items-center gap-4">
-            <div class="w-11 h-11 rounded-xl flex items-center justify-center" style="background:${color}33;border:1px solid ${color}55;box-shadow:0 0 15px ${color}22;">
-              <i class="fas ${icon} text-[17px]" style="color:${color};"></i>
-            </div>
-            <div class="flex flex-col">
-              <span class="text-[11px] font-bold uppercase tracking-[0.2em] text-emerald-400/80">Market Intel</span>
-              <span class="text-[15px] font-bold text-white uppercase tracking-wider">${displayName}</span>
-            </div>
+      <div class="py-8 border-b border-slate-800/80 group transition-all">
+        <div class="flex justify-between items-start mb-4">
+          <div class="flex flex-col gap-1">
+            <span class="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 font-mono">Operational Sector</span>
+            <span class="text-[18px] font-bold text-white uppercase tracking-wider" style="font-family: 'Plus Jakarta Sans', sans-serif;">${displayName}</span>
           </div>
-          ${rating ? `<div class="bg-black/40 rounded-xl px-4 py-2 flex flex-col items-center" style="border:1px solid ${ratingColor}44;"><span class="text-[20px] font-black font-mono leading-none" style="color:${ratingColor};">${rating}<span class="text-[12px] opacity-40">/10</span></span><div class="w-14 h-1 bg-white/10 rounded-full mt-2 overflow-hidden"><div class="h-full rounded-full" style="width:${rating * 10}%;background:${ratingColor};"></div></div></div>` : ''}
+          ${rating ? `
+            <div class="flex flex-col items-end">
+              <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600 font-mono mb-1">Tactical Rating</span>
+              <span class="text-[24px] font-light font-mono leading-none" style="color:${ratingColor};">${rating}<span class="text-[12px] opacity-20 ml-1">/ 10</span></span>
+            </div>` : ''}
         </div>
-        <div class="text-[13.5px] text-white/85 leading-relaxed font-mono relative z-10">${formattedParagraph}</div>
+        <div class="text-[14px] text-slate-400 leading-relaxed font-sans max-w-3xl">${formattedParagraph}</div>
       </div>`;
   });
-  container.innerHTML = html || `<div class="apple-glass p-6 text-[13px] text-slate-400 font-mono leading-relaxed">${clean.replace(/\n/g, '<br>')}</div>`;
+  container.innerHTML = html || `<div class="py-6 text-[13px] text-slate-500 font-mono leading-relaxed">${clean.replace(/\n/g, '<br>')}</div>`;
 }
 window.fetchDetailedEconomics = fetchDetailedEconomics;
 window.drawGDPTrend = drawGDPTrend;

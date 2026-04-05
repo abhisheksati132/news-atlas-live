@@ -189,20 +189,20 @@ function displayNewsArticles(articles) {
       : "";
 
     const row = document.createElement("div");
-    row.className = `p-4 border-b border-white/5 cursor-pointer hover:bg-white/[0.03] transition-colors news-card-animate whitespace-normal`;
+    row.className = `py-8 border-b border-slate-800/80 cursor-pointer hover:bg-white/[0.02] transition-all news-card-animate whitespace-normal group`;
     row.style.animationDelay = `${i * 30}ms`;
     row.innerHTML = `
-      <div class="flex flex-col gap-2">
-        <div class="flex items-center gap-2">
-          ${faviconHtml}
-          <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">${art.source_id || "UPLINK"}</span>
-          <span class="text-[8px] font-mono text-slate-600">/</span>
-          <span class="text-[8px] font-mono text-slate-600 uppercase">${timeAgo}</span>
-          <span class="text-[8px] font-bold px-1.5 py-0.5 rounded-sm ${sentiment.cls} uppercase ml-auto">${sentiment.label}</span>
+      <div class="flex flex-col gap-4">
+        <div class="flex items-center gap-4">
+          <span class="text-[9px] font-bold text-white bg-white/5 px-2 py-1 tracking-[0.2em] uppercase font-mono">${art.source_id || "SIGNAL"}</span>
+          <span class="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] font-mono">${timeAgo}</span>
+          <div class="h-px flex-1 bg-white/5"></div>
+          <span class="text-[9px] font-bold tracking-[0.2em] font-mono ${sentiment.cls}">${sentiment.label}</span>
         </div>
-        ${imgHtml}
-        <h3 class="text-base font-bold text-slate-100 leading-tight hover:text-blue-400 transition-colors pt-1" onclick="window.open('${escapeHtml(art.link)}', '_blank')">${escapeHtml(art.title)}</h3>
-        ${art.description ? `<p class="text-[12px] text-slate-400 leading-relaxed font-normal line-clamp-3">${escapeHtml(art.description)}</p>` : ''}
+        <div class="flex flex-col gap-2">
+          <h3 class="text-[20px] font-bold text-white leading-[1.2] tracking-tight group-hover:text-slate-300 transition-colors" style="font-family: 'Plus Jakarta Sans', sans-serif;" onclick="window.open('${escapeHtml(art.link)}', '_blank')">${escapeHtml(art.title)}</h3>
+          ${art.description ? `<p class="text-[14px] text-slate-500 leading-relaxed font-normal line-clamp-2 max-w-3xl">${escapeHtml(art.description)}</p>` : ''}
+        </div>
       </div>
     `;
     container.appendChild(row);

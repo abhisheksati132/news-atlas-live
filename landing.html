@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>NewsAtlas | Global Intelligence Platform</title>
   <meta name="description" content="NewsAtlas — Real-time global news intelligence, economic data, and geopolitical analysis in one premium dashboard." />
   <meta name="theme-color" content="#020617" />
@@ -200,7 +200,7 @@
       50% { opacity: 0.5; transform: scale(0.8); }
     }
     .hero h1 {
-      font-size: clamp(2.8rem, 6vw, 5rem);
+      font-size: clamp(2rem, 6vw, 5rem);
       font-weight: 900;
       line-height: 1.05;
       letter-spacing: -2px;
@@ -269,6 +269,13 @@
       margin-top: 4rem;
       flex-wrap: wrap;
       justify-content: center;
+    }
+    @media (max-width: 600px) {
+      .stats-strip {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem 1.5rem;
+      }
     }
     .stat-item { text-align: center; }
     .stat-value {
@@ -500,11 +507,25 @@
     }
     .fade-up.visible { opacity: 1; transform: translateY(0); }
 
-    @media (max-width: 600px) {
-      nav { padding: 0 1rem; }
-      .hero h1 { font-size: 2.2rem; letter-spacing: -1px; }
-      .stats-strip { gap: 1.5rem; }
-      .login-card { padding: 2rem 1.5rem; }
+    @media (max-width: 768px) {
+      nav { padding: 0 1.25rem; height: 60px; }
+      .nav-cta a { padding: 6px 14px !important; font-size: 11px !important; }
+      .hero { padding: 100px 1.5rem 3rem; }
+      .hero h1 { font-size: 2.8rem; letter-spacing: -1.5px; }
+      .hero-sub { font-size: 15px; margin-bottom: 2rem; }
+      .stats-strip { gap: 1.25rem; margin-top: 3rem; }
+      .stat-value { font-size: 22px; }
+      .stat-label { font-size: 10px; }
+      .section { padding: 4rem 1.5rem; }
+      .features-grid { grid-template-columns: 1fr; gap: 1rem; }
+      .login-card { padding: 2.5rem 1.5rem; border-radius: 20px; }
+      .btn-hero-primary, .btn-hero-secondary { width: 100%; justify-content: center; }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 2.2rem; }
+      .hero-badge { font-size: 9px; letter-spacing: 0.1em; padding: 4px 10px; }
+      .nav-logo-text { font-size: 14px; }
     }
   </style>
 </head>
@@ -712,5 +733,11 @@
 
   initFirebase();
 </script>
+  <!-- ARCHITECTURAL SIGNATURE -->
+  <footer class="py-12 text-center">
+    <p class="text-[10px] font-medium text-slate-600 uppercase tracking-[0.4em] font-mono opacity-60">
+      Made By Abhishek Sati
+    </p>
+  </footer>
 </body>
 </html>

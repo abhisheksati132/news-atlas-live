@@ -143,6 +143,15 @@
   <div id="map-layer" class="fixed inset-0 z-0 bg-[#02040a]">
     <div id="map-container" class="w-full h-full"></div>
 
+    <div id="geo-tracker-hud" class="fixed bottom-10 left-10 z-[100] bg-slate-950/80 backdrop-blur-xl border border-white/10 rounded-lg p-3 hidden md:flex items-center gap-4 pointer-events-none shadow-2xl">
+      <div class="flex items-center gap-2">
+        <i class="fas fa-crosshairs text-blue-500 text-[10px] animate-pulse"></i>
+        <span class="text-[9px] text-slate-400 uppercase tracking-[0.3em] font-mono">Geo-Lock</span>
+      </div>
+      <div class="h-4 w-px bg-white/10"></div>
+      <span id="geo-lat-lng" class="text-[11px] font-black text-white font-mono tracking-widest">AWAITING TLM</span>
+    </div>
+
     <div id="map-controls" class="fixed bottom-12 right-12 z-[100] flex flex-col gap-4">
       <button onclick="window.resetToGlobalCenter()"
         class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/45 backdrop-blur-3xl border border-white/10 text-white/50 hover:text-blue-400 hover:border-blue-500/30 transition-all shadow-2xl"

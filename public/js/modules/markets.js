@@ -127,7 +127,16 @@ async function displayCommodities() {
   } catch { container.innerHTML = '<div class="text-red-500 text-[10px] py-6 text-center uppercase font-black">Pipeline Failure</div>'; }
 }
 function renderTVChart(countryName) {
-  if (typeof TradingView === 'undefined') return;
+  if (typeof TradingView === 'undefined') {
+      console.warn("TradingView not ready, retrying in 500ms...");
+      setTimeout(() => renderTVChart(countryName), 500);
+      return;
+  }
+  
+  const tab = document.getElementById('tab-markets');
+  if (tab && tab.style.display === 'none') {
+      return; // Handled by switchTab later
+  }
   
   const countryToSymbol = {
     "united states": "NASDAQ:NDX",
@@ -179,6 +188,7 @@ window.displayCountryIndices = displayCountryIndices;
 window.displayForex = displayForex;
 window.displayCommodities = displayCommodities;
 window.initializeMarkets = initializeMarkets;
+window.renderTVChart = renderTVChart;
 let _marketsRefreshTimer = null;
 function startMarketsAutoRefresh() {
     if (_marketsRefreshTimer) clearInterval(_marketsRefreshTimer);

@@ -211,7 +211,12 @@ window.switchTab = (id) => {
   const targetContent = document.getElementById(`tab-${id}`);
   if (targetContent) {
     targetContent.style.display = 'block';
-    requestAnimationFrame(() => targetContent.classList.add("active"));
+    requestAnimationFrame(() => {
+      targetContent.classList.add("active");
+      if (id === 'markets' && window.renderTVChart) {
+        window.renderTVChart(window._currentCountryName || "Global");
+      }
+    });
   }
 };
 

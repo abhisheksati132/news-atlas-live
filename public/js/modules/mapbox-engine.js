@@ -70,6 +70,18 @@ class MapboxEngine {
             this._toggle3DBuildings();
         });
 
+        // Initialize Geo-Tracker HUD telemetry stream
+        this.map.on('mousemove', (e) => {
+            const el = document.getElementById('geo-lat-lng');
+            if(el) {
+                const lat = e.lngLat.lat.toFixed(4);
+                const lng = e.lngLat.lng.toFixed(4);
+                const latDir = lat >= 0 ? 'N' : 'S';
+                const lngDir = lng >= 0 ? 'E' : 'W';
+                el.innerText = `${Math.abs(lat)}° ${latDir} / ${Math.abs(lng)}° ${lngDir}`;
+            }
+        });
+
         return true;
     }
 
@@ -249,8 +261,34 @@ class MapboxEngine {
 
     flyToCountry(lngLat, zoom = 4.5) {
         if (!this.map) return;
+        
+        // Cancel any existing orbit
+        if (this._orbitAnimId) {
+            cancelAnimationFrame(this._orbitAnimId);
+            this._orbitAnimId = null;
+        }
+
         const currentZoom = this.map.getZoom();
         const isGlobeView = currentZoom < 3;
+
+        const startOrbit = () => {
+            let bearing = this.map.getBearing();
+            const orbit = () => {
+                if(this.map.isUserInteracting() || this._orbitAnimId === null) return;
+                bearing += 0.08;
+                this.map.easeTo({ bearing, duration: 0, easing: t => t });
+                this._orbitAnimId = requestAnimationFrame(orbit);
+            };
+            this._orbitAnimId = requestAnimationFrame(orbit);
+            
+            // Auto-cancel orbit when user drags map manually
+            this.map.once('dragstart', () => {
+                if (this._orbitAnimId) {
+                    cancelAnimationFrame(this._orbitAnimId);
+                    this._orbitAnimId = null;
+                }
+            });
+        };
 
         if (isGlobeView) {
             this.map.easeTo({ zoom: 1.8, pitch: 0, bearing: 0, duration: 600 });
@@ -258,24 +296,26 @@ class MapboxEngine {
                 this.map.flyTo({
                     center: lngLat,
                     zoom,
-                    pitch: 45,
+                    pitch: 55,
                     bearing: -15,
                     essential: true,
-                    duration: 2800,
-                    curve: 1.6,
+                    duration: 3200,
+                    curve: 1.4,
                     easing: t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
                 });
+                this.map.once('moveend', startOrbit);
             }, 700);
         } else {
             this.map.flyTo({
                 center: lngLat,
                 zoom,
-                pitch: 42,
+                pitch: 55,
                 bearing: -10,
                 essential: true,
-                duration: 2200,
-                curve: 1.42
+                duration: 2500,
+                curve: 1.2
             });
+            this.map.once('moveend', startOrbit);
         }
     }
 

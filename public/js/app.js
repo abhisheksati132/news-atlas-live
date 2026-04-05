@@ -602,8 +602,14 @@ window.activateMapInteraction = () => {
     }
     
     if (window.mapEngine) {
-        if (!window.mapEngine.ready) window.mapEngine.init();
-        window.mapEngine.enableInteractions();
+        // Ensure map is interactive
+        window.mapEngine.init().then(() => {
+            window.mapEngine.enableInteractions();
+            // Initial fly-to to wake up the engine
+            if (window.mapEngine.map) {
+                window.mapEngine.map.flyTo({ zoom: 2.2, duration: 1500 });
+            }
+        });
     }
     
     if (window.playTacticalSound) window.playTacticalSound('success');

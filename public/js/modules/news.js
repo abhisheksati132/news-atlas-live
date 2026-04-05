@@ -199,6 +199,9 @@ function displayNewsArticles(articles) {
           <div class="h-px flex-1 bg-white/5"></div>
           <span class="text-[9px] font-bold tracking-[0.2em] font-mono ${sentiment.cls}">${sentiment.label}</span>
         </div>
+        
+        ${imgHtml}
+
         <div class="flex flex-col gap-2">
           <h3 class="text-[20px] font-bold text-white leading-[1.2] tracking-tight group-hover:text-slate-300 transition-colors" style="font-family: 'Plus Jakarta Sans', sans-serif;" onclick="window.open('${escapeHtml(art.link)}', '_blank')">${escapeHtml(art.title)}</h3>
           ${art.description ? `<p class="text-[14px] text-slate-500 leading-relaxed font-normal line-clamp-2 max-w-3xl">${escapeHtml(art.description)}</p>` : ''}

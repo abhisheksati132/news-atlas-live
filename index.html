@@ -182,6 +182,35 @@
     <!-- ORBITAL MAP LAYER (Base Layer) -->
     <div id="map-layer" class="fixed inset-0 z-0 bg-[#02040a]">
       <div id="map-container" class="w-full h-full"></div>
+      
+      <!-- INITIAL INTERACTION GATEWAY -->
+      <div id="map-interaction-overlay" class="map-interaction-overlay">
+        <button onclick="window.activateMapInteraction()"
+          class="group relative px-8 py-4 rounded-full overflow-hidden transition-all hover:scale-105 active:scale-95">
+          <div class="absolute inset-0 bg-blue-600/20 backdrop-blur-md border border-blue-500/30"></div>
+          <div class="relative flex items-center gap-4 text-blue-400 group-hover:text-white transition-colors">
+            <i class="fas fa-radar animate-pulse"></i>
+            <span class="text-[12px] font-black uppercase tracking-[0.4em] font-mono">Activate Tactical View</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- MAP CONTROLS HUB -->
+      <div id="map-controls" class="fixed bottom-12 right-12 z-[100] flex flex-col gap-4">
+        <button onclick="window.toggleMapStyle()" class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/45 backdrop-blur-3xl border border-white/10 text-white/50 hover:text-blue-400 hover:border-blue-500/30 transition-all shadow-2xl" title="Sector Style Shift">
+          <i class="fas fa-layer-group text-sm"></i>
+        </button>
+        <button onclick="window.toggleMapProjection()" id="projection-toggle-btn" class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/45 backdrop-blur-3xl border border-white/10 text-white/50 hover:text-blue-400 hover:border-blue-500/30 transition-all shadow-2xl" title="Morph Projection">
+          <i class="fas fa-globe text-sm"></i>
+        </button>
+        <div class="h-px w-8 bg-white/5 mx-auto"></div>
+        <button onclick="window.zoomMap(1.2)" class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/45 backdrop-blur-3xl border border-white/10 text-white/50 hover:text-blue-400 hover:border-blue-500/30 transition-all shadow-2xl" title="Zoom In Telemetry">
+          <i class="fas fa-plus text-xs"></i>
+        </button>
+        <button onclick="window.zoomMap(0.8)" class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/45 backdrop-blur-3xl border border-white/10 text-white/50 hover:text-blue-400 hover:border-blue-500/30 transition-all shadow-2xl" title="Zoom Out Telemetry">
+          <i class="fas fa-minus text-xs"></i>
+        </button>
+      </div>
     </div>
 
     <!-- UI OVERLAY LAYER -->
@@ -207,6 +236,42 @@
                   class="w-full bg-transparent border-none py-3 text-[12px] font-bold text-white placeholder-slate-800 focus:outline-none uppercase tracking-widest transition-all"
                   style="font-family: 'JetBrains Mono', monospace" onkeydown="if (event.key === 'Enter') searchCityForTab('intel');" />
                 <button onclick="searchCityForTab('intel')" class="absolute right-0 top-1/2 -translate-y-1/2 text-[10px] text-blue-400 font-black uppercase tracking-widest hover:text-white transition-colors">SCAN</button>
+              </div>
+              
+              <div id="back-to-global-wrap" class="hidden">
+                 <button onclick="resetToGlobalCenter()" class="px-4 py-2 bg-white/5 border border-white/10 text-[9px] font-black text-slate-500 uppercase tracking-widest hover:text-white hover:border-blue-500/50 transition-all rounded-sm flex items-center gap-2">
+                   <div class="w-1 h-1 bg-blue-500"></div>
+                   Return to Global
+                 </button>
+              </div>
+            </div>
+
+            <!-- SECTOR IDENTITY HEADER -->
+            <div class="flex items-center justify-between mb-12">
+              <div class="flex items-center gap-8">
+                <div class="relative group">
+                  <div class="absolute -inset-2 bg-blue-600/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-all"></div>
+                  <div id="sector-globe-icon" class="w-16 h-16 rounded-full bg-slate-900 border border-white/10 flex items-center justify-center relative">
+                    <i class="fas fa-satellite text-2xl text-blue-500/80"></i>
+                  </div>
+                  <img id="sector-flag" src="" class="hidden w-16 h-16 rounded-full object-cover border-2 border-white/10 shadow-2xl relative" />
+                </div>
+                <div>
+                  <h1 id="sector-name" class="text-5xl font-black text-white tracking-tighter uppercase mb-2">Global Sector</h1>
+                  <div class="flex items-center gap-4">
+                    <span class="text-[9px] text-slate-600 font-black uppercase tracking-[0.4em] font-mono">Status: Uplink Nominal</span>
+                    <div class="w-1 h-1 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex gap-2">
+                <button onclick="downloadDossier()" class="p-3 bg-white/5 border border-white/5 text-slate-500 hover:text-white hover:border-blue-500/50 transition-all">
+                  <i class="fas fa-file-pdf text-sm"></i>
+                </button>
+                <div class="p-3 bg-white/5 border border-white/5 text-blue-500/50">
+                  <i id="neural-sync-icon" class="fas fa-sync-alt fa-spin text-sm"></i>
+                </div>
               </div>
             </div>
             <div id="hierarchy-panel" class="hidden">
@@ -257,13 +322,32 @@
             </div>
             <!-- SYSTEM INTELLIGENCE -->
             <div id="ai-briefing-box" class="mb-12">
-              <div class="flex items-center gap-3 mb-6">
+              <div class="flex items-center gap-3 mb-8">
                 <div class="w-1.5 h-1.5 bg-blue-500"></div>
                 <span class="text-[9px] text-slate-400 uppercase font-bold tracking-[0.4em] font-mono">Strategic Signal Deck</span>
               </div>
               
               <div id="ai-briefing-text" class="text-slate-400 font-sans text-[15px] leading-relaxed max-w-3xl">
-                System awaiting sector initialization. Map selection required to generate tactical briefing.
+                <div class="space-y-12">
+                  <div class="group">
+                    <span class="text-[12px] text-blue-500 font-black uppercase tracking-[0.3em] font-mono mb-4 block">Executive Summary</span>
+                    <p id="intel-lead" class="text-[17px] text-slate-300 font-medium leading-relaxed max-w-2xl">
+                      Strategic situational awareness for Global Context sector is complete. High-priority baselines are nominal.
+                    </p>
+                  </div>
+                  
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-16">
+                    <!-- GRID ITEMS -->
+                    <div class="hover-uplink">
+                       <span class="text-[12px] text-slate-500 font-black uppercase tracking-widest font-mono mb-3 block">Political Stability</span>
+                       <p id="intel-pol" class="text-[15px] text-slate-400 leading-relaxed">Internal governance sectors maintain standard operational stability. No major tactical deviations detected.</p>
+                    </div>
+                    <div class="hover-uplink">
+                       <span class="text-[12px] text-slate-500 font-black uppercase tracking-widest font-mono mb-3 block">Trade Relations</span>
+                       <p id="intel-trade" class="text-[15px] text-slate-400 leading-relaxed">Cross-border trade relays show mission-ready resilience and active strategic partnerships.</p>
+                    </div>
+                  </div>
+                </div>
               </div>
               
               <div id="ai-briefing-loading" class="hidden py-4 text-left">

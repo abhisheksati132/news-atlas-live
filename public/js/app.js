@@ -595,15 +595,16 @@ window.fetchMarketIntel = (loc, cur) => {
     if (window.initializeMarkets) window.initializeMarkets(loc);
 };
 window.activateMapInteraction = () => {
-    const map = document.getElementById('map-container');
     const overlay = document.getElementById('map-interaction-overlay');
-    if (map) {
-        map.classList.remove('map-locked');
-        map.classList.add('map-unlocked');
+    if (overlay) {
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.classList.add('hidden'), 500);
     }
-    if (overlay) overlay.classList.add('hidden');
+    
+    if (window.mapEngine) {
+        if (!window.mapEngine.ready) window.mapEngine.init();
+        window.mapEngine.enableInteractions();
+    }
+    
     if (window.playTacticalSound) window.playTacticalSound('success');
-    if (window.mapEngine && !window.mapEngine.ready) {
-        window.mapEngine.init();
-    }
 };

@@ -597,8 +597,9 @@ window.fetchMarketIntel = (loc, cur) => {
 window.activateMapInteraction = () => {
     const overlay = document.getElementById('map-interaction-overlay');
     if (overlay) {
-        overlay.style.opacity = '0';
-        setTimeout(() => overlay.classList.add('hidden'), 500);
+        overlay.classList.add('hidden');
+        overlay.style.pointerEvents = 'none';
+        overlay.style.display = 'none';
     }
     
     if (window.mapEngine) {

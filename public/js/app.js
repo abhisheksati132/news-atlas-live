@@ -23,6 +23,18 @@ window.currencyCode = currencyCode;
 window.iso2Code = iso2Code;
 window.currentCategory = currentCategory;
 
+window.toggleHierarchyCollapse = (type) => {
+    const content = document.getElementById(`${type}-collapse-content`);
+    const icon = document.getElementById(`${type}-collapse-icon`);
+    if (content) {
+        content.classList.toggle('hidden');
+    }
+    if (icon) {
+        icon.classList.toggle('fa-chevron-down');
+        icon.classList.toggle('fa-chevron-up');
+    }
+};
+
 function magColor(m) {
   return m >= 7 ? "#ef4444" : m >= 6 ? "#f97316" : m >= 5 ? "#eab308" : "#10b981";
 }

@@ -111,7 +111,18 @@ header {
   height: calc(100vh - var(--header-h));
   position: relative;
   margin-top: var(--header-h);
+  pointer-events: none; /* Let clicks pass through to the fixed map layer */
 }
+/* Restore pointer events for actual interactive UI layers */
+.main-content > #ui-overlay,
+#map-controls,
+#modular-intelligence-sector,
+#modular-intelligence-sector * {
+  pointer-events: auto;
+}
+/* Map controls always clickable */
+#map-controls button { pointer-events: auto; }
+
 
 .nav-sector-link {
   font-size: 13px; /* Upscaled from 12px */

@@ -196,8 +196,13 @@ window.switchTab = (id) => {
 
   document.querySelectorAll(".nav-sector-link").forEach(link => {
     const action = link.getAttribute('onclick') || "";
-    if (action.includes(`'${id}'`)) link.classList.add("active");
-    else link.classList.remove("active");
+    if (action.includes(`'${id}'`) || 
+        (id === 'intel' && action.includes("'summary'")) ||
+        (id === 'atmosphere' && action.includes("'weather'"))) {
+      link.classList.add("active");
+    } else {
+      link.classList.remove("active");
+    }
   });
 
   document.querySelectorAll(".tab-content").forEach((c) => {
@@ -262,10 +267,12 @@ window.toggleMapProjection = function() {
 
 window.toggleMapStyle = function() {
   if (!window.mapEngine) return;
-  const styles = ['dark-v11', 'satellite-streets-v12'];
-  window._styleIdx = (window._styleIdx || 0) + 1;
-  if (window._styleIdx >= styles.length) window._styleIdx = 0;
-  window.mapEngine.setStyle('mapbox://styles/mapbox/' + styles[window._styleIdx]);
+  const styles = [
+    'mapbox://styles/mapbox/satellite-streets-v12',
+    'mapbox://styles/mapbox/dark-v11'
+  ];
+  window._styleIdx = ((window._styleIdx || 0) + 1) % styles.length;
+  window.mapEngine.setStyle(styles[window._styleIdx]);
 };
 
 window.zoomMap = function(factor) {
@@ -309,9 +316,7 @@ window.searchCityForTab = async (tabId) => {
 };
 
 window.mapEngine = new MapboxEngine('map-container');
-window.mapEngine.init().then(() => {
-    if (window.mapEngine.ready) window.mapEngine.enableInteractions();
-});
+window.mapEngine.init(); // interactions enabled inside style.load callback in mapbox-engine.js
 
 initTerminal();
 setupEventListeners();

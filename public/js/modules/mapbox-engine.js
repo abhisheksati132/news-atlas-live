@@ -44,7 +44,11 @@ class MapboxEngine {
             bearing: 0,
             projection: 'globe',
             attributionControl: false,
-            antialias: true
+            antialias: true,
+            scrollZoom: true,
+            dragRotate: true,
+            dragPan: true,
+            touchZoomRotate: true
         });
 
         this.map.on('style.load', () => {
@@ -54,7 +58,11 @@ class MapboxEngine {
             this.initMapboxLayers();
             this._startDeckAnimation();
             this.ready = true;
+            // Always enable interactions on load — no gateway needed
+            this.enableInteractions();
             this.onReady();
+            // Start subtle auto-rotation
+            this._startAutoRotation();
         });
 
         this.map.on('zoom', () => {
@@ -87,11 +95,11 @@ class MapboxEngine {
     _applyAtmosphere() {
         try {
             this.map.setFog({
-                'color': 'rgb(13, 17, 23)',
-                'high-color': 'rgb(9, 12, 18)',
-                'horizon-blend': 0.03,
-                'space-color': 'rgb(3, 5, 10)',
-                'star-intensity': 0,
+                'color': 'rgb(5, 8, 20)',
+                'high-color': 'rgb(3, 6, 15)',
+                'horizon-blend': 0.02,
+                'space-color': 'rgb(2, 3, 8)',
+                'star-intensity': 0.85,
                 'range': [0.5, 10]
             });
         } catch (e) {
@@ -469,12 +477,35 @@ class MapboxEngine {
         this.clearHoloHUD();
     }
 
+    _startAutoRotation() {
+        if (!this.map) return;
+        this._isRotating = true;
+
+        const rotate = () => {
+            if (!this._isRotating || !this.map) return;
+            this.map.setBearing((this.map.getBearing() + 0.008) % 360);
+            this._rotateAnimId = requestAnimationFrame(rotate);
+        };
+        this._rotateAnimId = requestAnimationFrame(rotate);
+
+        // Stop rotation on any user interaction
+        const stopRotation = () => {
+            this._isRotating = false;
+            if (this._rotateAnimId) cancelAnimationFrame(this._rotateAnimId);
+        };
+        this.map.once('mousedown', stopRotation);
+        this.map.once('touchstart', stopRotation);
+        this.map.once('wheel', stopRotation);
+    }
+
     enableInteractions() {
         if (!this.map) return;
         this.map.scrollZoom.enable();
         this.map.dragPan.enable();
         this.map.dragRotate.enable();
         this.map.touchZoomRotate.enable();
+        this.map.keyboard.enable();
+        this.map.doubleClickZoom.enable();
     }
 
     disableInteractions() {

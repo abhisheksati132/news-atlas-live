@@ -38,11 +38,7 @@
 </head>
 
 <body class="flex flex-col night-theme">
-  <div class="aurora-container">
-    <div class="aurora-glow aurora-1"></div>
-    <div class="aurora-glow aurora-2"></div>
-    <div class="aurora-glow aurora-3"></div>
-  </div>
+  <!-- Clean Terminal Foundation -->
   <div id="map-tooltip" class="fixed hidden text-white rounded-sm border-l-2 border-l-blue-500 overflow-hidden" style="
         background: #0f172a;
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -86,16 +82,14 @@
         style="padding:14px 32px; border-top:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center; background: rgba(255,255,255,0.01);">
         <span
           style="font-size:10px; font-family:'JetBrains Mono',monospace; color:#475569; text-transform:uppercase; letter-spacing:0.2em;">Search
-          Index Active</span>
+          Directory</span>
         <span
           style="display:flex; align-items:center; gap:8px; font-size:10px; font-family:'JetBrains Mono',monospace; color:#3b82f6; font-weight:800;">
-          <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>SYSTEM ONLINE
+          <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>ACTIVE
         </span>
       </div>
     </div>
   </div>
-
-  <div class="telemetry-scan"></div>
 
   <header class="border-b border-white/5 bg-slate-900/40 backdrop-blur-3xl">
     <div class="flex items-center gap-10">
@@ -107,12 +101,12 @@
 
     <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-10">
       <button onclick="window.backToOrbital()" class="nav-sector-link active">Globe</button>
-      <button onclick="window.switchTab('summary')" class="nav-sector-link">Intelligence</button>
+      <button onclick="window.switchTab('summary')" class="nav-sector-link">Overview</button>
       <button onclick="window.switchTab('news')" class="nav-sector-link">News</button>
       <button onclick="window.switchTab('markets')" class="nav-sector-link">Markets</button>
       <button onclick="window.switchTab('weather')" class="nav-sector-link">Atmosphere</button>
       <button onclick="window.switchTab('economic')" class="nav-sector-link">Economics</button>
-      <button onclick="window.switchTab('neural')" class="nav-sector-link">AI</button>
+      <button onclick="window.switchTab('neural')" class="nav-sector-link">Analysis</button>
     </div>
 
     <div class="flex items-center gap-6">
@@ -146,10 +140,10 @@
     <div id="geo-tracker-hud" class="fixed bottom-10 left-10 z-[100] bg-slate-950/80 backdrop-blur-xl border border-white/10 rounded-lg p-3 hidden md:flex items-center gap-4 pointer-events-none shadow-2xl">
       <div class="flex items-center gap-2">
         <i class="fas fa-crosshairs text-blue-500 text-[10px] animate-pulse"></i>
-        <span class="text-[9px] text-slate-400 uppercase tracking-[0.3em] font-mono">Geo-Lock</span>
+        <span class="text-[9px] text-slate-400 uppercase tracking-[0.3em] font-mono">Coordinates</span>
       </div>
       <div class="h-4 w-px bg-white/10"></div>
-      <span id="geo-lat-lng" class="text-[11px] font-black text-white font-mono tracking-widest">AWAITING TLM</span>
+      <span id="geo-lat-lng" class="text-[11px] font-black text-white font-mono tracking-widest">AWAITING LOCATION</span>
     </div>
 
     <div id="map-controls" class="fixed bottom-12 right-12 z-[100] flex flex-col gap-4">
@@ -664,9 +658,8 @@
                 class="flex-1 bg-black/40 rounded-3xl border border-white/5 overflow-hidden flex flex-col shadow-2xl">
                 <div class="px-8 py-4 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
                   <div class="flex items-center gap-3">
-                    <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
-                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest font-mono">AI ·
-                      Online</span>
+                    <div class="w-1.5 h-1.5 bg-slate-500 rounded-full"></div>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest font-mono">System Assistant</span>
                   </div>
                   <button onclick="document.getElementById('neural-chat-log').innerHTML=''"
                     class="text-[10px] text-slate-600 hover:text-white transition-colors">Clear</button>
@@ -674,24 +667,24 @@
                 <div id="neural-chat-log" class="flex-1 p-8 overflow-y-auto custom-scrollbar space-y-8 min-h-[400px]">
                   <div class="flex gap-4">
                     <div
-                      class="w-8 h-8 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
-                      <i class="fas fa-robot text-[10px] text-blue-500"></i>
+                      class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0">
+                      <i class="fas fa-server text-[10px] text-slate-400"></i>
                     </div>
                     <div
                       class="bg-white/5 rounded-2xl rounded-tl-none p-5 text-sm text-slate-300 leading-relaxed max-w-[85%] border border-white/5">
-                      Hi! Ask me anything about a country, market, weather, or current events.
+                      Data console ready. Request macroeconomic vectors, climate patterns, or political event briefings.
                     </div>
                   </div>
                 </div>
                 <div class="p-6 bg-slate-900/40 border-t border-white/5">
                   <div
                     class="flex gap-4 items-center bg-white/5 rounded-2xl border border-white/5 p-2 pr-4 focus-within:border-blue-500/40 transition-all">
-                    <input type="text" id="neural-chat-input" placeholder="Ask anything..."
+                    <input type="text" id="neural-chat-input" placeholder="Execute analysis query..."
                       class="flex-1 bg-transparent border-none outline-none text-[15px] text-white placeholder-slate-700 font-medium px-4 py-2"
                       onkeydown="if(event.key==='Enter')sendNeuralInquiry()" />
                     <button onclick="sendNeuralInquiry()"
-                      class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20">
-                      <i class="fas fa-paper-plane text-xs"></i>
+                      class="w-10 h-10 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center hover:bg-slate-700 transition-all border border-slate-700">
+                      <i class="fas fa-arrow-right text-xs"></i>
                     </button>
                   </div>
                 </div>
@@ -976,8 +969,8 @@
   <div id="temporal-scrubber" class="fixed bottom-0 left-0 right-0 z-[150] px-8 py-6 pointer-events-none hidden md:flex items-end justify-center transition-opacity duration-300">
     <div class="w-full max-w-4xl pointer-events-auto bg-slate-900/60 backdrop-blur-md border border-white/10 rounded-full px-6 py-3 flex flex-col gap-2 shadow-2xl">
       <div class="flex items-center justify-between">
-        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">Telemetry T-Minus</span>
-        <span id="temporal-readout" class="text-[10px] font-black text-cyan-400 font-mono">-0H (LIVE)</span>
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">Historical Record</span>
+        <span id="temporal-readout" class="text-[10px] font-black text-blue-400 font-mono">-0H (LIVE)</span>
       </div>
       <input type="range" id="temporal-slider" min="-72" max="0" value="0" class="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer outline-none">
     </div>
@@ -992,32 +985,18 @@
             readout.innerText = h === 0 ? '-0H (LIVE)' : `${h}H`;
             if(h !== 0) {
                document.body.classList.add('temporal-shift-active');
-               readout.classList.remove('text-cyan-400');
-               readout.classList.add('text-amber-400');
+               readout.classList.remove('text-blue-400');
+               readout.classList.add('text-amber-500');
             } else {
                document.body.classList.remove('temporal-shift-active');
-               readout.classList.add('text-cyan-400');
-               readout.classList.remove('text-amber-400');
+               readout.classList.add('text-blue-400');
+               readout.classList.remove('text-amber-500');
             }
         });
     }
   </script>
 
-  <div id="floating-cli" class="cli-locked border border-white/5 overflow-hidden bg-slate-950/95 backdrop-blur-xl">
-    <div id="floating-cli-handle" onclick="window.toggleCLI()"
-      class="p-4 border-b border-white/5 bg-white/[0.02] cursor-pointer">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Assistant</span>
-        </div>
-        <button onclick="window.closeCLI(event)" class="text-slate-600 hover:text-white transition-colors">
-          <i class="fas fa-times text-xs"></i>
-        </button>
-      </div>
-    </div>
-    <div id="react-ai-assistant">
-    </div>
-  </div>
+
   <div id="cmd-palette-overlay" class="fixed inset-0 z-[200] hidden items-start justify-center pt-24 px-4"
     onclick="if (event.target === this) window.closeCommandPalette();"
     style="display: none; background: rgba(2, 6, 23, 0.75)">

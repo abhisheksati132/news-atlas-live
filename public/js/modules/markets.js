@@ -126,7 +126,49 @@ async function displayCommodities() {
     if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-[10px] py-6 text-center uppercase font-black">Data Offline</div>';
   } catch { container.innerHTML = '<div class="text-red-500 text-[10px] py-6 text-center uppercase font-black">Pipeline Failure</div>'; }
 }
+function renderTVChart(countryName) {
+  if (typeof TradingView === 'undefined') return;
+  
+  const countryToSymbol = {
+    "united states": "NASDAQ:NDX",
+    "usa": "NASDAQ:NDX",
+    "china": "TVC:SHCOMP",
+    "japan": "TVC:NI225",
+    "germany": "XETR:DAX",
+    "united kingdom": "TVC:UKX",
+    "uk": "TVC:UKX",
+    "france": "EURONEXT:PX1",
+    "india": "BSE:SENSEX",
+    "brazil": "BMFBOVESPA:IBOV",
+    "canada": "TSX:TSX",
+    "australia": "ASX:XJO"
+  };
+  
+  const symbol = countryToSymbol[(countryName || "Global").toLowerCase()] || "NASDAQ:NDX";
+
+  document.getElementById("tv-advanced-chart").innerHTML = "";
+  new TradingView.widget({
+    "autosize": true,
+    "symbol": symbol,
+    "interval": "D",
+    "timezone": "Etc/UTC",
+    "theme": "dark",
+    "style": "3", // Area chart
+    "locale": "en",
+    "enable_publishing": false,
+    "backgroundColor": "rgba(2, 6, 23, 1)",
+    "gridColor": "rgba(255, 255, 255, 0.03)",
+    "hide_top_toolbar": false,
+    "hide_legend": false,
+    "save_image": false,
+    "container_id": "tv-advanced-chart",
+    "toolbar_bg": "rgba(2, 6, 23, 1)",
+    "studies": []
+  });
+}
+
 function initializeMarkets(countryName) {
+  renderTVChart(countryName);
   displayPreciousMetals();
   displayCountryIndices(countryName || "Global");
   displayForex();

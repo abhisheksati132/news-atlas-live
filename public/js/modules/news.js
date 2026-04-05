@@ -99,8 +99,6 @@ async function fetchNews(overrideQ) {
     if (window.showToast) window.showToast("News feed unavailable. Check your connection.", "error");
   } finally {
     if (loading) loading.classList.add("hidden");
-    const stamp = document.getElementById("news-last-updated");
-    if (stamp) stamp.innerText = `Updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
   }
 }
 window.filterNews = (searchTerm) => {

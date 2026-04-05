@@ -166,11 +166,21 @@ async function fetchAllData(countryName) {
         nameEl.innerText = c.name.common;
       }
       
-      window.fetchNews(c.name.common);
-      if (window.initializeMarkets) window.initializeMarkets(c.name.common);
-      if (window.generateAIBriefing) window.generateAIBriefing(c.name.common);
+      const cName = c.name?.common || countryName;
+      window.fetchNews(cName);
+      if (window.initializeMarkets) window.initializeMarkets(cName);
+      if (window.generateAIBriefing) window.generateAIBriefing(cName);
+      
+      // Trigger Atmosphere (Weather) and Economics
+      if (window.fetchDetailedEconomics) window.fetchDetailedEconomics(cName);
+      if (window.fetchWeather && c.latlng) {
+        window._currentWeatherLocation = cName;
+        window.fetchWeather(c.latlng[0], c.latlng[1]);
+      }
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error("Critical Telemetry Synchronization Failure:", e);
+  }
 }
 
 window.fetchAllData = fetchAllData;
@@ -297,6 +307,77 @@ window.searchCityForTab = async (tabId) => {
       setText("selected-country-name", city.name.toUpperCase());
     }
   } catch (e) {}
+};
+
+window.generateAIBriefing = async (country) => {
+    const textEl = document.getElementById("ai-briefing-text");
+    const loadingEl = document.getElementById("ai-briefing-loading");
+    if (loadingEl) loadingEl.classList.remove("hidden");
+    if (textEl) textEl.style.opacity = "0.4";
+
+    try {
+        const prompt = `Analyze the current geopolitical and strategic situation of ${country}. 
+        Return ONLY a JSON object with 12 analysis factors. 
+        For each factor, write exactly 2-3 highly detailed, professional sentences.
+        Expect these exact keys in the JSON:
+        {
+          "summary": "Executive summary",
+          "political": "Political stability/regime",
+          "trade": "Trade/economics",
+          "infra": "Infrastructure/energy",
+          "social": "Societal sentiment/cohesion",
+          "mil": "Military/defense posture",
+          "tech": "Technology/cyber sovereignty",
+          "health": "Sanitary/health baseline",
+          "finance": "Financial integrity/fiscal",
+          "eco": "Ecological status/climate",
+          "prod": "Industrial productivity/labor",
+          "edu": "Educational/human capital",
+          "log": "Logistics/supply chain fluidity"
+        }
+        Be professional, data-centric, and extremely concise. No markdown formatting.`;
+
+        const res = await fetch("/api/ai", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt })
+        });
+        const data = await res.json();
+        const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || data.response || "{}";
+        const clean = raw.replace(/```json/g, "").replace(/```/g, "").trim();
+        let intel = {};
+        try {
+            intel = JSON.parse(clean);
+        } catch (e) {
+            console.error("Failed to parse Intel JSON:", clean);
+        }
+
+        const map = {
+            "intel-lead": intel.summary || intel.executive_summary || intel.lead,
+            "intel-pol": intel.political || intel.political_stability || intel.stability,
+            "intel-trade": intel.trade || intel.trade_relations || intel.economics,
+            "intel-infra": intel.infra || intel.infrastructure || intel.energy,
+            "intel-social": intel.social || intel.societal_sentiment || intel.sentiment || intel.cohesion,
+            "intel-mil": intel.mil || intel.military || intel.defense || intel.military_posture,
+            "intel-tech": intel.tech || intel.technology || intel.cyber || intel.tech_sovereignty,
+            "intel-health": intel.health || intel.sanitary || intel.medical,
+            "intel-finance": intel.finance || intel.fiscal || intel.transparency,
+            "intel-eco": intel.eco || intel.environment || intel.climate || intel.ecological,
+            "intel-prod": intel.prod || intel.productivity || intel.industrial,
+            "intel-edu": intel.edu || intel.education || intel.human_capital,
+            "intel-log": intel.log || intel.logistics || intel.supply_chain
+        };
+
+        Object.keys(map).forEach(id => {
+            if (map[id]) setText(id, map[id]);
+        });
+
+    } catch (e) {
+        console.error("AI Briefing failed:", e);
+    } finally {
+        if (loadingEl) loadingEl.classList.add("hidden");
+        if (textEl) textEl.style.opacity = "1";
+    }
 };
 
 window.mapEngine = new MapboxEngine('map-container');

@@ -42,17 +42,17 @@ window.showToast = function (message, type = "info") {
   if (!toastTimeout) showNextToast();
 };
 
-window.toggleAboutOverlay = function() {
+window.toggleAboutOverlay = function () {
   const el = document.getElementById('about-overlay');
   if (el) el.classList.toggle('hidden');
 };
 
-window.closeAboutOverlay = function() {
+window.closeAboutOverlay = function () {
   const el = document.getElementById('about-overlay');
   if (el) el.classList.add('hidden');
 };
 
-window.toggleTheme = function() {
+window.toggleTheme = function () {
   const isLight = document.body.classList.toggle('light-theme');
   localStorage.setItem('terminal-theme', isLight ? 'light' : 'dark');
   const icon = document.querySelector('#theme-toggle-btn i');
@@ -84,42 +84,42 @@ function renderTrending() {
   const resContainer = document.getElementById("search-results");
   const searchInput = document.getElementById("country-search");
   if (!resContainer || !searchInput) return;
-  
+
   const query = searchInput.value.trim().toLowerCase();
-  
+
   if (query && window.globalSearchData) {
-    const countries = window.globalSearchData.filter(c => 
-      c.name.common.toLowerCase().includes(query) || 
+    const countries = window.globalSearchData.filter(c =>
+      c.name.common.toLowerCase().includes(query) ||
       (c.name.official && c.name.official.toLowerCase().includes(query))
     ).slice(0, 8);
-    
+
     let html = `<div style="padding: 1.25rem 1.5rem 0.75rem; font-size: 11px; font-weight: 900; color: #475569; text-transform: uppercase; letter-spacing: 0.15em; font-family: 'JetBrains Mono', monospace;">Nations Found</div>`;
-    
+
     if (countries.length > 0) {
-        html += countries.map(c => {
-            const name = c.name.common;
-            return `<div class="flex items-center gap-6 px-8 py-5 hover:bg-white/[0.04] cursor-pointer transition-all border-b border-white/[0.03] group" onclick="window.selectFromSearch('${name.replace(/'/g, "\\'")}')">
+      html += countries.map(c => {
+        const name = c.name.common;
+        return `<div class="flex items-center gap-6 px-8 py-5 hover:bg-white/[0.04] cursor-pointer transition-all border-b border-white/[0.03] group" onclick="window.selectFromSearch('${name.replace(/'/g, "\\'")}')">
               <div class="w-8 h-5 border border-white/10 shrink-0"><img src="${c.flags.svg}" class="w-full h-full object-cover"></div>
               <span class="text-[15px] font-bold text-white uppercase tracking-wider group-hover:text-slate-300 transition-colors" style="font-family: 'Plus Jakarta Sans', sans-serif;">${name}</span>
               <span class="text-[9px] font-bold text-slate-700 ml-auto tracking-[0.2em] font-mono group-hover:text-white transition-all">TERMINAL_SELECT</span>
             </div>`;
-        }).join("");
+      }).join("");
     } else {
-        html = `<div class="px-6 py-4 text-slate-500 text-[11px] uppercase font-bold">Searching Global Registry...</div>`;
+      html = `<div class="px-6 py-4 text-slate-500 text-[11px] uppercase font-bold">Searching Global Registry...</div>`;
     }
 
     resContainer.innerHTML = html;
 
     // Background scan for cities/states
     if (query.length > 2 && mapboxToken) {
-        clearTimeout(window._searchDebounce);
-        window._searchDebounce = setTimeout(async () => {
-            try {
-                const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&types=place,region,locality&limit=5`);
-                const json = await res.json();
-                if (json.features && json.features.length > 0) {
-                    const registryHtml = `<div style="padding: 1.25rem 2rem 0.75rem; font-size: 11px; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: 0.15em; font-family: 'JetBrains Mono', monospace;">Registry Matches</div>` + 
-                    json.features.map(f => `
+      clearTimeout(window._searchDebounce);
+      window._searchDebounce = setTimeout(async () => {
+        try {
+          const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&types=place,region,locality&limit=5`);
+          const json = await res.json();
+          if (json.features && json.features.length > 0) {
+            const registryHtml = `<div style="padding: 1.25rem 2rem 0.75rem; font-size: 11px; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: 0.15em; font-family: 'JetBrains Mono', monospace;">Registry Matches</div>` +
+              json.features.map(f => `
                         <div class="flex items-center gap-6 px-8 py-5 hover:bg-white/[0.04] cursor-pointer transition-all border-b border-white/[0.03] group" onclick="window.selectFromSearch('${f.place_name.replace(/'/g, "\\'")}')">
                           <div class="w-2 h-2 rounded-full bg-white/20 group-hover:bg-white transition-colors shrink-0"></div>
                           <div class="flex flex-col">
@@ -127,10 +127,10 @@ function renderTrending() {
                             <span class="text-[10px] text-slate-600 font-mono mt-1">${f.place_name}</span>
                           </div>
                         </div>`).join("");
-                    resContainer.innerHTML = html + registryHtml;
-                }
-            } catch (e) { console.warn("Geocoding sync failed"); }
-        }, 500);
+            resContainer.innerHTML = html + registryHtml;
+          }
+        } catch (e) { console.warn("Geocoding sync failed"); }
+      }, 500);
     }
     return;
   }
@@ -196,24 +196,24 @@ window.toggleSearch = () => {
   }
 };
 window.selectFromSearch = (name) => {
-    window.toggleSearch();
-    if (window.handleCountryClickByName) {
-        window.handleCountryClickByName(name);
-    }
-    if (window.onCountrySelected) {
-        window.onCountrySelected(name);
-    }
-    // Deep geocoding link for cities/states
-    if (window.mapEngine && window.mapEngine.map) {
-        fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(name)}.json?access_token=${mapboxToken}&limit=1`)
-            .then(r => r.json())
-            .then(data => {
-                if (data.features && data.features[0]) {
-                    const [lng, lat] = data.features[0].center;
-                    window.mapEngine.map.flyTo({ center: [lng, lat], zoom: 6, duration: 2000 });
-                }
-            }).catch(e => console.warn("Selection geocoding failed"));
-    }
+  window.toggleSearch();
+  if (window.handleCountryClickByName) {
+    window.handleCountryClickByName(name);
+  }
+  if (window.onCountrySelected) {
+    window.onCountrySelected(name);
+  }
+  // Deep geocoding link for cities/states
+  if (window.mapEngine && window.mapEngine.map) {
+    fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(name)}.json?access_token=${mapboxToken}&limit=1`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.features && data.features[0]) {
+          const [lng, lat] = data.features[0].center;
+          window.mapEngine.map.flyTo({ center: [lng, lat], zoom: 6, duration: 2000 });
+        }
+      }).catch(e => console.warn("Selection geocoding failed"));
+  }
 };
 window.renderTrending = renderTrending;
 
@@ -422,7 +422,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (searchInp) {
     searchInp.addEventListener("input", () => window.renderTrending());
     searchInp.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") window.toggleSearch();
+      if (e.key === "Escape") window.toggleSearch();
     });
   }
   document.addEventListener("keydown", (e) => {

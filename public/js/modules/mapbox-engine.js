@@ -38,11 +38,12 @@ class MapboxEngine {
         this.map = new mapboxgl.Map({
             container: this.containerId,
             style: 'mapbox://styles/mapbox/satellite-streets-v12',
-            center: [10, 10],
+            center: [15, 0],
             zoom: 1.6,
             pitch: 0,
             bearing: 0,
             projection: 'globe',
+            padding: { top: 72 },
             attributionControl: false,
             antialias: true,
             scrollZoom: true,
@@ -281,7 +282,7 @@ class MapboxEngine {
     resetToGlobe() {
         if (!this.map) return;
         this.map.flyTo({
-            center: [10, 15],
+            center: [15, 0],
             zoom: 1.5,
             pitch: 0,
             bearing: 0,

@@ -42,6 +42,41 @@ window.showToast = function (message, type = "info") {
   if (!toastTimeout) showNextToast();
 };
 
+window.toggleAboutOverlay = function() {
+  const el = document.getElementById('about-overlay');
+  if (el) el.classList.toggle('hidden');
+};
+
+window.closeAboutOverlay = function() {
+  const el = document.getElementById('about-overlay');
+  if (el) el.classList.add('hidden');
+};
+
+window.toggleTheme = function() {
+  const isLight = document.body.classList.toggle('light-theme');
+  localStorage.setItem('terminal-theme', isLight ? 'light' : 'dark');
+  const icon = document.querySelector('#theme-toggle-btn i');
+  if (icon) {
+    if (isLight) icon.classList.replace('fa-moon', 'fa-sun');
+    else icon.classList.replace('fa-sun', 'fa-moon');
+  }
+  if (window.mapEngine && window.mapEngine.ready) {
+    window.mapEngine.setStyle(isLight ? 'mapbox://styles/mapbox/light-v11' : 'mapbox://styles/mapbox/dark-v11');
+  }
+};
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    window.closeAboutOverlay();
+    if (!document.getElementById('search-overlay')?.classList.contains('hidden')) {
+      window.toggleSearch();
+    }
+    if (window._paletteOpen) {
+      window.closeCommandPalette();
+    }
+  }
+});
+
 let mapboxToken = null;
 fetch('/api/config').then(r => r.json()).then(d => mapboxToken = d.mapboxToken);
 

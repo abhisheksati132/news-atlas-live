@@ -115,13 +115,22 @@ header {
 }
 /* Restore pointer events for actual interactive UI layers */
 .main-content > #ui-overlay,
-#map-controls,
-#modular-intelligence-sector,
-#modular-intelligence-sector * {
-  pointer-events: auto;
+#modular-intelligence-sector {
+  pointer-events: none !important;
 }
-/* Map controls always clickable */
-#map-controls button { pointer-events: auto; }
+
+#map-layer,
+#map-container,
+#map-container canvas,
+#map-controls,
+#map-controls button,
+#search-overlay,
+#palette-overlay,
+.toast-container,
+.nav-tab,
+.nav-sector-link {
+  pointer-events: auto !important;
+}
 
 
 .nav-sector-link {
@@ -661,20 +670,6 @@ input[type="text"]:focus { border-color: rgba(255, 255, 255, 0.2); background: r
   outline: none !important;
 }
 
-#intelligence-hub.mode-sector #modular-intelligence-sector {
-  display: flex !important;
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-#intelligence-hub.mode-orbital #modular-intelligence-sector {
-  opacity: 0;
-  transform: translateY(20px);
-  pointer-events: none;
-  display: none !important;
-}
-
 #modular-intelligence-sector {
   background: var(--hub-bg, rgba(8, 12, 21, 0.92)) !important;
   backdrop-filter: blur(48px) saturate(200%) !important;
@@ -682,7 +677,7 @@ input[type="text"]:focus { border-color: rgba(255, 255, 255, 0.2); background: r
   display: flex;
   flex-direction: column;
   height: 100vh;
-  transition: background 0.35s ease;
+  transition: background 0.35s ease, opacity 0.5s ease;
 }
 
 #sidebar-content {

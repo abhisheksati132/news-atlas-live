@@ -7,7 +7,9 @@
   <title>NewsAtlas | Global News Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
   <link rel="preconnect" href="https://unpkg.com" crossorigin />
   <link rel="dns-prefetch" href="https://unpkg.com" />
   <link rel="prefetch" href="//unpkg.com/three-globe/example/img/earth-night.jpg" />
@@ -31,55 +33,6 @@
   <script type="module" src="/src/main.jsx"></script>
   <script type="module" src="/js/app.js"></script>
   <link rel="stylesheet" href="/css/style.css" />
-  <style>
-    .hidden {
-      display: none !important;
-    }
-  </style>
-  <script>
-    function toggleAboutOverlay() {
-      var el = document.getElementById('about-overlay');
-      if (el) el.classList.toggle('hidden');
-    }
-    function closeAboutOverlay() {
-      var el = document.getElementById('about-overlay');
-      if (el) el.classList.add('hidden');
-    }
-    window.toggleMapStyle = function() {
-      if (!window.mapEngine) return;
-      const styles = ['dark-v11', 'light-v11', 'satellite-streets-v12'];
-      window._styleIdx = (window._styleIdx || 0) + 1;
-      if (window._styleIdx >= styles.length) window._styleIdx = 0;
-      window.mapEngine.setStyle('mapbox://styles/mapbox/' + styles[window._styleIdx]);
-    };
-
-    window.zoomMap = function(factor) {
-      if (window.mapEngine && window.mapEngine.map) {
-        const current = window.mapEngine.map.getZoom();
-        window.mapEngine.map.zoomTo(factor > 1 ? current + 1 : current - 1);
-      }
-    };
-    window.toggleTheme = function() {
-      const isLight = document.body.classList.toggle('light-theme');
-      localStorage.setItem('terminal-theme', isLight ? 'light' : 'dark');
-      const icon = document.querySelector('#theme-toggle-btn i');
-      if (icon) {
-        if (isLight) icon.classList.replace('fa-moon', 'fa-sun');
-        else icon.classList.replace('fa-sun', 'fa-moon');
-      }
-      if (window.mapEngine && window.mapEngine.ready) {
-        window.mapEngine.setStyle(isLight ? 'mapbox://styles/mapbox/light-v11' : 'mapbox://styles/mapbox/dark-v11');
-      }
-    };
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') {
-        closeAboutOverlay();
-        if (window.toggleSearch) window.toggleSearch();
-      }
-    });
-    window.toggleAboutOverlay = toggleAboutOverlay;
-    window.closeAboutOverlay = closeAboutOverlay;
-  </script>
 </head>
 
 <body class="flex flex-col night-theme">
@@ -113,676 +66,716 @@
       </div>
     </div>
   </div>
-  <div id="search-overlay" class="fixed inset-0 hidden z-[2200] px-6" style="align-items:center; justify-content:center; background: rgba(8,12,21,0.85); backdrop-filter: blur(24px) saturate(180%);">
-    <div style="width:100%; max-width:680px; background:#0f172a; border:1px solid rgba(255,255,255,0.08); border-radius: 2rem; overflow:hidden; box-shadow: 0 32px 80px rgba(0,0,0,0.6); transform: scale(1);">
-      <div style="display:flex; align-items:center; gap:20px; padding:24px 32px; border-bottom:1px solid rgba(255,255,255,0.05);">
+  <div id="search-overlay" class="fixed inset-0 hidden z-[2200] px-6"
+    style="align-items:center; justify-content:center; background: rgba(8,12,21,0.85); backdrop-filter: blur(24px) saturate(180%);">
+    <div
+      style="width:100%; max-width:680px; background:#0f172a; border:1px solid rgba(255,255,255,0.08); border-radius: 2rem; overflow:hidden; box-shadow: 0 32px 80px rgba(0,0,0,0.6); transform: scale(1);">
+      <div
+        style="display:flex; align-items:center; gap:20px; padding:24px 32px; border-bottom:1px solid rgba(255,255,255,0.05);">
         <i class="fas fa-search" style="color:#3b82f6; font-size:16px; flex-shrink:0; opacity: 0.8;"></i>
         <input type="text" id="country-search" placeholder="Execute Global Search Command..."
           style="flex:1; background:transparent; border:none; color:#f1f5f9; font-size:18px; font-weight:600; outline:none; font-family:'JetBrains Mono',monospace;"
           oninput="window.renderTrending && window.renderTrending()" autocomplete="off" />
-        <button onclick="window.toggleSearch && window.toggleSearch()" style="padding:6px 12px; border-radius: 99px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); color:#64748b; font-size:10px; font-family:'JetBrains Mono',monospace; letter-spacing:0.1em; cursor:pointer;">ESC</button>
+        <button onclick="window.toggleSearch && window.toggleSearch()"
+          style="padding:6px 12px; border-radius: 99px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); color:#64748b; font-size:10px; font-family:'JetBrains Mono',monospace; letter-spacing:0.1em; cursor:pointer;">ESC</button>
       </div>
       <div id="search-results" style="max-height:55vh; overflow-y:auto;" class="custom-scrollbar"></div>
-      <div style="padding:14px 32px; border-top:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center; background: rgba(255,255,255,0.01);">
-        <span style="font-size:10px; font-family:'JetBrains Mono',monospace; color:#475569; text-transform:uppercase; letter-spacing:0.2em;">Search Index Active</span>
-        <span style="display:flex; align-items:center; gap:8px; font-size:10px; font-family:'JetBrains Mono',monospace; color:#3b82f6; font-weight:800;">
+      <div
+        style="padding:14px 32px; border-top:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center; background: rgba(255,255,255,0.01);">
+        <span
+          style="font-size:10px; font-family:'JetBrains Mono',monospace; color:#475569; text-transform:uppercase; letter-spacing:0.2em;">Search
+          Index Active</span>
+        <span
+          style="display:flex; align-items:center; gap:8px; font-size:10px; font-family:'JetBrains Mono',monospace; color:#3b82f6; font-weight:800;">
           <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>SYSTEM ONLINE
         </span>
       </div>
     </div>
   </div>
-  
-  <!-- GLOBAL TELEMETRY SCANNER -->
+
   <div class="telemetry-scan"></div>
 
-  <!-- CLINICAL HEADER -->
   <header class="border-b border-white/5 bg-slate-900/40 backdrop-blur-3xl">
     <div class="flex items-center gap-10">
       <div class="flex items-center gap-3">
         <i class="fas fa-globe text-blue-500 text-sm"></i>
         <span class="text-xs font-black text-white uppercase tracking-[0.4em] font-mono">NewsAtlas</span>
       </div>
-      
-      <!-- SECTOR NAME REMOVED -->
     </div>
 
-    <!-- CENTER NAVIGATION -->
     <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-10">
-      <button onclick="backToOrbital()" class="nav-sector-link active">Globe</button>
-      <button onclick="switchTab('summary')" class="nav-sector-link">Intelligence</button>
-      <button onclick="switchTab('news')" class="nav-sector-link">News</button>
-      <button onclick="switchTab('markets')" class="nav-sector-link">Markets</button>
-      <button onclick="switchTab('weather')" class="nav-sector-link">Atmosphere</button>
-      <button onclick="switchTab('economic')" class="nav-sector-link">Economics</button>
-      <button onclick="switchTab('neural')" class="nav-sector-link">AI</button>
+      <button onclick="window.backToOrbital()" class="nav-sector-link active">Globe</button>
+      <button onclick="window.switchTab('summary')" class="nav-sector-link">Intelligence</button>
+      <button onclick="window.switchTab('news')" class="nav-sector-link">News</button>
+      <button onclick="window.switchTab('markets')" class="nav-sector-link">Markets</button>
+      <button onclick="window.switchTab('weather')" class="nav-sector-link">Atmosphere</button>
+      <button onclick="window.switchTab('economic')" class="nav-sector-link">Economics</button>
+      <button onclick="window.switchTab('neural')" class="nav-sector-link">AI</button>
     </div>
 
     <div class="flex items-center gap-6">
       <div class="flex items-center gap-3">
-        <button onclick="toggleSearch()"
+        <button onclick="window.toggleSearch()"
           class="w-10 h-10 flex items-center justify-center rounded-full transition-all bg-white/5 border border-slate-200 hover:border-blue-500/30 text-slate-400 hover:text-blue-400">
           <i class="fas fa-search text-sm"></i>
         </button>
       </div>
-      
+
       <div class="h-8 w-px bg-slate-200"></div>
-      
+
       <div class="flex items-center gap-4">
         <span id="ist-time" class="text-[10px] font-bold text-slate-500 font-mono tracking-widest">--:-- IST</span>
         <div class="flex gap-1">
-          <button onclick="downloadDossier()" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors"><i class="fas fa-file-export text-xs"></i></button>
-          <a href="/" title="Back to Home" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+          <button onclick="window.downloadDossier()"
+            class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors"><i
+              class="fas fa-file-export text-xs"></i></button>
+          <a href="/" title="Back to Home"
+            class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
             <i class="fas fa-home text-xs"></i>
           </a>
         </div>
       </div>
     </div>
   </header>
-  <main class="main-content">
-    <!-- ORBITAL MAP LAYER (Base Layer) -->
-    <div id="map-layer" class="fixed inset-0 z-0 bg-[#02040a]">
-      <div id="map-container" class="w-full h-full"></div>
-      
-      <!-- INITIAL INTERACTION GATEWAY REMOVED - MAP IS NOW ALWAYS ACTIVE -->
 
+  <div id="map-layer" class="fixed inset-0 z-0 bg-[#02040a]">
+    <div id="map-container" class="w-full h-full"></div>
 
-      <!-- MAP CONTROLS HUB -->
-      <div id="map-controls" class="fixed bottom-12 right-12 z-[100] flex flex-col gap-4">
-        <button onclick="window.toggleMapStyle()" class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/45 backdrop-blur-3xl border border-white/10 text-white/50 hover:text-blue-400 hover:border-blue-500/30 transition-all shadow-2xl" title="Sector Style Shift">
-          <i class="fas fa-layer-group text-sm"></i>
-        </button>
-        <button onclick="window.toggleMapProjection()" id="projection-toggle-btn" class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/45 backdrop-blur-3xl border border-white/10 text-white/50 hover:text-blue-400 hover:border-blue-500/30 transition-all shadow-2xl" title="Morph Projection">
-          <i class="fas fa-globe text-sm"></i>
-        </button>
-        <div class="h-px w-8 bg-white/5 mx-auto"></div>
-        <button onclick="window.zoomMap(1.2)" class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/45 backdrop-blur-3xl border border-white/10 text-white/50 hover:text-blue-400 hover:border-blue-500/30 transition-all shadow-2xl" title="Zoom In Telemetry">
-          <i class="fas fa-plus text-xs"></i>
-        </button>
-        <button onclick="window.zoomMap(0.8)" class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/45 backdrop-blur-3xl border border-white/10 text-white/50 hover:text-blue-400 hover:border-blue-500/30 transition-all shadow-2xl" title="Zoom Out Telemetry">
-          <i class="fas fa-minus text-xs"></i>
-        </button>
-      </div>
+    <div id="map-controls" class="fixed bottom-12 right-12 z-[100] flex flex-col gap-4">
+      <button onclick="window.resetToGlobalCenter()"
+        class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/45 backdrop-blur-3xl border border-white/10 text-white/50 hover:text-blue-400 hover:border-blue-500/30 transition-all shadow-2xl"
+        title="Reset to Global Baseline">
+        <i class="fas fa-expand text-sm"></i>
+      </button>
+      <button onclick="window.toggleMapStyle()"
+        class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/45 backdrop-blur-3xl border border-white/10 text-white/50 hover:text-blue-400 hover:border-blue-500/30 transition-all shadow-2xl"
+        title="Sector Style Shift">
+        <i class="fas fa-layer-group text-sm"></i>
+      </button>
+      <button onclick="window.toggleMapProjection()" id="projection-toggle-btn"
+        class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/45 backdrop-blur-3xl border border-white/10 text-white/50 hover:text-blue-400 hover:border-blue-500/30 transition-all shadow-2xl"
+        title="Morph Projection">
+        <i class="fas fa-globe text-sm"></i>
+      </button>
+      <div class="h-px w-8 bg-white/5 mx-auto"></div>
+      <button onclick="window.zoomMap(1.2)"
+        class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/45 backdrop-blur-3xl border border-white/10 text-white/50 hover:text-blue-400 hover:border-blue-500/30 transition-all shadow-2xl"
+        title="Zoom In Telemetry">
+        <i class="fas fa-plus text-xs"></i>
+      </button>
+      <button onclick="window.zoomMap(0.8)"
+        class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/45 backdrop-blur-3xl border border-white/10 text-white/50 hover:text-blue-400 hover:border-blue-500/30 transition-all shadow-2xl"
+        title="Zoom Out Telemetry">
+        <i class="fas fa-minus text-xs"></i>
+      </button>
     </div>
+  </div>
 
-    <!-- UI OVERLAY LAYER -->
+  <main class="main-content">
     <div id="ui-overlay" class="relative z-10 w-full h-full">
-      <!-- FULL-PAGE INTELLIGENCE HUB -->
-      <aside id="modular-intelligence-sector" class="fixed inset-0 z-20 bg-slate-950/90 backdrop-blur-2xl opacity-0 pointer-events-none transition-all duration-500 ease-in-out flex flex-col pt-[var(--header-h)]">
+      <aside id="modular-intelligence-sector"
+        class="fixed inset-0 z-20 bg-slate-950/90 backdrop-blur-2xl opacity-0 pointer-events-none transition-all duration-500 ease-in-out flex flex-col pt-[var(--header-h)]">
 
-        <div id="sidebar-content" class="flex-1 min-h-0 overflow-y-auto custom-scrollbar pointer-events-auto">
-        <div id="tab-intel" class="tab-content active">
-          <div class="content-scroll-area space-y-8">
-
-            <!-- SEARCH BAR -->
-            <div class="flex items-center gap-3 pb-10 mb-4">
-              <div class="flex-1 relative flex items-center bg-white/[0.04] border border-white/10 rounded-2xl px-5 py-3.5 gap-4 focus-within:border-blue-500/40 transition-all">
-                <i class="fas fa-search text-slate-600 text-sm"></i>
-                <input type="text" id="intel-city-search" placeholder="Search countries..."
-                  class="flex-1 bg-transparent border-none outline-none text-[14px] text-white placeholder-slate-700 font-medium transition-all"
-                  onkeydown="if (event.key === 'Enter') searchCityForTab('intel');" />
-                <button onclick="searchCityForTab('intel')" class="text-slate-500 hover:text-white transition-colors px-2">
-                  <i class="fas fa-arrow-right text-sm"></i>
-                </button>
-              </div>
-              
-              <div id="back-to-global-wrap" class="hidden">
-                 <button onclick="resetToGlobalCenter()" class="px-4 py-2 bg-white/5 border border-white/10 text-[9px] font-black text-slate-500 uppercase tracking-widest hover:text-white hover:border-blue-500/50 transition-all rounded-sm flex items-center gap-2">
-                   <div class="w-1 h-1 bg-blue-500"></div>
-                   Return to Global
-                 </button>
-              </div>
-            </div>
-
-            <!-- SECTOR IDENTITY HEADER REMOVED -->
-            <div id="hierarchy-panel" class="hidden">
-              <div class="flex items-center gap-2 text-sm font-mono mb-3">
-                <span class="text-blue-400 cursor-pointer" onclick="resetToCountry()">
-                  <div class="w-1 h-1 bg-blue-400 inline-block mr-2"></div>
-                  <span id="breadcrumb-country">Country</span>
-                </span>
-                <span id="breadcrumb-state-wrapper" class="hidden">
-                  <span class="text-slate-500"> > </span>
-                  <span class="text-cyan-400 cursor-pointer" onclick="resetToState()">
-                    <span id="breadcrumb-state">State</span>
-                  </span>
-                </span>
-                <span id="breadcrumb-city-wrapper" class="hidden">
-                  <span class="text-slate-500"> > </span>
-                  <span class="text-emerald-400">
-                    <span id="breadcrumb-city">City</span>
-                  </span>
-                </span>
-              </div>
-
-              <div class="flex flex-col gap-6 mt-8">
-                <div id="state-selector" class="hidden">
-                  <div class="flex justify-between items-center cursor-pointer border-b border-white/10 pb-4 mb-4" onclick="toggleHierarchyCollapse('state')">
-                    <h4 class="text-[10px] font-mono font-bold text-blue-400 uppercase tracking-widest">State / Province</h4>
-                    <i id="state-collapse-icon" class="fas fa-chevron-down text-slate-600 transition-transform"></i>
-                  </div>
-                  <div id="state-collapse-content" class="hidden space-y-4">
-                    <input id="state-search" type="text" placeholder="Search Sector Regions..." oninput="filterStateList(this.value)"
-                      class="w-full bg-transparent border-none py-2 text-xs text-white placeholder-slate-800 focus:outline-none font-mono" />
-                    <div id="state-list" class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar"></div>
-                  </div>
-                </div>
-
-                <div id="city-selector" class="hidden">
-                  <div class="flex justify-between items-center cursor-pointer border-b border-white/10 pb-4 mb-4" onclick="toggleHierarchyCollapse('city')">
-                    <h4 class="text-[10px] font-mono font-bold text-cyan-400 uppercase tracking-widest">Select City</h4>
-                    <i id="city-collapse-icon" class="fas fa-chevron-down text-slate-600 transition-transform"></i>
-                  </div>
-                  <div id="city-collapse-content" class="hidden space-y-4">
-                    <input id="city-search" type="text" placeholder="Search Primary Hubs..." oninput="filterCityList(this.value)"
-                      class="w-full bg-transparent border-none py-2 text-xs text-white placeholder-slate-800 focus:outline-none font-mono" />
-                    <div id="city-list" class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- SYSTEM INTELLIGENCE -->
-            <div id="ai-briefing-box" class="mb-12">
-              <div class="flex items-center gap-3 mb-8">
-                <div class="w-1.5 h-1.5 bg-blue-500"></div>
-                <span class="text-[9px] text-slate-400 uppercase font-bold tracking-[0.4em] font-mono">Strategic Signal Deck</span>
-              </div>
-              
-              <div id="ai-briefing-text" class="text-slate-400 font-sans text-[15px] leading-relaxed max-w-3xl">
-                <div class="space-y-12">
-                  <div class="group">
-                    <span class="text-[12px] text-blue-500 font-black uppercase tracking-[0.3em] font-mono mb-4 block">Executive Summary</span>
-                    <p id="intel-lead" class="text-[17px] text-slate-300 font-medium leading-relaxed max-w-2xl">
-                      Strategic situational awareness for Global Context sector is complete. High-priority baselines are nominal.
-                    </p>
-                  </div>
-                  
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-16">
-                    <!-- GRID ITEMS -->
-                    <div class="hover-uplink">
-                       <span class="text-[12px] text-slate-500 font-black uppercase tracking-widest font-mono mb-3 block">Political Stability</span>
-                       <p id="intel-pol" class="text-[15px] text-slate-400 leading-relaxed">Internal governance sectors maintain standard operational stability. No major tactical deviations detected.</p>
-                    </div>
-                    <div class="hover-uplink">
-                       <span class="text-[12px] text-slate-500 font-black uppercase tracking-widest font-mono mb-3 block">Trade Relations</span>
-                       <p id="intel-trade" class="text-[15px] text-slate-400 leading-relaxed">Cross-border trade relays show mission-ready resilience and active strategic partnerships.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div id="ai-briefing-loading" class="hidden py-4 text-left">
-                <span class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] font-mono animate-pulse">Processing Telemetry...</span>
-              </div>
-            </div>
-            
-
-          </div> <!-- End of intel scroll area -->
-        </div> <!-- End of tab-intel -->
-
-
-
-        <div id="tab-news" class="tab-content">
-          <div class="content-scroll-area space-y-8">
-            <!-- NEWS SEARCH & FILTER -->
-            <div class="border-b border-white/5 pb-8 mb-6">
-              <div class="flex flex-col gap-6">
-                <div class="flex items-center gap-3">
-                  <div class="flex-1 relative flex items-center bg-white/[0.04] border border-white/10 rounded-2xl px-5 py-3.5 gap-4 focus-within:border-white/20 transition-all">
-                    <i class="fas fa-search text-slate-600 text-sm"></i>
-                    <input type="text" id="news-search" placeholder="Filter by keyword, region, or source..."
-                      class="flex-1 bg-transparent border-none outline-none text-[14px] text-white placeholder-slate-700 font-medium"
-                      oninput="filterNews(this.value)" />
-                  </div>
-                  <button onclick="clearNewsSearch()"
-                    class="px-5 py-2.5 text-[10px] bg-transparent border border-white/10 text-slate-500 font-bold tracking-[0.2em] uppercase rounded-sm hover:text-white hover:border-white transition-all">
-                    CLEAR
+        <div id="sidebar-content" class="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+          <div id="tab-intel" class="tab-content active">
+            <div class="content-scroll-area space-y-8">
+              <div class="flex items-center gap-3 pb-10 mb-4">
+                <div
+                  class="flex-1 relative flex items-center bg-white/[0.04] border border-white/10 rounded-2xl px-5 py-3.5 gap-4 focus-within:border-blue-500/40 transition-all">
+                  <i class="fas fa-search text-slate-600 text-sm"></i>
+                  <input type="text" id="intel-city-search" placeholder="Search countries..."
+                    class="flex-1 bg-transparent border-none outline-none text-[14px] text-white placeholder-slate-700 font-medium transition-all"
+                    onkeydown="if (event.key === 'Enter') searchCityForTab('intel');" />
+                  <button onclick="searchCityForTab('intel')"
+                    class="text-slate-500 hover:text-white transition-colors px-2">
+                    <i class="fas fa-arrow-right text-sm"></i>
                   </button>
                 </div>
-                
-                <div class="flex gap-4 overflow-x-auto no-scrollbar items-center">
-                  <div class="cursor-pointer text-[10px] font-bold uppercase tracking-[0.2em] py-2 px-4 border border-white/10 rounded-full hover:border-white transition-all active-pill" onclick="window.setCategory(this, 'top')">Top</div>
-                  <div class="cursor-pointer text-[10px] font-bold uppercase tracking-[0.2em] py-2 px-4 border border-transparent text-slate-500 hover:text-white transition-all" onclick="window.setCategory(this, 'politics')">Politics</div>
-                  <div class="cursor-pointer text-[10px] font-bold uppercase tracking-[0.2em] py-2 px-4 border border-transparent text-slate-500 hover:text-white transition-all" onclick="window.setCategory(this, 'business')">Business</div>
-                  <div class="cursor-pointer text-[10px] font-bold uppercase tracking-[0.2em] py-2 px-4 border border-transparent text-slate-500 hover:text-white transition-all" onclick="window.setCategory(this, 'technology')">Tech</div>
-                  <div class="cursor-pointer text-[10px] font-bold uppercase tracking-[0.2em] py-2 px-4 border border-transparent text-slate-500 hover:text-white transition-all" onclick="window.setCategory(this, 'science')">Science</div>
-                  <div class="cursor-pointer text-[10px] font-bold uppercase tracking-[0.2em] py-2 px-4 border border-transparent text-slate-500 hover:text-white transition-all" onclick="window.setCategory(this, 'health')">Health</div>
-                </div>
-              </div>
-            </div>
 
-            <div id="news-loading" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div class="border border-white/5 h-44 skeleton"></div>
-              <div class="border border-white/5 h-44 skeleton"></div>
-              <div class="border border-white/5 h-44 skeleton"></div>
-            </div>
-
-            <div class="flex items-center justify-end px-1 pb-1">
-              <span id="news-last-updated" class="text-[9px] font-mono text-slate-600 tracking-wide"></span>
-            </div>
-            <div id="articles-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0"></div>
-            
-
-          </div> <!-- End of news scroll area -->
-        </div> <!-- End of tab-news -->
-
-
-
-        <div id="tab-markets" class="tab-content">
-          <div class="content-scroll-area space-y-8">
-            <div id="market-terminal-container" class="flex flex-col gap-4">
-              <!-- METALS -->
-              <div class="mb-10">
-                <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4 cursor-pointer"
-                  onclick="toggleMarketCategory('metals')">
-                  <span class="text-[10px] text-white uppercase font-bold tracking-[0.3em]" style="font-family: 'JetBrains Mono', monospace">Precious Metals</span>
-                  <div class="flex items-center gap-4">
-                    <i class="fas fa-chevron-up text-slate-600 text-[10px]" id="metals-chevron"></i>
-                  </div>
-                </div>
-                <div id="metals-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
-              </div>
-
-              <!-- INDICES -->
-              <div class="mb-10">
-                <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-4 cursor-pointer"
-                  onclick="toggleMarketCategory('indices')">
-                  <span class="text-[10px] text-blue-400 uppercase font-bold tracking-[0.3em]" style="font-family: 'JetBrains Mono', monospace">Global Indices</span>
-                  <div class="flex items-center gap-4">
-                    <i class="fas fa-chevron-up text-slate-600 text-[10px]" id="indices-chevron"></i>
-                  </div>
-                </div>
-                <div id="indices-content" class="flex flex-col"></div>
-              </div>
-
-              <!-- FOREX -->
-              <div class="mb-10">
-                <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-4 cursor-pointer"
-                  onclick="toggleMarketCategory('forex')">
-                  <span class="text-[10px] text-cyan-400 uppercase font-bold tracking-[0.3em]" style="font-family: 'JetBrains Mono', monospace">Forex</span>
-                  <div class="flex items-center gap-4">
-                    <i class="fas fa-chevron-up text-slate-600 text-[10px]" id="forex-chevron"></i>
-                  </div>
-                </div>
-                <div id="forex-content" class="flex flex-col"></div>
-              </div>
-
-              <!-- COMMODITIES -->
-              <div class="mb-10">
-                <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-4 cursor-pointer"
-                  onclick="toggleMarketCategory('commodities')">
-                  <span class="text-[10px] text-yellow-400 uppercase font-bold tracking-[0.3em]" style="font-family: 'JetBrains Mono', monospace">Commodities</span>
-                  <div class="flex items-center gap-4">
-                    <i class="fas fa-chevron-up text-slate-600 text-[10px]" id="commodities-chevron"></i>
-                  </div>
-                </div>
-                <div id="commodities-content" class="flex flex-col"></div>
-              </div>
-            </div>
-            
-
-          </div> <!-- End of markets scroll area -->
-        </div> <!-- End of tab-markets -->
-
-
-
-        <div id="tab-atmosphere" class="tab-content">
-          <div class="content-scroll-area space-y-8">
-            <!-- SEARCH BAR -->
-            <div class="flex items-center gap-3 pb-8 mb-4">
-              <div class="flex-1 relative flex items-center bg-white/[0.04] border border-white/10 rounded-2xl px-5 py-3.5 gap-4 focus-within:border-white/20 transition-all">
-                <i class="fas fa-map-marker-alt text-slate-600 text-sm"></i>
-                <input type="text" id="atmosphere-city-search" placeholder="Enter a city..."
-                  class="flex-1 bg-transparent border-none outline-none text-[14px] text-white placeholder-slate-700 font-medium transition-all"
-                  onkeydown="if (event.key === 'Enter') searchCityForTab('atmosphere');" />
-                <button onclick="searchCityForTab('atmosphere')" class="text-slate-500 hover:text-white transition-colors px-2">
-                  <i class="fas fa-arrow-right text-sm"></i>
-                </button>
-              </div>
-            </div>
-
-            <div id="weather-alerts" class="hidden space-y-2 mb-10"></div>
-            
-            <!-- MAIN TELEMETRY GRID -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 border-t border-white/10 pt-10 mt-6">
-              <!-- PRIMARY METRICS -->
-              <div class="flex flex-col gap-10">
-                
-                <div class="flex items-baseline gap-6">
-                  <span id="atmo-temp" class="text-[160px] font-light text-white leading-none tracking-tighter" style="font-family: 'Outfit', sans-serif;">--&deg;</span>
-                  <div class="flex flex-col">
-                    <div id="atmo-condition" class="text-[12px] font-bold text-slate-500 uppercase tracking-[0.2em] font-mono mb-1">Scanning...</div>
-                    <div id="atmo-hl" class="text-[20px] font-light text-white font-mono">-- / --</div>
-                  </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-12 pt-10 border-t border-white/5">
-                  <div>
-                    <span class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Heat Index</span>
-                    <span id="atmo-feels" class="text-3xl font-light text-white tracking-tight">--&deg;</span>
-                  </div>
-                  <div>
-                    <span class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">UV Spectrum</span>
-                    <span id="atmo-uv-val" class="text-3xl font-light text-white tracking-tight">--</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- SECONDARY SENSORS -->
-              <div class="grid grid-cols-2 gap-x-12 gap-y-12">
-                <div class="pb-6 border-b border-white/5">
-                  <span class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Pressure</span>
-                  <div id="atmo-pressure" class="text-3xl font-light text-white tracking-tight">-- <span class="text-xs text-slate-600 ml-1">hPa</span></div>
-                </div>
-                <div class="pb-6 border-b border-white/5">
-                  <span class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Humidity</span>
-                  <div id="atmo-humidity" class="text-3xl font-light text-white tracking-tight">--<span class="text-xs text-slate-600 ml-1">%</span></div>
-                </div>
-                <div class="pb-6 border-b border-white/5">
-                  <span class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Wind Speed</span>
-                  <div id="atmo-wind-speed" class="text-3xl font-light text-white tracking-tight">-- <span class="text-xs text-slate-600 ml-1">km/h</span></div>
-                </div>
-                <div class="pb-6 border-b border-white/5">
-                  <span class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Visibility</span>
-                  <div id="atmo-visibility" class="text-3xl font-light text-white tracking-tight">-- <span class="text-xs text-slate-600 ml-1">km</span></div>
-                </div>
-                <div>
-                  <span class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Sunrise</span>
-                  <div id="atmo-sunrise" class="text-2xl font-light text-white tracking-tight">--:--</div>
-                </div>
-                <div>
-                  <span class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Sunset</span>
-                  <div id="atmo-sunset" class="text-2xl font-light text-white tracking-tight">--:--</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- FORECAST PROJECTION -->
-            <div class="mt-16 pt-10 border-t border-white/10">
-              <span class="text-[10px] text-white uppercase font-bold tracking-[0.3em] font-mono mb-8 block">24-Hour Forecast</span>
-              <div id="atmo-hourly-container" class="flex overflow-x-auto gap-8 no-scrollbar pb-4"></div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-12 gap-y-12 mt-16">
-              <div class="flex flex-col">
-                <span class="text-[11px] text-emerald-400 font-bold uppercase tracking-widest mb-4"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">Air Quality</span>
-                <div class="flex items-end justify-between">
-                  <div>
-                    <div id="atmo-aqi" class="text-3xl font-black text-white leading-none">--</div>
-                    <div class="text-[8px] text-slate-600 mt-1 font-mono">EAQI SCALE</div>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col">
-                <span class="text-[11px] text-slate-500 font-bold uppercase tracking-widest mb-4"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">Hectopascals</span>
-                <div class="flex items-end justify-between">
-                  <div>
-                    <div id="atmo-pressure" class="text-3xl font-black text-white leading-none">--</div>
-                    <div class="text-[8px] text-slate-600 mt-1 font-mono">hPa</div>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col">
-                <span class="text-[11px] text-indigo-400 font-bold uppercase tracking-widest mb-4"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">Lunar Phase</span>
-                <div class="flex items-center gap-3">
-                  <span id="atmo-moon-text" class="text-xs font-bold text-white uppercase leading-tight font-mono">--</span>
-                </div>
-              </div>
-              <div class="flex flex-col">
-                <span class="text-[11px] text-slate-500 font-bold uppercase tracking-widest mb-4"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">Cloud Ceiling</span>
-                <div class="flex items-end justify-between">
-                  <div>
-                    <div id="atmo-cloud-base" class="text-3xl font-black text-white leading-none">--</div>
-                    <div class="text-[8px] text-slate-600 mt-1 font-mono">KILOMETERS</div>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col">
-                <span class="text-[11px] text-blue-400 font-bold uppercase tracking-widest mb-4"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">24h Precip</span>
-                <div class="flex items-end justify-between">
-                  <div>
-                    <div id="atmo-precip-total" class="text-3xl font-black text-white leading-none">--</div>
-                    <div class="text-[8px] text-slate-600 mt-1 font-mono">MILLIMETERS</div>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col">
-                <span class="text-[12px] text-slate-500 font-bold uppercase tracking-widest mb-4"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">Dew Point</span>
-                <div class="flex items-end justify-between">
-                  <div>
-                    <div class="flex items-baseline gap-1">
-                      <span id="atmo-dew" class="text-4xl font-black text-white leading-none">--</span>
-                      <span class="text-white font-bold text-xl">°</span>
-                    </div>
-                    <div class="text-[9px] text-slate-600 mt-2 font-mono">CELSIUS</div>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col">
-                <span class="text-[12px] text-slate-500 font-bold uppercase tracking-widest mb-4"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">Wind Gusts</span>
-                <div class="flex items-end justify-between">
-                  <div>
-                    <div id="atmo-gusts" class="text-4xl font-black text-white leading-none">--</div>
-                    <div class="text-[9px] text-slate-600 mt-2 font-mono">km/h</div>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col">
-                <span class="text-[12px] text-slate-500 font-bold uppercase tracking-widest mb-4"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">Cloud Cover</span>
-                <div class="flex items-end justify-between">
-                  <div>
-                    <div class="flex items-baseline gap-1">
-                      <span id="atmo-cloud-cover" class="text-4xl font-black text-white leading-none">--</span>
-                      <span class="text-slate-500 font-bold text-xl">%</span>
-                    </div>
-                    <div class="text-[9px] text-slate-600 mt-2 font-mono">%</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="border border-white/5 p-0 overflow-hidden">
-              <div class="px-5 py-3 border-b border-white/5">
-                <span class="text-[11px] text-slate-500 font-bold uppercase tracking-widest"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">7-Day Forecast</span>
-              </div>
-              <div id="atmo-daily-container" class="divide-y divide-white/5"></div>
-            </div>
-            
-
-          </div> <!-- End of atmo scroll area -->
-        </div> <!-- End of tab-atmosphere -->
-
-
-        <div id="tab-neural" class="tab-content">
-          <div class="content-scroll-area flex flex-col h-full max-w-4xl pt-6">
-
-            <div class="flex-1 bg-black/40 rounded-3xl border border-white/5 overflow-hidden flex flex-col shadow-2xl">
-              <div class="px-8 py-4 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
-                <div class="flex items-center gap-3">
-                  <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
-                  <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest font-mono">AI · Online</span>
-                </div>
-                <button onclick="document.getElementById('neural-chat-log').innerHTML=''" class="text-[10px] text-slate-600 hover:text-white transition-colors">Clear</button>
-              </div>
-              
-              <div id="neural-chat-log" class="flex-1 p-8 overflow-y-auto custom-scrollbar space-y-8 min-h-[400px]">
-                <div class="flex gap-4">
-                  <div class="w-8 h-8 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
-                    <i class="fas fa-robot text-[10px] text-blue-500"></i>
-                  </div>
-                  <div class="bg-white/5 rounded-2xl rounded-tl-none p-5 text-sm text-slate-300 leading-relaxed max-w-[85%] border border-white/5">
-                    Hi! Ask me anything about a country, market, weather, or current events.
-                  </div>
-                </div>
-              </div>
-
-              <div class="p-6 bg-slate-900/40 border-t border-white/5">
-                <div class="flex gap-4 items-center bg-white/5 rounded-2xl border border-white/5 p-2 pr-4 focus-within:border-blue-500/40 transition-all">
-                  <input type="text" id="neural-chat-input" placeholder="Ask anything..."
-                    class="flex-1 bg-transparent border-none outline-none text-[15px] text-white placeholder-slate-700 font-medium px-4 py-2"
-                    onkeydown="if(event.key==='Enter')sendNeuralInquiry()" />
-                  <button onclick="sendNeuralInquiry()" class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20">
-                    <i class="fas fa-paper-plane text-xs"></i>
+                <div id="back-to-global-wrap" class="hidden">
+                  <button onclick="resetToGlobalCenter()"
+                    class="px-4 py-2 bg-white/5 border border-white/10 text-[9px] font-black text-slate-500 uppercase tracking-widest hover:text-white hover:border-blue-500/50 transition-all rounded-sm flex items-center gap-2">
+                    <div class="w-1 h-1 bg-blue-500"></div>
+                    Return to Global
                   </button>
+                </div>
+              </div>
+              <div id="hierarchy-panel" class="hidden">
+                <div class="flex items-center gap-2 text-sm font-mono mb-3">
+                  <span class="text-blue-400 cursor-pointer" onclick="resetToCountry()">
+                    <div class="w-1 h-1 bg-blue-400 inline-block mr-2"></div>
+                    <span id="breadcrumb-country">Country</span>
+                  </span>
+                  <span id="breadcrumb-state-wrapper" class="hidden">
+                    <span class="text-slate-500"> > </span>
+                    <span class="text-cyan-400 cursor-pointer" onclick="resetToState()">
+                      <span id="breadcrumb-state">State</span>
+                    </span>
+                  </span>
+                  <span id="breadcrumb-city-wrapper" class="hidden">
+                    <span class="text-slate-500"> > </span>
+                    <span class="text-emerald-400">
+                      <span id="breadcrumb-city">City</span>
+                    </span>
+                  </span>
+                </div>
+
+                <div class="flex flex-col gap-6 mt-8">
+                  <div id="state-selector" class="hidden">
+                    <div class="flex justify-between items-center cursor-pointer border-b border-white/10 pb-4 mb-4"
+                      onclick="toggleHierarchyCollapse('state')">
+                      <h4 class="text-[10px] font-mono font-bold text-blue-400 uppercase tracking-widest">State /
+                        Province</h4>
+                      <i id="state-collapse-icon" class="fas fa-chevron-down text-slate-600 transition-transform"></i>
+                    </div>
+                    <div id="state-collapse-content" class="hidden space-y-4">
+                      <input id="state-search" type="text" placeholder="Search Sector Regions..."
+                        oninput="filterStateList(this.value)"
+                        class="w-full bg-transparent border-none py-2 text-xs text-white placeholder-slate-800 focus:outline-none font-mono" />
+                      <div id="state-list" class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div id="city-selector" class="hidden">
+                    <div class="flex justify-between items-center cursor-pointer border-b border-white/10 pb-4 mb-4"
+                      onclick="toggleHierarchyCollapse('city')">
+                      <h4 class="text-[10px] font-mono font-bold text-cyan-400 uppercase tracking-widest">Select City
+                      </h4>
+                      <i id="city-collapse-icon" class="fas fa-chevron-down text-slate-600 transition-transform"></i>
+                    </div>
+                    <div id="city-collapse-content" class="hidden space-y-4">
+                      <input id="city-search" type="text" placeholder="Search Primary Hubs..."
+                        oninput="filterCityList(this.value)"
+                        class="w-full bg-transparent border-none py-2 text-xs text-white placeholder-slate-800 focus:outline-none font-mono" />
+                      <div id="city-list" class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div id="ai-briefing-box" class="mb-12">
+                <div class="flex items-center gap-3 mb-8">
+                  <div class="w-1.5 h-1.5 bg-blue-500"></div>
+                  <span class="text-[9px] text-slate-400 uppercase font-bold tracking-[0.4em] font-mono">Strategic
+                    Signal Deck</span>
+                </div>
+
+                <div id="ai-briefing-text" class="text-slate-400 font-sans text-[15px] leading-relaxed max-w-3xl">
+                  <div class="space-y-12">
+                    <div class="group">
+                      <span
+                        class="text-[12px] text-blue-500 font-black uppercase tracking-[0.3em] font-mono mb-4 block">Executive
+                        Summary</span>
+                      <p id="intel-lead" class="text-[17px] text-slate-300 font-medium leading-relaxed max-w-2xl">
+                        Strategic situational awareness for Global Context sector is complete. High-priority baselines
+                        are nominal.
+                      </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-16">
+                      <div class="hover-uplink">
+                        <span
+                          class="text-[12px] text-slate-500 font-black uppercase tracking-widest font-mono mb-3 block">Political
+                          Stability</span>
+                        <p id="intel-pol" class="text-[15px] text-slate-400 leading-relaxed">Internal governance sectors
+                          maintain standard operational stability. No major tactical deviations detected.</p>
+                      </div>
+                      <div class="hover-uplink">
+                        <span
+                          class="text-[12px] text-slate-500 font-black uppercase tracking-widest font-mono mb-3 block">Trade
+                          Relations</span>
+                        <p id="intel-trade" class="text-[15px] text-slate-400 leading-relaxed">Cross-border trade relays
+                          show mission-ready resilience and active strategic partnerships.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="ai-briefing-loading" class="hidden py-4 text-left">
+                  <span
+                    class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] font-mono animate-pulse">Processing
+                    Telemetry...</span>
+                </div>
+              </div>
+
+
+            </div>
+          </div>
+
+
+
+          <div id="tab-news" class="tab-content">
+            <div class="content-scroll-area space-y-8">
+              <div class="border-b border-white/5 pb-8 mb-6">
+                <div class="flex flex-col gap-6">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="flex-1 relative flex items-center bg-white/[0.04] border border-white/10 rounded-2xl px-5 py-3.5 gap-4 focus-within:border-white/20 transition-all">
+                      <i class="fas fa-search text-slate-600 text-sm"></i>
+                      <input type="text" id="news-search" placeholder="Filter by keyword, region, or source..."
+                        class="flex-1 bg-transparent border-none outline-none text-[14px] text-white placeholder-slate-700 font-medium"
+                        oninput="filterNews(this.value)" />
+                    </div>
+                    <button onclick="clearNewsSearch()"
+                      class="px-5 py-2.5 text-[10px] bg-transparent border border-white/10 text-slate-500 font-bold tracking-[0.2em] uppercase rounded-sm hover:text-white hover:border-white transition-all">
+                      CLEAR
+                    </button>
+                  </div>
+
+                  <div class="flex gap-4 overflow-x-auto no-scrollbar items-center">
+                    <div
+                      class="cursor-pointer text-[10px] font-bold uppercase tracking-[0.2em] py-2 px-4 border border-transparent text-slate-500 hover:text-white transition-all"
+                      onclick="window.setCategory(this, 'top')">Top</div>
+                    <div
+                      class="cursor-pointer text-[10px] font-bold uppercase tracking-[0.2em] py-2 px-4 border border-transparent text-slate-500 hover:text-white transition-all"
+                      onclick="window.setCategory(this, 'politics')">Politics</div>
+                    <div
+                      class="cursor-pointer text-[10px] font-bold uppercase tracking-[0.2em] py-2 px-4 border border-transparent text-slate-500 hover:text-white transition-all"
+                      onclick="window.setCategory(this, 'business')">Business</div>
+                    <div
+                      class="cursor-pointer text-[10px] font-bold uppercase tracking-[0.2em] py-2 px-4 border border-transparent text-slate-500 hover:text-white transition-all"
+                      onclick="window.setCategory(this, 'technology')">Tech</div>
+                    <div
+                      class="cursor-pointer text-[10px] font-bold uppercase tracking-[0.2em] py-2 px-4 border border-transparent text-slate-500 hover:text-white transition-all"
+                      onclick="window.setCategory(this, 'science')">Science</div>
+                    <div
+                      class="cursor-pointer text-[10px] font-bold uppercase tracking-[0.2em] py-2 px-4 border border-transparent text-slate-500 hover:text-white transition-all"
+                      onclick="window.setCategory(this, 'health')">Health</div>
+                  </div>
+                </div>
+              </div>
+              <div id="news-loading" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="border border-white/5 h-44 skeleton"></div>
+                <div class="border border-white/5 h-44 skeleton"></div>
+                <div class="border border-white/5 h-44 skeleton"></div>
+              </div>
+              <div class="flex items-center justify-end px-1 pb-1">
+                <span id="news-last-updated" class="text-[9px] font-mono text-slate-600 tracking-wide"></span>
+              </div>
+              <div id="articles-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0"></div>
+            </div>
+          </div>
+          <div id="tab-markets" class="tab-content">
+            <div class="content-scroll-area space-y-8">
+              <div id="market-terminal-container" class="flex flex-col gap-4">
+                <div class="mb-10">
+                  <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4 cursor-pointer"
+                    onclick="toggleMarketCategory('metals')">
+                    <span class="text-[10px] text-white uppercase font-bold tracking-[0.3em]"
+                      style="font-family: 'JetBrains Mono', monospace">Precious Metals</span>
+                    <div class="flex items-center gap-4">
+                      <i class="fas fa-chevron-up text-slate-600 text-[10px]" id="metals-chevron"></i>
+                    </div>
+                  </div>
+                  <div id="metals-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+                </div>
+                <div class="mb-10">
+                  <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-4 cursor-pointer"
+                    onclick="toggleMarketCategory('indices')">
+                    <span class="text-[10px] text-blue-400 uppercase font-bold tracking-[0.3em]"
+                      style="font-family: 'JetBrains Mono', monospace">Global Indices</span>
+                    <div class="flex items-center gap-4">
+                      <i class="fas fa-chevron-up text-slate-600 text-[10px]" id="indices-chevron"></i>
+                    </div>
+                  </div>
+                  <div id="indices-content" class="flex flex-col"></div>
+                </div>
+                <div class="mb-10">
+                  <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-4 cursor-pointer"
+                    onclick="toggleMarketCategory('forex')">
+                    <span class="text-[10px] text-cyan-400 uppercase font-bold tracking-[0.3em]"
+                      style="font-family: 'JetBrains Mono', monospace">Forex</span>
+                    <div class="flex items-center gap-4">
+                      <i class="fas fa-chevron-up text-slate-600 text-[10px]" id="forex-chevron"></i>
+                    </div>
+                  </div>
+                  <div id="forex-content" class="flex flex-col"></div>
+                </div>
+                <div class="mb-10">
+                  <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-4 cursor-pointer"
+                    onclick="toggleMarketCategory('commodities')">
+                    <span class="text-[10px] text-yellow-400 uppercase font-bold tracking-[0.3em]"
+                      style="font-family: 'JetBrains Mono', monospace">Commodities</span>
+                    <div class="flex items-center gap-4">
+                      <i class="fas fa-chevron-up text-slate-600 text-[10px]" id="commodities-chevron"></i>
+                    </div>
+                  </div>
+                  <div id="commodities-content" class="flex flex-col"></div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-
-        <div id="tab-economic" class="tab-content">
-          <div class="content-scroll-area space-y-8">
-            <!-- SEARCH BAR -->
-            <div class="flex items-center gap-3 pb-8 mb-4">
-              <div class="flex-1 relative flex items-center bg-white/[0.04] border border-white/10 rounded-2xl px-5 py-3.5 gap-4 focus-within:border-white/20 transition-all">
-                <i class="fas fa-search text-slate-600 text-sm"></i>
-                <input type="text" id="economic-city-search" placeholder="Search by country..."
-                  class="flex-1 bg-transparent border-none outline-none text-[14px] text-white placeholder-slate-700 font-medium transition-all"
-                  onkeydown="if (event.key === 'Enter') searchCityForTab('economic');" />
-                <button onclick="searchCityForTab('economic')" class="text-slate-500 hover:text-white transition-colors px-2">
-                  <i class="fas fa-arrow-right text-sm"></i>
-                </button>
-              </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 border-t border-slate-800/80 pt-8">
-              <div>
-                <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">
-                  Gross Domestic Product
-                </span>
-                <div class="flex items-baseline gap-2">
-                  <span class="text-2xl text-slate-400 font-light">$</span>
-                  <span id="eco-gdp" class="text-7xl font-light text-white tracking-tighter" style="font-family: 'Outfit', sans-serif;">--</span>
-                  <span class="text-2xl text-slate-600 font-medium">BN</span>
+          <div id="tab-atmosphere" class="tab-content">
+            <div class="content-scroll-area space-y-8">
+              <div class="flex items-center gap-3 pb-8 mb-4">
+                <div
+                  class="flex-1 relative flex items-center bg-white/[0.04] border border-white/10 rounded-2xl px-5 py-3.5 gap-4 focus-within:border-white/20 transition-all">
+                  <i class="fas fa-map-marker-alt text-slate-600 text-sm"></i>
+                  <input type="text" id="atmosphere-city-search" placeholder="Enter a city..."
+                    class="flex-1 bg-transparent border-none outline-none text-[14px] text-white placeholder-slate-700 font-medium transition-all"
+                    onkeydown="if (event.key === 'Enter') searchCityForTab('atmosphere');" />
+                  <button onclick="searchCityForTab('atmosphere')"
+                    class="text-slate-500 hover:text-white transition-colors px-2">
+                    <i class="fas fa-arrow-right text-sm"></i>
+                  </button>
                 </div>
-                <div class="mt-6 flex gap-12">
-                  <div>
-                    <span class="block text-[10px] text-slate-500 uppercase tracking-widest mb-1">Growth</span>
-                    <span id="eco-growth" class="text-xl font-medium text-white">--%</span>
+              </div>
+              <div id="weather-alerts" class="hidden space-y-2 mb-10"></div>
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 border-t border-white/10 pt-10 mt-6">
+                <div class="flex flex-col gap-10">
+                  <div class="flex items-baseline gap-6">
+                    <span id="atmo-temp" class="text-[160px] font-light text-white leading-none tracking-tighter"
+                      style="font-family: 'Outfit', sans-serif;">--&deg;</span>
+                    <div class="flex flex-col">
+                      <div id="atmo-condition"
+                        class="text-[12px] font-bold text-slate-500 uppercase tracking-[0.2em] font-mono mb-1">
+                        Scanning...</div>
+                      <div id="atmo-hl" class="text-[20px] font-light text-white font-mono">-- / --</div>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-12 pt-10 border-t border-white/5">
+                    <div>
+                      <span class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Heat
+                        Index</span>
+                      <span id="atmo-feels" class="text-3xl font-light text-white tracking-tight">--&deg;</span>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">UV
+                        Spectrum</span>
+                      <span id="atmo-uv-val" class="text-3xl font-light text-white tracking-tight">--</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-x-12 gap-y-12">
+                  <div class="pb-6 border-b border-white/5">
+                    <span
+                      class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Pressure</span>
+                    <div id="atmo-pressure" class="text-3xl font-light text-white tracking-tight">-- <span
+                        class="text-xs text-slate-600 ml-1">hPa</span></div>
+                  </div>
+                  <div class="pb-6 border-b border-white/5">
+                    <span
+                      class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Humidity</span>
+                    <div id="atmo-humidity" class="text-3xl font-light text-white tracking-tight">--<span
+                        class="text-xs text-slate-600 ml-1">%</span></div>
+                  </div>
+                  <div class="pb-6 border-b border-white/5">
+                    <span class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Wind
+                      Speed</span>
+                    <div id="atmo-wind-speed" class="text-3xl font-light text-white tracking-tight">-- <span
+                        class="text-xs text-slate-600 ml-1">km/h</span></div>
+                  </div>
+                  <div class="pb-6 border-b border-white/5">
+                    <span
+                      class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Visibility</span>
+                    <div id="atmo-visibility" class="text-3xl font-light text-white tracking-tight">-- <span
+                        class="text-xs text-slate-600 ml-1">km</span></div>
                   </div>
                   <div>
-                    <span class="block text-[10px] text-slate-500 uppercase tracking-widest mb-1">Per Capita</span>
-                    <span id="eco-capita" class="text-xl font-medium text-white">$--</span>
+                    <span
+                      class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Sunrise</span>
+                    <div id="atmo-sunrise" class="text-2xl font-light text-white tracking-tight">--:--</div>
+                  </div>
+                  <div>
+                    <span
+                      class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Sunset</span>
+                    <div id="atmo-sunset" class="text-2xl font-light text-white tracking-tight">--:--</div>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-16 pt-10 border-t border-white/10">
+                <span class="text-[10px] text-white uppercase font-bold tracking-[0.3em] font-mono mb-8 block">24-Hour
+                  Forecast</span>
+                <div id="atmo-hourly-container" class="flex overflow-x-auto gap-8 no-scrollbar pb-4"></div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-12 gap-y-12 mt-16">
+                <div class="flex flex-col">
+                  <span class="text-[11px] text-emerald-400 font-bold uppercase tracking-widest mb-4"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Air Quality</span>
+                  <div class="flex items-end justify-between">
+                    <div>
+                      <div id="atmo-aqi" class="text-3xl font-black text-white leading-none">--</div>
+                      <div class="text-[8px] text-slate-600 mt-1 font-mono">EAQI SCALE</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-[11px] text-slate-500 font-bold uppercase tracking-widest mb-4"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Hectopascals</span>
+                  <div class="flex items-end justify-between">
+                    <div>
+                      <div id="atmo-pressure" class="text-3xl font-black text-white leading-none">--</div>
+                      <div class="text-[8px] text-slate-600 mt-1 font-mono">hPa</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-[11px] text-indigo-400 font-bold uppercase tracking-widest mb-4"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Lunar Phase</span>
+                  <div class="flex items-center gap-3">
+                    <span id="atmo-moon-text"
+                      class="text-xs font-bold text-white uppercase leading-tight font-mono">--</span>
+                  </div>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-[11px] text-slate-500 font-bold uppercase tracking-widest mb-4"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Cloud Ceiling</span>
+                  <div class="flex items-end justify-between">
+                    <div>
+                      <div id="atmo-cloud-base" class="text-3xl font-black text-white leading-none">--</div>
+                      <div class="text-[8px] text-slate-600 mt-1 font-mono">KILOMETERS</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-[11px] text-blue-400 font-bold uppercase tracking-widest mb-4"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">24h Precip</span>
+                  <div class="flex items-end justify-between">
+                    <div>
+                      <div id="atmo-precip-total" class="text-3xl font-black text-white leading-none">--</div>
+                      <div class="text-[8px] text-slate-600 mt-1 font-mono">MILLIMETERS</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-[12px] text-slate-500 font-bold uppercase tracking-widest mb-4"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Dew Point</span>
+                  <div class="flex items-end justify-between">
+                    <div>
+                      <div class="flex items-baseline gap-1">
+                        <span id="atmo-dew" class="text-4xl font-black text-white leading-none">--</span>
+                        <span class="text-white font-bold text-xl">°</span>
+                      </div>
+                      <div class="text-[9px] text-slate-600 mt-2 font-mono">CELSIUS</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-[12px] text-slate-500 font-bold uppercase tracking-widest mb-4"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Wind Gusts</span>
+                  <div class="flex items-end justify-between">
+                    <div>
+                      <div id="atmo-gusts" class="text-4xl font-black text-white leading-none">--</div>
+                      <div class="text-[9px] text-slate-600 mt-2 font-mono">km/h</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-[12px] text-slate-500 font-bold uppercase tracking-widest mb-4"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Cloud Cover</span>
+                  <div class="flex items-end justify-between">
+                    <div>
+                      <div class="flex items-baseline gap-1">
+                        <span id="atmo-cloud-cover" class="text-4xl font-black text-white leading-none">--</span>
+                        <span class="text-slate-500 font-bold text-xl">%</span>
+                      </div>
+                      <div class="text-[9px] text-slate-600 mt-2 font-mono">%</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="border border-white/5 p-0 overflow-hidden">
+                <div class="px-5 py-3 border-b border-white/5">
+                  <span class="text-[11px] text-slate-500 font-bold uppercase tracking-widest"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">7-Day Forecast</span>
+                </div>
+                <div id="atmo-daily-container" class="divide-y divide-white/5"></div>
+              </div>
+            </div>
+          </div>
+          <div id="tab-neural" class="tab-content">
+            <div class="content-scroll-area flex flex-col h-full max-w-4xl pt-6">
+              <div
+                class="flex-1 bg-black/40 rounded-3xl border border-white/5 overflow-hidden flex flex-col shadow-2xl">
+                <div class="px-8 py-4 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+                  <div class="flex items-center gap-3">
+                    <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest font-mono">AI ·
+                      Online</span>
+                  </div>
+                  <button onclick="document.getElementById('neural-chat-log').innerHTML=''"
+                    class="text-[10px] text-slate-600 hover:text-white transition-colors">Clear</button>
+                </div>
+                <div id="neural-chat-log" class="flex-1 p-8 overflow-y-auto custom-scrollbar space-y-8 min-h-[400px]">
+                  <div class="flex gap-4">
+                    <div
+                      class="w-8 h-8 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
+                      <i class="fas fa-robot text-[10px] text-blue-500"></i>
+                    </div>
+                    <div
+                      class="bg-white/5 rounded-2xl rounded-tl-none p-5 text-sm text-slate-300 leading-relaxed max-w-[85%] border border-white/5">
+                      Hi! Ask me anything about a country, market, weather, or current events.
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-6 bg-slate-900/40 border-t border-white/5">
+                  <div
+                    class="flex gap-4 items-center bg-white/5 rounded-2xl border border-white/5 p-2 pr-4 focus-within:border-blue-500/40 transition-all">
+                    <input type="text" id="neural-chat-input" placeholder="Ask anything..."
+                      class="flex-1 bg-transparent border-none outline-none text-[15px] text-white placeholder-slate-700 font-medium px-4 py-2"
+                      onkeydown="if(event.key==='Enter')sendNeuralInquiry()" />
+                    <button onclick="sendNeuralInquiry()"
+                      class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20">
+                      <i class="fas fa-paper-plane text-xs"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="tab-economic" class="tab-content">
+            <div class="content-scroll-area space-y-8">
+              <div class="flex items-center gap-3 pb-8 mb-4">
+                <div
+                  class="flex-1 relative flex items-center bg-white/[0.04] border border-white/10 rounded-2xl px-5 py-3.5 gap-4 focus-within:border-white/20 transition-all">
+                  <i class="fas fa-search text-slate-600 text-sm"></i>
+                  <input type="text" id="economic-city-search" placeholder="Search by country..."
+                    class="flex-1 bg-transparent border-none outline-none text-[14px] text-white placeholder-slate-700 font-medium transition-all"
+                    onkeydown="if (event.key === 'Enter') searchCityForTab('economic');" />
+                  <button onclick="searchCityForTab('economic')"
+                    class="text-slate-500 hover:text-white transition-colors px-2">
+                    <i class="fas fa-arrow-right text-sm"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-12 border-t border-slate-800/80 pt-8">
+                <div>
+                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">
+                    Gross Domestic Product
+                  </span>
+                  <div class="flex items-baseline gap-2">
+                    <span class="text-2xl text-slate-400 font-light">$</span>
+                    <span id="eco-gdp" class="text-7xl font-light text-white tracking-tighter"
+                      style="font-family: 'Outfit', sans-serif;">--</span>
+                    <span class="text-2xl text-slate-600 font-medium">BN</span>
+                  </div>
+                  <div class="mt-6 flex gap-12">
+                    <div>
+                      <span class="block text-[10px] text-slate-500 uppercase tracking-widest mb-1">Growth</span>
+                      <span id="eco-growth" class="text-xl font-medium text-white">--%</span>
+                    </div>
+                    <div>
+                      <span class="block text-[10px] text-slate-500 uppercase tracking-widest mb-1">Per Capita</span>
+                      <span id="eco-capita" class="text-xl font-medium text-white">$--</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">
+                    Forex Benchmark (<span id="eco-currency-code">USD</span>)
+                  </span>
+                  <div class="flex items-baseline gap-3 mt-4">
+                    <span class="text-base text-slate-500 font-bold uppercase tracking-widest">1 USD =</span>
+                    <span id="eco-rate" class="text-6xl font-light text-white tracking-tighter"
+                      style="font-family: 'Outfit', sans-serif;">--</span>
                   </div>
                 </div>
               </div>
 
-              <div>
-                <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">
-                  Forex Benchmark (<span id="eco-currency-code">USD</span>)
-                </span>
-                <div class="flex items-baseline gap-3 mt-4">
-                  <span class="text-base text-slate-500 font-bold uppercase tracking-widest">1 USD =</span>
-                  <span id="eco-rate" class="text-6xl font-light text-white tracking-tighter" style="font-family: 'Outfit', sans-serif;">--</span>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12 border-t border-slate-800/80 pt-8 mt-4">
+                <div>
+                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Inflation (CPI)</span>
+                  <div id="eco-inflation" class="text-3xl font-light text-white tracking-tight">--%</div>
+                  <div class="text-[10px] text-slate-600 uppercase mt-1">YoY Change</div>
                 </div>
-              </div>
-            </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12 border-t border-slate-800/80 pt-8 mt-4">
-              <div>
-                <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">Inflation (CPI)</span>
-                <div id="eco-inflation" class="text-3xl font-light text-white tracking-tight">--%</div>
-                <div class="text-[10px] text-slate-600 uppercase mt-1">YoY Change</div>
-              </div>
-              
-              <div>
-                <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">Unemployment</span>
-                <div id="eco-unemployment" class="text-3xl font-light text-white tracking-tight">--%</div>
-                <div class="text-[10px] text-slate-600 uppercase mt-1">Labor Force</div>
-              </div>
-              
-              <div>
-                <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">Central Bank Rate</span>
-                <div id="eco-interest" class="text-3xl font-light text-white tracking-tight">--%</div>
-                <div class="text-[10px] text-slate-600 uppercase mt-1">Monetary Policy</div>
-              </div>
-              
-              <div>
-                <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">Govt Debt</span>
-                <div id="eco-debt" class="text-3xl font-light text-white tracking-tight">--%</div>
-                <div class="text-[10px] text-slate-600 uppercase mt-1">of GDP</div>
-              </div>
-              
-              <div>
-                <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">Trade Balance</span>
-                <div id="eco-trade-balance" class="text-3xl font-light text-white tracking-tight">--</div>
-                <div class="text-[10px] text-slate-600 uppercase mt-1">Billion USD</div>
-              </div>
-              
-              <div>
-                <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">FDI</span>
-                <div id="eco-fdi" class="text-3xl font-light text-white tracking-tight">--</div>
-                <div class="text-[10px] text-slate-600 uppercase mt-1">Billion USD</div>
-              </div>
-              
-              <div>
-                <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">Reserves</span>
-                <div id="eco-reserves" class="text-3xl font-light text-white tracking-tight">--</div>
-                <div class="text-[10px] text-slate-600 uppercase mt-1">Billion USD</div>
-              </div>
-              
-              <div>
-                <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">Credit Rating</span>
-                <div id="eco-credit-rating" class="text-2xl font-medium text-white tracking-tight mt-1">--</div>
-                <div class="text-[10px] text-slate-600 uppercase mt-2">S&P / Moody's</div>
-              </div>
-            </div>
-            <div class="p-0">
-              <div class="px-4 py-3 border-b border-white/5 bg-transparent">
-                <span class="text-sm text-blue-400 font-bold uppercase tracking-widest"
-                  style="font-family: &quot;JetBrains Mono&quot;, monospace">
-                  5-Year GDP Trend
-                </span>
-              </div>
-              <div class="p-4">
-                <canvas id="gdp-trend-chart" height="150"></canvas>
-              </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-16 mt-16 pt-10 border-t border-white/10">
-              <div class="flex flex-col">
-                <span class="text-[11px] text-blue-400 font-bold uppercase tracking-widest mb-4"
-                  style="font-family: 'JetBrains Mono', monospace">Major Exports</span>
-                <div id="eco-exports" class="space-y-3">
-                  <div class="h-3 w-3/4 animate-pulse" style="background: rgba(255, 255, 255, 0.04)"></div>
+                <div>
+                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Unemployment</span>
+                  <div id="eco-unemployment" class="text-3xl font-light text-white tracking-tight">--%</div>
+                  <div class="text-[10px] text-slate-600 uppercase mt-1">Labor Force</div>
                 </div>
-              </div>
-              <div class="flex flex-col">
-                <span class="text-[11px] text-slate-500 font-bold uppercase tracking-widest mb-4"
-                  style="font-family: 'JetBrains Mono', monospace">Sovereign Data</span>
-                <div class="grid grid-cols-2 gap-6">
-                   <div><span class="text-[8px] text-slate-600 uppercase font-bold block mb-1">Pop.</span><span id="fact-pop-2" class="text-sm font-mono text-white">--</span></div>
-                   <div><span class="text-[8px] text-slate-600 uppercase font-bold block mb-1">Gini</span><span id="fact-gini-2" class="text-sm font-mono text-white">--</span></div>
-                </div>
-              </div>
-            </div>
 
-            <div class="mt-16 pt-10 border-t border-white/10">
-              <span class="text-[11px] text-blue-400 font-bold uppercase tracking-widest mb-4 block"
+                <div>
+                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Central Bank Rate</span>
+                  <div id="eco-interest" class="text-3xl font-light text-white tracking-tight">--%</div>
+                  <div class="text-[10px] text-slate-600 uppercase mt-1">Monetary Policy</div>
+                </div>
+
+                <div>
+                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Govt Debt</span>
+                  <div id="eco-debt" class="text-3xl font-light text-white tracking-tight">--%</div>
+                  <div class="text-[10px] text-slate-600 uppercase mt-1">of GDP</div>
+                </div>
+
+                <div>
+                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Trade Balance</span>
+                  <div id="eco-trade-balance" class="text-3xl font-light text-white tracking-tight">--</div>
+                  <div class="text-[10px] text-slate-600 uppercase mt-1">Billion USD</div>
+                </div>
+
+                <div>
+                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">FDI</span>
+                  <div id="eco-fdi" class="text-3xl font-light text-white tracking-tight">--</div>
+                  <div class="text-[10px] text-slate-600 uppercase mt-1">Billion USD</div>
+                </div>
+
+                <div>
+                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Reserves</span>
+                  <div id="eco-reserves" class="text-3xl font-light text-white tracking-tight">--</div>
+                  <div class="text-[10px] text-slate-600 uppercase mt-1">Billion USD</div>
+                </div>
+
+                <div>
+                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Credit Rating</span>
+                  <div id="eco-credit-rating" class="text-2xl font-medium text-white tracking-tight mt-1">--</div>
+                  <div class="text-[10px] text-slate-600 uppercase mt-2">S&P / Moody's</div>
+                </div>
+              </div>
+              <div class="p-0">
+                <div class="px-4 py-3 border-b border-white/5 bg-transparent">
+                  <span class="text-sm text-blue-400 font-bold uppercase tracking-widest"
+                    style="font-family: &quot;JetBrains Mono&quot;, monospace">
+                    5-Year GDP Trend
+                  </span>
+                </div>
+                <div class="p-4">
+                  <canvas id="gdp-trend-chart" height="150"></canvas>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-16 mt-16 pt-10 border-t border-white/10">
+                <div class="flex flex-col">
+                  <span class="text-[11px] text-blue-400 font-bold uppercase tracking-widest mb-4"
+                    style="font-family: 'JetBrains Mono', monospace">Major Exports</span>
+                  <div id="eco-exports" class="space-y-3">
+                    <div class="h-3 w-3/4 animate-pulse" style="background: rgba(255, 255, 255, 0.04)"></div>
+                  </div>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-[11px] text-slate-500 font-bold uppercase tracking-widest mb-4"
+                    style="font-family: 'JetBrains Mono', monospace">Sovereign Data</span>
+                  <div class="grid grid-cols-2 gap-6">
+                    <div><span class="text-[8px] text-slate-600 uppercase font-bold block mb-1">Pop.</span><span
+                        id="fact-pop-2" class="text-sm font-mono text-white">--</span></div>
+                    <div><span class="text-[8px] text-slate-600 uppercase font-bold block mb-1">Gini</span><span
+                        id="fact-gini-2" class="text-sm font-mono text-white">--</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-16 pt-10 border-t border-white/10">
+                <span class="text-[11px] text-blue-400 font-bold uppercase tracking-widest mb-4 block"
                   style="font-family: 'JetBrains Mono', monospace">Market Feed</span>
-              <span id="eco-market-ticker" class="text-slate-400 text-[11px] font-mono leading-relaxed">Loading market data...</span>
+                <span id="eco-market-ticker" class="text-slate-400 text-[11px] font-mono leading-relaxed">Loading market
+                  data...</span>
+              </div>
             </div>
-            
-
-          </div> <!-- End Of scroll-area -->
-        </div> <!-- End of tab-economic -->
-      </div> <!-- End of sidebar-content -->
-    </aside>
+          </div>
+        </div>
+      </aside>
   </main>
 
   <div id="fact-pop" class="hidden"></div>
@@ -912,8 +905,7 @@
       display: none !important;
     }
   </style>
-  <div id="floating-cli"
-    class="cli-locked border border-white/5 overflow-hidden bg-slate-950/95 backdrop-blur-xl">
+  <div id="floating-cli" class="cli-locked border border-white/5 overflow-hidden bg-slate-950/95 backdrop-blur-xl">
     <div id="floating-cli-handle" onclick="window.toggleCLI()"
       class="p-4 border-b border-white/5 bg-white/[0.02] cursor-pointer">
       <div class="flex items-center justify-between">
@@ -931,7 +923,8 @@
   <div id="cmd-palette-overlay" class="fixed inset-0 z-[200] hidden items-start justify-center pt-24 px-4"
     onclick="if (event.target === this) window.closeCommandPalette();"
     style="display: none; background: rgba(2, 6, 23, 0.75)">
-    <div id="cmd-palette-box" class="w-full max-w-xl flex flex-col overflow-hidden p-0 bg-slate-950 border border-slate-800"
+    <div id="cmd-palette-box"
+      class="w-full max-w-xl flex flex-col overflow-hidden p-0 bg-slate-950 border border-slate-800"
       style="max-height: 60vh">
       <div class="flex items-center gap-3 px-4 py-3 border-b border-white/8">
         <input id="cmd-palette-input" type="text" placeholder="Search Intel, Queries, or Actions..." autocomplete="off"
@@ -951,28 +944,26 @@
           <span class="text-[9px] text-slate-600 font-bold uppercase tracking-wider">Execute</span>
         </div>
         <div class="flex items-center gap-1.5">
-              <div class="flex items-center gap-1.5">
-                <kbd class="text-[9px] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-500">Ctrl+K</kbd>
-                <span class="text-[9px] text-slate-600 font-bold uppercase tracking-wider">Toggle</span>
-              </div>
-            </div>
+          <div class="flex items-center gap-1.5">
+            <kbd class="text-[9px] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-500">Ctrl+K</kbd>
+            <span class="text-[9px] text-slate-600 font-bold uppercase tracking-wider">Toggle</span>
           </div>
         </div>
       </div>
     </div>
   </div>
+  </div>
+  </div>
 
-  <!-- ABOUT OVERLAY REMOVED -->
   <script>
     window.sendNeuralInquiry = async function () {
       const input = document.getElementById('neural-chat-input');
       const log = document.getElementById('neural-chat-log');
       if (!input || !input.value.trim()) return;
-      
+
       const q = input.value.trim();
       input.value = '';
 
-      // User Bubble
       const userDiv = document.createElement('div');
       userDiv.className = 'flex gap-4 justify-end';
       userDiv.innerHTML = `
@@ -986,7 +977,6 @@
       log.appendChild(userDiv);
       log.scrollTop = log.scrollHeight;
 
-      // Bot Loading
       const botDiv = document.createElement('div');
       botDiv.className = 'flex gap-4';
       botDiv.innerHTML = `

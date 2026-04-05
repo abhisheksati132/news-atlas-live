@@ -610,36 +610,13 @@
 <!-- LOGIN -->
 <section class="login-section" id="login">
   <div class="login-card fade-up">
-    <h2>Access the Terminal</h2>
-    <p>Sign in with Google to personalize your intelligence dashboard and save your preferences.</p>
+    <h2>Access the Intelligence Platform</h2>
+    <p>Launch the professional data terminal to access real-time global news, economic telemetry, and geopolitical analysis.</p>
 
-    <!-- Logged-out state -->
-    <div id="auth-loggedout">
-      <button class="btn-google" id="google-sign-in-btn" onclick="handleGoogleSignIn()">
-        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
-        Continue with Google
-      </button>
-      <div class="divider">or</div>
-      <a href="/app" class="btn-enter-terminal">
-        <i class="fas fa-terminal"></i> Enter as Guest
-      </a>
-      <div class="auth-status" id="auth-status-msg"></div>
-    </div>
-
-    <!-- Logged-in state (hidden by default) -->
-    <div id="auth-loggedin" style="display:none;">
-      <div class="user-greeting">
-        <div id="user-avatar-wrap"><div class="user-avatar-fallback" id="user-avatar-fallback"><i class="fas fa-user"></i></div></div>
-        <div class="user-info">
-          <div class="user-name-text" id="user-display-name">Commander</div>
-          <div class="user-email-text" id="user-display-email"></div>
-        </div>
-      </div>
-      <a href="/app" class="btn-enter-terminal">
-        <i class="fas fa-rocket"></i> Launch Your Terminal
-      </a>
-      <div><button class="btn-signout" id="sign-out-btn" onclick="handleSignOut()">Sign out</button></div>
-    </div>
+    <a href="/app" class="btn-enter-terminal">
+      <i class="fas fa-terminal"></i> Launch Terminal
+    </a>
+    <div class="auth-status">SYTEM STATUS: OPTIMIZED</div>
   </div>
 </section>
 
@@ -654,90 +631,13 @@
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
   }, { threshold: 0.12 });
   document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
-
-  // ── Firebase Auth ──
-  import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
-  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
-    from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
-
-  let auth = null;
-
-  async function initFirebase() {
-    try {
-      const res = await fetch('/api/config');
-      if (!res.ok) return;
-      const data = await res.json();
-      const firebaseConfig = data.firebase || data;
-      if (!firebaseConfig?.projectId && !firebaseConfig?.apiKey) return;
-
-      const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-      auth = getAuth(app);
-
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          showLoggedIn(user);
-        } else {
-          showLoggedOut();
-        }
-      });
-    } catch (e) {
-      console.warn('Firebase init failed:', e);
-    }
-  }
-
-  function showLoggedIn(user) {
-    document.getElementById('auth-loggedout').style.display = 'none';
-    document.getElementById('auth-loggedin').style.display = 'block';
-    document.getElementById('user-display-name').textContent = user.displayName || 'Commander';
-    document.getElementById('user-display-email').textContent = user.email || '';
-    const avatarWrap = document.getElementById('user-avatar-wrap');
-    if (user.photoURL) {
-      avatarWrap.innerHTML = `<img class="user-avatar" src="${user.photoURL}" alt="Avatar" referrerpolicy="no-referrer">`;
-    } else {
-      const initial = (user.displayName || 'C')[0].toUpperCase();
-      avatarWrap.innerHTML = `<div class="user-avatar-fallback">${initial}</div>`;
-    }
-  }
-
-  function showLoggedOut() {
-    document.getElementById('auth-loggedout').style.display = 'block';
-    document.getElementById('auth-loggedin').style.display = 'none';
-  }
-
-  window.handleGoogleSignIn = async function() {
-    if (!auth) {
-      document.getElementById('auth-status-msg').textContent = 'Auth not ready. Continuing as guest...';
-      setTimeout(() => { window.location.href = '/app'; }, 1200);
-      return;
-    }
-    const btn = document.getElementById('google-sign-in-btn');
-    btn.disabled = true;
-    const statusEl = document.getElementById('auth-status-msg');
-    statusEl.textContent = 'Opening sign-in...';
-    statusEl.className = 'auth-status';
-    try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      statusEl.textContent = 'Authenticated. Launching terminal...';
-      setTimeout(() => { window.location.href = '/app'; }, 800);
-    } catch (e) {
-      statusEl.textContent = e.code === 'auth/popup-closed-by-user' ? 'Sign-in cancelled.' : 'Sign-in failed. Try again.';
-      statusEl.className = 'auth-status error';
-      btn.disabled = false;
-    }
-  };
-
-  window.handleSignOut = async function() {
-    if (auth) { try { await signOut(auth); } catch(e) {} }
-  };
-
-  initFirebase();
 </script>
-  <!-- ARCHITECTURAL SIGNATURE -->
-  <footer class="py-12 text-center">
-    <p class="text-[10px] font-medium text-slate-600 uppercase tracking-[0.4em] font-mono opacity-60">
-      Made By Abhishek Sati
-    </p>
-  </footer>
+
+<!-- ARCHITECTURAL SIGNATURE -->
+<footer class="py-12 text-center">
+  <p class="text-[10px] font-medium text-slate-600 uppercase tracking-[0.4em] font-mono opacity-60">
+    Released v4.0.0 &nbsp;·&nbsp; Build By Abhishek Sati
+  </p>
+</footer>
 </body>
 </html>

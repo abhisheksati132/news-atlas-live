@@ -15,7 +15,6 @@ let iso2Code = null;
 let countryUTCOffset = null;
 let projectionType = "3d";
 window.projectionType = "3d";
-let worldFeatures = [];
 let globalSearchData = [];
 let currentCategory = "top";
 
@@ -50,10 +49,6 @@ function runWhenIdle(callback, timeout = 2000) {
   }
 }
 
-async function runBootSequence() {
-  // Permanent dark protocol.
-}
-
 function showBackendRequiredBanner() {
   if (document.getElementById("backend-required-banner")) return;
   const banner = document.createElement("div");
@@ -70,7 +65,6 @@ function showBackendRequiredBanner() {
 }
 
 async function initTerminal() {
-  runBootSequence();
   let config = {};
   try {
     const res = await fetch("/api/config");
@@ -83,20 +77,15 @@ async function initTerminal() {
     showBackendRequiredBanner();
   }
   
-  fetchGlobalSearchData();
-  
   const hasFirebaseConfig = config && config.apiKey && config.projectId;
   if (hasFirebaseConfig && window.firebaseCore) {
     try {
       const firebaseApp = window.firebaseCore.initializeApp(config);
       const auth = window.firebaseCore.getAuth(firebaseApp);
-      const db = window.firebaseCore.getFirestore(firebaseApp);
-      await window.firebaseCore.signInAnonymously(auth);
+      window.firebaseCore.signInAnonymously(auth);
       window.firebaseCore.onAuthStateChanged(auth, (u) => {
-        if (u) {
-          const idEl = safeEl("neural-id");
-          if (idEl) idEl.innerText = `SESSION: ${u.uid.substring(0, 8).toUpperCase()}`;
-        }
+        const idEl = safeEl("neural-id");
+        if (idEl) idEl.innerText = u ? `SESSION: ${u.uid.substring(0, 8).toUpperCase()}` : "GUEST SESSION";
       });
     } catch (e) {
       setText("neural-id", "GUEST SESSION");
@@ -108,22 +97,21 @@ async function initTerminal() {
   try {
     const res = await fetch("/api/countries?all=true");
     if (res.ok) {
-      const data = await res.json();
-      window.globalSearchData = data;
+      window.globalSearchData = await res.json();
       if (window.renderTrendingHeader) window.renderTrendingHeader();
     }
   } catch (e) {}
 
   try {
-    window.fetchNews();
+    if (window.fetchNews) window.fetchNews();
     startStockTicker();
   } catch (e) {}
 
   runWhenIdle(() => {
     try {
       if (window.generateAIBriefing) window.generateAIBriefing("Global Context");
-      if (window.fetchGDELTEvents) window.fetchGDELTEvents("");
       if (window.initializeMarkets) window.initializeMarkets("Global");
+      if (window.fetchSeismicStatus) window.fetchSeismicStatus();
     } catch (e) {}
   });
 }
@@ -220,7 +208,10 @@ window.switchTab = (id) => {
 window.backToOrbital = () => {
   const modSector = document.getElementById("modular-intelligence-sector");
   if (modSector) modSector.classList.remove("active");
-  document.querySelectorAll(".nav-sector-link").forEach(link => link.classList.remove("active"));
+  document.querySelectorAll(".nav-sector-link").forEach(link => {
+    if (link.innerText.trim().toLowerCase() === 'globe') link.classList.add("active");
+    else link.classList.remove("active");
+  });
   window.history.pushState({}, "", "/app");
 };
 
@@ -253,7 +244,7 @@ window.resetToGlobalCenter = () => {
   window.backToOrbital();
   if (window.mapEngine && window.mapEngine.map) {
     window.mapEngine.clearSelection();
-    window.mapEngine.map.flyTo({ center: [20, 20], zoom: 1.6, duration: 2000 });
+    window.mapEngine.map.flyTo({ center: [15, 0], zoom: 1.6, duration: 2000 });
   }
   window.fetchNews();
 };
@@ -288,13 +279,6 @@ function setupEventListeners() {
       window.backToOrbital();
     }
   });
-}
-
-async function fetchGlobalSearchData() {
-  try {
-    const res = await fetch("/api/countries?all=true");
-    if (res.ok) window.globalSearchData = await res.json();
-  } catch (e) {}
 }
 
 window.searchCityForTab = async (tabId) => {

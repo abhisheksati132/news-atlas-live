@@ -980,7 +980,7 @@
     if(scrubber) {
         scrubber.addEventListener('input', (e) => {
             const h = parseInt(e.target.value);
-            readout.innerText = h === 0 ? '-0H (LIVE)' : \`\${h}H\`;
+            readout.innerText = h === 0 ? '-0H (LIVE)' : `${h}H`;
             if(h !== 0) {
                document.body.classList.add('temporal-shift-active');
                readout.classList.remove('text-cyan-400');

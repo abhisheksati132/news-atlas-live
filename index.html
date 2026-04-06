@@ -7,9 +7,7 @@
   <title>NewsAtlas | Global News Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
-    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="preconnect" href="https://unpkg.com" crossorigin />
   <link rel="dns-prefetch" href="https://unpkg.com" />
   <link rel="prefetch" href="//unpkg.com/three-globe/example/img/earth-night.jpg" />
@@ -19,10 +17,7 @@
   <script src="https://unpkg.com/deck.gl@8.9.0/dist.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet" />
-  <meta name="description" content="NewsAtlas: Real-time Global News and Market Dashboard." />
+  <meta name="description" content="NewsAtlas: Real-time Global Intelligence Dashboard — News, Markets, Weather, Economics." />
   <meta name="theme-color" content="#020617" />
   <link rel="icon"
     href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%233b82f6' d='M352 256c0 22.2-1.2 43.6-3.3 64H163.3c-2.2-20.4-3.3-41.8-3.3-64s1.2-43.6 3.3-64h185.4c2.2 20.4 3.3 41.8 3.3 64zm28.8-64h74.7c-9.1-37.4-28.7-71.1-55.4-97.7-18.1 19.3-33.1 41.9-44 67.2 9.6 9.4 18.2 20 24.7 30.5zM182.2 94.3c-18.1 19.3-33.1 41.9-44 67.2 9.6 9.4 18.2 20 24.7 30.5h74.7c-9.1-37.4-28.7-71.1-55.4-97.7zM163.3 320h185.4c-2.1 20.4-3.3 41.8-3.3 64s1.2 43.6 3.3 64H163.3c2.1-20.4 3.3-41.8 3.3-64s-1.2-43.6-3.3-64z'/%3E%3C/svg%3E"
@@ -63,13 +58,16 @@
 
 
   <header>
-    <div class="flex items-center gap-3">
-      <i class="fas fa-globe" style="color:#3B82F6;font-size:16px"></i>
-      <span
-        style="font-family:'Playfair Display',Georgia,serif;font-size:18px;font-weight:700;color:#fff;letter-spacing:-0.01em">NewsAtlas</span>
+    <!-- Logo -->
+    <div class="nav-logo">
+      <div class="nav-logo-icon">
+        <i class="fas fa-globe"></i>
+      </div>
+      <span class="nav-logo-text">NewsAtlas</span>
     </div>
 
-    <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+    <!-- Center Navigation -->
+    <nav class="nav-center" role="navigation" aria-label="Primary navigation">
       <button onclick="window.backToOrbital()" class="nav-sector-link active">Globe</button>
       <button onclick="window.switchTab('search')" class="nav-sector-link">Search</button>
       <button onclick="window.switchTab('summary')" class="nav-sector-link">Overview</button>
@@ -78,22 +76,17 @@
       <button onclick="window.switchTab('weather')" class="nav-sector-link">Weather</button>
       <button onclick="window.switchTab('economic')" class="nav-sector-link">Economy</button>
       <button onclick="window.switchTab('neural')" class="nav-sector-link">AI Chat</button>
-    </div>
+    </nav>
 
-    <div class="flex items-center gap-4">
-      <span id="ist-time"
-        style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.6);font-family:'Inter',sans-serif">--:--
-        IST</span>
-      <div style="width:1px;height:20px;background:rgba(255,255,255,0.12)"></div>
-      <button onclick="window.downloadReport()" title="Download Report"
-        style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);background:none;border:none;cursor:pointer;border-radius:6px;transition:all 0.2s"
-        onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">
-        <i class="fas fa-download" style="font-size:13px"></i>
+    <!-- Right Controls -->
+    <div class="nav-right">
+      <span id="ist-time" class="nav-time">--:-- IST</span>
+      <div class="nav-divider"></div>
+      <button onclick="window.downloadReport()" title="Download Report" class="nav-btn">
+        <i class="fas fa-download"></i>
       </button>
-      <a href="/" title="Home"
-        style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);border-radius:6px;transition:color 0.2s"
-        onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">
-        <i class="fas fa-home" style="font-size:13px"></i>
+      <a href="/" title="Home" class="nav-btn">
+        <i class="fas fa-home"></i>
       </a>
     </div>
   </header>
@@ -136,74 +129,61 @@
         class="fixed inset-0 z-20 opacity-0 pointer-events-none transition-all duration-400 ease-in-out flex flex-col"
         style="padding-top:var(--header-h)">
 
-        <div id="sidebar-content" class="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+        <div id="sidebar-content">
           <!-- Country Context Bar -->
-          <div id="global-context-hud" class="sticky top-0 z-50 px-8 py-4 flex items-center justify-between"
-            style="background:var(--navy);border-bottom:1px solid rgba(255,255,255,0.08)">
-            <div class="flex items-center gap-4">
-              <div
-                style="width:40px;height:28px;border-radius:4px;overflow:hidden;border:1px solid rgba(255,255,255,0.15)">
-                <img id="ctx-flag" src="" class="w-full h-full object-cover hidden">
-                <div id="ctx-globe-icon"
-                  style="width:100%;height:100%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center">
-                  <i class="fas fa-globe" style="color:rgba(255,255,255,0.4);font-size:11px"></i>
+          <div id="global-context-hud" style="position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0.875rem 2.5rem;">
+            <div style="display:flex;align-items:center;gap:1rem;">
+              <div style="width:38px;height:26px;border-radius:4px;overflow:hidden;border:1px solid rgba(255,255,255,0.12);flex-shrink:0;">
+                <img id="ctx-flag" src="" style="width:100%;height:100%;object-fit:cover;" class="hidden" alt="">
+                <div id="ctx-globe-icon" style="width:100%;height:100%;background:rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;">
+                  <i class="fas fa-globe" style="color:rgba(255,255,255,0.35);font-size:11px;"></i>
                 </div>
               </div>
-              <div class="flex flex-col gap-0.5">
-                <div class="flex items-center gap-2">
-                  <span id="ctx-country"
-                    style="font-size:14px;font-weight:700;color:#fff;font-family:'Inter',sans-serif">Global View</span>
-                  <i class="fas fa-chevron-right" style="font-size:9px;color:rgba(255,255,255,0.3)"></i>
-                  <span id="ctx-location"
-                    style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.55);font-family:'Inter',sans-serif">Select
-                    a location</span>
+              <div style="display:flex;flex-direction:column;gap:1px;">
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                  <span id="ctx-country" style="font-size:13px;font-weight:600;color:#fff;letter-spacing:-0.01em;">Global View</span>
+                  <span style="color:rgba(255,255,255,0.2);font-size:10px;">›</span>
+                  <span id="ctx-location" style="font-size:12px;color:rgba(255,255,255,0.45);">Select a location</span>
                 </div>
-                <span id="ctx-status"
-                  style="font-size:11px;color:rgba(255,255,255,0.3);font-family:'Inter',sans-serif">Live data</span>
+                <span id="ctx-status" style="font-size:10px;color:rgba(255,255,255,0.25);letter-spacing:0.04em;">Live data</span>
               </div>
             </div>
-            <button onclick="window.resetToGlobalCenter()"
-              style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.55);background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all 0.2s;font-family:'Inter',sans-serif"
-              onmouseover="this.style.color='#fff';this.style.background='rgba(255,255,255,0.15)'"
-              onmouseout="this.style.color='rgba(255,255,255,0.55)';this.style.background='rgba(255,255,255,0.08)'">Back
-              to Globe</button>
+            <button onclick="window.resetToGlobalCenter()" style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:5px 14px;cursor:pointer;letter-spacing:0.02em;transition:all 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">Back to Globe</button>
           </div>
 
           <div id="tab-search" class="tab-content">
-            <div class="content-scroll-area" style="padding-top:4.5rem; gap: 4.5rem;">
-              <div class="text-center">
-                <p class="text-[10px] font-bold text-blue-600 uppercase tracking-[0.4em] mb-4">Registry Access</p>
-                <h2 class="font-serif text-5xl font-bold text-slate-900 leading-tight mb-10">Intelligence Directory</h2>
-                
-                <div class="max-w-xl mx-auto relative group">
-                    <div class="relative flex items-center bg-white border border-gray-100 rounded-2xl p-2.5 shadow-sm group-focus-within:border-blue-400 group-focus-within:shadow-xl group-focus-within:shadow-blue-500/5 transition-all duration-300">
-                      <div class="w-12 h-12 flex items-center justify-center text-slate-300">
-                        <i class="fas fa-search text-lg"></i>
-                      </div>
-                      <input type="text" id="country-search" placeholder="Search by name or region..."
-                        class="flex-1 bg-transparent border-none outline-none text-lg font-medium text-slate-900 placeholder:text-slate-200 py-3 pr-6 font-sans">
-                      <div class="px-5 py-2.5 bg-slate-50 rounded-xl text-[10px] font-bold text-slate-400 uppercase tracking-widest border border-slate-100 hidden sm:block">Global Registry</div>
-                    </div>
-                </div>
-              </div>
-              
-              <div class="flex flex-col items-center gap-6">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Suggested Entry Points</span>
-                <div class="flex flex-wrap justify-center gap-3">
-                  <button onclick="document.getElementById('country-search').value='India'; window.renderTrending()"
-                    class="px-5 py-2 bg-slate-50 text-slate-600 text-[11px] font-bold rounded-full hover:bg-blue-50 hover:text-blue-600 border border-slate-100 transition-all">India</button>
-                  <button onclick="document.getElementById('country-search').value='United States'; window.renderTrending()"
-                    class="px-5 py-2 bg-slate-50 text-slate-600 text-[11px] font-bold rounded-full hover:bg-blue-50 hover:text-blue-600 border border-slate-100 transition-all">United States</button>
-                  <button onclick="document.getElementById('country-search').value='Singapore'; window.renderTrending()"
-                    class="px-5 py-2 bg-slate-50 text-slate-600 text-[11px] font-bold rounded-full hover:bg-blue-50 hover:text-blue-600 border border-slate-100 transition-all">Singapore</button>
-                  <button onclick="document.getElementById('country-search').value='Japan'; window.renderTrending()"
-                    class="px-5 py-2 bg-slate-50 text-slate-600 text-[11px] font-bold rounded-full hover:bg-blue-50 hover:text-blue-600 border border-slate-100 transition-all">Japan</button>
-                  <button onclick="document.getElementById('country-search').value='Germany'; window.renderTrending()"
-                    class="px-5 py-2 bg-slate-50 text-slate-600 text-[11px] font-bold rounded-full hover:bg-blue-50 hover:text-blue-600 border border-slate-100 transition-all">Germany</button>
+            <div class="content-scroll-area" style="gap: 3.5rem; padding-top: 4rem;">
+
+              <!-- Header -->
+              <div style="text-align:center; max-width:600px; margin: 0 auto;">
+                <p class="eyebrow" style="justify-content:center; margin-bottom:1rem;">Country Directory</p>
+                <h1 class="page-title" style="margin-bottom:0.75rem;">Search the World</h1>
+                <p style="font-size:15px; color:var(--text-muted); line-height:1.65; max-width:440px; margin:0 auto 2.5rem;">Find any country to explore live news, economic data, weather and intelligence reports.</p>
+
+                <!-- Search Box -->
+                <div class="search-box" style="max-width:520px; margin: 0 auto;">
+                  <i class="fas fa-search"></i>
+                  <input type="text" id="country-search" placeholder="Enter a country name..." autocomplete="off">
+                  <button class="search-box-btn" onclick="window.renderTrending && window.renderTrending()">Search</button>
                 </div>
               </div>
 
-              <div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-32"></div>
+              <!-- Quick Filters -->
+              <div style="text-align:center;">
+                <p style="font-size:10px; font-weight:700; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:1rem;">Quick Access</p>
+                <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:0.6rem;">
+                  <button onclick="document.getElementById('country-search').value='India'; window.renderTrending()" style="padding:0.4rem 1rem; background:var(--surface); border:1px solid var(--border); border-radius:100px; font-size:12px; font-weight:500; color:var(--text-2); cursor:pointer; transition:all 0.15s;" onmouseover="this.style.borderColor='var(--brand)'; this.style.color='var(--brand)'" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-2)'">India</button>
+                  <button onclick="document.getElementById('country-search').value='United States'; window.renderTrending()" style="padding:0.4rem 1rem; background:var(--surface); border:1px solid var(--border); border-radius:100px; font-size:12px; font-weight:500; color:var(--text-2); cursor:pointer; transition:all 0.15s;" onmouseover="this.style.borderColor='var(--brand)'; this.style.color='var(--brand)'" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-2)'">United States</button>
+                  <button onclick="document.getElementById('country-search').value='China'; window.renderTrending()" style="padding:0.4rem 1rem; background:var(--surface); border:1px solid var(--border); border-radius:100px; font-size:12px; font-weight:500; color:var(--text-2); cursor:pointer; transition:all 0.15s;" onmouseover="this.style.borderColor='var(--brand)'; this.style.color='var(--brand)'" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-2)'">China</button>
+                  <button onclick="document.getElementById('country-search').value='Germany'; window.renderTrending()" style="padding:0.4rem 1rem; background:var(--surface); border:1px solid var(--border); border-radius:100px; font-size:12px; font-weight:500; color:var(--text-2); cursor:pointer; transition:all 0.15s;" onmouseover="this.style.borderColor='var(--brand)'; this.style.color='var(--brand)'" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-2)'">Germany</button>
+                  <button onclick="document.getElementById('country-search').value='Japan'; window.renderTrending()" style="padding:0.4rem 1rem; background:var(--surface); border:1px solid var(--border); border-radius:100px; font-size:12px; font-weight:500; color:var(--text-2); cursor:pointer; transition:all 0.15s;" onmouseover="this.style.borderColor='var(--brand)'; this.style.color='var(--brand)'" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-2)'">Japan</button>
+                  <button onclick="document.getElementById('country-search').value='United Kingdom'; window.renderTrending()" style="padding:0.4rem 1rem; background:var(--surface); border:1px solid var(--border); border-radius:100px; font-size:12px; font-weight:500; color:var(--text-2); cursor:pointer; transition:all 0.15s;" onmouseover="this.style.borderColor='var(--brand)'; this.style.color='var(--brand)'" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-2)'">United Kingdom</button>
+                  <button onclick="document.getElementById('country-search').value='Singapore'; window.renderTrending()" style="padding:0.4rem 1rem; background:var(--surface); border:1px solid var(--border); border-radius:100px; font-size:12px; font-weight:500; color:var(--text-2); cursor:pointer; transition:all 0.15s;" onmouseover="this.style.borderColor='var(--brand)'; this.style.color='var(--brand)'" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-2)'">Singapore</button>
+                </div>
+              </div>
+
+              <!-- Results Grid -->
+              <div id="search-results" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:1.5rem; padding-bottom:6rem;"></div>
             </div>
           </div>
           <div id="tab-intel" class="tab-content active">
@@ -573,38 +553,23 @@
             <div class="content-scroll-area">
               <div id="weather-alerts" class="hidden" style="margin-bottom:1.5rem"></div>
 
-              <!-- Premium Header & Search -->
-              <div class="flex flex-col gap-6 mb-12">
-                <div class="flex items-end justify-between border-b border-gray-100 pb-5">
-                  <div class="flex flex-col gap-1">
-                    <p class="text-[10px] font-bold text-blue-600 uppercase tracking-[0.3em]">Atmospheric Condition</p>
-                    <h2 class="font-serif text-4xl font-bold text-slate-900 leading-tight">Live Weather & Telemetry</h2>
-                  </div>
-                  <div class="flex flex-col gap-1.5 items-end">
-                    <div class="flex items-center gap-2">
-                       <span class="relative flex h-2.5 w-2.5">
-                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                         <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                       </span>
-                       <span class="text-xs font-bold text-slate-500 uppercase tracking-widest" id="atmo-station-id">PRIME STATION ALPHA</span>
-                    </div>
-                  </div>
+              <!-- Tab Header -->
+              <div class="tab-header">
+                <div class="tab-header-left">
+                  <p class="eyebrow">Atmospheric Conditions</p>
+                  <h2 class="page-title">Weather & Climate</h2>
                 </div>
+                <div class="tab-header-right">
+                  <span class="live-dot" id="atmo-station-id">Live Feed</span>
+                </div>
+              </div>
 
-                <div class="relative group">
-                    <div class="relative flex items-center bg-white border border-gray-100 rounded-2xl p-2 shadow-sm group-focus-within:border-blue-400 group-focus-within:shadow-xl group-focus-within:shadow-blue-500/5 transition-all duration-300">
-                      <div class="w-12 h-12 flex items-center justify-center text-slate-300">
-                        <i class="fas fa-search text-lg"></i>
-                      </div>
-                      <input type="text" id="atmosphere-city-search" placeholder="Search any global city..."
-                        class="flex-1 bg-transparent border-none outline-none text-lg font-medium text-slate-900 placeholder:text-slate-200 py-2 pr-6 font-sans"
-                        onkeydown="if (event.key === 'Enter') searchCityForTab('atmosphere');">
-                      <button onclick="searchCityForTab('atmosphere')"
-                        class="px-5 py-3 bg-blue-50 text-blue-600 rounded-xl text-[11px] font-bold uppercase tracking-widest border border-blue-100 hover:bg-blue-600 hover:text-white transition-colors">
-                        Analyze
-                      </button>
-                    </div>
-                </div>
+              <!-- Search -->
+              <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="atmosphere-city-search" placeholder="Search any global city..."
+                  onkeydown="if (event.key === 'Enter') searchCityForTab('atmosphere');">
+                <button class="search-box-btn" onclick="searchCityForTab('atmosphere')">Search</button>
               </div>
 
               <!-- Main temp display -->
@@ -806,53 +771,38 @@
           </div>
           <div id="tab-economic" class="tab-content">
             <div class="content-scroll-area">
-              <!-- Premium Header & Search -->
-              <div class="flex flex-col gap-6 mb-12">
-                <div class="flex items-end justify-between border-b border-gray-100 pb-5">
-                  <div class="flex flex-col gap-1">
-                    <p class="text-[10px] font-bold text-blue-600 uppercase tracking-[0.3em]">Macro Economics</p>
-                    <h2 class="font-serif text-4xl font-bold text-slate-900 leading-tight">Global Financial Data</h2>
-                  </div>
-                  <div class="flex items-center gap-2">
-                     <span class="text-xs font-bold text-slate-500 uppercase tracking-widest" id="eco-country-code">Global</span>
-                  </div>
+              <!-- Tab Header -->
+              <div class="tab-header">
+                <div class="tab-header-left">
+                  <p class="eyebrow">Macroeconomics</p>
+                  <h2 class="page-title">Global Financial Data</h2>
                 </div>
-
-                <div class="relative group">
-                    <div class="relative flex items-center bg-white border border-gray-100 rounded-2xl p-2 shadow-sm group-focus-within:border-blue-400 group-focus-within:shadow-xl group-focus-within:shadow-blue-500/5 transition-all duration-300">
-                      <div class="w-12 h-12 flex items-center justify-center text-slate-300">
-                        <i class="fas fa-search text-lg"></i>
-                      </div>
-                      <input type="text" id="economic-city-search" placeholder="Search by exact economy or nation..."
-                        class="flex-1 bg-transparent border-none outline-none text-lg font-medium text-slate-900 placeholder:text-slate-200 py-2 pr-6 font-sans"
-                        onkeydown="if (event.key === 'Enter') searchCityForTab('economic');">
-                      <button onclick="searchCityForTab('economic')"
-                        class="px-5 py-3 bg-blue-50 text-blue-600 rounded-xl text-[11px] font-bold uppercase tracking-widest border border-blue-100 hover:bg-blue-600 hover:text-white transition-colors">
-                        Probe
-                      </button>
-                    </div>
+                <div class="tab-header-right">
+                  <span style="font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.04em;" id="eco-country-code">Global</span>
+                  <span class="live-dot">Live Data</span>
                 </div>
               </div>
 
+              <!-- Search -->
+              <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="economic-city-search" placeholder="Search by country or economy..."
+                  onkeydown="if (event.key === 'Enter') searchCityForTab('economic');">
+                <button class="search-box-btn" onclick="searchCityForTab('economic')">Search</button>
+              </div>
+
               <!-- GDP Display -->
-              <div
-                style="display:flex;align-items:flex-start;gap:3rem;margin-bottom:2rem;padding-bottom:2rem;border-bottom:1px solid var(--border)">
+              <div style="display:flex;align-items:flex-start;gap:3rem;padding-bottom:2rem;border-bottom:1px solid var(--divider);">
                 <div>
-                  <div
-                    style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
-                    GDP (USD Billions)</div>
-                  <div style="display:flex;align-items:baseline;gap:0.5rem">
-                    <span style="font-size:3rem;font-weight:800;color:var(--text);line-height:1" id="eco-gdp">--</span>
-                    <span style="font-size:16px;color:var(--text-muted)">billion USD</span>
+                  <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.6rem;">GDP — USD Billions</div>
+                  <div style="display:flex;align-items:baseline;gap:0.6rem;">
+                    <span style="font-size:3.25rem;font-weight:800;color:var(--ink-900);line-height:1;font-variant-numeric:tabular-nums;" id="eco-gdp">--</span>
+                    <span style="font-size:15px;color:var(--text-muted);font-weight:400;">B USD</span>
                   </div>
-                  <div style="margin-top:1rem;display:flex;gap:1rem">
-                    <div
-                      style="padding:0.4rem 0.9rem;background:var(--green-soft);border-radius:4px;font-size:13px;font-weight:600;color:var(--green)">
-                      Growth: <span id="eco-growth">--%</span>
-                    </div>
-                    <div
-                      style="padding:0.4rem 0.9rem;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;font-size:13px;color:var(--text-muted)">
-                      Per Capita: <span id="eco-capita" style="font-weight:600;color:var(--text)">$--</span>
+                  <div style="margin-top:1rem;display:flex;gap:0.75rem;">
+                    <span class="badge badge-up" style="padding:0.3rem 0.85rem;font-size:12px;">Growth: <span id="eco-growth">--%</span></span>
+                    <span style="padding:0.3rem 0.85rem;background:var(--surface-2);border:1px solid var(--border);border-radius:100px;font-size:12px;color:var(--text-muted);font-weight:500;">Per Capita: <span id="eco-capita" style="font-weight:700;color:var(--text);">$--</span></span>
+
                     </div>
                   </div>
                 </div>

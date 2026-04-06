@@ -93,35 +93,35 @@ function renderTrending() {
     html = searchData.map(c => {
       const name = c.name.common;
       const region = c.region || "Global";
-      const pop = (c.population / 1000000).toFixed(1) + "M";
+      const pop = c.population >= 1000000000
+        ? (c.population / 1000000000).toFixed(2) + "B"
+        : (c.population / 1000000).toFixed(1) + "M";
+      const capital = c.capital ? c.capital[0] : "—";
+      const subregion = c.subregion || region;
       return `
-        <div class="group relative bg-white border border-gray-100 rounded-xl p-8 hover:shadow-2xl hover:border-blue-400 hover:shadow-blue-500/10 transition-all duration-500 cursor-pointer flex flex-col gap-5" 
-             onclick="window.selectFromSearch('${name.replace(/'/g, "\\'")}')">
-          <div class="flex justify-between items-start">
-            <div class="w-12 h-8 rounded-md overflow-hidden border border-gray-200 shadow-sm transition-transform group-hover:scale-110">
-              <img src="${c.flags.svg}" class="w-full h-full object-cover">
+        <div class="country-card" onclick="window.selectFromSearch('${name.replace(/'/g, "\\'")}')">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.25rem;">
+            <div style="width:44px;height:30px;border-radius:4px;overflow:hidden;border:1px solid var(--border);flex-shrink:0;box-shadow:var(--shadow-xs);">
+              <img src="${c.flags.svg}" alt="${name} flag" style="width:100%;height:100%;object-fit:cover;">
             </div>
-            <div class="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 rounded">
-              <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-              <span class="text-[9px] text-emerald-600 font-bold uppercase tracking-widest font-sans">Active</span>
-            </div>
-          </div>
-          <div class="mt-2">
-            <h3 class="text-xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors font-serif">${name}</h3>
-            <p class="text-[11px] text-gray-500 font-bold uppercase tracking-[0.2em] mt-1">${region} / ${c.subregion || 'Universal'}</p>
-          </div>
-          <div class="flex items-center gap-12 pt-6 border-t border-gray-100">
-            <div class="flex flex-col">
-              <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Population</span>
-              <span class="text-sm text-gray-900 font-black font-sans">${pop}</span>
-            </div>
-            <div class="flex flex-col">
-              <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Capital City</span>
-              <span class="text-sm text-gray-900 font-black font-sans line-clamp-1">${c.capital ? c.capital[0] : 'N/A'}</span>
+            <div style="display:flex;align-items:center;gap:0.4rem;">
+              <span style="width:6px;height:6px;border-radius:50%;background:var(--up);display:inline-block;"></span>
+              <span style="font-size:10px;font-weight:600;color:var(--up);text-transform:uppercase;letter-spacing:0.06em;">Live</span>
             </div>
           </div>
-          <div class="absolute bottom-8 right-8 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-500">
-             <i class="fas fa-arrow-right text-blue-600 text-sm"></i>
+          <div style="margin-bottom:1.25rem;">
+            <h3 style="font-family:var(--font-serif);font-size:1.2rem;font-weight:700;color:var(--ink-900);line-height:1.2;margin-bottom:0.25rem;">${name}</h3>
+            <p style="font-size:11px;font-weight:500;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.1em;">${subregion}</p>
+          </div>
+          <div style="display:flex;gap:2rem;padding-top:1rem;border-top:1px solid var(--divider);">
+            <div>
+              <div style="font-size:10px;font-weight:700;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem;">Population</div>
+              <div style="font-size:1rem;font-weight:700;color:var(--ink-800);font-variant-numeric:tabular-nums;">${pop}</div>
+            </div>
+            <div>
+              <div style="font-size:10px;font-weight:700;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem;">Capital</div>
+              <div style="font-size:1rem;font-weight:700;color:var(--ink-800);">${capital}</div>
+            </div>
           </div>
         </div>`;
     }).join("");

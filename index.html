@@ -236,16 +236,20 @@
 
           <div id="tab-intel" class="tab-content active" style="width:100%;">
             <div class="content-scroll-area" style="max-width:1400px; padding:3rem 2.5rem 8rem;">
-              <!-- Location path -->
-              <div
-                style="display:flex;align-items:center;gap:0.75rem;padding:1rem 0 1.5rem;border-bottom:1px solid var(--border);margin-bottom:2rem">
-                <i class="fas fa-map-marker-alt" style="color:var(--blue);font-size:11px"></i>
-                <span id="breadcrumb-operational-path"
-                  style="font-size:13px;font-weight:600;color:var(--text-2)">Worldwide</span>
-                <div id="ai-sync-pulse" style="margin-left:auto;display:flex;align-items:center;gap:0.4rem">
-                  <span
-                    style="width:6px;height:6px;background:#16A34A;border-radius:50%;display:inline-block;animation:pulse 2s infinite"></span>
-                  <span style="font-size:11px;color:var(--text-faint)">Live</span>
+              <!-- Header -->
+              <div class="tab-header">
+                <div class="tab-header-left">
+                  <p class="eyebrow" style="display:flex;align-items:center;gap:0.5rem;text-transform:uppercase;">
+                    <i class="fas fa-map-marker-alt" style="color:var(--blue);"></i>
+                    <span id="breadcrumb-operational-path">Worldwide</span>
+                  </p>
+                  <h2 class="page-title">Operational Overview</h2>
+                </div>
+                <div class="tab-header-right">
+                  <div id="ai-sync-pulse" style="display:flex;align-items:center;gap:0.4rem">
+                    <span style="width:6px;height:6px;background:#16A34A;border-radius:50%;display:inline-block;animation:pulse 2s infinite"></span>
+                    <span style="font-size:11px;color:var(--text-faint)">Live</span>
+                  </div>
                 </div>
               </div>
 
@@ -518,18 +522,16 @@
           <div id="tab-news" class="tab-content" style="width:100%;">
             <div class="content-scroll-area" style="max-width:1400px; padding:3rem 2.5rem 8rem;">
               <div style="margin-bottom:2rem; width:100%;">
-                <div
-                  style="display:flex;align-items:center;justify-content:space-between;padding-bottom:1.25rem;border-bottom:1px solid var(--border);margin-bottom:1.5rem">
-                  <div>
-                    <p
-                      style="font-size:11px;font-weight:600;color:var(--down);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem">
-                      <span
-                        style="display:inline-block;width:6px;height:6px;background:var(--down);border-radius:50%;margin-right:0.4rem;vertical-align:middle;animation:pulse 2s infinite"></span>
-                      Direct Intel Feed
-                    </p>
-                    <h2 style="font-family:var(--font-serif);font-size:2.5rem;font-weight:700;color:var(--text);letter-spacing:-0.01em;">Global News Dashboard</h2>
-                  </div>
+              <!-- Header -->
+              <div class="tab-header">
+                <div class="tab-header-left">
+                  <p class="eyebrow" style="color:var(--down);">
+                    <span style="display:inline-block;width:6px;height:6px;background:var(--down);border-radius:50%;margin-right:0.4rem;vertical-align:middle;animation:pulse 2s infinite"></span>
+                    Direct Intel Feed
+                  </p>
+                  <h2 class="page-title">Global News Dashboard</h2>
                 </div>
+              </div>
 
                 <!-- Search -->
                 <div class="search-box">

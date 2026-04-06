@@ -249,6 +249,14 @@
                 </div>
               </div>
 
+              <!-- Search -->
+              <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="intel-city-search" placeholder="Search by country or region..."
+                  onkeydown="if (event.key === 'Enter') searchCityForTab('intel');">
+                <button class="search-box-btn" onclick="searchCityForTab('intel')">Search</button>
+              </div>
+
               <div id="hierarchy-panel" class="hidden">
                 <div style="display:flex;align-items:center;gap:0.5rem;font-size:13px;margin-bottom:1.5rem">
                   <span style="color:var(--blue);cursor:pointer" onclick="resetToCountry()">
@@ -523,6 +531,14 @@
                   </div>
                 </div>
 
+                <!-- Search -->
+                <div class="search-box">
+                  <i class="fas fa-search"></i>
+                  <input type="text" id="news-city-search" placeholder="Navigate to country profile..."
+                    onkeydown="if (event.key === 'Enter') searchCityForTab('news');">
+                  <button class="search-box-btn" onclick="searchCityForTab('news')">Change Location</button>
+                </div>
+
                 <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:2rem">
                   <div
                     style="flex:1;display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:0.75rem 1.25rem;gap:0.75rem">
@@ -623,6 +639,14 @@
                 </div>
               </div>
 
+              <!-- Search -->
+              <div class="search-box" style="margin-bottom:2rem;">
+                <i class="fas fa-search"></i>
+                <input type="text" id="markets-city-search" placeholder="Search by country or region..."
+                  onkeydown="if (event.key === 'Enter') searchCityForTab('markets');">
+                <button class="search-box-btn" onclick="searchCityForTab('markets')">Search</button>
+              </div>
+
               <!-- Market Sections -->
               <div style="display:flex;flex-direction:column;gap:2.5rem;">
 
@@ -703,6 +727,14 @@
                   <div class="tab-header-right">
                     <span class="live-dot" id="atmo-station-id">Live Feed</span>
                   </div>
+                </div>
+
+                <!-- Search -->
+                <div class="search-box" style="margin-bottom:2rem;">
+                  <i class="fas fa-search"></i>
+                  <input type="text" id="atmosphere-city-search" placeholder="Search by country or region..."
+                    onkeydown="if (event.key === 'Enter') searchCityForTab('atmosphere');">
+                  <button class="search-box-btn" onclick="searchCityForTab('atmosphere')">Search</button>
                 </div>
 
                 <!-- Main Temp Display -->
@@ -821,38 +853,32 @@
 
                 <!-- Sun / Analysis row -->
                 <div style="display:grid;grid-template-columns:1fr;gap:1.5rem;margin-bottom:2.5rem">
-                  <div
-                    style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem">
-                    <div
-                      style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.5rem">
-                      <i class="fas fa-sun" style="color:var(--warn)"></i> Sunrise & Sunset
-                    </div>
-                    <div style="display:flex;justify-content:space-around;align-items:center">
-                      <div style="text-align:center">
-                        <div style="font-size:11px;color:var(--text-muted);margin-bottom:0.4rem;font-weight:600;">
-                          Sunrise</div>
-                        <div id="atmo-sunrise" style="font-size:1.5rem;font-weight:800;color:var(--text)">--:--</div>
-                      </div>
-                      <div style="width:1px;height:40px;background:var(--border)"></div>
-                      <div style="text-align:center">
-                        <div style="font-size:11px;color:var(--text-muted);margin-bottom:0.4rem;font-weight:600;">Sunset
+                  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.5rem;">
+                    <div style="display:flex;align-items:center;gap:3rem;flex-wrap:wrap;">
+                      <div style="display:flex;align-items:center;gap:0.75rem;">
+                        <i class="fas fa-sun" style="color:var(--warn);font-size:1.25rem;"></i>
+                        <div>
+                          <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.2rem;">Sunrise</div>
+                          <div id="atmo-sunrise" style="font-size:1.15rem;font-weight:800;color:var(--text)">--:--</div>
                         </div>
-                        <div id="atmo-sunset" style="font-size:1.5rem;font-weight:800;color:var(--text)">--:--</div>
+                      </div>
+                      <div style="width:1px;height:24px;background:var(--border);"></div>
+                      <div style="display:flex;align-items:center;gap:0.75rem;">
+                        <i class="fas fa-moon" style="color:var(--blue);font-size:1.25rem;"></i>
+                        <div>
+                          <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.2rem;">Sunset</div>
+                          <div id="atmo-sunset" style="font-size:1.15rem;font-weight:800;color:var(--text)">--:--</div>
+                        </div>
                       </div>
                     </div>
-                    <div
-                      style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--divider);display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                    <div style="display:flex;align-items:center;gap:3rem;">
                       <div>
-                        <div
-                          style="font-size:10px;color:var(--text-muted);text-transform:uppercase;font-weight:700;letter-spacing:0.05em;margin-bottom:0.25rem;">
-                          Wind Gusts</div>
-                        <div id="atmo-gusts" style="font-size:14px;font-weight:700;color:var(--text)">-- km/h</div>
+                        <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.2rem;">Wind Gusts</div>
+                        <div id="atmo-gusts" style="font-size:1.15rem;font-weight:800;color:var(--text);">-- km/h</div>
                       </div>
                       <div>
-                        <div
-                          style="font-size:10px;color:var(--text-muted);text-transform:uppercase;font-weight:700;letter-spacing:0.05em;margin-bottom:0.25rem;">
-                          Station ID</div>
-                        <div style="font-size:14px;font-weight:700;color:var(--text)">ATMO-042</div>
+                        <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.2rem;">Station ID</div>
+                        <div style="font-size:1.15rem;font-weight:800;color:var(--text);">ATMO-042</div>
                       </div>
                     </div>
                   </div>

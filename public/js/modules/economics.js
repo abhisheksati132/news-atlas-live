@@ -20,7 +20,8 @@ async function fetchDetailedEconomics(country) {
                 "trade_balance": "number only (BN)",
                 "reserves": "number only (BN)",
                 "credit_rating": "S&P/Moody style string",
-                "fiscal_summary": "1 sentence high-level summary"
+                "fiscal_summary": "1 sentence high-level summary",
+                "major_exports": "comma separated string of top 3 exports"
             }
             Use 2024/2025 estimates. No markdown. Raw JSON only.
         `;
@@ -67,6 +68,10 @@ async function fetchDetailedEconomics(country) {
       ecoEl("eco-reserves").innerText = eco.reserves;
     if (eco.credit_rating && ecoEl("eco-credit-rating"))
       ecoEl("eco-credit-rating").innerText = eco.credit_rating;
+      
+    if (eco.major_exports && ecoEl("eco-exports")) {
+      ecoEl("eco-exports").innerHTML = eco.major_exports.split(',').map(e => `<span style="background:var(--surface-2);padding:0.2rem 0.5rem;border-radius:4px;border:1px solid var(--border);color:var(--text);font-size:11px;font-weight:600;">${e.trim().toUpperCase()}</span>`).join('');
+    }
 
     window.playTacticalSound?.("success");
     drawGDPTrend(country);

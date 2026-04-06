@@ -382,10 +382,11 @@ window.searchCityForTab = async (tabId) => {
         window.mapEngine.map.flyTo({ center: [city.longitude, city.latitude], zoom: 9, duration: 2000 });
       }
       setText("selected-country-name", city.name.toUpperCase());
-      if (tabId === 'economic' && window.fetchDetailedEconomics) window.fetchDetailedEconomics(city.name);
-      if (tabId === 'atmosphere' && window.fetchWeather) window.fetchWeather(city.latitude, city.longitude);
+      if (window.fetchAllData) window.fetchAllData(city.name);
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error(e);
+  }
 };
 
 window.updateAISummary = async (country) => {

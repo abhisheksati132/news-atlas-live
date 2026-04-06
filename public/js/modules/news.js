@@ -170,43 +170,46 @@ function displayNewsArticles(articles) {
     const timeAgo = (art.pubDate ? relativeTime(art.pubDate) : "RECENT");
     const source = (art.source_id || "GLOBAL").toUpperCase();
     
-    // Premium image container with refined hover
     const imgHtml = art.image_url
-      ? `<div class="w-full mt-4 rounded-lg overflow-hidden bg-gray-100 group-hover:shadow-md transition-all duration-500" 
-              style="height: 220px;">
+      ? `<div style="width:100%; height:180px; margin-top:1rem; overflow:hidden; background:var(--surface-2); border-bottom:1px solid var(--border);">
               <img src="${art.image_url}" 
-                   class="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" 
+                   style="width:100%; height:100%; object-fit:cover; opacity:0.95; transition:transform 0.4s ease;" 
+                   class="group-hover:scale-105"
                    onerror="this.parentElement.style.display='none'">
          </div>`
       : "";
 
     const card = document.createElement("div");
-    card.className = `p-8 border border-gray-100 bg-white hover:border-blue-200 hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-500 cursor-pointer flex flex-col gap-5 news-card-animate group rounded-xl`;
-    card.style.animationDelay = `${i * 40}ms`;
+    card.className = "news-card-animate group";
+    card.style.cssText = "background:var(--surface); border:1px solid var(--border); overflow:hidden; display:flex; flex-direction:column; cursor:pointer; transition:border-color 0.15s ease, background 0.15s ease;";
+    card.style.animationDelay = `${i * 30}ms`;
+    card.onmouseover = () => { card.style.borderColor = "var(--ink-900)"; card.style.background = "var(--surface-2)" };
+    card.onmouseout = () => { card.style.borderColor = "var(--border)"; card.style.background = "var(--surface)" };
     card.onclick = () => window.open(art.link, '_blank');
     
     card.innerHTML = `
-      <div class="flex items-center justify-between border-b border-gray-50 pb-4">
-        <div class="flex items-center gap-3">
-          <div class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[9px] font-bold rounded uppercase tracking-wider font-sans">${source}</div>
-          <span class="text-[10px] font-medium text-gray-500 uppercase tracking-widest font-sans">${timeAgo}</span>
-        </div>
-        <div class="flex items-center gap-2">
-            <span class="text-[9px] font-bold tracking-widest font-sans ${sentiment.cls} uppercase">${sentiment.label}</span>
-            <div class="w-1.5 h-1.5 rounded-full ${sentiment.cls.replace('text-', 'bg-')} shadow-[0_0_8px_rgba(37,99,235,0.4)]"></div>
-        </div>
-      </div>
-      
-      <div class="flex flex-col gap-4">
-        <h3 class="text-xl font-bold text-gray-900 leading-tight tracking-tight group-hover:text-blue-700 transition-colors font-serif">${escapeHtml(art.title)}</h3>
-        ${art.description ? `<p class="text-[14px] text-gray-600 leading-relaxed font-sans line-clamp-3">${escapeHtml(art.description)}</p>` : ''}
-      </div>
-
       ${imgHtml}
+      <div style="padding:1.5rem; display:flex; flex-direction:column; flex:1;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+          <div style="font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; font-family:var(--font-sans);">
+            ${source} <span style="margin:0 0.4rem; color:var(--border-2);">|</span> ${timeAgo}
+          </div>
+          <div style="display:flex; align-items:center; gap:0.4rem;">
+            <div style="width:6px; height:6px; background:${sentiment.label === 'POSITIVE' ? 'var(--up)' : sentiment.label === 'CRITICAL' ? 'var(--down)' : 'var(--text-faint)'};"></div>
+            <span style="font-size:9px; font-weight:700; font-family:var(--font-sans); color:${sentiment.label === 'POSITIVE' ? 'var(--up)' : sentiment.label === 'CRITICAL' ? 'var(--down)' : 'var(--text-faint)'}; uppercase tracking-widest">${sentiment.label}</span>
+          </div>
+        </div>
+        
+        <h3 style="font-size:1.15rem; font-weight:700; color:var(--text); font-family:var(--font-serif); line-height:1.3; margin-bottom:0.75rem;">
+          ${escapeHtml(art.title)}
+        </h3>
+        
+        ${art.description ? `<p style="font-size:13px; color:var(--text-2); line-height:1.6; font-family:var(--font-sans); display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:1.5rem;">${escapeHtml(art.description)}</p>` : '<div style="margin-bottom:1.5rem;"></div>'}
 
-      <div class="mt-auto pt-5 flex items-center justify-between group-hover:translate-x-1 transition-transform duration-300">
-        <span class="text-[11px] text-blue-600 font-bold uppercase tracking-widest font-sans">Read Full Analysis</span>
-        <i class="fas fa-arrow-right text-[11px] text-blue-600"></i>
+        <div style="margin-top:auto; padding-top:1rem; border-top:1px solid var(--divider); display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text);">Read Analysis</span>
+          <i class="fas fa-arrow-right" style="font-size:10px; color:var(--text-muted);"></i>
+        </div>
       </div>
     `;
     container.appendChild(card);

@@ -21,25 +21,24 @@ async function displayPreciousMetals() {
       const change = data.change || 0;
       const changeClass = change >= 0 ? "text-emerald-600" : "text-rose-600";
       const row = document.createElement("div");
-      row.className = "flex items-center justify-between py-5 px-8 border-b border-gray-100 hover:bg-gray-50 transition-colors group";
+      row.className = "stat-cell";
+      row.style.cursor = "pointer";
       row.innerHTML = `
-                <div class="flex items-center gap-5">
-                  <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-[10px] tracking-tight border border-blue-100">${sym}</div>
-                  <div class="flex flex-col">
-                    <span class="text-[13px] font-bold text-slate-900 uppercase tracking-tight font-sans">${name}</span>
-                    <div class="flex items-center gap-3">
-                      <span class="text-[9px] text-slate-500 uppercase font-bold tracking-widest font-sans">Depth: High</span>
-                      <span class="text-[9px] text-slate-400 uppercase font-medium tracking-widest font-sans">/ Spot Exchange</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex flex-col items-end gap-1">
-                  <div class="text-[18px] font-bold text-slate-900 font-sans leading-none tracking-tight">${(data.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span class="text-[10px] text-slate-400 ml-1">${cur}</span></div>
-                  <div class="${changeClass} text-[11px] font-bold font-sans text-right flex items-center gap-1.5 px-2 py-0.5 rounded-full ${change >= 0 ? 'bg-emerald-50' : 'bg-rose-50'}">
-                    ${change >= 0 ? '<i class="fas fa-caret-up text-[9px]"></i>' : '<i class="fas fa-caret-down text-[9px]"></i>'}
-                    ${Math.abs(change).toFixed(2)}%
-                  </div>
-                </div>`;
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem;">
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.3rem;">${sym}</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text);font-family:var(--font-sans);">${name}</div>
+          </div>
+          <div class="${changeClass}" style="font-size:10px;font-weight:700;background:var(--surface-2);padding:0.2rem 0.4rem;border-radius:4px;border:1px solid var(--border);">
+            ${change >= 0 ? '<i class="fas fa-caret-up"></i>' : '<i class="fas fa-caret-down"></i>'} ${Math.abs(change).toFixed(2)}%
+          </div>
+        </div>
+        <div>
+          <div style="font-size:1.5rem;font-weight:800;color:var(--text);font-family:var(--font-sans);letter-spacing:-0.03em;">
+            ${(data.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span style="font-size:12px;color:var(--text-muted);">${cur}</span>
+          </div>
+          <div style="font-size:9px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.05em;margin-top:0.4rem;">Spot Exchange</div>
+        </div>`;
       container.appendChild(row);
     });
     if (container.children.length === 0) container.innerHTML = '<div class="text-slate-400 text-[11px] py-10 text-center uppercase font-bold tracking-widest">Exchange Sync Unavailable</div>';
@@ -60,25 +59,24 @@ async function displayCountryIndices(countryName) {
       const change = data.change || 0;
       const changeClass = change >= 0 ? "text-emerald-600" : "text-rose-600";
       const row = document.createElement("div");
-      row.className = "flex items-center justify-between py-5 px-8 border-b border-gray-100 hover:bg-gray-50 transition-colors group";
+      row.className = "stat-cell";
+      row.style.cursor = "pointer";
       row.innerHTML = `
-                <div class="flex items-center gap-5">
-                  <div class="w-12 h-10 rounded-lg bg-slate-50 flex flex-col items-center justify-center text-slate-600 font-bold text-[9px] tracking-tighter border border-slate-100 uppercase">${data.ticker || 'IDX'}</div>
-                  <div class="flex flex-col">
-                    <span class="text-[13px] font-bold text-slate-900 uppercase tracking-tight font-sans">${data.label}</span>
-                    <div class="flex items-center gap-3">
-                       <span class="text-[9px] text-slate-500 uppercase font-bold tracking-widest font-sans">Status: Open</span>
-                       <span class="text-[9px] text-slate-400 uppercase font-medium tracking-widest font-sans">/ Index Trading</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex flex-col items-end gap-1">
-                  <div class="text-[18px] font-bold text-slate-900 font-sans leading-none tracking-tight">${(data.price || 0).toLocaleString(undefined, { maximumFractionDigits: 1 })}</div>
-                  <div class="${changeClass} text-[11px] font-bold font-sans text-right flex items-center gap-1.5 px-2 py-0.5 rounded-full ${change >= 0 ? 'bg-emerald-50' : 'bg-rose-50'}">
-                    ${change >= 0 ? '<i class="fas fa-caret-up text-[9px]"></i>' : '<i class="fas fa-caret-down text-[9px]"></i>'}
-                    ${Math.abs(change).toFixed(2)}%
-                  </div>
-                </div>`;
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem;">
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.3rem;">${data.ticker || 'IDX'}</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text);font-family:var(--font-sans);">${data.label}</div>
+          </div>
+          <div class="${changeClass}" style="font-size:10px;font-weight:700;background:var(--surface-2);padding:0.2rem 0.4rem;border-radius:4px;border:1px solid var(--border);">
+            ${change >= 0 ? '<i class="fas fa-caret-up"></i>' : '<i class="fas fa-caret-down"></i>'} ${Math.abs(change).toFixed(2)}%
+          </div>
+        </div>
+        <div>
+          <div style="font-size:1.5rem;font-weight:800;color:var(--text);font-family:var(--font-sans);letter-spacing:-0.03em;">
+            ${(data.price || 0).toLocaleString(undefined, { maximumFractionDigits: 1 })}
+          </div>
+          <div style="font-size:9px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.05em;margin-top:0.4rem;">Index Trading / Open</div>
+        </div>`;
       container.appendChild(row);
     });
     if (container.children.length === 0) container.innerHTML = '<div class="text-slate-400 text-[11px] py-10 text-center uppercase font-bold tracking-widest">No Regional Index Match Found</div>';
@@ -94,20 +92,23 @@ async function displayForex() {
     const res = await fetch(`/api/markets?type=forex&currency=${base}`);
     const json = await res.json();
     container.innerHTML = "";
-    Object.entries(json.rates || {}).filter(([c]) => c !== base).slice(0, 16).forEach(([pair, rate]) => {
+    Object.entries(json.rates || {}).filter(([c]) => c !== base).slice(0, 16).forEach(([c, rate]) => {
       const row = document.createElement("div");
-      row.className = "flex items-center justify-between py-5 px-8 border-b border-gray-100 hover:bg-gray-50 transition-colors group";
+      row.className = "stat-cell";
+      row.style.cursor = "pointer";
       row.innerHTML = `
-                <div class="flex items-center gap-5">
-                  <div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-700 font-bold text-[9px] tracking-tight border border-emerald-100">${base}/${pair}</div>
-                  <div class="flex flex-col">
-                    <span class="text-[13px] font-bold text-slate-900 uppercase tracking-tight font-sans">Currency Flow</span>
-                    <div class="flex items-center gap-3">
-                       <span class="text-[9px] text-slate-500 uppercase font-bold tracking-widest font-sans">Liquidity: Prime</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="text-[18px] font-bold text-slate-900 font-sans leading-none tracking-tight">${rate.toFixed(4)}</div>`;
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem;">
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.3rem;">Forex</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text);font-family:var(--font-sans);">${base}/${c}</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:1.5rem;font-weight:800;color:var(--text);font-family:var(--font-sans);letter-spacing:-0.03em;">
+            ${Number(rate).toFixed(4)}
+          </div>
+          <div style="font-size:9px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.05em;margin-top:0.4rem;">Currency Flow / Liquidity</div>
+        </div>`;
       container.appendChild(row);
     });
   } catch { container.innerHTML = '<div class="text-slate-400 text-[11px] py-10 text-center uppercase font-bold tracking-widest">FX Matrix Offline</div>'; }
@@ -125,24 +126,24 @@ async function displayCommodities() {
       const change = data.change || 0;
       const changeClass = change >= 0 ? "text-emerald-600" : "text-rose-600";
       const row = document.createElement("div");
-      row.className = "flex items-center justify-between py-5 px-8 border-b border-gray-100 hover:bg-gray-50 transition-colors group";
+      row.className = "stat-cell";
+      row.style.cursor = "pointer";
       row.innerHTML = `
-                <div class="flex items-center gap-5">
-                  <div class="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center text-orange-700 font-bold text-[9px] tracking-tight border border-orange-100">${name.toUpperCase().slice(0, 3)}</div>
-                  <div class="flex flex-col">
-                    <span class="text-[13px] font-bold text-slate-900 uppercase tracking-tight font-sans">${name}</span>
-                    <div class="flex items-center gap-3">
-                       <span class="text-[9px] text-slate-500 uppercase font-bold tracking-widest font-sans">Status: Stable</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex flex-col items-end gap-1">
-                  <div class="text-[18px] font-bold text-slate-900 font-sans leading-none tracking-tight">${(data.price || 0).toFixed(2)} <span class="text-[10px] text-slate-400 ml-1">${cur}</span></div>
-                  <div class="${changeClass} text-[11px] font-bold font-sans text-right flex items-center gap-1.5 px-2 py-0.5 rounded-full ${change >= 0 ? 'bg-emerald-50' : 'bg-rose-50'}">
-                    ${change >= 0 ? '<i class="fas fa-caret-up text-[9px]"></i>' : '<i class="fas fa-caret-down text-[9px]"></i>'}
-                    ${Math.abs(change).toFixed(2)}%
-                  </div>
-                </div>`;
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem;">
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.3rem;">${name.toUpperCase().slice(0, 3)}</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text);font-family:var(--font-sans);">${name}</div>
+          </div>
+          <div class="${changeClass}" style="font-size:10px;font-weight:700;background:var(--surface-2);padding:0.2rem 0.4rem;border-radius:4px;border:1px solid var(--border);">
+            ${change >= 0 ? '<i class="fas fa-caret-up"></i>' : '<i class="fas fa-caret-down"></i>'} ${Math.abs(change).toFixed(2)}%
+          </div>
+        </div>
+        <div>
+          <div style="font-size:1.5rem;font-weight:800;color:var(--text);font-family:var(--font-sans);letter-spacing:-0.03em;">
+            ${(data.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span style="font-size:12px;color:var(--text-muted);">${cur}</span>
+          </div>
+          <div style="font-size:9px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.05em;margin-top:0.4rem;">Futures Contract</div>
+        </div>`;
       container.appendChild(row);
     });
     if (container.children.length === 0) container.innerHTML = '<div class="text-slate-400 text-[11px] py-10 text-center uppercase font-bold tracking-widest">Global Commodity Data Unavailable</div>';

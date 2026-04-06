@@ -37,141 +37,95 @@
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 
-<body class="flex flex-col night-theme">
+<body class="flex flex-col">
   <!-- Clean Terminal Foundation -->
-  <div id="map-tooltip" class="fixed hidden text-white rounded-sm border-l-2 border-l-blue-500 overflow-hidden" style="
-        background: #0f172a;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        min-width: 140px;
-      ">
-    <div class="flex items-center gap-2.5 px-3 pt-2.5 pb-2 border-b border-white/5">
-      <img id="tooltip-flag" src="" alt="" class="hidden w-8 h-5 object-cover rounded shadow" />
-      <span id="tooltip-name" class="text-[11px] font-black text-white uppercase tracking-wider"
-        style="font-family: &quot;JetBrains Mono&quot;, monospace"></span>
+  <div id="map-tooltip" class="fixed hidden overflow-hidden"
+    style="background:#0D1B2A;border:1px solid rgba(255,255,255,0.12);border-radius:8px;min-width:150px;box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+    <div class="flex items-center gap-2.5 px-3 pt-2.5 pb-2" style="border-bottom:1px solid rgba(255,255,255,0.08)">
+      <img id="tooltip-flag" src="" alt="" class="hidden w-8 h-5 object-cover rounded" style="border-radius:3px" />
+      <span id="tooltip-name" style="font-size:12px;font-weight:700;color:#fff;font-family:'Inter',sans-serif"></span>
     </div>
     <div class="px-3 py-2 flex flex-col gap-1">
-      <div class="flex items-center gap-1.5">
-        <span id="tooltip-label-1" class="text-[11px] text-slate-500 uppercase font-bold tracking-widest"
-          style="font-family: &quot;JetBrains Mono&quot;, monospace">Capital</span>
-        <span id="tooltip-capital" class="text-sm text-cyan-400 font-bold"
-          style="font-family: &quot;JetBrains Mono&quot;, monospace"></span>
+      <div class="flex items-center gap-2">
+        <span id="tooltip-label-1"
+          style="font-size:11px;color:rgba(255,255,255,0.45);font-family:'Inter',sans-serif">Capital</span>
+        <span id="tooltip-capital"
+          style="font-size:12px;color:#60A5FA;font-weight:600;font-family:'Inter',sans-serif"></span>
       </div>
-      <div class="flex items-center gap-1.5">
-        <span id="tooltip-label-2" class="text-[11px] text-slate-500 uppercase font-bold tracking-widest"
-          style="font-family: &quot;JetBrains Mono&quot;, monospace">Pop.</span>
-        <span id="tooltip-pop" class="text-sm text-emerald-400 font-bold"
-          style="font-family: &quot;JetBrains Mono&quot;, monospace"></span>
-      </div>
-    </div>
-  </div>
-  <div id="search-overlay" class="fixed inset-0 hidden z-[2200] px-6"
-    style="align-items:center; justify-content:center; background: rgba(8,12,21,0.85); backdrop-filter: blur(24px) saturate(180%);">
-    <div
-      style="width:100%; max-width:680px; background:#0f172a; border:1px solid rgba(255,255,255,0.08); border-radius: 2rem; overflow:hidden; box-shadow: 0 32px 80px rgba(0,0,0,0.6); transform: scale(1);">
-      <div
-        style="display:flex; align-items:center; gap:20px; padding:24px 32px; border-bottom:1px solid rgba(255,255,255,0.05);">
-        <i class="fas fa-search" style="color:#3b82f6; font-size:16px; flex-shrink:0; opacity: 0.8;"></i>
-        <input type="text" id="country-search" placeholder="Execute Global Search Command..."
-          style="flex:1; background:transparent; border:none; color:#f1f5f9; font-size:18px; font-weight:600; outline:none; font-family:'JetBrains Mono',monospace;"
-          oninput="window.renderTrending && window.renderTrending()" autocomplete="off" />
-        <button onclick="window.toggleSearch && window.toggleSearch()"
-          style="padding:6px 12px; border-radius: 99px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04); color:#64748b; font-size:10px; font-family:'JetBrains Mono',monospace; letter-spacing:0.1em; cursor:pointer;">ESC</button>
-      </div>
-      <div id="search-results" style="max-height:55vh; overflow-y:auto;" class="custom-scrollbar"></div>
-      <div
-        style="padding:14px 32px; border-top:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center; background: rgba(255,255,255,0.01);">
-        <span
-          style="font-size:10px; font-family:'JetBrains Mono',monospace; color:#475569; text-transform:uppercase; letter-spacing:0.2em;">Search
-          Directory</span>
-        <span
-          style="display:flex; align-items:center; gap:8px; font-size:10px; font-family:'JetBrains Mono',monospace; color:#3b82f6; font-weight:800;">
-          <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>ACTIVE
-        </span>
+      <div class="flex items-center gap-2">
+        <span id="tooltip-label-2"
+          style="font-size:11px;color:rgba(255,255,255,0.45);font-family:'Inter',sans-serif">Population</span>
+        <span id="tooltip-pop"
+          style="font-size:12px;color:#34D399;font-weight:600;font-family:'Inter',sans-serif"></span>
       </div>
     </div>
   </div>
 
-  <header class="border-b border-white/5 bg-slate-900/40 backdrop-blur-3xl">
-    <div class="flex items-center gap-10">
-      <div class="flex items-center gap-3">
-        <i class="fas fa-globe text-blue-500 text-sm"></i>
-        <span class="text-xs font-black text-white uppercase tracking-[0.4em] font-mono">NewsAtlas</span>
-      </div>
+
+  <header>
+    <div class="flex items-center gap-3">
+      <i class="fas fa-globe" style="color:#3B82F6;font-size:16px"></i>
+      <span
+        style="font-family:'Playfair Display',Georgia,serif;font-size:18px;font-weight:700;color:#fff;letter-spacing:-0.01em">NewsAtlas</span>
     </div>
 
-    <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-10">
+    <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
       <button onclick="window.backToOrbital()" class="nav-sector-link active">Globe</button>
+      <button onclick="window.switchTab('search')" class="nav-sector-link">Search</button>
       <button onclick="window.switchTab('summary')" class="nav-sector-link">Overview</button>
       <button onclick="window.switchTab('news')" class="nav-sector-link">News</button>
       <button onclick="window.switchTab('markets')" class="nav-sector-link">Markets</button>
-      <button onclick="window.switchTab('weather')" class="nav-sector-link">Atmosphere</button>
-      <button onclick="window.switchTab('economic')" class="nav-sector-link">Economics</button>
-      <button onclick="window.switchTab('neural')" class="nav-sector-link">Analysis</button>
+      <button onclick="window.switchTab('weather')" class="nav-sector-link">Weather</button>
+      <button onclick="window.switchTab('economic')" class="nav-sector-link">Economy</button>
+      <button onclick="window.switchTab('neural')" class="nav-sector-link">AI Chat</button>
     </div>
 
-    <div class="flex items-center gap-6">
-      <div class="flex items-center gap-3">
-        <button onclick="window.toggleSearch()"
-          class="w-10 h-10 flex items-center justify-center rounded-full transition-all bg-white/5 border border-slate-200 hover:border-blue-500/30 text-slate-400 hover:text-blue-400">
-          <i class="fas fa-search text-sm"></i>
-        </button>
-      </div>
-
-      <div class="h-8 w-px bg-slate-200"></div>
-
-      <div class="flex items-center gap-4">
-        <span id="ist-time" class="text-[10px] font-bold text-slate-500 font-mono tracking-widest">--:-- IST</span>
-        <div class="flex gap-1">
-          <button onclick="window.downloadDossier()"
-            class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors"><i
-              class="fas fa-file-export text-xs"></i></button>
-          <a href="/" title="Back to Home"
-            class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
-            <i class="fas fa-home text-xs"></i>
-          </a>
-        </div>
-      </div>
+    <div class="flex items-center gap-4">
+      <span id="ist-time"
+        style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.6);font-family:'Inter',sans-serif">--:--
+        IST</span>
+      <div style="width:1px;height:20px;background:rgba(255,255,255,0.12)"></div>
+      <button onclick="window.downloadReport()" title="Download Report"
+        style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);background:none;border:none;cursor:pointer;border-radius:6px;transition:all 0.2s"
+        onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">
+        <i class="fas fa-download" style="font-size:13px"></i>
+      </button>
+      <a href="/" title="Home"
+        style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);border-radius:6px;transition:color 0.2s"
+        onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">
+        <i class="fas fa-home" style="font-size:13px"></i>
+      </a>
     </div>
   </header>
 
   <div id="map-layer" class="fixed inset-0 z-0 bg-[#02040a]">
     <div id="map-container" class="w-full h-full"></div>
 
-    <div id="geo-tracker-hud" class="fixed bottom-10 left-10 z-[100] bg-slate-950/80 backdrop-blur-xl border border-white/10 rounded-lg p-3 hidden md:flex items-center gap-4 pointer-events-none shadow-2xl">
-      <div class="flex items-center gap-2">
-        <i class="fas fa-crosshairs text-blue-500 text-[10px] animate-pulse"></i>
-        <span class="text-[9px] text-slate-400 uppercase tracking-[0.3em] font-mono">Coordinates</span>
-      </div>
-      <div class="h-4 w-px bg-white/10"></div>
-      <span id="geo-lat-lng" class="text-[11px] font-black text-white font-mono tracking-widest">AWAITING LOCATION</span>
+    <div id="geo-tracker-hud"
+      class="fixed bottom-10 left-10 z-[100] hidden md:flex items-center gap-3 pointer-events-none"
+      style="background:rgba(13,27,42,0.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 14px">
+      <i class="fas fa-map-marker-alt" style="color:#3B82F6;font-size:10px"></i>
+      <span id="geo-lat-lng"
+        style="font-size:11px;color:rgba(255,255,255,0.7);font-family:'Inter',sans-serif">â€”</span>
     </div>
 
-    <div id="map-controls" class="fixed bottom-12 right-12 z-[100] flex flex-col gap-4">
-      <button onclick="window.resetToGlobalCenter()"
-        class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/45 backdrop-blur-3xl border border-white/10 text-white/50 hover:text-blue-400 hover:border-blue-500/30 transition-all shadow-2xl"
-        title="Reset to Global Baseline">
-        <i class="fas fa-expand text-sm"></i>
+    <div id="map-controls" class="fixed bottom-12 right-8 z-[100] flex flex-col gap-3">
+      <button onclick="window.resetToGlobalCenter()" title="Reset View" class="map-ctrl-btn">
+        <i class="fas fa-expand" style="font-size:13px"></i>
       </button>
-      <button onclick="window.toggleMapStyle()"
-        class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/45 backdrop-blur-3xl border border-white/10 text-white/50 hover:text-blue-400 hover:border-blue-500/30 transition-all shadow-2xl"
-        title="Sector Style Shift">
-        <i class="fas fa-layer-group text-sm"></i>
+      <button onclick="window.toggleMapStyle()" title="Change Map Style" class="map-ctrl-btn">
+        <i class="fas fa-layer-group" style="font-size:13px"></i>
       </button>
-      <button onclick="window.toggleMapProjection()" id="projection-toggle-btn"
-        class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/45 backdrop-blur-3xl border border-white/10 text-white/50 hover:text-blue-400 hover:border-blue-500/30 transition-all shadow-2xl"
-        title="Morph Projection">
-        <i class="fas fa-globe text-sm"></i>
+      <button onclick="window.toggleMapProjection()" id="projection-toggle-btn" title="Toggle Globe / Flat"
+        class="map-ctrl-btn">
+        <i class="fas fa-globe" style="font-size:13px"></i>
       </button>
-      <div class="h-px w-8 bg-white/5 mx-auto"></div>
-      <button onclick="window.zoomMap(1.2)"
-        class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/45 backdrop-blur-3xl border border-white/10 text-white/50 hover:text-blue-400 hover:border-blue-500/30 transition-all shadow-2xl"
-        title="Zoom In Telemetry">
-        <i class="fas fa-plus text-xs"></i>
+      <div style="height:1px;background:rgba(255,255,255,0.1);margin:2px 4px"></div>
+      <button onclick="window.zoomMap(1.2)" title="Zoom In" class="map-ctrl-btn">
+        <i class="fas fa-plus" style="font-size:12px"></i>
       </button>
-      <button onclick="window.zoomMap(0.8)"
-        class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-900/45 backdrop-blur-3xl border border-white/10 text-white/50 hover:text-blue-400 hover:border-blue-500/30 transition-all shadow-2xl"
-        title="Zoom Out Telemetry">
-        <i class="fas fa-minus text-xs"></i>
+      <button onclick="window.zoomMap(0.8)" title="Zoom Out" class="map-ctrl-btn">
+        <i class="fas fa-minus" style="font-size:12px"></i>
       </button>
     </div>
   </div>
@@ -179,259 +133,418 @@
   <main class="main-content">
     <div id="ui-overlay" class="relative z-10 w-full h-full">
       <aside id="modular-intelligence-sector"
-        class="fixed inset-0 z-20 bg-slate-950/90 backdrop-blur-2xl opacity-0 pointer-events-none transition-all duration-500 ease-in-out flex flex-col pt-[var(--header-h)]">
+        class="fixed inset-0 z-20 opacity-0 pointer-events-none transition-all duration-400 ease-in-out flex flex-col"
+        style="padding-top:var(--header-h)">
 
         <div id="sidebar-content" class="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-          <div id="tab-intel" class="tab-content active">
-            <div class="content-scroll-area space-y-4">
-              <div class="flex items-center gap-3 mb-4">
-                <div
-                  class="flex-1 relative flex items-center bg-white/[0.04] border border-white/10 rounded-2xl px-5 py-3.5 gap-4 focus-within:border-blue-500/40 transition-all">
-                  <i class="fas fa-search text-slate-600 text-sm"></i>
-                  <input type="text" id="intel-city-search" placeholder="Search countries..."
-                    class="flex-1 bg-transparent border-none outline-none text-[14px] text-white placeholder-slate-700 font-medium transition-all"
-                    onkeydown="if (event.key === 'Enter') searchCityForTab('intel');" />
-                  <button onclick="searchCityForTab('intel')"
-                    class="text-slate-500 hover:text-white transition-colors px-2">
-                    <i class="fas fa-arrow-right text-sm"></i>
-                  </button>
-                </div>
-
-                <div id="back-to-global-wrap" class="hidden">
-                  <button onclick="resetToGlobalCenter()"
-                    class="px-4 py-2 bg-white/5 border border-white/10 text-[9px] font-black text-slate-500 uppercase tracking-widest hover:text-white hover:border-blue-500/50 transition-all rounded-sm flex items-center gap-2">
-                    <div class="w-1 h-1 bg-blue-500"></div>
-                    Return to Global
-                  </button>
+          <!-- Country Context Bar -->
+          <div id="global-context-hud" class="sticky top-0 z-50 px-8 py-4 flex items-center justify-between"
+            style="background:var(--navy);border-bottom:1px solid rgba(255,255,255,0.08)">
+            <div class="flex items-center gap-4">
+              <div
+                style="width:40px;height:28px;border-radius:4px;overflow:hidden;border:1px solid rgba(255,255,255,0.15)">
+                <img id="ctx-flag" src="" class="w-full h-full object-cover hidden">
+                <div id="ctx-globe-icon"
+                  style="width:100%;height:100%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center">
+                  <i class="fas fa-globe" style="color:rgba(255,255,255,0.4);font-size:11px"></i>
                 </div>
               </div>
+              <div class="flex flex-col gap-0.5">
+                <div class="flex items-center gap-2">
+                  <span id="ctx-country"
+                    style="font-size:14px;font-weight:700;color:#fff;font-family:'Inter',sans-serif">Global View</span>
+                  <i class="fas fa-chevron-right" style="font-size:9px;color:rgba(255,255,255,0.3)"></i>
+                  <span id="ctx-location"
+                    style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.55);font-family:'Inter',sans-serif">Select
+                    a location</span>
+                </div>
+                <span id="ctx-status"
+                  style="font-size:11px;color:rgba(255,255,255,0.3);font-family:'Inter',sans-serif">Live data</span>
+              </div>
+            </div>
+            <button onclick="window.resetToGlobalCenter()"
+              style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.55);background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all 0.2s;font-family:'Inter',sans-serif"
+              onmouseover="this.style.color='#fff';this.style.background='rgba(255,255,255,0.15)'"
+              onmouseout="this.style.color='rgba(255,255,255,0.55)';this.style.background='rgba(255,255,255,0.08)'">Back
+              to Globe</button>
+          </div>
+
+          <div id="tab-search" class="tab-content">
+            <div class="content-scroll-area" style="padding-top:3rem">
+              <div style="margin-bottom:2.5rem">
+                <p
+                  style="font-size:12px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem">
+                  Search</p>
+                <h2
+                  style="font-family:var(--font-serif);font-size:2.5rem;font-weight:700;color:var(--text);line-height:1.1;margin-bottom:0.75rem">
+                  Search the World</h2>
+                <p style="color:var(--text-muted);font-size:15px;max-width:500px;line-height:1.6">Find any country,
+                  city, or region to explore live news, economic data, and more.</p>
+              </div>
+
+              <div
+                style="display:flex;align-items:center;background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:1rem 1.5rem;gap:1rem;margin-bottom:2rem;transition:border-color 0.2s"
+                onfocusin="this.style.borderColor='var(--blue)'" onfocusout="this.style.borderColor='var(--border)'">
+                <i class="fas fa-search" style="color:var(--text-faint);font-size:18px"></i>
+                <input type="text" id="country-search" placeholder="Enter a country, city, or region..."
+                  style="flex:1;background:transparent;border:none;outline:none;font-size:18px;color:var(--text);font-family:var(--font-sans);font-weight:500"
+                  oninput="window.renderTrending && window.renderTrending()" autocomplete="off" />
+                <button onclick="document.getElementById('country-search').value=''; window.renderTrending()"
+                  style="color:var(--text-faint);background:none;border:none;cursor:pointer">
+                  <i class="fas fa-times" style="font-size:16px"></i>
+                </button>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:2.5rem;flex-wrap:wrap">
+                <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Popular</span>
+                <div style="display:flex;flex-wrap:wrap;gap:0.75rem">
+                  <button onclick="document.getElementById('country-search').value='India'; window.renderTrending()"
+                    style="font-size:13px;font-weight:500;color:var(--blue);background:var(--blue-soft);border:none;border-radius:20px;padding:4px 14px;cursor:pointer">India</button>
+                  <button onclick="document.getElementById('country-search').value='France'; window.renderTrending()"
+                    style="font-size:13px;font-weight:500;color:var(--blue);background:var(--blue-soft);border:none;border-radius:20px;padding:4px 14px;cursor:pointer">France</button>
+                  <button onclick="document.getElementById('country-search').value='Singapore'; window.renderTrending()"
+                    style="font-size:13px;font-weight:500;color:var(--blue);background:var(--blue-soft);border:none;border-radius:20px;padding:4px 14px;cursor:pointer">Singapore</button>
+                  <button onclick="document.getElementById('country-search').value='Japan'; window.renderTrending()"
+                    style="font-size:13px;font-weight:500;color:var(--blue);background:var(--blue-soft);border:none;border-radius:20px;padding:4px 14px;cursor:pointer">Japan</button>
+                  <button onclick="document.getElementById('country-search').value='Germany'; window.renderTrending()"
+                    style="font-size:13px;font-weight:500;color:var(--blue);background:var(--blue-soft);border:none;border-radius:20px;padding:4px 14px;cursor:pointer">Germany</button>
+                </div>
+              </div>
+
+              <div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+              <div id="search-info-footer"
+                style="margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+                <div style="display:flex;gap:2.5rem">
+                  <div><span style="font-size:12px;font-weight:600;color:var(--text-muted)">249 Countries</span></div>
+                  <div><span style="font-size:12px;font-weight:600;color:var(--text-muted)">8,400+ Cities</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="tab-intel" class="tab-content active">
+            <div class="content-scroll-area">
+              <!-- Location path -->
+              <div
+                style="display:flex;align-items:center;gap:0.75rem;padding:1rem 0 1.5rem;border-bottom:1px solid var(--border);margin-bottom:2rem">
+                <i class="fas fa-map-marker-alt" style="color:var(--blue);font-size:11px"></i>
+                <span id="breadcrumb-operational-path"
+                  style="font-size:13px;font-weight:600;color:var(--text-2)">Worldwide</span>
+                <div id="ai-sync-pulse" style="margin-left:auto;display:flex;align-items:center;gap:0.4rem">
+                  <span
+                    style="width:6px;height:6px;background:#16A34A;border-radius:50%;display:inline-block;animation:pulse 2s infinite"></span>
+                  <span style="font-size:11px;color:var(--text-faint)">Live</span>
+                </div>
+              </div>
+
               <div id="hierarchy-panel" class="hidden">
-                <div class="flex items-center gap-2 text-sm font-mono mb-3">
-                  <span class="text-blue-400 cursor-pointer" onclick="resetToCountry()">
-                    <div class="w-1 h-1 bg-blue-400 inline-block mr-2"></div>
+                <div style="display:flex;align-items:center;gap:0.5rem;font-size:13px;margin-bottom:1.5rem">
+                  <span style="color:var(--blue);cursor:pointer" onclick="resetToCountry()">
                     <span id="breadcrumb-country">Country</span>
                   </span>
                   <span id="breadcrumb-state-wrapper" class="hidden">
-                    <span class="text-slate-500"> > </span>
-                    <span class="text-cyan-400 cursor-pointer" onclick="resetToState()">
+                    <span style="color:var(--text-faint)"> â€º </span>
+                    <span style="color:var(--text-2);cursor:pointer" onclick="resetToState()">
                       <span id="breadcrumb-state">State</span>
                     </span>
                   </span>
                   <span id="breadcrumb-city-wrapper" class="hidden">
-                    <span class="text-slate-500"> > </span>
-                    <span class="text-emerald-400">
+                    <span style="color:var(--text-faint)"> â€º </span>
+                    <span style="color:var(--text)">
                       <span id="breadcrumb-city">City</span>
                     </span>
                   </span>
                 </div>
-
-                <div class="flex flex-col gap-6 mt-8">
+                <div style="display:flex;flex-direction:column;gap:1.5rem">
                   <div id="state-selector" class="hidden">
-                    <div class="flex justify-between items-center cursor-pointer border-b border-white/10 pb-4 mb-4"
+                    <div
+                      style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:0.75rem;margin-bottom:0.75rem;cursor:pointer"
                       onclick="toggleHierarchyCollapse('state')">
-                      <h4 class="text-[10px] font-mono font-bold text-blue-400 uppercase tracking-widest">State /
-                        Province</h4>
-                      <i id="state-collapse-icon" class="fas fa-chevron-down text-slate-600 transition-transform"></i>
+                      <h4 style="font-size:13px;font-weight:600;color:var(--text)">States / Provinces</h4>
+                      <i id="state-collapse-icon" class="fas fa-chevron-down"
+                        style="color:var(--text-muted);font-size:12px"></i>
                     </div>
-                    <div id="state-collapse-content" class="hidden space-y-4">
-                      <input id="state-search" type="text" placeholder="Search Sector Regions..."
-                        oninput="filterStateList(this.value)"
-                        class="w-full bg-transparent border-none py-2 text-xs text-white placeholder-slate-800 focus:outline-none font-mono" />
-                      <div id="state-list" class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar">
-                      </div>
+                    <div id="state-collapse-content" class="hidden">
+                      <input id="state-search" type="text" placeholder="Search states..."
+                        oninput="filterStateList(this.value)" />
+                      <div id="state-list"
+                        class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar mt-2"></div>
                     </div>
                   </div>
-
                   <div id="city-selector" class="hidden">
-                    <div class="flex justify-between items-center cursor-pointer border-b border-white/10 pb-4 mb-4"
+                    <div
+                      style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:0.75rem;margin-bottom:0.75rem;cursor:pointer"
                       onclick="toggleHierarchyCollapse('city')">
-                      <h4 class="text-[10px] font-mono font-bold text-cyan-400 uppercase tracking-widest">Select City
-                      </h4>
-                      <i id="city-collapse-icon" class="fas fa-chevron-down text-slate-600 transition-transform"></i>
+                      <h4 style="font-size:13px;font-weight:600;color:var(--text)">Cities</h4>
+                      <i id="city-collapse-icon" class="fas fa-chevron-down"
+                        style="color:var(--text-muted);font-size:12px"></i>
                     </div>
-                    <div id="city-collapse-content" class="hidden space-y-4">
-                      <input id="city-search" type="text" placeholder="Search Primary Hubs..."
-                        oninput="filterCityList(this.value)"
-                        class="w-full bg-transparent border-none py-2 text-xs text-white placeholder-slate-800 focus:outline-none font-mono" />
-                      <div id="city-list" class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar">
+                    <div id="city-collapse-content" class="hidden">
+                      <input id="city-search" type="text" placeholder="Search cities..."
+                        oninput="filterCityList(this.value)" />
+                      <div id="city-list" class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar mt-2">
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div id="ai-briefing-box" class="mb-4">
-                <div class="flex items-center gap-2 mb-2">
-                  <div class="w-1.5 h-1.5 bg-blue-500"></div>
-                  <span class="text-[9px] text-slate-400 uppercase font-bold tracking-[0.2em] font-mono">Strategic
-                    Signal Deck</span>
-                </div>
 
-                <div id="ai-briefing-text" class="text-slate-400 font-sans text-[14px] leading-snug w-full">
-                  <div class="space-y-4">
-                    <div class="group pb-2">
-                      <span
-                        class="text-[14px] text-blue-500 font-black uppercase tracking-[0.2em] font-mono mb-2 block">Executive
-                        Summary</span>
-                      <p id="intel-lead" class="text-[20px] text-slate-200 font-medium leading-relaxed max-w-5xl tracking-wide">
-                        Strategic situational awareness for Global Context sector is complete. High-priority baselines
-                        are nominal.
-                      </p>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pb-4 border-b border-white/5">
-                      <div class="hover-uplink p-4 border border-white/5 rounded hover:bg-white/[0.02] transition-colors flex flex-col gap-2">
-                        <span class="text-[10px] text-slate-500 font-black uppercase tracking-wider font-mono block">Political
-                          Stability</span>
-                        <p id="intel-pol" class="text-[12px] text-slate-400 leading-[1.3] mt-auto">Internal governance sectors
-                          maintain standard operational stability.</p>
-                      </div>
-                      <div class="hover-uplink p-4 border border-white/5 rounded hover:bg-white/[0.02] transition-colors flex flex-col gap-2">
-                        <span class="text-[10px] text-slate-500 font-black uppercase tracking-wider font-mono block">Trade
-                          Relations</span>
-                        <p id="intel-trade" class="text-[12px] text-slate-400 leading-[1.3] mt-auto">Cross-border trade relays
-                          show mission-ready resilience.</p>
-                      </div>
-                      <div class="hover-uplink p-4 border border-white/5 rounded hover:bg-white/[0.02] transition-colors flex flex-col gap-2">
-                        <span class="text-[10px] text-slate-500 font-black uppercase tracking-wider font-mono block">Infrastructure
-                          Systems</span>
-                        <p id="intel-infra" class="text-[12px] text-slate-400 leading-[1.3] mt-auto">Energy pipelines and
-                          data relays are performing within baselines.</p>
-                      </div>
-                      <div class="hover-uplink p-4 border border-white/5 rounded hover:bg-white/[0.02] transition-colors flex flex-col gap-2">
-                        <span class="text-[10px] text-slate-500 font-black uppercase tracking-wider font-mono block">Societal
-                          Sentiment</span>
-                        <p id="intel-social" class="text-[12px] text-slate-400 leading-[1.3] mt-auto">Population engagement
-                          sectors remain neutral with localized fluctuations.</p>
-                      </div>
-                      <div class="hover-uplink p-4 border border-white/5 rounded hover:bg-white/[0.02] transition-colors flex flex-col gap-2">
-                        <span class="text-[10px] text-slate-500 font-black uppercase tracking-wider font-mono block">Military
-                          Posture</span>
-                        <p id="intel-mil" class="text-[12px] text-slate-400 leading-[1.3] mt-auto">Defense sectors maintain
-                          readiness with no re-positioning.</p>
-                      </div>
-                      <div class="hover-uplink p-4 border border-white/5 rounded hover:bg-white/[0.02] transition-colors flex flex-col gap-2">
-                        <span class="text-[10px] text-slate-500 font-black uppercase tracking-wider font-mono block">Tech
-                          Sovereignty</span>
-                        <p id="intel-tech" class="text-[12px] text-slate-400 leading-[1.3] mt-auto">Domestic data relays and
-                          critical nodes are performing nominal.</p>
-                      </div>
-                      <div class="hover-uplink p-4 border border-white/5 rounded hover:bg-white/[0.02] transition-colors flex flex-col gap-2">
-                        <span class="text-[10px] text-slate-500 font-black uppercase tracking-wider font-mono block">Sanitary
-                          Baseline</span>
-                        <p id="intel-health" class="text-[12px] text-slate-400 leading-[1.3] mt-auto">Health/Medical sectors
-                          maintain operational baseline capacity.</p>
-                      </div>
-                      <div class="hover-uplink p-4 border border-white/5 rounded hover:bg-white/[0.02] transition-colors flex flex-col gap-2">
-                        <span class="text-[10px] text-slate-500 font-black uppercase tracking-wider font-mono block">Fiscal
-                          Integrity</span>
-                        <p id="intel-finance" class="text-[12px] text-slate-400 leading-[1.3] mt-auto">Financial transparency
-                          relays show high-integrity situational metrics.</p>
-                      </div>
-                      <div class="hover-uplink p-4 border border-white/5 rounded hover:bg-white/[0.02] transition-colors flex flex-col gap-2">
-                        <span class="text-[10px] text-slate-500 font-black uppercase tracking-wider font-mono block">Ecological
-                          Status</span>
-                        <p id="intel-eco" class="text-[12px] text-slate-400 leading-[1.3] mt-auto">Environmental baselines and 
-                          climate signals are monitored for sector stability.</p>
-                      </div>
-                      <div class="hover-uplink p-4 border border-white/5 rounded hover:bg-white/[0.02] transition-colors flex flex-col gap-2">
-                        <span class="text-[10px] text-slate-500 font-black uppercase tracking-wider font-mono block">Productivity
-                          Baseline</span>
-                        <p id="intel-prod" class="text-[12px] text-slate-400 leading-[1.3] mt-auto">Industrial output and labor 
-                          efficiency relays are within nominal thresholds.</p>
-                      </div>
-                      <div class="hover-uplink p-4 border border-white/5 rounded hover:bg-white/[0.02] transition-colors flex flex-col gap-2">
-                        <span class="text-[10px] text-slate-500 font-black uppercase tracking-wider font-mono block">Educational
-                          Resiliency</span>
-                        <p id="intel-edu" class="text-[12px] text-slate-400 leading-[1.3] mt-auto">Human capital development 
-                          sectors show long-term strategic readiness.</p>
-                      </div>
-                      <div class="hover-uplink p-4 border border-white/5 rounded hover:bg-white/[0.02] transition-colors flex flex-col gap-2">
-                        <span class="text-[10px] text-slate-500 font-black uppercase tracking-wider font-mono block">Logistical
-                          Fluidity</span>
-                        <p id="intel-log" class="text-[12px] text-slate-400 leading-[1.3] mt-auto">Supply chain relays and transport 
-                          hubs maintain high-velocity throughput.</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div id="ai-briefing-loading" class="hidden py-4 text-left">
+              <!-- AI Summary -->
+              <div id="ai-summary-box" style="margin-bottom:1.5rem">
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem">
+                  <div style="width:4px;height:18px;background:var(--blue);border-radius:2px"></div>
                   <span
-                    class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] font-mono animate-pulse">Processing
-                    Telemetry...</span>
+                    style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em">Country
+                    Overview</span>
+                </div>
+
+                <div id="ai-summary-text" style="color:var(--text-2);font-size:14px;line-height:1.6;width:100%">
+                  <div>
+                    <p id="intel-lead"
+                      style="font-family:var(--font-serif);font-size:1.5rem;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:1.5rem">
+                      Select a country on the map to see an overview.
+                    </p>
+
+                    <div
+                      style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem">
+                      <div class="summary-card"
+                        style="background:var(--surface);padding:1.25rem;display:flex;flex-direction:column;gap:0.5rem">
+                        <span
+                          style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Politics</span>
+                        <p id="intel-pol" style="font-size:13px;color:var(--text-2);line-height:1.5">Select a country to
+                          view analysis.</p>
+                      </div>
+                      <div class="summary-card"
+                        style="background:var(--surface);padding:1.25rem;display:flex;flex-direction:column;gap:0.5rem">
+                        <span
+                          style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Trade</span>
+                        <p id="intel-trade" style="font-size:13px;color:var(--text-2);line-height:1.5">Select a country
+                          to view analysis.</p>
+                      </div>
+                      <div class="summary-card"
+                        style="background:var(--surface);padding:1.25rem;display:flex;flex-direction:column;gap:0.5rem">
+                        <span
+                          style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Infrastructure</span>
+                        <p id="intel-infra" style="font-size:13px;color:var(--text-2);line-height:1.5">Select a country
+                          to view analysis.</p>
+                      </div>
+                      <div class="summary-card"
+                        style="background:var(--surface);padding:1.25rem;display:flex;flex-direction:column;gap:0.5rem">
+                        <span
+                          style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Society</span>
+                        <p id="intel-social" style="font-size:13px;color:var(--text-2);line-height:1.5">Select a country
+                          to view analysis.</p>
+                      </div>
+                      <div class="summary-card"
+                        style="background:var(--surface);padding:1.25rem;display:flex;flex-direction:column;gap:0.5rem">
+                        <span
+                          style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Defence</span>
+                        <p id="intel-mil" style="font-size:13px;color:var(--text-2);line-height:1.5">Select a country to
+                          view analysis.</p>
+                      </div>
+                      <div class="summary-card"
+                        style="background:var(--surface);padding:1.25rem;display:flex;flex-direction:column;gap:0.5rem">
+                        <span
+                          style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Technology</span>
+                        <p id="intel-tech" style="font-size:13px;color:var(--text-2);line-height:1.5">Select a country
+                          to view analysis.</p>
+                      </div>
+                      <div class="summary-card"
+                        style="background:var(--surface);padding:1.25rem;display:flex;flex-direction:column;gap:0.5rem">
+                        <span
+                          style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Health</span>
+                        <p id="intel-health" style="font-size:13px;color:var(--text-2);line-height:1.5">Select a country
+                          to view analysis.</p>
+                      </div>
+                      <div class="summary-card"
+                        style="background:var(--surface);padding:1.25rem;display:flex;flex-direction:column;gap:0.5rem">
+                        <span
+                          style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Finance</span>
+                        <p id="intel-finance" style="font-size:13px;color:var(--text-2);line-height:1.5">Select a
+                          country to view analysis.</p>
+                      </div>
+                      <div class="summary-card"
+                        style="background:var(--surface);padding:1.25rem;display:flex;flex-direction:column;gap:0.5rem">
+                        <span
+                          style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Environment</span>
+                        <p id="intel-eco" style="font-size:13px;color:var(--text-2);line-height:1.5">Select a country to
+                          view analysis.</p>
+                      </div>
+                      <div class="summary-card"
+                        style="background:var(--surface);padding:1.25rem;display:flex;flex-direction:column;gap:0.5rem">
+                        <span
+                          style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Industry</span>
+                        <p id="intel-prod" style="font-size:13px;color:var(--text-2);line-height:1.5">Select a country
+                          to view analysis.</p>
+                      </div>
+                      <div class="summary-card"
+                        style="background:var(--surface);padding:1.25rem;display:flex;flex-direction:column;gap:0.5rem">
+                        <span
+                          style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Education</span>
+                        <p id="intel-edu" style="font-size:13px;color:var(--text-2);line-height:1.5">Select a country to
+                          view analysis.</p>
+                      </div>
+                      <div class="summary-card"
+                        style="background:var(--surface);padding:1.25rem;display:flex;flex-direction:column;gap:0.5rem">
+                        <span
+                          style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Logistics</span>
+                        <p id="intel-log" style="font-size:13px;color:var(--text-2);line-height:1.5">Select a country to
+                          view analysis.</p>
+                      </div>
+                      <div class="summary-card"
+                        style="background:var(--surface);padding:1.25rem;display:flex;flex-direction:column;gap:0.5rem">
+                        <span
+                          style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Energy</span>
+                        <p id="intel-energy" style="font-size:13px;color:var(--text-2);line-height:1.5">Select a country to
+                          view analysis.</p>
+                      </div>
+                      <div class="summary-card"
+                        style="background:var(--surface);padding:1.25rem;display:flex;flex-direction:column;gap:0.5rem">
+                        <span
+                          style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Agriculture</span>
+                        <p id="intel-agri" style="font-size:13px;color:var(--text-2);line-height:1.5">Select a country to
+                          view analysis.</p>
+                      </div>
+                      <div class="summary-card"
+                        style="background:var(--surface);padding:1.25rem;display:flex;flex-direction:column;gap:0.5rem">
+                        <span
+                          style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Demographics</span>
+                        <p id="intel-demo" style="font-size:13px;color:var(--text-2);line-height:1.5">Select a country to
+                          view analysis.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="ai-summary-loading" class="hidden" style="padding:1rem 0">
+                  <span style="font-size:13px;color:var(--text-muted)">Loading analysis...</span>
                 </div>
               </div>
-
-
             </div>
           </div>
 
 
 
           <div id="tab-news" class="tab-content">
-            <div class="content-scroll-area space-y-8">
-              <div class="border-b border-white/5 pb-8 mb-6">
-                <div class="flex flex-col gap-6">
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="flex-1 relative flex items-center bg-white/[0.04] border border-white/10 rounded-2xl px-5 py-3.5 gap-4 focus-within:border-white/20 transition-all">
-                      <i class="fas fa-search text-slate-600 text-sm"></i>
-                      <input type="text" id="news-search" placeholder="Filter by keyword, region, or source..."
-                        class="flex-1 bg-transparent border-none outline-none text-[14px] text-white placeholder-slate-700 font-medium"
-                        oninput="filterNews(this.value)" />
-                    </div>
-                    <button onclick="clearNewsSearch()"
-                      class="px-5 py-2.5 text-[10px] bg-transparent border border-white/10 text-slate-500 font-bold tracking-[0.2em] uppercase rounded-sm hover:text-white hover:border-white transition-all">
-                      CLEAR
-                    </button>
-                  </div>
-
-                  <div class="flex gap-4 overflow-x-auto no-scrollbar items-center">
-                    <div
-                      class="intel-tab cursor-pointer text-[10px] font-bold uppercase tracking-[0.2em] py-2 px-4 border border-white/5 text-slate-500 hover:text-white transition-all rounded"
-                      onclick="window.setCategory(this, 'top')">Top</div>
-                    <div
-                      class="intel-tab cursor-pointer text-[10px] font-bold uppercase tracking-[0.2em] py-2 px-4 border border-white/5 text-slate-500 hover:text-white transition-all rounded"
-                      onclick="window.setCategory(this, 'politics')">Politics</div>
-                    <div
-                      class="intel-tab cursor-pointer text-[10px] font-bold uppercase tracking-[0.2em] py-2 px-4 border border-white/5 text-slate-500 hover:text-white transition-all rounded"
-                      onclick="window.setCategory(this, 'business')">Business</div>
-                    <div
-                      class="intel-tab cursor-pointer text-[10px] font-bold uppercase tracking-[0.2em] py-2 px-4 border border-white/5 text-slate-500 hover:text-white transition-all rounded"
-                      onclick="window.setCategory(this, 'technology')">Tech</div>
-                    <div
-                      class="intel-tab cursor-pointer text-[10px] font-bold uppercase tracking-[0.2em] py-2 px-4 border border-white/5 text-slate-500 hover:text-white transition-all rounded"
-                      onclick="window.setCategory(this, 'science')">Science</div>
-                    <div
-                      class="intel-tab cursor-pointer text-[10px] font-bold uppercase tracking-[0.2em] py-2 px-4 border border-white/5 text-slate-500 hover:text-white transition-all rounded"
-                      onclick="window.setCategory(this, 'health')">Health</div>
+            <div class="content-scroll-area">
+              <div style="margin-bottom:2rem">
+                <div
+                  style="display:flex;align-items:center;justify-content:space-between;padding-bottom:1.25rem;border-bottom:1px solid var(--border);margin-bottom:1.5rem">
+                  <div>
+                    <p
+                      style="font-size:12px;font-weight:600;color:var(--red);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem">
+                      <span
+                        style="display:inline-block;width:6px;height:6px;background:var(--red);border-radius:50%;margin-right:0.4rem;vertical-align:middle;animation:pulse 2s infinite"></span>
+                      Live
+                    </p>
+                    <h2 style="font-family:var(--font-serif);font-size:2rem;font-weight:700;color:var(--text)">News Feed
+                    </h2>
                   </div>
                 </div>
+
+                <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem">
+                  <div
+                    style="flex:1;display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:0.6rem 1rem;gap:0.75rem">
+                    <i class="fas fa-search" style="color:var(--text-faint);font-size:13px"></i>
+                    <input type="text" id="news-search" placeholder="Search news..."
+                      style="flex:1;border:none;outline:none;font-size:14px;color:var(--text);background:transparent;font-family:var(--font-sans)"
+                      oninput="filterNews(this.value)" />
+                  </div>
+                  <button onclick="clearNewsSearch()"
+                    style="padding:0.6rem 1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;font-family:var(--font-sans)">Clear</button>
+                </div>
+
+                <div style="display:flex;gap:1.5rem;overflow-x:auto;padding-bottom:0.5rem" class="no-scrollbar">
+                  <div class="intel-tab" onclick="window.setCategory(this, 'top')">All</div>
+                  <div class="intel-tab" onclick="window.setCategory(this, 'politics')">World</div>
+                  <div class="intel-tab" onclick="window.setCategory(this, 'business')">Business</div>
+                  <div class="intel-tab" onclick="window.setCategory(this, 'technology')">Technology</div>
+                  <div class="intel-tab" onclick="window.setCategory(this, 'science')">Science</div>
+                  <div class="intel-tab" onclick="window.setCategory(this, 'health')">Health</div>
+                </div>
               </div>
-              <div id="news-loading" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div class="border border-white/5 h-44 skeleton"></div>
-                <div class="border border-white/5 h-44 skeleton"></div>
-                <div class="border border-white/5 h-44 skeleton"></div>
+              <div id="news-loading" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="p-8 border border-gray-100 bg-white rounded-lg h-[420px] animate-pulse flex flex-col gap-5">
+                   <div class="h-4 w-24 bg-gray-100 rounded"></div>
+                   <div class="h-44 w-full bg-gray-50 rounded-lg"></div>
+                   <div class="h-8 w-full bg-gray-100 rounded"></div>
+                   <div class="h-20 w-full bg-gray-50 rounded"></div>
+                   <div class="mt-auto h-4 w-32 bg-gray-100 rounded"></div>
+                </div>
+                <div class="p-8 border border-gray-100 bg-white rounded-lg h-[420px] animate-pulse flex flex-col gap-5">
+                   <div class="h-4 w-24 bg-gray-100 rounded"></div>
+                   <div class="h-44 w-full bg-gray-50 rounded-lg"></div>
+                   <div class="h-8 w-full bg-gray-100 rounded"></div>
+                   <div class="h-20 w-full bg-gray-50 rounded"></div>
+                   <div class="mt-auto h-4 w-32 bg-gray-100 rounded"></div>
+                </div>
+                <div class="p-8 border border-gray-100 bg-white rounded-lg h-[420px] animate-pulse flex flex-col gap-5">
+                   <div class="h-4 w-24 bg-gray-100 rounded"></div>
+                   <div class="h-44 w-full bg-gray-50 rounded-lg"></div>
+                   <div class="h-8 w-full bg-gray-100 rounded"></div>
+                   <div class="h-20 w-full bg-gray-50 rounded"></div>
+                   <div class="mt-auto h-4 w-32 bg-gray-100 rounded"></div>
+                </div>
+                <!-- Row 2 -->
+                <div class="p-8 border border-gray-100 bg-white rounded-lg h-[420px] animate-pulse lg:flex hidden flex-col gap-5">
+                   <div class="h-4 w-24 bg-gray-100 rounded"></div>
+                   <div class="h-44 w-full bg-gray-50 rounded-lg"></div>
+                   <div class="h-8 w-full bg-gray-100 rounded"></div>
+                   <div class="h-20 w-full bg-gray-50 rounded"></div>
+                   <div class="mt-auto h-4 w-32 bg-gray-100 rounded"></div>
+                </div>
+                <div class="p-8 border border-gray-100 bg-white rounded-lg h-[420px] animate-pulse lg:flex hidden flex-col gap-5">
+                   <div class="h-4 w-24 bg-gray-100 rounded"></div>
+                   <div class="h-44 w-full bg-gray-50 rounded-lg"></div>
+                   <div class="h-8 w-full bg-gray-100 rounded"></div>
+                   <div class="h-20 w-full bg-gray-50 rounded"></div>
+                   <div class="mt-auto h-4 w-32 bg-gray-100 rounded"></div>
+                </div>
+                <div class="p-8 border border-gray-100 bg-white rounded-lg h-[420px] animate-pulse lg:flex hidden flex-col gap-5">
+                   <div class="h-4 w-24 bg-gray-100 rounded"></div>
+                   <div class="h-44 w-full bg-gray-50 rounded-lg"></div>
+                   <div class="h-8 w-full bg-gray-100 rounded"></div>
+                   <div class="h-20 w-full bg-gray-50 rounded"></div>
+                   <div class="mt-auto h-4 w-32 bg-gray-100 rounded"></div>
+                </div>
               </div>
 
-              <div id="articles-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0"></div>
+              <div id="articles-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+              <div id="load-more-news-container" class="py-12 flex justify-center border-t border-gray-100 mt-4">
+                <button onclick="window.loadMoreNews()" id="load-more-btn"
+                  class="group relative flex items-center gap-4 px-10 py-4 bg-transparent border border-gray-200 hover:border-blue-500/50 transition-all rounded-sm overflow-hidden">
+                  <div class="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  </div>
+                  <div class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+                  <span
+                    class="text-[12px] font-bold text-slate-800 group-hover:text-blue-600 uppercase tracking-widest font-sans">Load
+                    More Intelligence Feeds</span>
+                  <div class="h-px w-8 bg-white/10 group-hover:w-12 group-hover:bg-blue-500/50 transition-all"></div>
+                </button>
+              </div>
             </div>
           </div>
           <div id="tab-markets" class="tab-content">
             <div class="content-scroll-area space-y-8">
-              <div id="market-terminal-container" class="flex flex-col gap-4">
-                <div class="mb-10" id="tv-chart-wrapper">
-                  <div class="flex items-center gap-2 mb-4">
-                    <div class="w-1.5 h-1.5 bg-blue-500"></div>
-                    <span class="text-[9px] text-slate-400 uppercase font-bold tracking-[0.2em] font-mono">Live Macro Chart</span>
-                  </div>
-                  <div id="tv-advanced-chart" class="w-full h-[400px] border border-white/5 rounded-md overflow-hidden bg-transparent"></div>
+              <div
+                style="display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:1.25rem;border-bottom:1px solid var(--border);margin-bottom:2rem">
+                <div>
+                  <p
+                    style="font-size:12px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem">
+                    Markets</p>
+                  <h2 style="font-family:var(--font-serif);font-size:2rem;font-weight:700;color:var(--text)">Global
+                    Markets</h2>
                 </div>
+                <div style="display:flex;align-items:center;gap:0.75rem">
+                  <span style="width:8px;height:8px;background:#16A34A;border-radius:50%;display:inline-block"></span>
+                  <span style="font-size:13px;color:var(--text-muted)">Live Feed</span>
+                </div>
+              </div>
+              <div id="market-terminal-container" class="flex flex-col gap-4">
                 <div class="mb-10">
-                  <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4 cursor-pointer"
+                  <div class="flex justify-between items-center mb-6 border-b border-gray-200 pb-4 cursor-pointer"
                     onclick="toggleMarketCategory('metals')">
-                    <span class="text-[10px] text-white uppercase font-bold tracking-[0.3em]"
-                      style="font-family: 'JetBrains Mono', monospace">Precious Metals</span>
+                    <span class="text-[11px] text-gray-900 uppercase font-black tracking-widest">Precious Metals</span>
                     <div class="flex items-center gap-4">
                       <i class="fas fa-chevron-up text-slate-600 text-[10px]" id="metals-chevron"></i>
                     </div>
@@ -439,10 +552,9 @@
                   <div id="metals-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
                 </div>
                 <div class="mb-10">
-                  <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-4 cursor-pointer"
+                  <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-4 cursor-pointer"
                     onclick="toggleMarketCategory('indices')">
-                    <span class="text-[10px] text-blue-400 uppercase font-bold tracking-[0.3em]"
-                      style="font-family: 'JetBrains Mono', monospace">Global Indices</span>
+                    <span class="text-[11px] text-blue-700 uppercase font-black tracking-widest">Global Indices</span>
                     <div class="flex items-center gap-4">
                       <i class="fas fa-chevron-up text-slate-600 text-[10px]" id="indices-chevron"></i>
                     </div>
@@ -450,9 +562,9 @@
                   <div id="indices-content" class="flex flex-col"></div>
                 </div>
                 <div class="mb-10">
-                  <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-4 cursor-pointer"
+                  <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-4 cursor-pointer"
                     onclick="toggleMarketCategory('forex')">
-                    <span class="text-[10px] text-cyan-400 uppercase font-bold tracking-[0.3em]"
+                    <span class="text-[10px] text-gray-600 uppercase font-bold tracking-[0.3em]"
                       style="font-family: 'JetBrains Mono', monospace">Forex</span>
                     <div class="flex items-center gap-4">
                       <i class="fas fa-chevron-up text-slate-600 text-[10px]" id="forex-chevron"></i>
@@ -461,10 +573,9 @@
                   <div id="forex-content" class="flex flex-col"></div>
                 </div>
                 <div class="mb-10">
-                  <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-4 cursor-pointer"
+                  <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-4 cursor-pointer"
                     onclick="toggleMarketCategory('commodities')">
-                    <span class="text-[10px] text-yellow-400 uppercase font-bold tracking-[0.3em]"
-                      style="font-family: 'JetBrains Mono', monospace">Commodities</span>
+                    <span class="text-[11px] text-amber-800 uppercase font-black tracking-widest">Commodities</span>
                     <div class="flex items-center gap-4">
                       <i class="fas fa-chevron-up text-slate-600 text-[10px]" id="commodities-chevron"></i>
                     </div>
@@ -475,362 +586,438 @@
             </div>
           </div>
           <div id="tab-atmosphere" class="tab-content">
-            <div class="content-scroll-area space-y-8">
-              <div class="flex items-center gap-3 pb-8 mb-4">
+            <div class="content-scroll-area">
+              <div id="weather-alerts" class="hidden" style="margin-bottom:1.5rem"></div>
+
+              <!-- Header -->
+              <div
+                style="display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:1.25rem;border-bottom:1px solid var(--border);margin-bottom:1.5rem">
+                <div class="flex-1 min-w-0">
+                  <p
+                    style="font-size:12px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem">
+                    Weather Analysis</p>
+                  <h2 id="atmo-location-label"
+                    style="font-family:var(--font-serif);font-size:2.25rem;font-weight:700;color:var(--text);line-height:1.2">
+                    Select Location</h2>
+                </div>
+                <div style="text-align:right" class="shrink-0">
+                  <span id="atmo-station-id"
+                    style="font-size:12px;color:var(--text-muted);font-weight:500;display:block">Global Station</span>
+                  <span
+                    style="font-size:11px;color:var(--green);font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Live
+                    Data Available</span>
+                </div>
+              </div>
+
+              <!-- Search -->
+              <div
+                style="display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:0.6rem 1rem;gap:0.75rem;margin-bottom:1.5rem">
+                <i class="fas fa-search" style="color:var(--text-faint);font-size:13px"></i>
+                <input type="text" id="atmosphere-city-search" placeholder="Search for a city..."
+                  style="flex:1;border:none;outline:none;font-size:14px;color:var(--text);background:transparent;font-family:var(--font-sans)"
+                  onkeydown="if (event.key === 'Enter') searchCityForTab('atmosphere');" />
+                <button onclick="searchCityForTab('atmosphere')"
+                  style="color:var(--blue);background:none;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:var(--font-sans)">Search</button>
+              </div>
+
+              <!-- Main temp display -->
+              <div
+                style="display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:start;margin-bottom:2rem;padding-bottom:2rem;border-bottom:1px solid var(--border)">
+                <div>
+                  <div
+                    style="font-size:8rem;font-weight:800;color:var(--text);line-height:1;font-family:var(--font-sans)"
+                    id="atmo-temp">--&deg;</div>
+                  <div style="display:flex;gap:1rem;align-items:center;margin-top:0.75rem">
+                    <div id="atmo-condition" style="font-size:18px;font-weight:600;color:var(--text-2)">Loading...</div>
+                    <div id="atmo-hl" style="font-size:14px;color:var(--text-muted)">H: -- / L: --</div>
+                  </div>
+                  <div style="display:flex;gap:1rem;margin-top:1rem">
+                    <div
+                      style="padding:0.4rem 0.9rem;background:var(--blue-soft);border-radius:4px;font-size:12px;font-weight:500;color:var(--blue)">
+                      Stable</div>
+                    <div
+                      style="padding:0.4rem 0.9rem;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;font-size:12px;color:var(--text-muted)">
+                      Feels like <span id="atmo-feels" style="font-weight:600;color:var(--text)">--&deg;</span>
+                    </div>
+                  </div>
+                </div>
+                <i id="atmo-main-icon" class="fas fa-cloud-sun"
+                  style="font-size:5rem;color:var(--blue);opacity:0.25"></i>
+              </div>
+
+              <!-- Stats grid -->
+              <div
+                style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:2rem">
+                <div class="summary-card" style="background:var(--surface);padding:1.25rem">
+                  <div
+                    style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
+                    Pressure</div>
+                  <div id="atmo-pressure" style="font-size:1.4rem;font-weight:700;color:var(--text)">-- <span
+                      style="font-size:12px;font-weight:400;color:var(--text-muted)">hPa</span></div>
+                </div>
+                <div class="summary-card" style="background:var(--surface);padding:1.25rem">
+                  <div
+                    style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
+                    Humidity</div>
+                  <div id="atmo-humidity" style="font-size:1.4rem;font-weight:700;color:var(--text)">-- <span
+                      style="font-size:12px;font-weight:400;color:var(--text-muted)">%</span></div>
+                </div>
+                <div class="summary-card" style="background:var(--surface);padding:1.25rem">
+                  <div
+                    style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
+                    Wind Speed</div>
+                  <div style="display:flex;align-items:center;gap:0.4rem">
+                    <i id="atmo-wind-arrow" class="fas fa-arrow-up" style="color:var(--blue);font-size:11px"></i>
+                    <div id="atmo-wind-speed" style="font-size:1.4rem;font-weight:700;color:var(--text)">-- <span
+                        style="font-size:12px;font-weight:400;color:var(--text-muted)">km/h</span></div>
+                  </div>
+                </div>
+                <div class="summary-card" style="background:var(--surface);padding:1.25rem">
+                  <div
+                    style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
+                    Visibility</div>
+                  <div id="atmo-visibility" style="font-size:1.4rem;font-weight:700;color:var(--text)">-- <span
+                      style="font-size:12px;font-weight:400;color:var(--text-muted)">km</span></div>
+                </div>
+                <div class="summary-card" style="background:var(--surface);padding:1.25rem">
+                  <div
+                    style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
+                    UV Index</div>
+                  <div id="atmo-uv-val" style="font-size:1.4rem;font-weight:700;color:var(--text)">--</div>
+                </div>
+                <div class="summary-card" style="background:var(--surface);padding:1.25rem">
+                  <div
+                    style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
+                    Rain (24h)</div>
+                  <div id="atmo-precip-total" style="font-size:1.4rem;font-weight:700;color:var(--text)">-- <span
+                      style="font-size:12px;font-weight:400;color:var(--text-muted)">mm</span></div>
+                </div>
+              </div>
+
+              <!-- Sunrise / sunset + forecast -->
+              <div style="display:grid;grid-template-columns:1fr 2fr;gap:1.5rem;margin-bottom:2rem">
                 <div
-                  class="flex-1 relative flex items-center bg-white/[0.04] border border-white/10 rounded-2xl px-5 py-3.5 gap-4 focus-within:border-white/20 transition-all">
-                  <i class="fas fa-map-marker-alt text-slate-600 text-sm"></i>
-                  <input type="text" id="atmosphere-city-search" placeholder="Enter a city..."
-                    class="flex-1 bg-transparent border-none outline-none text-[14px] text-white placeholder-slate-700 font-medium transition-all"
-                    onkeydown="if (event.key === 'Enter') searchCityForTab('atmosphere');" />
-                  <button onclick="searchCityForTab('atmosphere')"
-                    class="text-slate-500 hover:text-white transition-colors px-2">
-                    <i class="fas fa-arrow-right text-sm"></i>
-                  </button>
+                  style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem">
+                  <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:1rem">Sunrise &
+                    Sunset</div>
+                  <div style="display:flex;justify-content:space-between;align-items:center">
+                    <div>
+                      <div style="font-size:11px;color:var(--text-muted);margin-bottom:0.3rem">Sunrise</div>
+                      <div id="atmo-sunrise" style="font-size:1.25rem;font-weight:700;color:var(--text)">--:--</div>
+                    </div>
+                    <div style="width:1px;height:40px;background:var(--border)"></div>
+                    <div>
+                      <div style="font-size:11px;color:var(--text-muted);margin-bottom:0.3rem">Sunset</div>
+                      <div id="atmo-sunset" style="font-size:1.25rem;font-weight:700;color:var(--text)">--:--</div>
+                    </div>
+                  </div>
+
+                  <div
+                    style="margin-top:1.25rem;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:0.75rem">
+                    More details</div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+                    <div>
+                      <div style="font-size:11px;color:var(--text-muted)">Cloud Cover</div>
+                      <div id="atmo-cloud-cover" style="font-weight:600;color:var(--text)">--%</div>
+                    </div>
+                    <div>
+                      <div style="font-size:11px;color:var(--text-muted)">Dew Point</div>
+                      <div id="atmo-dew" style="font-weight:600;color:var(--text)">--&deg;</div>
+                    </div>
+                    <div>
+                      <div style="font-size:11px;color:var(--text-muted)">Wind Gusts</div>
+                      <div id="atmo-gusts" style="font-weight:600;color:var(--text)">--</div>
+                    </div>
+                    <div>
+                      <div style="font-size:11px;color:var(--text-muted)">Moon Phase</div>
+                      <div id="atmo-moon-text" style="font-weight:600;color:var(--text)">--</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem">
+                  <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:1rem">Weather
+                    Analysis</div>
+                  <div id="weather-ai-analysis" style="font-size:13px;color:var(--text-2);line-height:1.6">Loading
+                    weather analysis...</div>
                 </div>
               </div>
-              <div id="weather-alerts" class="hidden space-y-2 mb-10"></div>
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 border-t border-white/10 pt-10 mt-6">
-                <div class="flex flex-col gap-10">
-                  <div class="flex items-baseline gap-6">
-                    <span id="atmo-temp" class="text-[160px] font-light text-white leading-none tracking-tighter"
-                      style="font-family: 'Outfit', sans-serif;">--&deg;</span>
-                    <div class="flex flex-col">
-                      <div id="atmo-condition"
-                        class="text-[12px] font-bold text-slate-500 uppercase tracking-[0.2em] font-mono mb-1">
-                        Scanning...</div>
-                      <div id="atmo-hl" class="text-[20px] font-light text-white font-mono">-- / --</div>
+
+              <!-- Forecasts -->
+              <div style="margin-top:1.5rem">
+                <h3 style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:1rem">Forecasts</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+                  <div
+                    style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+                    <div
+                      style="padding:0.75rem 1rem;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text-muted)">
+                      7-Day Forecast</div>
+                    <div id="atmo-daily-container" style="max-height:360px;overflow-y:auto" class="custom-scrollbar">
                     </div>
                   </div>
-                  <div class="grid grid-cols-2 gap-12 pt-10 border-t border-white/5">
-                    <div>
-                      <span class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Heat
-                        Index</span>
-                      <span id="atmo-feels" class="text-3xl font-light text-white tracking-tight">--&deg;</span>
-                    </div>
-                    <div>
-                      <span class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">UV
-                        Spectrum</span>
-                      <span id="atmo-uv-val" class="text-3xl font-light text-white tracking-tight">--</span>
-                    </div>
+                  <div
+                    style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+                    <div
+                      style="padding:0.75rem 1rem;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text-muted)">
+                      Hourly Forecast</div>
+                    <div id="atmo-hourly-container" style="display:flex;overflow-x:auto;padding:1rem;gap:1rem"
+                      class="no-scrollbar"></div>
                   </div>
                 </div>
-                <div class="grid grid-cols-2 gap-x-12 gap-y-12">
-                  <div class="pb-6 border-b border-white/5">
-                    <span
-                      class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Pressure</span>
-                    <div id="atmo-pressure" class="text-3xl font-light text-white tracking-tight">-- <span
-                        class="text-xs text-slate-600 ml-1">hPa</span></div>
-                  </div>
-                  <div class="pb-6 border-b border-white/5">
-                    <span
-                      class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Humidity</span>
-                    <div id="atmo-humidity" class="text-3xl font-light text-white tracking-tight">--<span
-                        class="text-xs text-slate-600 ml-1">%</span></div>
-                  </div>
-                  <div class="pb-6 border-b border-white/5">
-                    <span class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Wind
-                      Speed</span>
-                    <div id="atmo-wind-speed" class="text-3xl font-light text-white tracking-tight">-- <span
-                        class="text-xs text-slate-600 ml-1">km/h</span></div>
-                  </div>
-                  <div class="pb-6 border-b border-white/5">
-                    <span
-                      class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Visibility</span>
-                    <div id="atmo-visibility" class="text-3xl font-light text-white tracking-tight">-- <span
-                        class="text-xs text-slate-600 ml-1">km</span></div>
-                  </div>
-                  <div>
-                    <span
-                      class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Sunrise</span>
-                    <div id="atmo-sunrise" class="text-2xl font-light text-white tracking-tight">--:--</div>
-                  </div>
-                  <div>
-                    <span
-                      class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-mono mb-2 block">Sunset</span>
-                    <div id="atmo-sunset" class="text-2xl font-light text-white tracking-tight">--:--</div>
-                  </div>
-                </div>
-              </div>
-              <div class="mt-16 pt-10 border-t border-white/10">
-                <span class="text-[10px] text-white uppercase font-bold tracking-[0.3em] font-mono mb-8 block">24-Hour
-                  Forecast</span>
-                <div id="atmo-hourly-container" class="flex overflow-x-auto gap-8 no-scrollbar pb-4"></div>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-12 gap-y-12 mt-16">
-                <div class="flex flex-col">
-                  <span class="text-[11px] text-emerald-400 font-bold uppercase tracking-widest mb-4"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Air Quality</span>
-                  <div class="flex items-end justify-between">
-                    <div>
-                      <div id="atmo-aqi" class="text-3xl font-black text-white leading-none">--</div>
-                      <div class="text-[8px] text-slate-600 mt-1 font-mono">EAQI SCALE</div>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex flex-col">
-                  <span class="text-[11px] text-slate-500 font-bold uppercase tracking-widest mb-4"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Hectopascals</span>
-                  <div class="flex items-end justify-between">
-                    <div>
-                      <div id="atmo-pressure" class="text-3xl font-black text-white leading-none">--</div>
-                      <div class="text-[8px] text-slate-600 mt-1 font-mono">hPa</div>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex flex-col">
-                  <span class="text-[11px] text-indigo-400 font-bold uppercase tracking-widest mb-4"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Lunar Phase</span>
-                  <div class="flex items-center gap-3">
-                    <span id="atmo-moon-text"
-                      class="text-xs font-bold text-white uppercase leading-tight font-mono">--</span>
-                  </div>
-                </div>
-                <div class="flex flex-col">
-                  <span class="text-[11px] text-slate-500 font-bold uppercase tracking-widest mb-4"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Cloud Ceiling</span>
-                  <div class="flex items-end justify-between">
-                    <div>
-                      <div id="atmo-cloud-base" class="text-3xl font-black text-white leading-none">--</div>
-                      <div class="text-[8px] text-slate-600 mt-1 font-mono">KILOMETERS</div>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex flex-col">
-                  <span class="text-[11px] text-blue-400 font-bold uppercase tracking-widest mb-4"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">24h Precip</span>
-                  <div class="flex items-end justify-between">
-                    <div>
-                      <div id="atmo-precip-total" class="text-3xl font-black text-white leading-none">--</div>
-                      <div class="text-[8px] text-slate-600 mt-1 font-mono">MILLIMETERS</div>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex flex-col">
-                  <span class="text-[12px] text-slate-500 font-bold uppercase tracking-widest mb-4"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Dew Point</span>
-                  <div class="flex items-end justify-between">
-                    <div>
-                      <div class="flex items-baseline gap-1">
-                        <span id="atmo-dew" class="text-4xl font-black text-white leading-none">--</span>
-                        <span class="text-white font-bold text-xl">°</span>
-                      </div>
-                      <div class="text-[9px] text-slate-600 mt-2 font-mono">CELSIUS</div>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex flex-col">
-                  <span class="text-[12px] text-slate-500 font-bold uppercase tracking-widest mb-4"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Wind Gusts</span>
-                  <div class="flex items-end justify-between">
-                    <div>
-                      <div id="atmo-gusts" class="text-4xl font-black text-white leading-none">--</div>
-                      <div class="text-[9px] text-slate-600 mt-2 font-mono">km/h</div>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex flex-col">
-                  <span class="text-[12px] text-slate-500 font-bold uppercase tracking-widest mb-4"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Cloud Cover</span>
-                  <div class="flex items-end justify-between">
-                    <div>
-                      <div class="flex items-baseline gap-1">
-                        <span id="atmo-cloud-cover" class="text-4xl font-black text-white leading-none">--</span>
-                        <span class="text-slate-500 font-bold text-xl">%</span>
-                      </div>
-                      <div class="text-[9px] text-slate-600 mt-2 font-mono">%</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="border border-white/5 p-0 overflow-hidden">
-                <div class="px-5 py-3 border-b border-white/5">
-                  <span class="text-[11px] text-slate-500 font-bold uppercase tracking-widest"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">7-Day Forecast</span>
-                </div>
-                <div id="atmo-daily-container" class="divide-y divide-white/5"></div>
               </div>
             </div>
           </div>
           <div id="tab-neural" class="tab-content">
-            <div class="content-scroll-area flex flex-col h-full max-w-4xl pt-6">
+            <div class="content-scroll-area"
+              style="display:flex;flex-direction:column;max-width:760px;margin:0 auto;padding-top:2rem">
+              <!-- Header -->
               <div
-                class="flex-1 bg-black/40 rounded-3xl border border-white/5 overflow-hidden flex flex-col shadow-2xl">
-                <div class="px-8 py-4 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
-                  <div class="flex items-center gap-3">
-                    <div class="w-1.5 h-1.5 bg-slate-500 rounded-full"></div>
-                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest font-mono">System Assistant</span>
-                  </div>
+                style="display:flex;align-items:center;justify-content:space-between;padding-bottom:1.25rem;border-bottom:1px solid var(--border);margin-bottom:1.25rem">
+                <div>
+                  <p
+                    style="font-size:12px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem">
+                    AI Assistant</p>
+                  <h2 style="font-family:var(--font-serif);font-size:1.75rem;font-weight:700;color:var(--text)">Ask Anything</h2>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.75rem">
+                  <span style="width:8px;height:8px;background:#16A34A;border-radius:50%;display:inline-block"></span>
+                  <span style="font-size:13px;color:var(--text-muted)">Ready</span>
                   <button onclick="document.getElementById('neural-chat-log').innerHTML=''"
-                    class="text-[10px] text-slate-600 hover:text-white transition-colors">Clear</button>
+                    style="font-size:12px;font-weight:500;color:var(--text-muted);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;margin-left:0.5rem;font-family:var(--font-sans)">Clear
+                    chat</button>
                 </div>
-                <div id="neural-chat-log" class="flex-1 p-8 overflow-y-auto custom-scrollbar space-y-8 min-h-[400px]">
-                  <div class="flex gap-4">
-                    <div
-                      class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0">
-                      <i class="fas fa-server text-[10px] text-slate-400"></i>
-                    </div>
-                    <div
-                      class="bg-white/5 rounded-2xl rounded-tl-none p-5 text-sm text-slate-300 leading-relaxed max-w-[85%] border border-white/5">
-                      Data console ready. Request macroeconomic vectors, climate patterns, or political event briefings.
-                    </div>
-                  </div>
-                </div>
-                <div class="p-6 bg-slate-900/40 border-t border-white/5">
+              </div>
+
+              <!-- Chat area -->
+              <div id="neural-chat-log"
+                style="background:var(--surface-2);border-radius:var(--radius);padding:1.5rem;overflow-y:auto;min-height:300px;max-height:450px;display:flex;flex-direction:column;gap:1.25rem;border:1px solid var(--border)"
+                class="custom-scrollbar">
+                <div style="display:flex;gap:1rem;align-items:flex-start">
                   <div
-                    class="flex gap-4 items-center bg-white/5 rounded-2xl border border-white/5 p-2 pr-4 focus-within:border-blue-500/40 transition-all">
-                    <input type="text" id="neural-chat-input" placeholder="Execute analysis query..."
-                      class="flex-1 bg-transparent border-none outline-none text-[15px] text-white placeholder-slate-700 font-medium px-4 py-2"
-                      onkeydown="if(event.key==='Enter')sendNeuralInquiry()" />
-                    <button onclick="sendNeuralInquiry()"
-                      class="w-10 h-10 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center hover:bg-slate-700 transition-all border border-slate-700">
-                      <i class="fas fa-arrow-right text-xs"></i>
-                    </button>
+                    style="width:36px;height:36px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                    <i class="fas fa-robot" style="color:#fff;font-size:14px"></i>
+                  </div>
+                  <div style="flex:1">
+                    <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:0.4rem">NewsAtlas
+                      AI</div>
+                    <p
+                      style="font-size:14px;color:var(--text-2);line-height:1.7;background:var(--surface);padding:0.875rem 1.125rem;border-radius:0 var(--radius) var(--radius) var(--radius);border:1px solid var(--border)">
+                      Hello! I'm your NewsAtlas AI assistant. I can help you understand anything about countries,
+                      cities, world events, economics, and more. What would you like to know?
+                    </p>
                   </div>
                 </div>
               </div>
+
+              <!-- Input -->
+              <div
+                style="margin-top:1rem;display:flex;gap:0.75rem;align-items:center;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:0.75rem 1rem;transition:border-color 0.2s"
+                onfocusin="this.style.borderColor='var(--blue)'" onfocusout="this.style.borderColor='var(--border)'">
+                <input type="text" id="neural-chat-input"
+                  placeholder="Ask anything..."
+                  style="flex:1;background:transparent;border:none;outline:none;font-size:15px;color:var(--text);font-family:var(--font-sans)"
+                  onkeydown="if(event.key==='Enter')sendNeuralInquiry()" />
+                <button onclick="sendNeuralInquiry()"
+                  style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:0.55rem 1.25rem;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-sans);white-space:nowrap">Send</button>
+              </div>
+              <p style="font-size:11px;color:var(--text-faint);margin-top:0.5rem;text-align:center">Powered by Google
+                Gemini</p>
             </div>
           </div>
           <div id="tab-economic" class="tab-content">
-            <div class="content-scroll-area space-y-8">
-              <div class="flex items-center gap-3 pb-8 mb-4">
+            <div class="content-scroll-area">
+              <!-- Header -->
+              <div
+                style="display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:1.25rem;border-bottom:1px solid var(--border);margin-bottom:1.5rem">
+                <div>
+                  <p
+                    style="font-size:12px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem">
+                    Economics</p>
+                  <h2 style="font-family:var(--font-serif);font-size:2rem;font-weight:700;color:var(--text)">Economic
+                    Data</h2>
+                </div>
+                <span style="font-size:12px;color:var(--text-muted)" id="eco-country-code">Global</span>
+              </div>
+
+              <!-- Search -->
+              <div
+                style="display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:0.6rem 1rem;gap:0.75rem;margin-bottom:1.5rem">
+                <i class="fas fa-search" style="color:var(--text-faint);font-size:13px"></i>
+                <input type="text" id="economic-city-search" placeholder="Search for a country or economy..."
+                  style="flex:1;border:none;outline:none;font-size:14px;color:var(--text);background:transparent;font-family:var(--font-sans)"
+                  onkeydown="if (event.key === 'Enter') searchCityForTab('economic');" />
+                <button onclick="searchCityForTab('economic')"
+                  style="color:var(--blue);background:none;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:var(--font-sans)">Search</button>
+              </div>
+
+              <!-- GDP Display -->
+              <div
+                style="display:flex;align-items:flex-start;gap:3rem;margin-bottom:2rem;padding-bottom:2rem;border-bottom:1px solid var(--border)">
+                <div>
+                  <div
+                    style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
+                    GDP (USD Billions)</div>
+                  <div style="display:flex;align-items:baseline;gap:0.5rem">
+                    <span style="font-size:3rem;font-weight:800;color:var(--text);line-height:1" id="eco-gdp">--</span>
+                    <span style="font-size:16px;color:var(--text-muted)">billion USD</span>
+                  </div>
+                  <div style="margin-top:1rem;display:flex;gap:1rem">
+                    <div
+                      style="padding:0.4rem 0.9rem;background:var(--green-soft);border-radius:4px;font-size:13px;font-weight:600;color:var(--green)">
+                      Growth: <span id="eco-growth">--%</span>
+                    </div>
+                    <div
+                      style="padding:0.4rem 0.9rem;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;font-size:13px;color:var(--text-muted)">
+                      Per Capita: <span id="eco-capita" style="font-weight:600;color:var(--text)">$--</span>
+                    </div>
+                  </div>
+                </div>
+
                 <div
-                  class="flex-1 relative flex items-center bg-white/[0.04] border border-white/10 rounded-2xl px-5 py-3.5 gap-4 focus-within:border-white/20 transition-all">
-                  <i class="fas fa-search text-slate-600 text-sm"></i>
-                  <input type="text" id="economic-city-search" placeholder="Search by country..."
-                    class="flex-1 bg-transparent border-none outline-none text-[14px] text-white placeholder-slate-700 font-medium transition-all"
-                    onkeydown="if (event.key === 'Enter') searchCityForTab('economic');" />
-                  <button onclick="searchCityForTab('economic')"
-                    class="text-slate-500 hover:text-white transition-colors px-2">
-                    <i class="fas fa-arrow-right text-sm"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-12 border-t border-slate-800/80 pt-8">
-                <div>
-                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">
-                    Gross Domestic Product
-                  </span>
-                  <div class="flex items-baseline gap-2">
-                    <span class="text-2xl text-slate-400 font-light">$</span>
-                    <span id="eco-gdp" class="text-7xl font-light text-white tracking-tighter"
-                      style="font-family: 'Outfit', sans-serif;">--</span>
-                    <span class="text-2xl text-slate-600 font-medium">BN</span>
-                  </div>
-                  <div class="mt-6 flex gap-12">
+                  style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem">
+                  <div style="display:flex;justify-content:space-between;align-items:start">
                     <div>
-                      <span class="block text-[10px] text-slate-500 uppercase tracking-widest mb-1">Growth</span>
-                      <span id="eco-growth" class="text-xl font-medium text-white">--%</span>
+                      <div style="font-size:12px;color:var(--text-muted);margin-bottom:0.3rem">Exchange Rate</div>
+                      <div style="display:flex;align-items:baseline;gap:0.4rem">
+                        <span style="font-size:14px;color:var(--text-muted)">1 USD =</span>
+                        <span id="eco-rate" style="font-size:2rem;font-weight:700;color:var(--text)">--</span>
+                        <span id="eco-currency-code" style="font-size:14px;font-weight:600;color:var(--blue)">---</span>
+                      </div>
                     </div>
-                    <div>
-                      <span class="block text-[10px] text-slate-500 uppercase tracking-widest mb-1">Per Capita</span>
-                      <span id="eco-capita" class="text-xl font-medium text-white">$--</span>
+                    <div style="text-align:right">
+                      <div style="font-size:12px;color:var(--text-muted);margin-bottom:0.3rem">Credit Rating</div>
+                      <div id="eco-credit-rating" style="font-size:2rem;font-weight:700;color:var(--text)">--</div>
+                      <div style="font-size:11px;color:var(--text-faint)">S&P / Moody's</div>
                     </div>
                   </div>
                 </div>
-                <div>
-                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">
-                    Forex Benchmark (<span id="eco-currency-code">USD</span>)
-                  </span>
-                  <div class="flex items-baseline gap-3 mt-4">
-                    <span class="text-base text-slate-500 font-bold uppercase tracking-widest">1 USD =</span>
-                    <span id="eco-rate" class="text-6xl font-light text-white tracking-tighter"
-                      style="font-family: 'Outfit', sans-serif;">--</span>
+              </div>
+
+              <!-- Key Indicators -->
+              <div
+                style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:2rem">
+                <div class="summary-card" style="background:var(--surface);padding:1.25rem">
+                  <div
+                    style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
+                    Inflation Rate</div>
+                  <div id="eco-inflation" style="font-size:1.4rem;font-weight:700;color:var(--red)">-- <span
+                      style="font-size:12px;font-weight:400;color:var(--text-muted)">%</span></div>
+                </div>
+                <div class="summary-card" style="background:var(--surface);padding:1.25rem">
+                  <div
+                    style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
+                    Unemployment</div>
+                  <div id="eco-unemployment" style="font-size:1.4rem;font-weight:700;color:var(--text)">-- <span
+                      style="font-size:12px;font-weight:400;color:var(--text-muted)">%</span></div>
+                </div>
+                <div class="summary-card" style="background:var(--surface);padding:1.25rem">
+                  <div
+                    style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
+                    Interest Rate</div>
+                  <div id="eco-interest" style="font-size:1.4rem;font-weight:700;color:var(--text)">-- <span
+                      style="font-size:12px;font-weight:400;color:var(--text-muted)">%</span></div>
+                </div>
+                <div class="summary-card" style="background:var(--surface);padding:1.25rem">
+                  <div
+                    style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
+                    Debt to GDP</div>
+                  <div id="eco-debt" style="font-size:1.4rem;font-weight:700;color:var(--text)">-- <span
+                      style="font-size:12px;font-weight:400;color:var(--text-muted)">%</span></div>
+                </div>
+                <div class="summary-card" style="background:var(--surface);padding:1.25rem">
+                  <div
+                    style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
+                    Trade Balance</div>
+                  <div id="eco-trade-balance" style="font-size:1.4rem;font-weight:700;color:var(--text)">-- <span
+                      style="font-size:12px;font-weight:400;color:var(--text-muted)">B</span></div>
+                </div>
+                <div class="summary-card" style="background:var(--surface);padding:1.25rem">
+                  <div
+                    style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
+                    Foreign Reserves</div>
+                  <div id="eco-reserves" style="font-size:1.4rem;font-weight:700;color:var(--text)">-- <span
+                      style="font-size:12px;font-weight:400;color:var(--text-muted)">B</span></div>
+                </div>
+              </div>
+
+              <!-- Monetary policy + Analysis -->
+              <div style="display:grid;grid-template-columns:1fr 2fr;gap:1.5rem">
+                <div
+                  style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem">
+                  <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:1rem">Monetary Policy
+                  </div>
+                  <div style="font-size:16px;font-weight:600;color:var(--text)">Neutral / Adaptive</div>
+                </div>
+                <div
+                  style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem">
+                  <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:0.75rem">Economic
+                    Analysis</div>
+                  <div id="economy-ai-analysis" style="font-size:13px;color:var(--text-2);line-height:1.6">Loading
+                    analysis...</div>
+                </div>
+              </div>
+
+              <!-- GDP Trend & Additional Context -->
+              <div style="margin-top:2rem;display:flex;flex-direction:column;gap:2rem">
+                <!-- Chart -->
+                <div
+                  style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+                    <h3 style="font-size:16px;font-weight:600;color:var(--text)">Historical GDP Trend</h3>
+                    <span style="font-size:12px;color:var(--text-muted)">USD Billions</span>
+                  </div>
+                  <div style="width:100%;min-height:200px">
+                    <canvas id="gdp-trend-chart" height="150" style="width:100%"></canvas>
                   </div>
                 </div>
-              </div>
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12 border-t border-slate-800/80 pt-8 mt-4">
-                <div>
-                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Inflation (CPI)</span>
-                  <div id="eco-inflation" class="text-3xl font-light text-white tracking-tight">--%</div>
-                  <div class="text-[10px] text-slate-600 uppercase mt-1">YoY Change</div>
-                </div>
-                <div>
-                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Unemployment</span>
-                  <div id="eco-unemployment" class="text-3xl font-light text-white tracking-tight">--%</div>
-                  <div class="text-[10px] text-slate-600 uppercase mt-1">Labor Force</div>
-                </div>
-                <div>
-                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Central Bank Rate</span>
-                  <div id="eco-interest" class="text-3xl font-light text-white tracking-tight">--%</div>
-                  <div class="text-[10px] text-slate-600 uppercase mt-1">Monetary Policy</div>
-                </div>
-                <div>
-                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Govt Debt</span>
-                  <div id="eco-debt" class="text-3xl font-light text-white tracking-tight">--%</div>
-                  <div class="text-[10px] text-slate-600 uppercase mt-1">of GDP</div>
-                </div>
-                <div>
-                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Trade Balance</span>
-                  <div id="eco-trade-balance" class="text-3xl font-light text-white tracking-tight">--</div>
-                  <div class="text-[10px] text-slate-600 uppercase mt-1">Billion USD</div>
-                </div>
-                <div>
-                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">FDI</span>
-                  <div id="eco-fdi" class="text-3xl font-light text-white tracking-tight">--</div>
-                  <div class="text-[10px] text-slate-600 uppercase mt-1">Billion USD</div>
-                </div>
-                <div>
-                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Reserves</span>
-                  <div id="eco-reserves" class="text-3xl font-light text-white tracking-tight">--</div>
-                  <div class="text-[10px] text-slate-600 uppercase mt-1">Billion USD</div>
-                </div>
-                <div>
-                  <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">Credit Rating</span>
-                  <div id="eco-credit-rating" class="text-2xl font-medium text-white tracking-tight mt-1">--</div>
-                  <div class="text-[10px] text-slate-600 uppercase mt-2">S&P / Moody's</div>
-                </div>
-              </div>
-              <div class="p-0">
-                <div class="px-4 py-3 border-b border-white/5 bg-transparent">
-                  <span class="text-sm text-blue-400 font-bold uppercase tracking-widest"
-                    style="font-family: &quot;JetBrains Mono&quot;, monospace">
-                    5-Year GDP Trend
-                  </span>
-                </div>
-                <div class="p-4">
-                  <canvas id="gdp-trend-chart" height="150"></canvas>
-                </div>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-16 mt-16 pt-10 border-t border-white/10">
-                <div class="flex flex-col">
-                  <span class="text-[11px] text-blue-400 font-bold uppercase tracking-widest mb-4"
-                    style="font-family: 'JetBrains Mono', monospace">Major Exports</span>
-                  <div id="eco-exports" class="space-y-3">
-                    <div class="h-3 w-3/4 animate-pulse" style="background: rgba(255, 255, 255, 0.04)"></div>
+
+                <!-- Facts & Exports -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+                  <div
+                    style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem">
+                    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:1rem">Major Exports</h3>
+                    <div id="eco-exports" style="display:flex;flex-wrap:wrap;gap:0.5rem">
+                      <!-- Populated via JS -->
+                      <span style="font-size:13px;color:var(--text-muted)">Loading export data...</span>
+                    </div>
+                  </div>
+                  <div
+                    style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem">
+                    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:1rem">Demographics</h3>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                      <div>
+                        <div
+                          style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.25rem">
+                          Population Density</div>
+                        <div id="fact-pop-2" style="font-size:15px;font-weight:600;color:var(--text)">--</div>
+                      </div>
+                      <div>
+                        <div
+                          style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.25rem">
+                          Gini Index</div>
+                        <div id="fact-gini-2" style="font-size:15px;font-weight:600;color:var(--text)">--</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div class="flex flex-col">
-                  <span class="text-[11px] text-slate-500 font-bold uppercase tracking-widest mb-4"
-                    style="font-family: 'JetBrains Mono', monospace">Sovereign Data</span>
-                  <div class="grid grid-cols-2 gap-6">
-                    <div><span class="text-[8px] text-slate-600 uppercase font-bold block mb-1">Pop.</span><span
-                        id="fact-pop-2" class="text-sm font-mono text-white">--</span></div>
-                    <div><span class="text-[8px] text-slate-600 uppercase font-bold block mb-1">Gini</span><span
-                        id="fact-gini-2" class="text-sm font-mono text-white">--</span></div>
+
+                <!-- Market Ticker Log -->
+                <div style="margin-top:2rem;padding-top:2rem;border-top:1px solid var(--border);padding-bottom:3rem">
+                  <h3
+                    style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem">
+                    Global Market Ticker</h3>
+                  <div id="eco-market-ticker"
+                    style="font-family:var(--font-sans);font-size:13px;color:var(--text-2);line-height:1.6;background:var(--surface-2);padding:1rem;border-radius:var(--radius);border:1px solid var(--border)">
+                    Loading active market feeds...
                   </div>
                 </div>
-              </div>
-              <div class="mt-16 pt-10 border-t border-white/10">
-                <span class="text-[11px] text-blue-400 font-bold uppercase tracking-widest mb-4 block"
-                  style="font-family: 'JetBrains Mono', monospace">Market Feed</span>
-                <span id="eco-market-ticker" class="text-slate-400 text-[11px] font-mono leading-relaxed">Loading market
-                  data...</span>
               </div>
             </div>
           </div>
         </div>
       </aside>
+    </div>
   </main>
 
   <div id="fact-pop" class="hidden"></div>
@@ -846,191 +1033,6 @@
   <script type="module" src="/js/modules/mapbox-engine.js"></script>
   <script type="module" src="/js/global-fx.js"></script>
 
-  <style>
-    #floating-cli {
-      position: fixed;
-      bottom: calc(var(--footer-h) + 1.5rem);
-      left: 1rem;
-      width: 178px;
-      max-width: calc(100vw - 3rem);
-      z-index: 150;
-      display: flex;
-      flex-direction: column;
-      font-family: "JetBrains Mono", monospace;
-      border-radius: 0;
-      overflow: hidden;
-      background: #0a0f1c;
-      border: 1px solid #1e293b;
-      transition: width 0.2s ease;
-    }
-
-    #floating-cli.cli-expanded {
-      width: 420px;
-    }
-
-    #floating-cli-handle {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 14px;
-      height: 38px;
-      background: #0a0f1c;
-      border-bottom: 1px solid #1e293b;
-      cursor: grab;
-      user-select: none;
-    }
-
-    #floating-cli-handle:active {
-      cursor: grabbing;
-    }
-
-    #floating-cli-body {
-      display: none;
-      flex-direction: column;
-      overflow: hidden;
-      max-height: 0;
-      transition: max-height 0.26s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    #floating-cli-body.cli-body-open {
-      max-height: 320px;
-    }
-
-    #floating-cli-output {
-      height: 230px;
-      overflow-y: auto;
-      padding: 10px 14px 6px;
-      font-size: 11px;
-      line-height: 1.75;
-      scrollbar-width: thin;
-    }
-
-    .cli-line {
-      margin-bottom: 2px;
-      word-break: break-word;
-    }
-
-    .cli-head {
-      color: #38bdf8;
-      font-weight: 900;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      font-size: 9px;
-    }
-
-    .cli-key {
-      color: #60a5fa;
-      font-weight: 700;
-    }
-
-    .cli-val,
-    .cli-ok {
-      color: #34d399;
-    }
-
-    .cli-err {
-      color: #f87171;
-    }
-
-    .cli-dim {
-      color: #64748b;
-      font-size: 10px;
-    }
-
-    .cli-cmd {
-      color: #f1f5f9;
-    }
-
-    .cli-prompt {
-      color: #38bdf8;
-    }
-
-    .cli-ai {
-      color: #60a5fa;
-      font-weight: 900;
-      font-size: 9px;
-      letter-spacing: 0.1em;
-    }
-
-    .cli-reply {
-      color: #f1f5f9;
-    }
-
-    .cli-locked {
-      display: none !important;
-    }
-    
-    #temporal-scrubber {
-      background: linear-gradient(180deg, rgba(2,6,23,0) 0%, rgba(2,6,23,0.9) 100%);
-    }
-  </style>
-
-  <!-- TEMPORAL SCRUBBING UI -->
-  <div id="temporal-scrubber" class="fixed bottom-0 left-0 right-0 z-[150] px-8 py-6 pointer-events-none hidden md:flex items-end justify-center transition-opacity duration-300">
-    <div class="w-full max-w-4xl pointer-events-auto bg-slate-900/60 backdrop-blur-md border border-white/10 rounded-full px-6 py-3 flex flex-col gap-2 shadow-2xl">
-      <div class="flex items-center justify-between">
-        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">Historical Record</span>
-        <span id="temporal-readout" class="text-[10px] font-black text-blue-400 font-mono">-0H (LIVE)</span>
-      </div>
-      <input type="range" id="temporal-slider" min="-72" max="0" value="0" class="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer outline-none">
-    </div>
-  </div>
-  
-  <script>
-    const scrubber = document.getElementById('temporal-slider');
-    const readout = document.getElementById('temporal-readout');
-    if(scrubber) {
-        scrubber.addEventListener('input', (e) => {
-            const h = parseInt(e.target.value);
-            readout.innerText = h === 0 ? '-0H (LIVE)' : `${h}H`;
-            if(h !== 0) {
-               document.body.classList.add('temporal-shift-active');
-               readout.classList.remove('text-blue-400');
-               readout.classList.add('text-amber-500');
-            } else {
-               document.body.classList.remove('temporal-shift-active');
-               readout.classList.add('text-blue-400');
-               readout.classList.remove('text-amber-500');
-            }
-        });
-    }
-  </script>
-
-
-  <div id="cmd-palette-overlay" class="fixed inset-0 z-[200] hidden items-start justify-center pt-24 px-4"
-    onclick="if (event.target === this) window.closeCommandPalette();"
-    style="display: none; background: rgba(2, 6, 23, 0.75)">
-    <div id="cmd-palette-box"
-      class="w-full max-w-xl flex flex-col overflow-hidden p-0 bg-slate-950 border border-slate-800"
-      style="max-height: 60vh">
-      <div class="flex items-center gap-3 px-4 py-3 border-b border-white/8">
-        <input id="cmd-palette-input" type="text" placeholder="Search Intel, Queries, or Actions..." autocomplete="off"
-          class="flex-1 bg-transparent border-none outline-none text-base font-bold text-white placeholder-slate-700"
-          style="font-family: &quot;JetBrains Mono&quot;, monospace" />
-        <kbd
-          class="text-[11px] font-mono text-slate-600 px-1.5 py-0.5 rounded bg-white/6 border border-white/10">ESC</kbd>
-      </div>
-      <div id="cmd-palette-list" class="overflow-y-auto" style="max-height: 48vh"></div>
-      <div class="flex items-center gap-4 px-4 py-2 border-t border-white/5 bg-white/[0.01]">
-        <div class="flex items-center gap-1.5">
-          <kbd class="text-[9px] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-500">↑↓</kbd>
-          <span class="text-[9px] text-slate-600 font-bold uppercase tracking-wider">Navigate</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <kbd class="text-[9px] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-500">↵</kbd>
-          <span class="text-[9px] text-slate-600 font-bold uppercase tracking-wider">Execute</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <div class="flex items-center gap-1.5">
-            <kbd class="text-[9px] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-500">Ctrl+K</kbd>
-            <span class="text-[9px] text-slate-600 font-bold uppercase tracking-wider">Toggle</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  </div>
-  </div>
   <script>
     window.sendNeuralInquiry = async function () {
       const input = document.getElementById('neural-chat-input');
@@ -1041,26 +1043,26 @@
       input.value = '';
 
       const userDiv = document.createElement('div');
-      userDiv.className = 'flex gap-4 justify-end';
+      userDiv.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:1rem;';
       userDiv.innerHTML = `
-        <div class="bg-blue-600 rounded-2xl rounded-tr-none p-5 text-sm text-white leading-relaxed max-w-[85%] shadow-xl shadow-blue-600/10">
+        <div style="background:var(--blue);color:#fff;padding:0.75rem 1rem;border-radius:var(--radius);max-width:80%;font-size:14px;box-shadow:0 2px 5px rgba(0,0,0,0.05)">
           ${q}
-        </div>
-        <div class="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center shrink-0">
-          <i class="fas fa-user text-[10px] text-slate-400"></i>
         </div>
       `;
       log.appendChild(userDiv);
       log.scrollTop = log.scrollHeight;
 
       const botDiv = document.createElement('div');
-      botDiv.className = 'flex gap-4';
+      botDiv.style.cssText = 'display:flex;justify-content:flex-start;margin-bottom:1rem;';
       botDiv.innerHTML = `
-        <div class="w-8 h-8 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
-          <i class="fas fa-robot text-[10px] text-blue-500"></i>
-        </div>
-        <div class="bg-white/5 rounded-2xl rounded-tl-none p-5 text-sm text-slate-300 leading-relaxed max-w-[85%] border border-white/5">
-          <i class="fas fa-circle-notch fa-spin text-blue-400"></i> Analyzing tactical data...
+        <div style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:0.75rem 1rem;border-radius:var(--radius);max-width:85%;font-size:14px;box-shadow:0 2px 5px rgba(0,0,0,0.02)">
+           <div style="display:flex;align-items:center;margin-bottom:0.4rem">
+              <i class="fas fa-robot" style="color:var(--blue);margin-right:0.5rem;font-size:12px"></i>
+              <span style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em">AI Assistant</span>
+           </div>
+           <div class="ai-bubble" style="line-height:1.6">
+              <i class="fas fa-circle-notch fa-spin" style="color:var(--blue);margin-right:0.4rem"></i> Generating response...
+           </div>
         </div>
       `;
       log.appendChild(botDiv);
@@ -1072,15 +1074,23 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: q })
         });
+
+        if (!res.ok) throw new Error('API Sync Failed');
+
         const data = await res.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || data.response || 'No baseline response available.';
-        botDiv.querySelector('.bg-white/5').innerText = text.replace(/\*\*/g, '').trim();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || data.response || 'No response available.';
+        const bubble = botDiv.querySelector('.ai-bubble');
+        if (bubble) {
+          bubble.innerHTML = text.replace(/\*\*/g, '').trim().replace(/\n/g, '<br>');
+        }
       } catch (e) {
-        botDiv.querySelector('.bg-white/5').innerHTML = '<span class="text-red-400">Encryption Error: Connection Interrupted.</span>';
+        const bubble = botDiv.querySelector('.ai-bubble');
+        if (bubble) {
+          bubble.innerHTML = '<span style="color:var(--red)"><i class="fas fa-exclamation-triangle" style="margin-right:0.4rem"></i> Unable to reach AI service. Please try again later.</span>';
+        }
       }
       log.scrollTop = log.scrollHeight;
     };
-
   </script>
 </body>
 

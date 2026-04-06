@@ -97,13 +97,13 @@ async function initTerminal() {
       window.firebaseCore.signInAnonymously(auth);
       window.firebaseCore.onAuthStateChanged(auth, (u) => {
         const idEl = safeEl("neural-id");
-        if (idEl) idEl.innerText = u ? `SESSION: ${u.uid.substring(0, 8).toUpperCase()}` : "GUEST SESSION";
+        if (idEl) idEl.innerText = u ? `User ID: ${u.uid.substring(0, 8)}` : "Guest Mode";
       });
     } catch (e) {
-      setText("neural-id", "GUEST SESSION");
+      setText("neural-id", "Guest Mode");
     }
   } else { 
-    setText("neural-id", "GUEST SESSION"); 
+    setText("neural-id", "Guest Mode"); 
   }
 
   try {
@@ -121,8 +121,13 @@ async function initTerminal() {
 
   runWhenIdle(() => {
     try {
-      if (window.generateAIBriefing) window.generateAIBriefing("Global Context");
+      if (window.updateAISummary) window.updateAISummary("Global Context");
       if (window.initializeMarkets) window.initializeMarkets("Global");
+      if (window.fetchDetailedEconomics) window.fetchDetailedEconomics("Global");
+      if (window.fetchWeather) {
+        window._currentWeatherLocation = "New Delhi, India";
+        window.fetchWeather(28.61, 77.23);
+      }
       if (window.fetchSeismicStatus) window.fetchSeismicStatus();
     } catch (e) {}
   });
@@ -179,9 +184,27 @@ async function fetchAllData(countryName) {
       }
       
       const cName = c.name?.common || countryName;
+      
+      // Update Context HUD
+      const ctxFlag = document.getElementById("ctx-flag");
+      const ctxGlobe = document.getElementById("ctx-globe-icon");
+      const ctxCountry = document.getElementById("ctx-country");
+      const ctxLocation = document.getElementById("ctx-location");
+      
+      if (ctxFlag) {
+        ctxFlag.src = c.flags?.svg || "";
+        ctxFlag.classList.remove("hidden");
+      }
+      if (ctxGlobe) ctxGlobe.classList.add("hidden");
+      if (ctxCountry) ctxCountry.innerText = cName.toUpperCase();
+      if (ctxLocation) ctxLocation.innerText = "Country Profile";
+      
+      const opPath = document.getElementById("breadcrumb-operational-path");
+      if (opPath) opPath.innerText = cName;
+
       window.fetchNews(cName);
       if (window.initializeMarkets) window.initializeMarkets(cName);
-      if (window.generateAIBriefing) window.generateAIBriefing(cName);
+      if (window.updateAISummary) window.updateAISummary(cName);
       
       // Trigger Atmosphere (Weather) and Economics
       if (window.fetchDetailedEconomics) window.fetchDetailedEconomics(cName);
@@ -191,7 +214,7 @@ async function fetchAllData(countryName) {
       }
     }
   } catch (e) {
-    console.error("Critical Telemetry Synchronization Failure:", e);
+    console.warn("Data Sync Failure:", e);
   }
 }
 
@@ -225,6 +248,10 @@ window.switchTab = (id) => {
     targetContent.style.display = 'block';
     requestAnimationFrame(() => {
       targetContent.classList.add("active");
+      if (id === 'search' && window.renderTrending) {
+        window.renderTrending();
+        setTimeout(() => document.getElementById("country-search")?.focus(), 100);
+      }
       if (id === 'markets' && window.renderTVChart) {
         window.renderTVChart(window._currentCountryName || "Global");
       }
@@ -261,13 +288,25 @@ window.handleCountryClick = async function (event, d) {
     if (window.mapEngine && window.mapEngine.ready && event && event.lngLat) {
        window.mapEngine.flyToCountry(event.lngLat, 4.5);
     }
-    generateAIBriefing(countryName);
+    if (window.updateAISummary) window.updateAISummary(countryName);
   }
 };
 
 window.resetToGlobalCenter = () => {
   window.selectedCountry = null;
   setText("selected-country-name", "Worldwide");
+  
+  // Reset Context HUD
+  const ctxFlag = document.getElementById("ctx-flag");
+  const ctxGlobe = document.getElementById("ctx-globe-icon");
+  const ctxCountry = document.getElementById("ctx-country");
+  const ctxLocation = document.getElementById("ctx-location");
+  
+  if (ctxFlag) ctxFlag.classList.add("hidden");
+  if (ctxGlobe) ctxGlobe.classList.remove("hidden");
+  if (ctxCountry) ctxCountry.innerText = "GLOBAL VIEW";
+  if (ctxLocation) ctxLocation.innerText = "SELECT A LOCATION";
+
   window.backToOrbital();
   if (window.mapEngine && window.mapEngine.map) {
     window.mapEngine.clearSelection();
@@ -322,37 +361,40 @@ window.searchCityForTab = async (tabId) => {
         window.mapEngine.map.flyTo({ center: [city.longitude, city.latitude], zoom: 9, duration: 2000 });
       }
       setText("selected-country-name", city.name.toUpperCase());
+      if (tabId === 'economic' && window.fetchDetailedEconomics) window.fetchDetailedEconomics(city.name);
+      if (tabId === 'atmosphere' && window.fetchWeather) window.fetchWeather(city.latitude, city.longitude);
     }
   } catch (e) {}
 };
 
-window.generateAIBriefing = async (country) => {
-    const textEl = document.getElementById("ai-briefing-text");
-    const loadingEl = document.getElementById("ai-briefing-loading");
+window.updateAISummary = async (country) => {
+    const textEl = document.getElementById("ai-summary-text");
+    const loadingEl = document.getElementById("ai-summary-loading");
     if (loadingEl) loadingEl.classList.remove("hidden");
     if (textEl) textEl.style.opacity = "0.4";
 
     try {
-        const prompt = `Analyze the current geopolitical and strategic situation of ${country}. 
-        Return ONLY a JSON object with 12 analysis factors. 
-        For each factor, write exactly 2-3 highly detailed, professional sentences.
-        Expect these exact keys in the JSON:
+        const prompt = `Provide a professional news summary for ${country}.
+        Return ONLY a JSON object with these keys: 
         {
-          "summary": "Executive summary",
-          "political": "Political stability/regime",
-          "trade": "Trade/economics",
-          "infra": "Infrastructure/energy",
-          "social": "Societal sentiment/cohesion",
-          "mil": "Military/defense posture",
-          "tech": "Technology/cyber sovereignty",
-          "health": "Sanitary/health baseline",
-          "finance": "Financial integrity/fiscal",
-          "eco": "Ecological status/climate",
-          "prod": "Industrial productivity/labor",
-          "edu": "Educational/human capital",
-          "log": "Logistics/supply chain fluidity"
+          "summary": "General overview of the country.",
+          "political": "Current government and political situation.",
+          "trade": "Trade, imports, and exports.",
+          "infra": "Infrastructure and public utilities.",
+          "social": "Society and public sentiment.",
+          "mil": "Security and safety outlook.",
+          "tech": "Technology and innovation landscape.",
+          "health": "Healthcare and public health status.",
+          "finance": "Financial markets and fiscal status.",
+          "eco": "Environment and climate issues.",
+          "prod": "Industrial and business performance.",
+          "edu": "Education and skills development.",
+          "log": "Logistics, transport, and supply chains.",
+          "energy": "Energy resources, production, and security.",
+          "agri": "Agriculture, farming, and food security.",
+          "demo": "Demographics, population trends, and labor."
         }
-        Be professional, data-centric, and extremely concise. No markdown formatting.`;
+        Use a professional, objective news reporting tone. No jargon. No markdown. No preambles.`;
 
         const res = await fetch("/api/ai", {
             method: "POST",
@@ -362,27 +404,30 @@ window.generateAIBriefing = async (country) => {
         const data = await res.json();
         const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || data.response || "{}";
         const clean = raw.replace(/```json/g, "").replace(/```/g, "").trim();
-        let intel = {};
+        let summaryData = {};
         try {
-            intel = JSON.parse(clean);
+            summaryData = JSON.parse(clean);
         } catch (e) {
-            console.error("Failed to parse Intel JSON:", clean);
+            console.error("Failed to parse Summary JSON:", clean);
         }
 
         const map = {
-            "intel-lead": intel.summary || intel.executive_summary || intel.lead,
-            "intel-pol": intel.political || intel.political_stability || intel.stability,
-            "intel-trade": intel.trade || intel.trade_relations || intel.economics,
-            "intel-infra": intel.infra || intel.infrastructure || intel.energy,
-            "intel-social": intel.social || intel.societal_sentiment || intel.sentiment || intel.cohesion,
-            "intel-mil": intel.mil || intel.military || intel.defense || intel.military_posture,
-            "intel-tech": intel.tech || intel.technology || intel.cyber || intel.tech_sovereignty,
-            "intel-health": intel.health || intel.sanitary || intel.medical,
-            "intel-finance": intel.finance || intel.fiscal || intel.transparency,
-            "intel-eco": intel.eco || intel.environment || intel.climate || intel.ecological,
-            "intel-prod": intel.prod || intel.productivity || intel.industrial,
-            "intel-edu": intel.edu || intel.education || intel.human_capital,
-            "intel-log": intel.log || intel.logistics || intel.supply_chain
+            "intel-lead": summaryData.summary || summaryData.lead,
+            "intel-pol": summaryData.political || summaryData.governance,
+            "intel-trade": summaryData.trade || summaryData.economics,
+            "intel-infra": summaryData.infra || summaryData.infrastructure,
+            "intel-social": summaryData.social || summaryData.society,
+            "intel-mil": summaryData.mil || summaryData.security || summaryData.safety,
+            "intel-tech": summaryData.tech || summaryData.technology,
+            "intel-health": summaryData.health || summaryData.medical,
+            "intel-finance": summaryData.finance || summaryData.fiscal,
+            "intel-eco": summaryData.eco || summaryData.environment,
+            "intel-prod": summaryData.prod || summaryData.business,
+            "intel-edu": summaryData.edu || summaryData.education,
+            "intel-log": summaryData.log || summaryData.logistics,
+            "intel-energy": summaryData.energy || summaryData.resources,
+            "intel-agri": summaryData.agri || summaryData.agriculture,
+            "intel-demo": summaryData.demo || summaryData.demographics
         };
 
         Object.keys(map).forEach(id => {
@@ -390,7 +435,7 @@ window.generateAIBriefing = async (country) => {
         });
 
     } catch (e) {
-        console.error("AI Briefing failed:", e);
+        console.error("AI Update failed:", e);
     } finally {
         if (loadingEl) loadingEl.classList.add("hidden");
         if (textEl) textEl.style.opacity = "1";
@@ -400,7 +445,7 @@ window.generateAIBriefing = async (country) => {
 window.mapEngine = new MapboxEngine('map-container');
 window.mapEngine.init(); // interactions enabled inside style.load callback in mapbox-engine.js
 
-initTerminal();
+initDashboard();
 setupEventListeners();
 
 window.initializeMarkets = (loc) => {

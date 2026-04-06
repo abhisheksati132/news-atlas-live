@@ -1,5 +1,5 @@
 let allNews = [];
-let displayedNewsCount = 21;
+let displayedNewsCount = 20;
 let currentNewsFilters = { search: "", time: "All Time", sort: "Most Recent" };
 let newsSearchQuery = "";
 let newsSearchTimer = null;
@@ -44,25 +44,14 @@ function getFavicon(sourceUrl) {
     return null;
   }
 }
-function showNewsSkeletons(container) {
-  if (!container) return;
-  const skels = Array.from({ length: 3 }, () => `
-    <div class="dossier-card mb-4 skeleton" style="height:140px;">
-      <div class="flex items-center gap-2 mb-4">
-        <div class="w-16 h-3 rounded-full skeleton" style="background:rgba(255,255,255,0.05)"></div>
-        <div class="ml-auto w-10 h-3 rounded-full skeleton" style="background:rgba(255,255,255,0.04)"></div>
-      </div>
-      <div class="w-full h-4 rounded skeleton mb-2" style="background:rgba(255,255,255,0.05)"></div>
-      <div class="w-4/5 h-4 rounded skeleton" style="background:rgba(255,255,255,0.04)"></div>
-    </div>`).join("");
-  container.innerHTML = skels;
-}
+// No-op: replaced by static HTML skeletons in index.html for better symmetry
+function showNewsSkeletons(container) {}
 async function fetchNews(overrideQ) {
   const loading = document.getElementById("news-loading");
   const container = document.getElementById("articles-container");
   if (loading) loading.classList.remove("hidden");
-  if (container) showNewsSkeletons(container);
-  displayedNewsCount = 21;
+  if (container) container.innerHTML = ""; // Clear existing during fresh fetch
+  displayedNewsCount = 20;
   isLiveSearching = false;
   const previousNews = allNews.length > 0 ? [...allNews] : null;
   try {
@@ -154,9 +143,16 @@ function displayFilteredNews() {
   });
 
   let countToDisplay = Math.min(displayedNewsCount, filtered.length);
-  const remainder = countToDisplay % 3;
-  if (remainder !== 0 && countToDisplay > remainder) countToDisplay -= remainder;
   displayNewsArticles(filtered.slice(0, countToDisplay));
+
+  const loadMoreContainer = document.getElementById("load-more-news-container");
+  if (loadMoreContainer) {
+    if (countToDisplay >= filtered.length) {
+      loadMoreContainer.classList.add("hidden");
+    } else {
+      loadMoreContainer.classList.remove("hidden");
+    }
+  }
 }
 function displayNewsArticles(articles) {
   const container = document.getElementById("articles-container");
@@ -174,50 +170,53 @@ function displayNewsArticles(articles) {
   articles.forEach((art, i) => {
     const sentiment = getNewsSentiment(art.title, art.description);
     const timeAgo = relativeTime(art.pubDate);
-    const favicon = getFavicon(art.source_url);
-    const faviconHtml = favicon
-      ? `<img src="${favicon}" alt="" class="w-3 h-3 rounded-full object-cover grayscale opacity-60">`
-      : `<i class="fas fa-newspaper text-[8px] text-slate-500"></i>`;
+    const source = (art.source_id || "SIGNAL").toUpperCase();
     
+    // Grayscale images that colorize on hover for high-end feel
     const imgHtml = art.image_url
-      ? `<div class="w-full mt-3 rounded-xl border border-white/[0.05] overflow-hidden bg-slate-900/50" 
-              style="height: 180px;">
-              <img src="${art.image_url}" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'">
+      ? `<div class="w-full mt-2 mb-4 rounded-lg border border-white/[0.03] overflow-hidden bg-slate-900/50 group-hover:border-blue-500/20 transition-all" 
+              style="height: 200px;">
+              <img src="${art.image_url}" 
+                   class="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" 
+                   onerror="this.parentElement.style.display='none'">
          </div>`
       : "";
 
-    const row = document.createElement("div");
-    row.className = `py-8 border-b border-slate-800/80 cursor-pointer hover:bg-white/[0.02] transition-all news-card-animate whitespace-normal group`;
-    row.style.animationDelay = `${i * 30}ms`;
-    row.innerHTML = `
-      <div class="flex flex-col gap-4">
-        <div class="flex items-center gap-4">
-          <span class="text-[9px] font-bold text-white bg-white/5 px-2 py-1 tracking-[0.2em] uppercase font-mono">${art.source_id || "SIGNAL"}</span>
-          <span class="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] font-mono">${timeAgo}</span>
-          <div class="h-px flex-1 bg-white/5"></div>
-          <span class="text-[9px] font-bold tracking-[0.2em] font-mono ${sentiment.cls}">${sentiment.label}</span>
+    const card = document.createElement("div");
+    card.className = `p-8 border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-lg transition-all cursor-pointer flex flex-col gap-5 news-card-animate group rounded-lg`;
+    card.style.animationDelay = `${i * 40}ms`;
+    card.onclick = () => window.open(art.link, '_blank');
+    
+    card.innerHTML = `
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="text-[10px] font-black text-blue-500 font-mono tracking-tighter">[ ${source} ]</span>
+          <span class="text-[9px] font-bold text-slate-600 uppercase tracking-widest font-mono">${timeAgo}</span>
         </div>
-        
-        ${imgHtml}
-
-        <div class="flex flex-col gap-2">
-          <h3 class="text-[20px] font-bold text-white leading-[1.2] tracking-tight group-hover:text-slate-300 transition-colors" style="font-family: 'Plus Jakarta Sans', sans-serif;" onclick="window.open('${escapeHtml(art.link)}', '_blank')">${escapeHtml(art.title)}</h3>
-          ${art.description ? `<p class="text-[14px] text-slate-500 leading-relaxed font-normal line-clamp-2 max-w-3xl">${escapeHtml(art.description)}</p>` : ''}
+        <div class="flex items-center gap-2">
+            <span class="text-[8px] font-black tracking-[0.2em] font-mono ${sentiment.cls} opacity-80 group-hover:opacity-100 transition-opacity">${sentiment.label}</span>
+            <div class="w-1 h-1 rounded-full ${sentiment.cls.replace('text-', 'bg-')} animate-pulse"></div>
         </div>
       </div>
+      
+      ${imgHtml}
+
+      <div class="flex flex-col gap-3">
+        <h3 class="text-xl font-bold text-gray-900 leading-tight tracking-tight group-hover:text-blue-600 transition-colors font-serif">${escapeHtml(art.title)}</h3>
+        ${art.description ? `<p class="text-[14px] text-gray-700 leading-relaxed font-sans line-clamp-3">${escapeHtml(art.description)}</p>` : ''}
+      </div>
+
+      <div class="mt-auto pt-5 border-t border-gray-100 flex items-center justify-between">
+        <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Read Full Article</span>
+        <i class="fas fa-arrow-right text-[11px] text-blue-600"></i>
+      </div>
     `;
-    container.appendChild(row);
+    container.appendChild(card);
   });
 }
 window.loadMoreNews = () => {
-  displayedNewsCount += 21;
+  displayedNewsCount += 20;
   displayFilteredNews();
-};
-window.checkNewsScroll = () => {
-  const container = document.getElementById("news-scroll-container");
-  if (!container) return;
-  if (container.scrollTop + container.clientHeight >= container.scrollHeight - 100)
-    window.loadMoreNews();
 };
 window.fetchNews = fetchNews;
 window.displayFilteredNews = displayFilteredNews;
@@ -225,17 +224,6 @@ async function fetchGDELTEvents(country) {
   const container = document.getElementById("gdelt-events-content");
   if (!container) return;
   container.innerHTML = '<div class="text-slate-500 text-xs animate-pulse py-2">Loading intelligence events...</div>';
-
-  const simulated = [
-    { title: "Global trade negotiations enter critical phase amid supply chain concerns", tone: -1.2, domain: "Reuters", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
-    { title: "Central banks coordinate on inflation response strategy", tone: 2.5, domain: "Bloomberg", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
-    { title: "Regional security summit addresses emerging threat vectors", tone: -2.8, domain: "FT", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
-    { title: "Technology export controls reshape global semiconductor landscape", tone: -0.5, domain: "WSJ", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
-    { title: "UN peacekeeping mission reports progress in conflict zones", tone: 3.1, domain: "AP News", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
-    { title: "Energy markets adjust to new geopolitical supply dynamics", tone: -1.8, domain: "CNBC", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
-    { title: "Climate cooperation framework achieves binding commitments", tone: 4.2, domain: "Guardian", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
-    { title: "Diplomatic channels reopened after months of tension", tone: 3.8, domain: "BBC", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") }
-  ];
 
   function renderRows(articles) {
     container.innerHTML = "";
@@ -267,14 +255,14 @@ async function fetchGDELTEvents(country) {
     if (!res.ok) throw new Error("GDELT unavailable");
     const data = await res.json();
     const articles = data.articles || [];
-    if (!articles.length) throw new Error("No articles");
+    if (!articles.length) throw new Error("No recent events found");
     renderRows(articles);
     const stamp = document.getElementById("gdelt-timestamp");
     if (stamp) stamp.innerText = `Intel · ${articles.length} events · Live`;
   } catch (e) {
-    renderRows(simulated);
+    container.innerHTML = `<div class="text-slate-600 text-[10px] py-10 text-center uppercase tracking-widest font-mono">No live intelligence events found for this sector</div>`;
     const stamp = document.getElementById("gdelt-timestamp");
-    if (stamp) stamp.innerText = `Intel · ${simulated.length} events · Simulated`;
+    if (stamp) stamp.innerText = `Intel · Offline`;
   }
 }
 window.fetchGDELTEvents = fetchGDELTEvents;

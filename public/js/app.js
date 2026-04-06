@@ -15,7 +15,20 @@ let iso2Code = null;
 let countryUTCOffset = null;
 let projectionType = "3d";
 window.projectionType = "3d";
-let globalSearchData = [];
+let globalSearchData = [
+  { name: { common: "United States" }, region: "Americas", population: 331000000, flags: { svg: "https://flagcdn.com/us.svg" }, capital: ["Washington D.C."], cca2: "US" },
+  { name: { common: "India" }, region: "Asia", population: 1400000000, flags: { svg: "https://flagcdn.com/in.svg" }, capital: ["New Delhi"], cca2: "IN" },
+  { name: { common: "China" }, region: "Asia", population: 1400000000, flags: { svg: "https://flagcdn.com/cn.svg" }, capital: ["Beijing"], cca2: "CN" },
+  { name: { common: "United Kingdom" }, region: "Europe", population: 67000000, flags: { svg: "https://flagcdn.com/gb.svg" }, capital: ["London"], cca2: "GB" },
+  { name: { common: "France" }, region: "Europe", population: 67000000, flags: { svg: "https://flagcdn.com/fr.svg" }, capital: ["Paris"], cca2: "FR" },
+  { name: { common: "Japan" }, region: "Asia", population: 125000000, flags: { svg: "https://flagcdn.com/jp.svg" }, capital: ["Tokyo"], cca2: "JP" },
+  { name: { common: "Germany" }, region: "Europe", population: 83000000, flags: { svg: "https://flagcdn.com/de.svg" }, capital: ["Berlin"], cca2: "DE" },
+  { name: { common: "Brazil" }, region: "Americas", population: 214000000, flags: { svg: "https://flagcdn.com/br.svg" }, capital: ["Brasilia"], cca2: "BR" },
+  { name: { common: "Canada" }, region: "Americas", population: 38000000, flags: { svg: "https://flagcdn.com/ca.svg" }, capital: ["Ottawa"], cca2: "CA" },
+  { name: { common: "Singapore" }, region: "Asia", population: 5700000, flags: { svg: "https://flagcdn.com/sg.svg" }, capital: ["Singapore"], cca2: "SG" },
+  { name: { common: "Australia" }, region: "Oceania", population: 26000000, flags: { svg: "https://flagcdn.com/au.svg" }, capital: ["Canberra"], cca2: "AU" }
+];
+window.globalSearchData = globalSearchData;
 let currentCategory = "top";
 
 window.selectedCountry = selectedCountry;

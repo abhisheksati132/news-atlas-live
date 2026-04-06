@@ -170,56 +170,40 @@
           </div>
 
           <div id="tab-search" class="tab-content">
-            <div class="content-scroll-area" style="padding-top:3rem">
-              <div style="margin-bottom:2.5rem">
-                <p
-                  style="font-size:12px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem">
-                  Search</p>
-                <h2
-                  style="font-family:var(--font-serif);font-size:2.5rem;font-weight:700;color:var(--text);line-height:1.1;margin-bottom:0.75rem">
-                  Search the World</h2>
-                <p style="color:var(--text-muted);font-size:15px;max-width:500px;line-height:1.6">Find any country,
-                  city, or region to explore live news, economic data, and more.</p>
+            <div class="content-scroll-area" style="padding-top:4.5rem; gap: 4.5rem;">
+              <div class="text-center">
+                <p class="text-[10px] font-bold text-blue-600 uppercase tracking-[0.4em] mb-4">Registry Access</p>
+                <h2 class="font-serif text-5xl font-bold text-slate-900 leading-tight mb-10">Intelligence Directory</h2>
+                
+                <div class="max-w-xl mx-auto relative group">
+                    <div class="relative flex items-center bg-white border border-gray-100 rounded-2xl p-2.5 shadow-sm group-focus-within:border-blue-400 group-focus-within:shadow-xl group-focus-within:shadow-blue-500/5 transition-all duration-300">
+                      <div class="w-12 h-12 flex items-center justify-center text-slate-300">
+                        <i class="fas fa-search text-lg"></i>
+                      </div>
+                      <input type="text" id="country-search" placeholder="Search by name or region..."
+                        class="flex-1 bg-transparent border-none outline-none text-lg font-medium text-slate-900 placeholder:text-slate-200 py-3 pr-6 font-sans">
+                      <div class="px-5 py-2.5 bg-slate-50 rounded-xl text-[10px] font-bold text-slate-400 uppercase tracking-widest border border-slate-100 hidden sm:block">Global Registry</div>
+                    </div>
+                </div>
               </div>
-
-              <div
-                style="display:flex;align-items:center;background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:1rem 1.5rem;gap:1rem;margin-bottom:2rem;transition:border-color 0.2s"
-                onfocusin="this.style.borderColor='var(--blue)'" onfocusout="this.style.borderColor='var(--border)'">
-                <i class="fas fa-search" style="color:var(--text-faint);font-size:18px"></i>
-                <input type="text" id="country-search" placeholder="Enter a country, city, or region..."
-                  style="flex:1;background:transparent;border:none;outline:none;font-size:18px;color:var(--text);font-family:var(--font-sans);font-weight:500"
-                  oninput="window.renderTrending && window.renderTrending()" autocomplete="off" />
-                <button onclick="document.getElementById('country-search').value=''; window.renderTrending()"
-                  style="color:var(--text-faint);background:none;border:none;cursor:pointer">
-                  <i class="fas fa-times" style="font-size:16px"></i>
-                </button>
-              </div>
-
-              <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:2.5rem;flex-wrap:wrap">
-                <span style="font-size:12px;font-weight:600;color:var(--text-muted)">Popular</span>
-                <div style="display:flex;flex-wrap:wrap;gap:0.75rem">
+              
+              <div class="flex flex-col items-center gap-6">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Suggested Entry Points</span>
+                <div class="flex flex-wrap justify-center gap-3">
                   <button onclick="document.getElementById('country-search').value='India'; window.renderTrending()"
-                    style="font-size:13px;font-weight:500;color:var(--blue);background:var(--blue-soft);border:none;border-radius:20px;padding:4px 14px;cursor:pointer">India</button>
-                  <button onclick="document.getElementById('country-search').value='France'; window.renderTrending()"
-                    style="font-size:13px;font-weight:500;color:var(--blue);background:var(--blue-soft);border:none;border-radius:20px;padding:4px 14px;cursor:pointer">France</button>
+                    class="px-5 py-2 bg-slate-50 text-slate-600 text-[11px] font-bold rounded-full hover:bg-blue-50 hover:text-blue-600 border border-slate-100 transition-all">India</button>
+                  <button onclick="document.getElementById('country-search').value='United States'; window.renderTrending()"
+                    class="px-5 py-2 bg-slate-50 text-slate-600 text-[11px] font-bold rounded-full hover:bg-blue-50 hover:text-blue-600 border border-slate-100 transition-all">United States</button>
                   <button onclick="document.getElementById('country-search').value='Singapore'; window.renderTrending()"
-                    style="font-size:13px;font-weight:500;color:var(--blue);background:var(--blue-soft);border:none;border-radius:20px;padding:4px 14px;cursor:pointer">Singapore</button>
+                    class="px-5 py-2 bg-slate-50 text-slate-600 text-[11px] font-bold rounded-full hover:bg-blue-50 hover:text-blue-600 border border-slate-100 transition-all">Singapore</button>
                   <button onclick="document.getElementById('country-search').value='Japan'; window.renderTrending()"
-                    style="font-size:13px;font-weight:500;color:var(--blue);background:var(--blue-soft);border:none;border-radius:20px;padding:4px 14px;cursor:pointer">Japan</button>
+                    class="px-5 py-2 bg-slate-50 text-slate-600 text-[11px] font-bold rounded-full hover:bg-blue-50 hover:text-blue-600 border border-slate-100 transition-all">Japan</button>
                   <button onclick="document.getElementById('country-search').value='Germany'; window.renderTrending()"
-                    style="font-size:13px;font-weight:500;color:var(--blue);background:var(--blue-soft);border:none;border-radius:20px;padding:4px 14px;cursor:pointer">Germany</button>
+                    class="px-5 py-2 bg-slate-50 text-slate-600 text-[11px] font-bold rounded-full hover:bg-blue-50 hover:text-blue-600 border border-slate-100 transition-all">Germany</button>
                 </div>
               </div>
 
-              <div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-
-              <div id="search-info-footer"
-                style="margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-                <div style="display:flex;gap:2.5rem">
-                  <div><span style="font-size:12px;font-weight:600;color:var(--text-muted)">249 Countries</span></div>
-                  <div><span style="font-size:12px;font-weight:600;color:var(--text-muted)">8,400+ Cities</span></div>
-                </div>
-              </div>
+              <div id="search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-32"></div>
             </div>
           </div>
           <div id="tab-intel" class="tab-content active">
@@ -589,35 +573,38 @@
             <div class="content-scroll-area">
               <div id="weather-alerts" class="hidden" style="margin-bottom:1.5rem"></div>
 
-              <!-- Header -->
-              <div
-                style="display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:1.25rem;border-bottom:1px solid var(--border);margin-bottom:1.5rem">
-                <div class="flex-1 min-w-0">
-                  <p
-                    style="font-size:12px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem">
-                    Weather Analysis</p>
-                  <h2 id="atmo-location-label"
-                    style="font-family:var(--font-serif);font-size:2.25rem;font-weight:700;color:var(--text);line-height:1.2">
-                    Select Location</h2>
+              <!-- Premium Header & Search -->
+              <div class="flex flex-col gap-6 mb-12">
+                <div class="flex items-end justify-between border-b border-gray-100 pb-5">
+                  <div class="flex flex-col gap-1">
+                    <p class="text-[10px] font-bold text-blue-600 uppercase tracking-[0.3em]">Atmospheric Condition</p>
+                    <h2 class="font-serif text-4xl font-bold text-slate-900 leading-tight">Live Weather & Telemetry</h2>
+                  </div>
+                  <div class="flex flex-col gap-1.5 items-end">
+                    <div class="flex items-center gap-2">
+                       <span class="relative flex h-2.5 w-2.5">
+                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                         <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                       </span>
+                       <span class="text-xs font-bold text-slate-500 uppercase tracking-widest" id="atmo-station-id">PRIME STATION ALPHA</span>
+                    </div>
+                  </div>
                 </div>
-                <div style="text-align:right" class="shrink-0">
-                  <span id="atmo-station-id"
-                    style="font-size:12px;color:var(--text-muted);font-weight:500;display:block">Global Station</span>
-                  <span
-                    style="font-size:11px;color:var(--green);font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Live
-                    Data Available</span>
-                </div>
-              </div>
 
-              <!-- Search -->
-              <div
-                style="display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:0.6rem 1rem;gap:0.75rem;margin-bottom:1.5rem">
-                <i class="fas fa-search" style="color:var(--text-faint);font-size:13px"></i>
-                <input type="text" id="atmosphere-city-search" placeholder="Search for a city..."
-                  style="flex:1;border:none;outline:none;font-size:14px;color:var(--text);background:transparent;font-family:var(--font-sans)"
-                  onkeydown="if (event.key === 'Enter') searchCityForTab('atmosphere');" />
-                <button onclick="searchCityForTab('atmosphere')"
-                  style="color:var(--blue);background:none;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:var(--font-sans)">Search</button>
+                <div class="relative group">
+                    <div class="relative flex items-center bg-white border border-gray-100 rounded-2xl p-2 shadow-sm group-focus-within:border-blue-400 group-focus-within:shadow-xl group-focus-within:shadow-blue-500/5 transition-all duration-300">
+                      <div class="w-12 h-12 flex items-center justify-center text-slate-300">
+                        <i class="fas fa-search text-lg"></i>
+                      </div>
+                      <input type="text" id="atmosphere-city-search" placeholder="Search any global city..."
+                        class="flex-1 bg-transparent border-none outline-none text-lg font-medium text-slate-900 placeholder:text-slate-200 py-2 pr-6 font-sans"
+                        onkeydown="if (event.key === 'Enter') searchCityForTab('atmosphere');">
+                      <button onclick="searchCityForTab('atmosphere')"
+                        class="px-5 py-3 bg-blue-50 text-blue-600 rounded-xl text-[11px] font-bold uppercase tracking-widest border border-blue-100 hover:bg-blue-600 hover:text-white transition-colors">
+                        Analyze
+                      </button>
+                    </div>
+                </div>
               </div>
 
               <!-- Main temp display -->
@@ -673,24 +660,16 @@
                   </div>
                 </div>
                 <div class="summary-card" style="background:var(--surface);padding:1.25rem">
-                  <div
-                    style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
-                    Visibility</div>
-                  <div id="atmo-visibility" style="font-size:1.4rem;font-weight:700;color:var(--text)">-- <span
-                      style="font-size:12px;font-weight:400;color:var(--text-muted)">km</span></div>
+                  <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem">Visibility</div>
+                  <div id="atmo-visibility" style="font-size:1.6rem;font-weight:800;color:var(--text)">-- <span style="font-size:12px;font-weight:500;color:var(--text-muted)">km</span></div>
                 </div>
                 <div class="summary-card" style="background:var(--surface);padding:1.25rem">
-                  <div
-                    style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
-                    UV Index</div>
-                  <div id="atmo-uv-val" style="font-size:1.4rem;font-weight:700;color:var(--text)">--</div>
+                  <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem">Air Quality (AQI)</div>
+                  <div id="atmo-aqi" style="font-size:1.6rem;font-weight:800;color:var(--emerald-500)">--</div>
                 </div>
                 <div class="summary-card" style="background:var(--surface);padding:1.25rem">
-                  <div
-                    style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
-                    Rain (24h)</div>
-                  <div id="atmo-precip-total" style="font-size:1.4rem;font-weight:700;color:var(--text)">-- <span
-                      style="font-size:12px;font-weight:400;color:var(--text-muted)">mm</span></div>
+                  <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem">Precip. Prob.</div>
+                  <div id="atmo-precip-prob" style="font-size:1.6rem;font-weight:800;color:var(--text)">-- <span style="font-size:12px;font-weight:500;color:var(--text-muted)">%</span></div>
                 </div>
               </div>
 
@@ -827,28 +806,32 @@
           </div>
           <div id="tab-economic" class="tab-content">
             <div class="content-scroll-area">
-              <!-- Header -->
-              <div
-                style="display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:1.25rem;border-bottom:1px solid var(--border);margin-bottom:1.5rem">
-                <div>
-                  <p
-                    style="font-size:12px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem">
-                    Economics</p>
-                  <h2 style="font-family:var(--font-serif);font-size:2rem;font-weight:700;color:var(--text)">Economic
-                    Data</h2>
+              <!-- Premium Header & Search -->
+              <div class="flex flex-col gap-6 mb-12">
+                <div class="flex items-end justify-between border-b border-gray-100 pb-5">
+                  <div class="flex flex-col gap-1">
+                    <p class="text-[10px] font-bold text-blue-600 uppercase tracking-[0.3em]">Macro Economics</p>
+                    <h2 class="font-serif text-4xl font-bold text-slate-900 leading-tight">Global Financial Data</h2>
+                  </div>
+                  <div class="flex items-center gap-2">
+                     <span class="text-xs font-bold text-slate-500 uppercase tracking-widest" id="eco-country-code">Global</span>
+                  </div>
                 </div>
-                <span style="font-size:12px;color:var(--text-muted)" id="eco-country-code">Global</span>
-              </div>
 
-              <!-- Search -->
-              <div
-                style="display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:0.6rem 1rem;gap:0.75rem;margin-bottom:1.5rem">
-                <i class="fas fa-search" style="color:var(--text-faint);font-size:13px"></i>
-                <input type="text" id="economic-city-search" placeholder="Search for a country or economy..."
-                  style="flex:1;border:none;outline:none;font-size:14px;color:var(--text);background:transparent;font-family:var(--font-sans)"
-                  onkeydown="if (event.key === 'Enter') searchCityForTab('economic');" />
-                <button onclick="searchCityForTab('economic')"
-                  style="color:var(--blue);background:none;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:var(--font-sans)">Search</button>
+                <div class="relative group">
+                    <div class="relative flex items-center bg-white border border-gray-100 rounded-2xl p-2 shadow-sm group-focus-within:border-blue-400 group-focus-within:shadow-xl group-focus-within:shadow-blue-500/5 transition-all duration-300">
+                      <div class="w-12 h-12 flex items-center justify-center text-slate-300">
+                        <i class="fas fa-search text-lg"></i>
+                      </div>
+                      <input type="text" id="economic-city-search" placeholder="Search by exact economy or nation..."
+                        class="flex-1 bg-transparent border-none outline-none text-lg font-medium text-slate-900 placeholder:text-slate-200 py-2 pr-6 font-sans"
+                        onkeydown="if (event.key === 'Enter') searchCityForTab('economic');">
+                      <button onclick="searchCityForTab('economic')"
+                        class="px-5 py-3 bg-blue-50 text-blue-600 rounded-xl text-[11px] font-bold uppercase tracking-widest border border-blue-100 hover:bg-blue-600 hover:text-white transition-colors">
+                        Probe
+                      </button>
+                    </div>
+                </div>
               </div>
 
               <!-- GDP Display -->
@@ -905,25 +888,16 @@
                       style="font-size:12px;font-weight:400;color:var(--text-muted)">%</span></div>
                 </div>
                 <div class="summary-card" style="background:var(--surface);padding:1.25rem">
-                  <div
-                    style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
-                    Unemployment</div>
-                  <div id="eco-unemployment" style="font-size:1.4rem;font-weight:700;color:var(--text)">-- <span
-                      style="font-size:12px;font-weight:400;color:var(--text-muted)">%</span></div>
+                  <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem">Unemployment</div>
+                  <div id="eco-unemployment" style="font-size:1.4rem;font-weight:800;color:var(--text)">-- <span style="font-size:12px;font-weight:500;color:var(--text-muted)">%</span></div>
                 </div>
                 <div class="summary-card" style="background:var(--surface);padding:1.25rem">
-                  <div
-                    style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
-                    Interest Rate</div>
-                  <div id="eco-interest" style="font-size:1.4rem;font-weight:700;color:var(--text)">-- <span
-                      style="font-size:12px;font-weight:400;color:var(--text-muted)">%</span></div>
+                  <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem">Central Bank Rate</div>
+                  <div id="eco-interest" style="font-size:1.4rem;font-weight:800;color:var(--text)">-- <span style="font-size:12px;font-weight:500;color:var(--text-muted)">%</span></div>
                 </div>
                 <div class="summary-card" style="background:var(--surface);padding:1.25rem">
-                  <div
-                    style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">
-                    Debt to GDP</div>
-                  <div id="eco-debt" style="font-size:1.4rem;font-weight:700;color:var(--text)">-- <span
-                      style="font-size:12px;font-weight:400;color:var(--text-muted)">%</span></div>
+                  <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem">Debt to GDP %</div>
+                  <div id="eco-debt" style="font-size:1.4rem;font-weight:800;color:var(--red-600)">-- <span style="font-size:12px;font-weight:500;color:var(--text-muted)">%</span></div>
                 </div>
                 <div class="summary-card" style="background:var(--surface);padding:1.25rem">
                   <div

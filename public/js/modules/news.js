@@ -5,7 +5,6 @@ let newsSearchQuery = "";
 let newsSearchTimer = null;
 let isLiveSearching = false;
 
-// Security: escape HTML special chars to prevent XSS from external RSS content
 function escapeHtml(str) {
   if (!str) return "";
   return String(str)
@@ -44,13 +43,12 @@ function getFavicon(sourceUrl) {
     return null;
   }
 }
-// No-op: replaced by static HTML skeletons in index.html for better symmetry
-function showNewsSkeletons(container) {}
+function showNewsSkeletons(container) { }
 async function fetchNews(overrideQ) {
   const loading = document.getElementById("news-loading");
   const container = document.getElementById("articles-container");
   if (loading) loading.classList.remove("hidden");
-  if (container) container.innerHTML = ""; // Clear existing during fresh fetch
+  if (container) container.innerHTML = "";
   displayedNewsCount = 20;
   isLiveSearching = false;
   const previousNews = allNews.length > 0 ? [...allNews] : null;
@@ -169,45 +167,45 @@ function displayNewsArticles(articles) {
   }
   articles.forEach((art, i) => {
     const sentiment = getNewsSentiment(art.title, art.description);
-    const timeAgo = relativeTime(art.pubDate);
-    const source = (art.source_id || "SIGNAL").toUpperCase();
+    const timeAgo = (art.pubDate ? relativeTime(art.pubDate) : "RECENT");
+    const source = (art.source_id || "GLOBAL").toUpperCase();
     
-    // Grayscale images that colorize on hover for high-end feel
+    // Premium image container with refined hover
     const imgHtml = art.image_url
-      ? `<div class="w-full mt-2 mb-4 rounded-lg border border-white/[0.03] overflow-hidden bg-slate-900/50 group-hover:border-blue-500/20 transition-all" 
-              style="height: 200px;">
+      ? `<div class="w-full mt-4 rounded-lg overflow-hidden bg-gray-100 group-hover:shadow-md transition-all duration-500" 
+              style="height: 220px;">
               <img src="${art.image_url}" 
-                   class="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" 
+                   class="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" 
                    onerror="this.parentElement.style.display='none'">
          </div>`
       : "";
 
     const card = document.createElement("div");
-    card.className = `p-8 border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-lg transition-all cursor-pointer flex flex-col gap-5 news-card-animate group rounded-lg`;
+    card.className = `p-8 border border-gray-100 bg-white hover:border-blue-200 hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-500 cursor-pointer flex flex-col gap-5 news-card-animate group rounded-xl`;
     card.style.animationDelay = `${i * 40}ms`;
     card.onclick = () => window.open(art.link, '_blank');
     
     card.innerHTML = `
-      <div class="flex items-center justify-between">
+      <div class="flex items-center justify-between border-b border-gray-50 pb-4">
         <div class="flex items-center gap-3">
-          <span class="text-[10px] font-black text-blue-500 font-mono tracking-tighter">[ ${source} ]</span>
-          <span class="text-[9px] font-bold text-slate-600 uppercase tracking-widest font-mono">${timeAgo}</span>
+          <div class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[9px] font-bold rounded uppercase tracking-wider font-sans">${source}</div>
+          <span class="text-[10px] font-medium text-gray-500 uppercase tracking-widest font-sans">${timeAgo}</span>
         </div>
         <div class="flex items-center gap-2">
-            <span class="text-[8px] font-black tracking-[0.2em] font-mono ${sentiment.cls} opacity-80 group-hover:opacity-100 transition-opacity">${sentiment.label}</span>
-            <div class="w-1 h-1 rounded-full ${sentiment.cls.replace('text-', 'bg-')} animate-pulse"></div>
+            <span class="text-[9px] font-bold tracking-widest font-sans ${sentiment.cls} uppercase">${sentiment.label}</span>
+            <div class="w-1.5 h-1.5 rounded-full ${sentiment.cls.replace('text-', 'bg-')} shadow-[0_0_8px_rgba(37,99,235,0.4)]"></div>
         </div>
       </div>
       
-      ${imgHtml}
-
-      <div class="flex flex-col gap-3">
-        <h3 class="text-xl font-bold text-gray-900 leading-tight tracking-tight group-hover:text-blue-600 transition-colors font-serif">${escapeHtml(art.title)}</h3>
-        ${art.description ? `<p class="text-[14px] text-gray-700 leading-relaxed font-sans line-clamp-3">${escapeHtml(art.description)}</p>` : ''}
+      <div class="flex flex-col gap-4">
+        <h3 class="text-xl font-bold text-gray-900 leading-tight tracking-tight group-hover:text-blue-700 transition-colors font-serif">${escapeHtml(art.title)}</h3>
+        ${art.description ? `<p class="text-[14px] text-gray-600 leading-relaxed font-sans line-clamp-3">${escapeHtml(art.description)}</p>` : ''}
       </div>
 
-      <div class="mt-auto pt-5 border-t border-gray-100 flex items-center justify-between">
-        <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Read Full Article</span>
+      ${imgHtml}
+
+      <div class="mt-auto pt-5 flex items-center justify-between group-hover:translate-x-1 transition-transform duration-300">
+        <span class="text-[11px] text-blue-600 font-bold uppercase tracking-widest font-sans">Read Full Analysis</span>
         <i class="fas fa-arrow-right text-[11px] text-blue-600"></i>
       </div>
     `;
@@ -287,14 +285,14 @@ setInterval(fetchSeismicStatus, 300000);
 
 let _newsRefreshTimer = null;
 function startNewsAutoRefresh() {
-    if (_newsRefreshTimer) clearInterval(_newsRefreshTimer);
-    _newsRefreshTimer = setInterval(() => {
-        if (document.visibilityState === 'visible' && !isLiveSearching) {
-            fetchNews();
-        }
-    }, 5 * 60 * 1000);
+  if (_newsRefreshTimer) clearInterval(_newsRefreshTimer);
+  _newsRefreshTimer = setInterval(() => {
+    if (document.visibilityState === 'visible' && !isLiveSearching) {
+      fetchNews();
+    }
+  }, 5 * 60 * 1000);
 }
 startNewsAutoRefresh();
 document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') startNewsAutoRefresh();
+  if (document.visibilityState === 'visible') startNewsAutoRefresh();
 });

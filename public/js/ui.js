@@ -61,6 +61,9 @@ window.closeAboutOverlay = function () {
 let mapboxToken = null;
 fetch('/api/config').then(r => r.json()).then(d => mapboxToken = d.mapboxToken);
 
+// Initialize with major economies to ensure a populated initial view
+const SUGGESTED_NODES = ["United States", "India", "China", "Germany", "United Kingdom", "France", "Japan", "Brazil", "Canada", "Singapore", "Australia", "United Arab Emirates"];
+
 function renderTrending() {
   const resContainer = document.getElementById("search-results");
   const searchInput = document.getElementById("country-search");
@@ -68,14 +71,21 @@ function renderTrending() {
 
   const query = searchInput.value.trim().toLowerCase();
   let searchData = [];
-  if (query && window.globalSearchData) {
-    searchData = window.globalSearchData.filter(c =>
+  
+  const sourceData = (window.globalSearchData && window.globalSearchData.length > 0) 
+    ? window.globalSearchData 
+    : [{ name: { common: "United States" }, region: "Americas", population: 331000000, flags: { svg: "https://flagcdn.com/us.svg" }, capital: ["Washington D.C."] },
+       { name: { common: "India" }, region: "Asia", population: 1400000000, flags: { svg: "https://flagcdn.com/in.svg" }, capital: ["New Delhi"] },
+       { name: { common: "China" }, region: "Asia", population: 1400000000, flags: { svg: "https://flagcdn.com/cn.svg" }, capital: ["Beijing"] },
+       { name: { common: "United Kingdom" }, region: "Europe", population: 67000000, flags: { svg: "https://flagcdn.com/gb.svg" }, capital: ["London"] }];
+
+  if (query) {
+    searchData = sourceData.filter(c =>
       c.name.common.toLowerCase().includes(query) ||
       (c.name.official && c.name.official.toLowerCase().includes(query))
     ).slice(0, 15);
-  } else if (!query && window.globalSearchData) {
-    const suggestions = ["United States", "India", "China", "Germany", "United Kingdom", "France", "Japan", "Brazil", "Canada"];
-    searchData = window.globalSearchData.filter(c => suggestions.includes(c.name.common)).slice(0, 9);
+  } else {
+    searchData = sourceData.filter(c => SUGGESTED_NODES.includes(c.name.common)).slice(0, 12);
   }
 
   let html = "";
@@ -85,38 +95,46 @@ function renderTrending() {
       const region = c.region || "Global";
       const pop = (c.population / 1000000).toFixed(1) + "M";
       return `
-        <div class="group relative bg-white border border-gray-100 rounded-xl p-6 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer flex flex-col gap-4" 
+        <div class="group relative bg-white border border-gray-100 rounded-xl p-8 hover:shadow-2xl hover:border-blue-400 hover:shadow-blue-500/10 transition-all duration-500 cursor-pointer flex flex-col gap-5" 
              onclick="window.selectFromSearch('${name.replace(/'/g, "\\'")}')">
-          <div class="flex justify-between items-center">
-            <div class="w-10 h-6 rounded-sm overflow-hidden border border-gray-100 shadow-sm">
+          <div class="flex justify-between items-start">
+            <div class="w-12 h-8 rounded-md overflow-hidden border border-gray-200 shadow-sm transition-transform group-hover:scale-110">
               <img src="${c.flags.svg}" class="w-full h-full object-cover">
             </div>
-            <span class="text-[10px] text-green-600 font-bold uppercase tracking-wider">Live</span>
-          </div>
-          <div>
-            <h3 class="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">${name}</h3>
-            <p class="text-xs text-gray-600 font-medium">${region} / ${c.subregion || 'Universal'}</p>
-          </div>
-          <div class="flex items-center gap-6 pt-4 border-t border-gray-50">
-            <div class="flex flex-col">
-              <span class="text-[9px] text-gray-600 font-bold uppercase tracking-wider">Population</span>
-              <span class="text-sm text-gray-700 font-semibold">${pop}</span>
-            </div>
-            <div class="flex flex-col">
-              <span class="text-[9px] text-gray-600 font-bold uppercase tracking-wider">Capital</span>
-              <span class="text-sm text-gray-700 font-semibold line-clamp-1">${c.capital ? c.capital[0] : 'N/A'}</span>
+            <div class="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 rounded">
+              <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+              <span class="text-[9px] text-emerald-600 font-bold uppercase tracking-widest font-sans">Active</span>
             </div>
           </div>
-          <div class="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-all">
-             <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
+          <div class="mt-2">
+            <h3 class="text-xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors font-serif">${name}</h3>
+            <p class="text-[11px] text-gray-500 font-bold uppercase tracking-[0.2em] mt-1">${region} / ${c.subregion || 'Universal'}</p>
+          </div>
+          <div class="flex items-center gap-12 pt-6 border-t border-gray-100">
+            <div class="flex flex-col">
+              <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Population</span>
+              <span class="text-sm text-gray-900 font-black font-sans">${pop}</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Capital City</span>
+              <span class="text-sm text-gray-900 font-black font-sans line-clamp-1">${c.capital ? c.capital[0] : 'N/A'}</span>
+            </div>
+          </div>
+          <div class="absolute bottom-8 right-8 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-500">
+             <i class="fas fa-arrow-right text-blue-600 text-sm"></i>
           </div>
         </div>`;
     }).join("");
   } else if (query) {
-    html = `<div class="col-span-full py-20 text-center">
-              <div class="inline-flex flex-col items-center gap-4">
-                <i class="fas fa-search text-4xl text-gray-200"></i>
-                <p class="text-gray-600 text-sm font-medium">Searching our global database...</p>
+    html = `<div class="col-span-full py-24 text-center">
+              <div class="inline-flex flex-col items-center gap-6">
+                <div class="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center">
+                  <i class="fas fa-search text-2xl text-blue-200"></i>
+                </div>
+                <div class="flex flex-col gap-2">
+                  <h3 class="text-lg font-bold text-gray-900">No Registry Match</h3>
+                  <p class="text-gray-500 text-sm max-w-xs">Our intelligence network found no entries matching "${query}". Check the spelling or enter a country name.</p>
+                </div>
               </div>
             </div>`;
   }

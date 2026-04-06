@@ -97,6 +97,12 @@
   --transition: 180ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-fast: 100ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 360ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Legacy Aliases — backward compatibility */
+  --blue:          var(--brand);
+  --red:           var(--down);
+  --red-600:       #DC2626;
+  --emerald-500:   var(--up);
 }
 
 /* ────────────────────────────
@@ -525,7 +531,7 @@ header {
 ──────────────────────────── */
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1px;
   background: var(--border);
   border: 1px solid var(--border);
@@ -582,7 +588,7 @@ header {
 
 #articles-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
 }
 
@@ -689,7 +695,7 @@ header {
 ──────────────────────────── */
 .stat-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1px;
   background: var(--border);
   border: 1px solid var(--border);

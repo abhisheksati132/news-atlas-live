@@ -16,17 +16,18 @@ let countryUTCOffset = null;
 let projectionType = "3d";
 window.projectionType = "3d";
 let globalSearchData = [
-  { name: { common: "United States" }, region: "Americas", population: 331000000, flags: { svg: "https://flagcdn.com/us.svg" }, capital: ["Washington D.C."], cca2: "US" },
-  { name: { common: "India" }, region: "Asia", population: 1400000000, flags: { svg: "https://flagcdn.com/in.svg" }, capital: ["New Delhi"], cca2: "IN" },
-  { name: { common: "China" }, region: "Asia", population: 1400000000, flags: { svg: "https://flagcdn.com/cn.svg" }, capital: ["Beijing"], cca2: "CN" },
-  { name: { common: "United Kingdom" }, region: "Europe", population: 67000000, flags: { svg: "https://flagcdn.com/gb.svg" }, capital: ["London"], cca2: "GB" },
-  { name: { common: "France" }, region: "Europe", population: 67000000, flags: { svg: "https://flagcdn.com/fr.svg" }, capital: ["Paris"], cca2: "FR" },
-  { name: { common: "Japan" }, region: "Asia", population: 125000000, flags: { svg: "https://flagcdn.com/jp.svg" }, capital: ["Tokyo"], cca2: "JP" },
-  { name: { common: "Germany" }, region: "Europe", population: 83000000, flags: { svg: "https://flagcdn.com/de.svg" }, capital: ["Berlin"], cca2: "DE" },
-  { name: { common: "Brazil" }, region: "Americas", population: 214000000, flags: { svg: "https://flagcdn.com/br.svg" }, capital: ["Brasilia"], cca2: "BR" },
-  { name: { common: "Canada" }, region: "Americas", population: 38000000, flags: { svg: "https://flagcdn.com/ca.svg" }, capital: ["Ottawa"], cca2: "CA" },
-  { name: { common: "Singapore" }, region: "Asia", population: 5700000, flags: { svg: "https://flagcdn.com/sg.svg" }, capital: ["Singapore"], cca2: "SG" },
-  { name: { common: "Australia" }, region: "Oceania", population: 26000000, flags: { svg: "https://flagcdn.com/au.svg" }, capital: ["Canberra"], cca2: "AU" }
+  { name: { common: "United States" }, region: "Americas", subregion: "Northern America", population: 331000000, flags: { svg: "https://flagcdn.com/us.svg" }, capital: ["Washington D.C."], cca2: "US" },
+  { name: { common: "India" }, region: "Asia", subregion: "Southern Asia", population: 1400000000, flags: { svg: "https://flagcdn.com/in.svg" }, capital: ["New Delhi"], cca2: "IN" },
+  { name: { common: "China" }, region: "Asia", subregion: "Eastern Asia", population: 1400000000, flags: { svg: "https://flagcdn.com/cn.svg" }, capital: ["Beijing"], cca2: "CN" },
+  { name: { common: "United Kingdom" }, region: "Europe", subregion: "Northern Europe", population: 67000000, flags: { svg: "https://flagcdn.com/gb.svg" }, capital: ["London"], cca2: "GB" },
+  { name: { common: "France" }, region: "Europe", subregion: "Western Europe", population: 67000000, flags: { svg: "https://flagcdn.com/fr.svg" }, capital: ["Paris"], cca2: "FR" },
+  { name: { common: "Japan" }, region: "Asia", subregion: "Eastern Asia", population: 125000000, flags: { svg: "https://flagcdn.com/jp.svg" }, capital: ["Tokyo"], cca2: "JP" },
+  { name: { common: "Germany" }, region: "Europe", subregion: "Western Europe", population: 83000000, flags: { svg: "https://flagcdn.com/de.svg" }, capital: ["Berlin"], cca2: "DE" },
+  { name: { common: "Brazil" }, region: "Americas", subregion: "South America", population: 214000000, flags: { svg: "https://flagcdn.com/br.svg" }, capital: ["Brasilia"], cca2: "BR" },
+  { name: { common: "Canada" }, region: "Americas", subregion: "Northern America", population: 38000000, flags: { svg: "https://flagcdn.com/ca.svg" }, capital: ["Ottawa"], cca2: "CA" },
+  { name: { common: "Singapore" }, region: "Asia", subregion: "South-Eastern Asia", population: 5700000, flags: { svg: "https://flagcdn.com/sg.svg" }, capital: ["Singapore"], cca2: "SG" },
+  { name: { common: "Australia" }, region: "Oceania", subregion: "Australia and New Zealand", population: 26000000, flags: { svg: "https://flagcdn.com/au.svg" }, capital: ["Canberra"], cca2: "AU" },
+  { name: { common: "South Korea" }, region: "Asia", subregion: "Eastern Asia", population: 51700000, flags: { svg: "https://flagcdn.com/kr.svg" }, capital: ["Seoul"], cca2: "KR" }
 ];
 window.globalSearchData = globalSearchData;
 let currentCategory = "top";
@@ -307,6 +308,7 @@ window.handleCountryClick = async function (event, d) {
 
 window.resetToGlobalCenter = () => {
   window.selectedCountry = null;
+  window.iso2Code = null;
   setText("selected-country-name", "Worldwide");
   
   // Reset Context HUD
@@ -321,10 +323,16 @@ window.resetToGlobalCenter = () => {
   if (ctxLocation) ctxLocation.innerText = "SELECT A LOCATION";
 
   window.backToOrbital();
-  if (window.mapEngine && window.mapEngine.map) {
-    window.mapEngine.clearSelection();
-    window.mapEngine.map.flyTo({ center: [15, 0], zoom: 1.6, duration: 2000 });
-  }
+
+  // Resize map after sidebar collapses, then fly to global center
+  setTimeout(() => {
+    if (window.mapEngine && window.mapEngine.map) {
+      window.mapEngine.map.resize();
+      window.mapEngine.clearSelection();
+      window.mapEngine.map.flyTo({ center: [15, 0], zoom: 1.6, duration: 2000, pitch: 0, bearing: 0 });
+    }
+  }, 50);
+
   window.fetchNews();
 };
 
@@ -405,9 +413,18 @@ window.updateAISummary = async (country) => {
           "log": "Logistics, transport, and supply chains.",
           "energy": "Energy resources, production, and security.",
           "agri": "Agriculture, farming, and food security.",
-          "demo": "Demographics, population trends, and labor."
+          "demo": "Demographics, population trends, and labor.",
+          "media": "Media freedom and information environment.",
+          "tourism": "Travel industry and visitation trends.",
+          "justice": "Rule of law and legal indicators.",
+          "sports": "Cultural athletic influence.",
+          "space": "Space exploration and aerospace status.",
+          "rights": "Civil liberties and human rights status.",
+          "innovation": "Research, IP, and emerging tech.",
+          "sentiment": "Overall public optimism and sentiment.",
+          "digital": "E-commerce, digital transformation, and internet economy."
         }
-        Use a professional, objective news reporting tone. No jargon. No markdown. No preambles.`;
+        Use a professional, objective news reporting tone. No markdown. No preambles.`;
 
         const res = await fetch("/api/ai", {
             method: "POST",
@@ -440,7 +457,16 @@ window.updateAISummary = async (country) => {
             "intel-log": summaryData.log || summaryData.logistics,
             "intel-energy": summaryData.energy || summaryData.resources,
             "intel-agri": summaryData.agri || summaryData.agriculture,
-            "intel-demo": summaryData.demo || summaryData.demographics
+            "intel-demo": summaryData.demo || summaryData.demographics,
+            "intel-media": summaryData.media,
+            "intel-tourism": summaryData.tourism,
+            "intel-justice": summaryData.justice,
+            "intel-sports": summaryData.sports,
+            "intel-space": summaryData.space,
+            "intel-rights": summaryData.rights,
+            "intel-innovation": summaryData.innovation,
+            "intel-sentiment": summaryData.sentiment,
+            "intel-digital": summaryData.digital || summaryData.digital_economy
         };
 
         Object.keys(map).forEach(id => {

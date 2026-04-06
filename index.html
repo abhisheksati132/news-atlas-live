@@ -773,22 +773,22 @@
                   style="display:grid;grid-template-columns:repeat(4, 1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:2.5rem">
                   <div class="summary-card" style="background:var(--surface);padding:1.5rem">
                     <div
-                      style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem">
-                      Pressure</div>
+                      style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.4rem">
+                      <i class="fas fa-compress-arrows-alt" style="font-size:12px"></i> Pressure</div>
                     <div id="atmo-pressure" style="font-size:1.5rem;font-weight:800;color:var(--text)">-- <span
                         style="font-size:12px;font-weight:500;color:var(--text-muted)">hPa</span></div>
                   </div>
                   <div class="summary-card" style="background:var(--surface);padding:1.5rem">
                     <div
-                      style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem">
-                      Humidity</div>
+                      style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.4rem">
+                      <i class="fas fa-tint" style="color:var(--blue);font-size:12px"></i> Humidity</div>
                     <div id="atmo-humidity" style="font-size:1.5rem;font-weight:800;color:var(--text)">-- <span
                         style="font-size:12px;font-weight:500;color:var(--text-muted)">%</span></div>
                   </div>
                   <div class="summary-card" style="background:var(--surface);padding:1.5rem">
                     <div
-                      style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem">
-                      Wind Speed</div>
+                      style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.4rem">
+                      <i class="fas fa-wind" style="font-size:12px"></i> Wind Speed</div>
                     <div style="display:flex;align-items:center;gap:0.5rem">
                       <i id="atmo-wind-arrow" class="fas fa-arrow-up" style="color:var(--brand);font-size:11px"></i>
                       <div id="atmo-wind-speed" style="font-size:1.5rem;font-weight:800;color:var(--text)">-- <span
@@ -797,40 +797,40 @@
                   </div>
                   <div class="summary-card" style="background:var(--surface);padding:1.5rem">
                     <div
-                      style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem">
-                      Visibility</div>
+                      style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.4rem">
+                      <i class="fas fa-eye" style="font-size:12px"></i> Visibility</div>
                     <div id="atmo-visibility" style="font-size:1.5rem;font-weight:800;color:var(--text)">-- <span
                         style="font-size:12px;font-weight:500;color:var(--text-muted)">km</span></div>
                   </div>
                   <div class="summary-card" style="background:var(--surface);padding:1.5rem">
                     <div
-                      style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem">
-                      Air Quality (AQI)</div>
+                      style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.4rem">
+                      <i class="fas fa-leaf" style="color:var(--up);font-size:12px"></i> Air Quality (AQI)</div>
                     <div id="atmo-aqi" style="font-size:1.5rem;font-weight:800;color:var(--up)">--</div>
                   </div>
                   <div class="summary-card" style="background:var(--surface);padding:1.5rem">
                     <div
-                      style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem">
-                      UV Index</div>
+                      style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.4rem">
+                      <i class="fas fa-sun" style="color:var(--warn);font-size:12px"></i> UV Index</div>
                     <div id="atmo-uv" style="font-size:1.5rem;font-weight:800;color:var(--text)">--</div>
                   </div>
                   <div class="summary-card" style="background:var(--surface);padding:1.5rem">
                     <div
-                      style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem">
-                      Cloud Cover</div>
+                      style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.4rem">
+                      <i class="fas fa-cloud" style="font-size:12px"></i> Cloud Cover</div>
                     <div id="atmo-cloud-cover" style="font-size:1.5rem;font-weight:800;color:var(--text)">-- <span
                         style="font-size:12px;font-weight:500;color:var(--text-muted)">%</span></div>
                   </div>
                   <div class="summary-card" style="background:var(--surface);padding:1.5rem">
                     <div
-                      style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem">
-                      Dew Point</div>
+                      style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.4rem">
+                      <i class="fas fa-temperature-low" style="color:var(--blue);font-size:12px"></i> Dew Point</div>
                     <div id="atmo-dew" style="font-size:1.5rem;font-weight:800;color:var(--text)">--&deg;</div>
                   </div>
                   <div class="summary-card" style="background:var(--surface);padding:1.5rem">
                     <div
-                      style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem">
-                      Moon Phase</div>
+                      style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.4rem">
+                      <i class="fas fa-moon" style="font-size:12px"></i> Moon Phase</div>
                     <div id="atmo-moon-text" style="font-size:1.5rem;font-weight:800;color:var(--text)">--</div>
                   </div>
                   <div class="summary-card" style="background:var(--surface);padding:1.5rem">

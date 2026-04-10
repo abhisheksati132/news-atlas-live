@@ -198,7 +198,7 @@ function applyChoropleth(mode, values) {
     }
     if (mode === "risk") {
         legend.innerHTML = `
-        <span class="text-[9px] font-mono font-black text-slate-700 uppercase tracking-widest">Geopolitical Risk</span>
+        <span class="text-[9px] font-mono font-black text-slate-400 uppercase tracking-widest">Geopolitical Risk</span>
         <span class="text-[8px] font-mono text-slate-600">Stable</span>
         <div class="w-16 h-2 rounded" style="background:linear-gradient(to right,#10b981,#f59e0b,#ef4444)"></div>
         <span class="text-[8px] font-mono text-slate-600">Critical</span>`;
@@ -207,7 +207,7 @@ function applyChoropleth(mode, values) {
         const low = mode === "conflict" ? "Low" : "$Low";
         const high = mode === "conflict" ? "High" : "$High";
         legend.innerHTML = `
-        <span class="text-[9px] font-mono font-black text-slate-700 uppercase tracking-widest">${Label}</span>
+        <span class="text-[9px] font-mono font-black text-slate-400 uppercase tracking-widest">${Label}</span>
         <span class="text-[8px] font-mono text-slate-600">${low}</span>
         <div class="w-16 h-2 rounded" style="background:linear-gradient(to right,rgba(59,130,246,0.3),rgba(16,185,129,0.8))"></div>
         <span class="text-[8px] font-mono text-slate-600">${high}</span>`;
@@ -256,7 +256,7 @@ window.updateHeadlineTicker = function (articles) {
     const top = articles.slice(0, 8);
     const items = [...top, ...top].map((a) => {
         const sent = a.title?.toLowerCase().match(/\b(war|attack|crisis|conflict|crash)\b/) ? "text-red-400" :
-            a.title?.toLowerCase().match(/\b(record|deal|growth|summit)\b/) ? "text-emerald-400" : "text-slate-700";
+            a.title?.toLowerCase().match(/\b(record|deal|growth|summit)\b/) ? "text-emerald-400" : "text-slate-400";
         return `<span class="headline-ticker-item ${sent}">
       <i class="fas fa-circle text-[4px] mr-2 text-slate-700"></i>
       ${a.title || ""}
@@ -270,14 +270,14 @@ window.handleCountryClickByName = function (name) {
     window.pushStateCountry(name, null);
     window.updateWatchlistBtn(name);
     if (window.fetchAllData) window.fetchAllData(name);
-    if (window.updateAISummary) window.updateAISummary(name);
+    if (window.generateAIBriefing) window.generateAIBriefing(name);
 };
 document.addEventListener("DOMContentLoaded", () => {
     const nameEl = document.getElementById("selected-country-name");
     if (nameEl) {
         const obs = new MutationObserver(() => {
             const country = nameEl.textContent?.trim();
-            if (country && country !== "Worldwide") {
+            if (country && country !== "GLOBAL SURVEILLANCE") {
                 window.pushStateCountry(country, null);
                 window.updateWatchlistBtn(country);
             }

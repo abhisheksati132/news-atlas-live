@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NewsAtlas | Global Intelligence Platform</title>
   <meta name="description" content="NewsAtlas — Real-time global news intelligence, economic data, and geopolitical analysis in one premium dashboard." />
   <meta name="theme-color" content="#020617" />
@@ -200,7 +200,7 @@
       50% { opacity: 0.5; transform: scale(0.8); }
     }
     .hero h1 {
-      font-size: clamp(2rem, 6vw, 5rem);
+      font-size: clamp(2.8rem, 6vw, 5rem);
       font-weight: 900;
       line-height: 1.05;
       letter-spacing: -2px;
@@ -269,13 +269,6 @@
       margin-top: 4rem;
       flex-wrap: wrap;
       justify-content: center;
-    }
-    @media (max-width: 600px) {
-      .stats-strip {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem 1.5rem;
-      }
     }
     .stat-item { text-align: center; }
     .stat-value {
@@ -507,25 +500,11 @@
     }
     .fade-up.visible { opacity: 1; transform: translateY(0); }
 
-    @media (max-width: 768px) {
-      nav { padding: 0 1.25rem; height: 60px; }
-      .nav-cta a { padding: 6px 14px !important; font-size: 11px !important; }
-      .hero { padding: 100px 1.5rem 3rem; }
-      .hero h1 { font-size: 2.8rem; letter-spacing: -1.5px; }
-      .hero-sub { font-size: 15px; margin-bottom: 2rem; }
-      .stats-strip { gap: 1.25rem; margin-top: 3rem; }
-      .stat-value { font-size: 22px; }
-      .stat-label { font-size: 10px; }
-      .section { padding: 4rem 1.5rem; }
-      .features-grid { grid-template-columns: 1fr; gap: 1rem; }
-      .login-card { padding: 2.5rem 1.5rem; border-radius: 20px; }
-      .btn-hero-primary, .btn-hero-secondary { width: 100%; justify-content: center; }
-    }
-
-    @media (max-width: 480px) {
-      .hero h1 { font-size: 2.2rem; }
-      .hero-badge { font-size: 9px; letter-spacing: 0.1em; padding: 4px 10px; }
-      .nav-logo-text { font-size: 14px; }
+    @media (max-width: 600px) {
+      nav { padding: 0 1rem; }
+      .hero h1 { font-size: 2.2rem; letter-spacing: -1px; }
+      .stats-strip { gap: 1.5rem; }
+      .login-card { padding: 2rem 1.5rem; }
     }
   </style>
 </head>
@@ -610,13 +589,36 @@
 <!-- LOGIN -->
 <section class="login-section" id="login">
   <div class="login-card fade-up">
-    <h2>Access the Intelligence Platform</h2>
-    <p>Launch the professional data terminal to access real-time global news, economic telemetry, and geopolitical analysis.</p>
+    <h2>Access the Terminal</h2>
+    <p>Sign in with Google to personalize your intelligence dashboard and save your preferences.</p>
 
-    <a href="/app" class="btn-enter-terminal">
-      <i class="fas fa-terminal"></i> Launch Terminal
-    </a>
-    <div class="auth-status">SYTEM STATUS: OPTIMIZED</div>
+    <!-- Logged-out state -->
+    <div id="auth-loggedout">
+      <button class="btn-google" id="google-sign-in-btn" onclick="handleGoogleSignIn()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+        Continue with Google
+      </button>
+      <div class="divider">or</div>
+      <a href="/app" class="btn-enter-terminal">
+        <i class="fas fa-terminal"></i> Enter as Guest
+      </a>
+      <div class="auth-status" id="auth-status-msg"></div>
+    </div>
+
+    <!-- Logged-in state (hidden by default) -->
+    <div id="auth-loggedin" style="display:none;">
+      <div class="user-greeting">
+        <div id="user-avatar-wrap"><div class="user-avatar-fallback" id="user-avatar-fallback"><i class="fas fa-user"></i></div></div>
+        <div class="user-info">
+          <div class="user-name-text" id="user-display-name">Commander</div>
+          <div class="user-email-text" id="user-display-email"></div>
+        </div>
+      </div>
+      <a href="/app" class="btn-enter-terminal">
+        <i class="fas fa-rocket"></i> Launch Your Terminal
+      </a>
+      <div><button class="btn-signout" id="sign-out-btn" onclick="handleSignOut()">Sign out</button></div>
+    </div>
   </div>
 </section>
 
@@ -631,13 +633,84 @@
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
   }, { threshold: 0.12 });
   document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
-</script>
 
-<!-- ARCHITECTURAL SIGNATURE -->
-<footer class="py-12 text-center">
-  <p class="text-[10px] font-medium text-slate-600 uppercase tracking-[0.4em] font-mono opacity-60">
-    Released v4.0.0 &nbsp;·&nbsp; Build By Abhishek Sati
-  </p>
-</footer>
+  // ── Firebase Auth ──
+  import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
+  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
+    from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
+
+  let auth = null;
+
+  async function initFirebase() {
+    try {
+      const res = await fetch('/api/config');
+      if (!res.ok) return;
+      const data = await res.json();
+      const firebaseConfig = data.firebase || data;
+      if (!firebaseConfig?.projectId && !firebaseConfig?.apiKey) return;
+
+      const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+      auth = getAuth(app);
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          showLoggedIn(user);
+        } else {
+          showLoggedOut();
+        }
+      });
+    } catch (e) {
+      console.warn('Firebase init failed:', e);
+    }
+  }
+
+  function showLoggedIn(user) {
+    document.getElementById('auth-loggedout').style.display = 'none';
+    document.getElementById('auth-loggedin').style.display = 'block';
+    document.getElementById('user-display-name').textContent = user.displayName || 'Commander';
+    document.getElementById('user-display-email').textContent = user.email || '';
+    const avatarWrap = document.getElementById('user-avatar-wrap');
+    if (user.photoURL) {
+      avatarWrap.innerHTML = `<img class="user-avatar" src="${user.photoURL}" alt="Avatar" referrerpolicy="no-referrer">`;
+    } else {
+      const initial = (user.displayName || 'C')[0].toUpperCase();
+      avatarWrap.innerHTML = `<div class="user-avatar-fallback">${initial}</div>`;
+    }
+  }
+
+  function showLoggedOut() {
+    document.getElementById('auth-loggedout').style.display = 'block';
+    document.getElementById('auth-loggedin').style.display = 'none';
+  }
+
+  window.handleGoogleSignIn = async function() {
+    if (!auth) {
+      document.getElementById('auth-status-msg').textContent = 'Auth not ready. Continuing as guest...';
+      setTimeout(() => { window.location.href = '/app'; }, 1200);
+      return;
+    }
+    const btn = document.getElementById('google-sign-in-btn');
+    btn.disabled = true;
+    const statusEl = document.getElementById('auth-status-msg');
+    statusEl.textContent = 'Opening sign-in...';
+    statusEl.className = 'auth-status';
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      statusEl.textContent = 'Authenticated. Launching terminal...';
+      setTimeout(() => { window.location.href = '/app'; }, 800);
+    } catch (e) {
+      statusEl.textContent = e.code === 'auth/popup-closed-by-user' ? 'Sign-in cancelled.' : 'Sign-in failed. Try again.';
+      statusEl.className = 'auth-status error';
+      btn.disabled = false;
+    }
+  };
+
+  window.handleSignOut = async function() {
+    if (auth) { try { await signOut(auth); } catch(e) {} }
+  };
+
+  initFirebase();
+</script>
 </body>
 </html>

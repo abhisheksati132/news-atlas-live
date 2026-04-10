@@ -83,8 +83,6 @@ export default async function handler(req, res) {
             // Extra cross rates for richness
             if (!rates.HKD) rates.HKD = (rates.USD || 1.0) * (7.82 + rand(-0.01, 0.01));
             if (!rates.BRL) rates.BRL = (rates.USD || 1.0) * (5.05 + rand(-0.03, 0.03));
-            if (!rates.NZD) rates.NZD = (rates.USD || 1.0) * (1.65 + rand(-0.02, 0.02));
-            if (!rates.ZAR) rates.ZAR = (rates.USD || 1.0) * (18.60 + rand(-0.1, 0.1));
 
             return simulate({ 
                 base: cur, 
@@ -100,10 +98,7 @@ export default async function handler(req, res) {
                     "Natural Gas": { price: 1.8 + rand(-0.1, 0.1), change: rand(-5, 5), unit: "USD/MMBtu", icon: "🔥" },
                     "Copper": { price: 3.85 + rand(-0.05, 0.05), change: rand(-1, 1), unit: "USD/lb", icon: "🏗️" },
                     "Wheat": { price: 540 + rand(-10, 10), change: rand(-2, 2), unit: "USD/bu", icon: "🌾" },
-                    "Corn": { price: 430 + rand(-5, 5), change: rand(-1.5, 1.5), unit: "USD/bu", icon: "🌽" },
-                    "Soybeans": { price: 1180 + rand(-15, 15), change: rand(-2, 2.5), unit: "USD/bu", icon: "🌱" },
-                    "Coffee": { price: 185 + rand(-2, 2), change: rand(-3, 3), unit: "USd/lb", icon: "☕" },
-                    "Cotton": { price: 82 + rand(-1, 1), change: rand(-1, 2), unit: "USd/lb", icon: "🧵" }
+                    "Corn": { price: 430 + rand(-5, 5), change: rand(-1.5, 1.5), unit: "USD/bu", icon: "🌽" }
                 }
             });
         }

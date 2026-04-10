@@ -44,10 +44,12 @@ async function onCountrySelected(countryName) {
       stateList.innerHTML = "";
       data.states.forEach((state) => {
         const btn = document.createElement("button");
-        btn.className = "text-left py-4 px-2 border-b border-white/5 hover:bg-white/[0.03] transition-all group flex justify-between items-center";
+        btn.className = "apple-glass hover-glow-blue text-left p-3 rounded-2xl border border-white/5 transition-all text-xs font-mono group";
         btn.innerHTML = `
-          <span class="text-[11px] font-bold text-white uppercase tracking-widest group-hover:text-slate-300 transition-colors" style="font-family: 'JetBrains Mono', monospace">${state.name}</span>
-          <span class="text-[9px] font-bold text-slate-600 uppercase tracking-widest font-mono">${state.code || ""}</span>
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-blue-400 group-hover:text-white transition-colors uppercase tracking-wider">${state.name}</span>
+            <span class="text-slate-500 text-[9px] font-black opacity-40 uppercase">${state.code || ""}</span>
+          </div>
         `;
         btn.onclick = () => selectState(countryName, state.name);
         stateList.appendChild(btn);
@@ -113,8 +115,8 @@ async function selectState(countryName, stateName) {
       cityList.innerHTML = "";
       data.cities.forEach((cityName) => {
         const btn = document.createElement("button");
-        btn.className = "text-left py-4 px-2 border-b border-white/5 hover:bg-white/[0.03] transition-all group";
-        btn.innerHTML = `<span class="text-[11px] font-bold text-white uppercase tracking-widest group-hover:text-slate-300 transition-colors" style="font-family: 'JetBrains Mono', monospace">${cityName}</span>`;
+        btn.className = "apple-glass hover-glow-cyan text-left p-3 rounded-2xl border border-white/5 transition-all text-xs font-mono group";
+        btn.innerHTML = `<span class="font-bold text-cyan-400 group-hover:text-white transition-colors uppercase tracking-wider">${cityName}</span>`;
         btn.onclick = () => selectCity(countryName, stateName, cityName);
         cityList.appendChild(btn);
       });

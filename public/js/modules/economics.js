@@ -2,13 +2,17 @@ function ecoEl(id) {
   return document.getElementById(id);
 }
 async function fetchDetailedEconomics(country) {
-  const ids = ["eco-gdp", "eco-growth", "eco-inflation", "eco-unemployment", "eco-interest", "eco-debt", "eco-trade-balance", "eco-reserves", "eco-capita", "eco-rate"];
-  ids.forEach(id => { if (ecoEl(id)) ecoEl(id).innerText = "--"; });
-
+  if (ecoEl("eco-gdp")) ecoEl("eco-gdp").innerText = "--";
+  if (ecoEl("eco-growth")) ecoEl("eco-growth").innerText = "--%";
+  if (ecoEl("eco-inflation")) ecoEl("eco-inflation").innerText = "--%";
+  if (ecoEl("eco-unemployment")) ecoEl("eco-unemployment").innerText = "--%";
+  if (ecoEl("eco-exports"))
+    ecoEl("eco-exports").innerHTML =
+      '<div class="h-4 bg-white/10 rounded w-3/4 animate-pulse"></div>';
   try {
     const prompt = `
-            Analyze the macro-economy of ${country} for a professional intelligence terminal.
-            Return ONLY a valid JSON object with these keys:
+            Analyze the economy of ${country}.
+            Return ONLY a valid JSON object with these keys (use 'N/A' if unknown, estimate if necessary based on 2024/2025 data):
             {
                 "gdp_billions": "number only",
                 "gdp_growth_percent": "number only",
@@ -17,13 +21,10 @@ async function fetchDetailedEconomics(country) {
                 "unemployment_rate": "number only",
                 "interest_rate": "number only",
                 "debt_to_gdp": "number only",
-                "trade_balance": "number only (BN)",
-                "reserves": "number only (BN)",
-                "credit_rating": "S&P/Moody style string",
-                "fiscal_summary": "1 sentence high-level summary",
-                "major_exports": "comma separated string of top 3 exports"
+                "major_exports": ["item1", "item2", "item3"],
+                "market_summary": "1 short sentence on current market status"
             }
-            Use 2024/2025 estimates. No markdown. Raw JSON only.
+            Do not add markdown formatting. Just the raw JSON string.
         `;
     const res = await fetch("/api/ai", {
       method: "POST",
@@ -31,118 +32,62 @@ async function fetchDetailedEconomics(country) {
       body: JSON.stringify({ prompt }),
     });
     const data = await res.json();
+    if (!data.candidates) throw new Error("AI Busy");
     let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+    text = text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
     let eco = {};
     try {
       eco = typeof text === "string" ? JSON.parse(text) : text;
-    } catch (e) {
-      console.error("Economy Parse Error");
+    } catch (parseErr) {
+      if (ecoEl("eco-market-ticker"))
+        ecoEl("eco-market-ticker").innerText =
+          "ECONOMIC DATALINK SEVERED. RETRYING...";
+      drawGDPTrend(country);
       return;
     }
-
-    if (eco.gdp_billions && ecoEl("eco-gdp")) ecoEl("eco-gdp").innerText = eco.gdp_billions;
+    if (eco.gdp_billions && ecoEl("eco-gdp"))
+      ecoEl("eco-gdp").innerText = eco.gdp_billions;
     if (eco.gdp_growth_percent != null && ecoEl("eco-growth"))
-      ecoEl("eco-growth").innerText = (eco.gdp_growth_percent > 0 ? "+" : "") + eco.gdp_growth_percent + "%";
+      ecoEl("eco-growth").innerText =
+        (eco.gdp_growth_percent > 0 ? "+" : "") + eco.gdp_growth_percent + "%";
     if (eco.gdp_per_capita != null && ecoEl("eco-capita"))
-      ecoEl("eco-capita").innerText = "$" + eco.gdp_per_capita.toLocaleString();
+      ecoEl("eco-capita").innerText = "$" + eco.gdp_per_capita;
     if (eco.inflation_rate != null && ecoEl("eco-inflation"))
       ecoEl("eco-inflation").innerText = eco.inflation_rate + "%";
-      const unempEl = document.getElementById("eco-unemployment");
-      if (unempEl) {
-        const val = eco.unemployment_rate || (4.5 + Math.random() * 2).toFixed(1);
-        unempEl.innerHTML = `${val} <span class="text-[12px] font-medium text-slate-500">%</span>`;
-      }
-      
-      const debtEl = document.getElementById("eco-debt");
-      if (debtEl) {
-        const val = eco.debt_to_gdp || (60 + Math.random() * 40).toFixed(1);
-        debtEl.innerHTML = `${val} <span class="text-[12px] font-medium text-slate-500">%</span>`;
-        debtEl.className = `text-[1.6rem] font-bold leading-none ${val > 100 ? 'text-rose-600' : 'text-slate-900'}`;
-      }
+    if (eco.unemployment_rate != null && ecoEl("eco-unemployment"))
+      ecoEl("eco-unemployment").innerText = eco.unemployment_rate + "%";
     if (eco.interest_rate != null && ecoEl("eco-interest"))
       ecoEl("eco-interest").innerText = eco.interest_rate + "%";
-    if (eco.trade_balance != null && ecoEl("eco-trade-balance"))
-      ecoEl("eco-trade-balance").innerText = eco.trade_balance;
-    if (eco.reserves != null && ecoEl("eco-reserves"))
-      ecoEl("eco-reserves").innerText = eco.reserves;
-    if (eco.credit_rating && ecoEl("eco-credit-rating"))
-      ecoEl("eco-credit-rating").innerText = eco.credit_rating;
-      
-    if (eco.major_exports && ecoEl("eco-exports")) {
-      ecoEl("eco-exports").innerHTML = eco.major_exports.split(',').map(e => `<span style="background:var(--surface-2);padding:0.2rem 0.5rem;border-radius:4px;border:1px solid var(--border);color:var(--text);font-size:11px;font-weight:600;">${e.trim().toUpperCase()}</span>`).join('');
+    if (eco.debt_to_gdp != null && ecoEl("eco-debt"))
+      ecoEl("eco-debt").innerText = eco.debt_to_gdp + "%";
+    if (eco.major_exports && Array.isArray(eco.major_exports) && ecoEl("eco-exports")) {
+      ecoEl("eco-exports").innerHTML = eco.major_exports
+        .map(
+          (item) =>
+            `<div class="apple-glass px-3 py-1.5 border border-blue-500/20 flex items-center gap-2 rounded-full">
+               <div class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></div>
+               <span class="text-[10px] text-white font-black uppercase tracking-wider">${item}</span>
+             </div>`,
+        )
+        .join("");
     }
-
-    window.playTacticalSound?.("success");
+    if (eco.market_summary && ecoEl("eco-market-ticker"))
+      ecoEl("eco-market-ticker").innerText = eco.market_summary.toUpperCase();
+    window.playTacticalSound("success");
     drawGDPTrend(country);
-    generateEconomicAnalysis(eco, country);
   } catch (e) {
-    console.error("Economy Uplink Failed", e);
+    if (ecoEl("eco-gdp")) ecoEl("eco-gdp").innerText = "--";
+    if (ecoEl("eco-growth")) ecoEl("eco-growth").innerText = "--%";
+    if (ecoEl("eco-inflation")) ecoEl("eco-inflation").innerText = "--%";
+    if (ecoEl("eco-unemployment")) ecoEl("eco-unemployment").innerText = "--%";
+    if (ecoEl("eco-market-ticker"))
+      ecoEl("eco-market-ticker").innerText =
+        "ECONOMIC DATALINK SEVERED. RETRYING...";
     drawGDPTrend(country);
   }
-}
-
-async function generateEconomicAnalysis(ecoData, country) {
-  const el = ecoEl("economy-ai-analysis");
-  if (!el) return;
-  el.innerHTML = '<span class="animate-pulse text-slate-500 font-mono text-[9px] uppercase tracking-widest">Processing Fiscal Intelligence...</span>';
-  try {
-    const prompt = `Provide a professional strategic fiscal assessment for ${country} in this EXACT format:
-
-[FISCAL_OVERVIEW]
-Provide a 2-sentence technical summary of current debt and growth dynamics.
-
-[MONETARY_OUTLOOK]
-Analyze inflation and interest rate trajectories.
-
-[INVESTMENT_CLIMATE]
-Strategic outlook on trade balance and foreign reserves.
-
-[RISK_ASSESSMENT]
-Key macro-economic risk factors for the upcoming 12 months.
-
-Current data: GDP $${ecoData.gdp_billions}B, Growth ${ecoData.gdp_growth_percent}%, Inflation ${ecoData.inflation_rate}%, Debt/GDP ${ecoData.debt_to_gdp}%. Keep each section to 2 sentences max. Use sparse, enterprise-grade intelligence language.`;
-
-    const res = await fetch("/api/ai", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt }),
-    });
-    const data = await res.json();
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || data.result || "";
-    if (rawText) {
-      renderEcoCards(rawText, el);
-    } else {
-      el.innerHTML = '<div class="text-slate-600 font-mono text-[9px] uppercase">Uplink timeout. Analysis unavailable.</div>';
-    }
-  } catch (e) {
-    el.innerHTML = '<div class="text-red-900/50 font-mono text-[9px] uppercase">Link failure. Fiscal intelligence offline.</div>';
-  }
-}
-
-function renderEcoCards(rawText, container) {
-  let clean = rawText.replace(/\*\*/g, '').trim();
-  const parts = clean.split(/(?=\[[A-Z][A-Z_ ]+\])/);
-  let html = '<div class="flex flex-col gap-5">';
-
-  parts.forEach(block => {
-    const headerMatch = block.match(/\[([A-Z][A-Z_ ]+)\]/);
-    if (!headerMatch) return;
-    const key = headerMatch[1].trim();
-    const displayName = key.replace(/_/g, ' ');
-    const bodyRaw = block.slice(block.indexOf(']') + 1).trim().replace(/\*\*/g, '');
-    if (!bodyRaw) return;
-
-    html += `
-      <div class="flex flex-col gap-1.5 px-0">
-        <h4 class="text-[9px] font-black text-indigo-900 uppercase tracking-widest font-sans">${displayName}</h4>
-        <p class="text-[10px] text-slate-700 leading-relaxed font-mono">${bodyRaw}</p>
-      </div>
-    `;
-  });
-
-  html += '</div>';
-  container.innerHTML = html;
 }
 async function drawGDPTrend(country) {
   const canvas = document.getElementById("gdp-trend-chart");
@@ -326,11 +271,11 @@ Keep each section to 2-3 sentences. Be specific with numbers where possible.`;
       if (goldEl && goldMatch) goldEl.innerText = goldMatch[1];
       if (silverEl && silverMatch) silverEl.innerText = silverMatch[1];
     } else if (textEl) {
-      textEl.innerHTML = '<div class="data-card p-5 text-slate-700 font-sans text-sm">Market analysis unavailable.</div>';
+      textEl.innerHTML = '<div class="apple-glass p-5 text-slate-400 font-mono text-sm">Market data unavailable.</div>';
     }
     window.playTacticalSound("success");
   } catch (e) {
-    if (textEl) textEl.innerHTML = '<div class="data-card p-5 text-red-700 font-sans text-sm">Market analysis connection failed.</div>';
+    if (textEl) textEl.innerHTML = '<div class="apple-glass p-5 text-red-400 font-mono text-sm">Financial uplink failed.</div>';
   }
 }
 function renderMarketCards(rawText, container) {
@@ -365,22 +310,24 @@ function renderMarketCards(rawText, container) {
       .map(line => line.trim().startsWith('-') ? `<span class="block pl-2 border-l-2 border-white/10 mb-1">${line.slice(1).trim()}</span>` : `<span>${line}</span>`)
       .join('');
     html += `
-      <div class="py-8 border-b border-slate-800/80 group transition-all">
-        <div class="flex justify-between items-start mb-4">
-          <div class="flex flex-col gap-1">
-            <span class="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 font-mono">Operational Sector</span>
-            <span class="text-[18px] font-bold text-white uppercase tracking-wider" style="font-family: 'Plus Jakarta Sans', sans-serif;">${displayName}</span>
+      <div class="apple-glass group p-5 mb-4 relative overflow-hidden transition-all duration-300 hover:bg-white/[0.05]" style="border:1px solid ${color}22;">
+        <div class="absolute -inset-[1px] bg-gradient-to-br from-white/10 to-transparent opacity-20 pointer-events-none"></div>
+        <div class="flex justify-between items-start mb-4 relative z-10">
+          <div class="flex items-center gap-4">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center" style="background:${color}33;border:1px solid ${color}55;box-shadow:0 0 15px ${color}22;">
+              <i class="fas ${icon} text-[17px]" style="color:${color};"></i>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[11px] font-bold uppercase tracking-[0.2em] text-emerald-400/80">Market Intel</span>
+              <span class="text-[15px] font-bold text-white uppercase tracking-wider">${displayName}</span>
+            </div>
           </div>
-          ${rating ? `
-            <div class="flex flex-col items-end">
-              <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600 font-mono mb-1">Tactical Rating</span>
-              <span class="text-[24px] font-light font-mono leading-none" style="color:${ratingColor};">${rating}<span class="text-[12px] opacity-20 ml-1">/ 10</span></span>
-            </div>` : ''}
+          ${rating ? `<div class="bg-black/40 rounded-xl px-4 py-2 flex flex-col items-center" style="border:1px solid ${ratingColor}44;"><span class="text-[20px] font-black font-mono leading-none" style="color:${ratingColor};">${rating}<span class="text-[12px] opacity-40">/10</span></span><div class="w-14 h-1 bg-white/10 rounded-full mt-2 overflow-hidden"><div class="h-full rounded-full" style="width:${rating * 10}%;background:${ratingColor};"></div></div></div>` : ''}
         </div>
-        <div class="text-[14px] text-slate-700 leading-relaxed font-sans max-w-3xl">${formattedParagraph}</div>
+        <div class="text-[13.5px] text-white/85 leading-relaxed font-mono relative z-10">${formattedParagraph}</div>
       </div>`;
   });
-  container.innerHTML = html || `<div class="py-6 text-[13px] text-slate-500 font-mono leading-relaxed">${clean.replace(/\n/g, '<br>')}</div>`;
+  container.innerHTML = html || `<div class="apple-glass p-6 text-[13px] text-slate-400 font-mono leading-relaxed">${clean.replace(/\n/g, '<br>')}</div>`;
 }
 window.fetchDetailedEconomics = fetchDetailedEconomics;
 window.drawGDPTrend = drawGDPTrend;

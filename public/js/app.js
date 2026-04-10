@@ -8,65 +8,33 @@ import './modules/economics.js';
 import './modules/geography.js';
 import './global-fx.js';
 import './enhancements.js';
-
 let selectedCountry = null;
 let currencyCode = null;
 let iso2Code = null;
 let countryUTCOffset = null;
 let projectionType = "3d";
 window.projectionType = "3d";
-let globalSearchData = [
-  { name: { common: "United States" }, region: "Americas", subregion: "Northern America", population: 331000000, flags: { svg: "https://flagcdn.com/us.svg" }, capital: ["Washington D.C."], cca2: "US" },
-  { name: { common: "India" }, region: "Asia", subregion: "Southern Asia", population: 1400000000, flags: { svg: "https://flagcdn.com/in.svg" }, capital: ["New Delhi"], cca2: "IN" },
-  { name: { common: "China" }, region: "Asia", subregion: "Eastern Asia", population: 1400000000, flags: { svg: "https://flagcdn.com/cn.svg" }, capital: ["Beijing"], cca2: "CN" },
-  { name: { common: "United Kingdom" }, region: "Europe", subregion: "Northern Europe", population: 67000000, flags: { svg: "https://flagcdn.com/gb.svg" }, capital: ["London"], cca2: "GB" },
-  { name: { common: "France" }, region: "Europe", subregion: "Western Europe", population: 67000000, flags: { svg: "https://flagcdn.com/fr.svg" }, capital: ["Paris"], cca2: "FR" },
-  { name: { common: "Japan" }, region: "Asia", subregion: "Eastern Asia", population: 125000000, flags: { svg: "https://flagcdn.com/jp.svg" }, capital: ["Tokyo"], cca2: "JP" },
-  { name: { common: "Germany" }, region: "Europe", subregion: "Western Europe", population: 83000000, flags: { svg: "https://flagcdn.com/de.svg" }, capital: ["Berlin"], cca2: "DE" },
-  { name: { common: "Brazil" }, region: "Americas", subregion: "South America", population: 214000000, flags: { svg: "https://flagcdn.com/br.svg" }, capital: ["Brasilia"], cca2: "BR" },
-  { name: { common: "Canada" }, region: "Americas", subregion: "Northern America", population: 38000000, flags: { svg: "https://flagcdn.com/ca.svg" }, capital: ["Ottawa"], cca2: "CA" },
-  { name: { common: "Singapore" }, region: "Asia", subregion: "South-Eastern Asia", population: 5700000, flags: { svg: "https://flagcdn.com/sg.svg" }, capital: ["Singapore"], cca2: "SG" },
-  { name: { common: "Australia" }, region: "Oceania", subregion: "Australia and New Zealand", population: 26000000, flags: { svg: "https://flagcdn.com/au.svg" }, capital: ["Canberra"], cca2: "AU" },
-  { name: { common: "South Korea" }, region: "Asia", subregion: "Eastern Asia", population: 51700000, flags: { svg: "https://flagcdn.com/kr.svg" }, capital: ["Seoul"], cca2: "KR" }
-];
-window.globalSearchData = globalSearchData;
+let worldFeatures = [];
+let globalSearchData = [];
 let currentCategory = "top";
-
 window.selectedCountry = selectedCountry;
 window.currencyCode = currencyCode;
 window.iso2Code = iso2Code;
 window.currentCategory = currentCategory;
-
-window.toggleHierarchyCollapse = (type) => {
-    const content = document.getElementById(`${type}-collapse-content`);
-    const icon = document.getElementById(`${type}-collapse-icon`);
-    if (content) {
-        content.classList.toggle('hidden');
-    }
-    if (icon) {
-        icon.classList.toggle('fa-chevron-down');
-        icon.classList.toggle('fa-chevron-up');
-    }
-};
-
 function magColor(m) {
   return m >= 7 ? "#ef4444" : m >= 6 ? "#f97316" : m >= 5 ? "#eab308" : "#10b981";
 }
-
 function safeEl(id) {
   return document.getElementById(id);
 }
-
 function setText(id, text) {
   const el = safeEl(id);
   if (el) el.innerText = text;
 }
-
 function setSrc(id, src) {
   const el = safeEl(id);
   if (el) el.src = src;
 }
-
 function runWhenIdle(callback, timeout = 2000) {
   if ("requestIdleCallback" in window) {
     window.requestIdleCallback(() => callback(), { timeout });
@@ -74,7 +42,10 @@ function runWhenIdle(callback, timeout = 2000) {
     setTimeout(callback, timeout);
   }
 }
-
+async function runBootSequence() {
+  const savedTheme = localStorage.getItem('terminal-theme');
+  if (savedTheme === 'light') document.body.classList.add('light-theme');
+}
 function showBackendRequiredBanner() {
   if (document.getElementById("backend-required-banner")) return;
   const banner = document.createElement("div");
@@ -89,8 +60,8 @@ function showBackendRequiredBanner() {
   `;
   document.body.appendChild(banner);
 }
-
 async function initTerminal() {
+  runBootSequence();
   let config = {};
   try {
     const res = await fetch("/api/config");
@@ -100,53 +71,60 @@ async function initTerminal() {
         config = data.firebase || {};
     }
   } catch (e) {
+    console.warn("Config fetch failed:", e);
     showBackendRequiredBanner();
+    if (window.showToast) window.showToast("Config unavailable. Running in local mode.", "info");
   }
-  
+  fetchGlobalSearchData();
   const hasFirebaseConfig = config && config.apiKey && config.projectId;
   if (hasFirebaseConfig && window.firebaseCore) {
     try {
       const firebaseApp = window.firebaseCore.initializeApp(config);
       const auth = window.firebaseCore.getAuth(firebaseApp);
-      window.firebaseCore.signInAnonymously(auth);
+      const db = window.firebaseCore.getFirestore(firebaseApp);
+      await window.firebaseCore.signInAnonymously(auth);
       window.firebaseCore.onAuthStateChanged(auth, (u) => {
-        const idEl = safeEl("neural-id");
-        if (idEl) idEl.innerText = u ? `User ID: ${u.uid.substring(0, 8)}` : "Guest Mode";
+        if (u) {
+          const idEl = safeEl("neural-id");
+          if (idEl && !u.isAnonymous && u.displayName) {
+            idEl.innerText = `SESSION: ${u.displayName.toUpperCase()}`;
+            idEl.classList.add("text-emerald-500");
+          } else if (idEl && u.isAnonymous) {
+            idEl.innerText = `SESSION: ${u.uid.substring(0, 8).toUpperCase()}`;
+          }
+          try {
+            const userRef = window.firebaseCore.doc(db, "visitors", u.uid);
+            window.firebaseCore.setDoc(userRef, { last_login: window.firebaseCore.serverTimestamp(), device: navigator.userAgent }, { merge: true });
+          } catch (e) { }
+        }
       });
     } catch (e) {
-      setText("neural-id", "Guest Mode");
+      console.warn("Auth limited:", e);
+      setText("neural-id", "GUEST SESSION");
     }
-  } else { 
-    setText("neural-id", "Guest Mode"); 
-  }
-
+  } else { setText("neural-id", "GUEST SESSION"); }
   try {
     const res = await fetch("/api/countries?all=true");
-    if (res.ok) {
-      window.globalSearchData = await res.json();
-      if (window.renderTrendingHeader) window.renderTrendingHeader();
-    }
-  } catch (e) {}
-
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    globalSearchData = await res.json();
+    window.globalSearchData = globalSearchData;
+    if (window.renderTrendingHeader) window.renderTrendingHeader();
+  } catch (e) { 
+    console.error("Search data load failed:", e); 
+    window.globalSearchData = [];
+  }
   try {
-    if (window.fetchNews) window.fetchNews();
+    window.fetchNews();
     startStockTicker();
-  } catch (e) {}
-
+  } catch (e) { console.error("Critical systems load failed:", e); }
   runWhenIdle(() => {
     try {
-      if (window.updateAISummary) window.updateAISummary("Global Context");
+      if (window.generateAIBriefing) window.generateAIBriefing("Global Context");
+      if (window.fetchGDELTEvents) window.fetchGDELTEvents("");
       if (window.initializeMarkets) window.initializeMarkets("Global");
-      if (window.fetchDetailedEconomics) window.fetchDetailedEconomics("Global");
-      if (window.fetchWeather) {
-        window._currentWeatherLocation = "New Delhi, India";
-        window.fetchWeather(28.61, 77.23);
-      }
-      if (window.fetchSeismicStatus) window.fetchSeismicStatus();
-    } catch (e) {}
+    } catch (e) { console.warn("Background systems failed:", e); }
   });
 }
-
 async function startStockTicker() {
   const tickerContent = document.getElementById("stock-ticker-content");
   if (!tickerContent) return;
@@ -157,36 +135,53 @@ async function startStockTicker() {
       const color = up ? "text-emerald-400" : "text-red-400";
       const arrow = up ? "▲" : "▼";
       const priceStr = stock.price >= 1000 ? stock.price.toLocaleString(undefined, { maximumFractionDigits: 2 }) : stock.price.toFixed(stock.price < 10 ? 4 : 2);
-      html += `<div class="ticker-item"><span style="color:rgba(255,255,255,.12);margin:0 .25rem">│</span><span class="text-slate-400">${stock.label}</span> <span class="text-white font-black">${priceStr}</span> <span class="${color} ml-1">${arrow} ${Math.abs(stock.change).toFixed(2)}%</span></div>`;
+      const dot = `<span style="color:rgba(255,255,255,.12);margin:0 .25rem">│</span>`;
+      html += `<div class="ticker-item">${dot}<span class="text-slate-400">${stock.label}</span> <span class="text-white font-black">${priceStr}</span> <span class="${color} ml-1">${arrow} ${Math.abs(stock.change).toFixed(2)}%</span></div>`;
     });
     tickerContent.innerHTML = html + html;
   }
   async function fetchAndRender() {
     try {
-      const res = await fetch(`/api/markets?type=ticker&region=${window._isoAlpha3 || 'IN'}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.data) renderTicker(data.data);
+      const fetcher = window.fetchWithRetry || fetch;
+      const url = `/api/markets?type=ticker&region=${window._isoAlpha3 || 'IN'}`;
+      const res = await fetcher(url, {}, { retries: 1, timeoutMs: 10000 });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (data.data && data.data.length > 0) {
+        renderTicker(data.data);
+        setTickerLastUpdated();
+        const dot = document.querySelector(".ticker-wrap")?.previousElementSibling?.querySelector(".bg-red-400");
+        if (dot) dot.classList.replace("bg-red-400", "bg-emerald-400");
       }
-    } catch (e) {}
+    } catch (e) { }
+  }
+  function setTickerLastUpdated() {
+    const el = document.getElementById("ticker-last-updated");
+    if (el) el.innerText = new Date().toLocaleTimeString();
   }
   fetchAndRender();
   setInterval(fetchAndRender, 60000);
 }
-
 async function fetchAllData(countryName) {
   try {
     const res = await fetch(`/api/countries?name=${encodeURIComponent(countryName)}`);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data = await res.json();
     const c = Array.isArray(data) ? data[0] : data;
     if (c) {
       currencyCode = c.currencies ? Object.keys(c.currencies)[0] : "USD";
       iso2Code = c.cca2 || "";
+      window._isoAlpha3 = c.cca3 || "";
       window.iso2Code = iso2Code;
       window.currencyCode = currencyCode;
       setText("fact-pop", (c.population / 1000000).toFixed(1) + "M");
       setText("fact-cap", c.capital ? c.capital[0] : "N/A");
-      
+      setText("fact-region", c.region || "--");
+      setText("fact-area", c.area ? c.area.toLocaleString() : "--");
+      setText("fact-code", c.idd ? (c.idd.root || "") + (c.idd.suffixes ? c.idd.suffixes[0] : "") : "--");
+      setText("fact-demonym", c.demonyms?.eng?.m || "--");
+      setText("fact-gini", c.gini ? Object.values(c.gini)[0] : "N/A");
+      setText("fact-drive", c.car ? c.car.side.toUpperCase() : "--");
       const flagEl = safeEl("sector-flag");
       const nameEl = safeEl("sector-name");
       const globeIcon = safeEl("sector-globe-icon");
@@ -196,144 +191,169 @@ async function fetchAllData(countryName) {
         if (globeIcon) globeIcon.classList.add("hidden");
         nameEl.innerText = c.name.common;
       }
-      
-      const cName = c.name?.common || countryName;
-      
-      // Update Context HUD
-      const ctxFlag = document.getElementById("ctx-flag");
-      const ctxGlobe = document.getElementById("ctx-globe-icon");
-      const ctxCountry = document.getElementById("ctx-country");
-      const ctxLocation = document.getElementById("ctx-location");
-      
-      if (ctxFlag) {
-        ctxFlag.src = c.flags?.svg || "";
-        ctxFlag.classList.remove("hidden");
+      const headerFlagContainer = safeEl("search-flag-container");
+      const headerFlagImg = safeEl("search-active-flag");
+      const headerSearchIcon = safeEl("search-icon-main");
+      const headerInput = safeEl("map-search-input");
+      if (headerFlagContainer && headerFlagImg && headerSearchIcon) {
+        headerFlagImg.src = c.flags?.svg || "";
+        headerFlagContainer.classList.remove("hidden");
+        headerSearchIcon.classList.add("hidden");
+        if (headerInput) headerInput.value = c.name.common;
       }
-      if (ctxGlobe) ctxGlobe.classList.add("hidden");
-      if (ctxCountry) ctxCountry.innerText = cName.toUpperCase();
-      if (ctxLocation) ctxLocation.innerText = "Country Profile";
-      
-      const opPath = document.getElementById("breadcrumb-operational-path");
-      if (opPath) opPath.innerText = cName;
-
-      window.fetchNews(cName);
-      if (window.initializeMarkets) window.initializeMarkets(cName);
-      if (window.updateAISummary) window.updateAISummary(cName);
-      
-      // Trigger Atmosphere (Weather) and Economics
-      if (window.fetchDetailedEconomics) window.fetchDetailedEconomics(cName);
-      if (window.fetchWeather && c.latlng) {
-        window._currentWeatherLocation = cName;
-        window.fetchWeather(c.latlng[0], c.latlng[1]);
-      }
+      countryUTCOffset = c.timezones ? c.timezones[0] : "UTC+00:00";
+      let lat = 0, lon = 0;
+      if (c.latlng && c.latlng.length === 2) [lat, lon] = c.latlng;
+      else if (c.capitalInfo && c.capitalInfo.latlng) [lat, lon] = c.capitalInfo.latlng;
+      const capitalName = c.capital ? c.capital[0] : c.name.common;
+      window._currentWeatherLocation = `${capitalName}, ${c.name.common}`;
+      if (lat || lon) window.fetchWeather(lat, lon);
+      setText("fact-pop-2", (c.population / 1000000).toFixed(1) + "M");
+      setText("fact-gini-2", c.gini ? Object.values(c.gini)[0] : "N/A");
+      setText("fact-demonym-2", c.demonyms?.eng?.m || "--");
+      setText("fact-area-2", c.area ? c.area.toLocaleString() + " km²" : "--");
+      window.fetchNews(c.name.common);
+      if (window.initializeMarkets) window.initializeMarkets(c.name.common);
+      if (window.fetchDetailedEconomics) window.fetchDetailedEconomics(c.name.common);
+      if (window.generateAIBriefing) window.generateAIBriefing(c.name.common);
     }
   } catch (e) {
-    console.warn("Data Sync Failure:", e);
+    console.error("Data Fetch Error", e);
+    if (window.showToast) window.showToast("Country data failed.", "error");
   }
 }
-
 window.fetchAllData = fetchAllData;
-
-window.switchTab = (id) => {
-  if (id === 'summary') id = 'intel';
-  if (id === 'weather') id = 'atmosphere';
-
-  const modSector = document.getElementById("modular-intelligence-sector");
-  if (modSector) modSector.classList.add("active");
-
-  document.querySelectorAll(".nav-sector-link").forEach(link => {
-    const action = link.getAttribute('onclick') || "";
-    if (action.includes(`'${id}'`) || 
-        (id === 'intel' && action.includes("'summary'")) ||
-        (id === 'atmosphere' && action.includes("'weather'"))) {
-      link.classList.add("active");
-    } else {
-      link.classList.remove("active");
-    }
+function renderBriefingCards(rawText) {
+  const container = safeEl("ai-briefing-text");
+  if (!container) return;
+  let clean = rawText.replace(/\[(STRATEGIC METRICS DASHBOARD|OVERVIEW)\]\s*/gi, '').trim();
+  const parts = clean.split(/(?=\[[A-Z_ ]+\])/);
+  let html = '<div class="space-y-6 pt-2">';
+  parts.forEach(block => {
+    const headerMatch = block.match(/\[([A-Z_ ]+)\]/);
+    if (!headerMatch) return;
+    const key = headerMatch[1].trim();
+    const displayName = key.replace(/_/g, ' ');
+    const bodyRaw = block.slice(block.indexOf(']') + 1).trim().replace(/Rating:\s*\d+\s*\/\s*10\n?/gi, '').replace(/\*\*/g, '');
+    if (!bodyRaw) return;
+    html += `
+      <div class="mb-6">
+        <h4 class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1.5">${displayName}</h4>
+        <p class="intel-summary-text px-1">${bodyRaw}</p>
+      </div>
+    `;
   });
-
-  document.querySelectorAll(".tab-content").forEach((c) => {
-    c.classList.remove("active");
-    c.style.display = 'none';
-  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+async function generateAIBriefing(loc) {
+  const text = safeEl("ai-briefing-text");
+  const loading = safeEl("ai-briefing-loading");
+  const actions = safeEl("ai-briefing-actions");
   
-  const targetContent = document.getElementById(`tab-${id}`);
-  if (targetContent) {
-    targetContent.style.display = 'block';
-    requestAnimationFrame(() => {
-      targetContent.classList.add("active");
-      if (id === 'search' && window.renderTrending) {
-        window.renderTrending();
-        setTimeout(() => document.getElementById("country-search")?.focus(), 100);
-      }
-      if (id === 'markets' && window.renderTVChart) {
-        window.renderTVChart(window._currentCountryName || "Global");
-      }
-    });
+  if (text) {
+    text.innerHTML = `
+      <div class="space-y-4 w-full mt-2">
+        <div class="skeleton-pulse skeleton-text-block short"></div>
+        <div class="skeleton-pulse skeleton-text-block"></div>
+        <div class="skeleton-pulse skeleton-text-block" style="width: 80%;"></div>
+      </div>
+    `;
   }
+  if (loading) loading.classList.remove("hidden");
+  if (actions) actions.classList.add("hidden");
+
+  const briefingPrompt = `Location: ${loc || 'Global Overview'}. Strategic Intel Report. Categories: [EXECUTIVE_SUMMARY], [POLITICAL_STABILITY], [TRADE_RELATIONS], [TECHNOLOGY], [ECONOMY], [SOCIAL_TRENDS], [ENERGY], [SUPPLY_CHAIN], [INFLATION], [INFRASTRUCTURE]. Format: [CATEGORY_NAME] followed by a 2-sentence tactical summary. No bullets.`;
+  
+  try {
+    const res = await fetch("/api/ai", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: briefingPrompt })
+    });
+    
+    if (!res.ok) throw new Error("Intelligence Uplink Failed");
+    const data = await res.json();
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || data.response || "No data received.";
+    
+    if (loading) loading.classList.add("hidden");
+    if (actions) actions.classList.remove("hidden");
+    
+    renderBriefingCards(rawText);
+  } catch (e) {
+    if (loading) loading.classList.add("hidden");
+    if (text) text.innerHTML = `<p class="text-red-400 text-xs py-4 uppercase font-bold text-center">Protocol Intercepted: ${e.message}</p>`;
+  }
+}
+window.generateAIBriefing = generateAIBriefing;
+window.switchTab = (id) => {
+  window.playTacticalSound("tab");
+  document.querySelectorAll(".nav-tab").forEach((t) => { t.classList.remove("active"); t.setAttribute("aria-selected", "false"); });
+  document.querySelectorAll(".tab-content").forEach((c) => c.classList.remove("active"));
+  const tabBtn = Array.from(document.querySelectorAll(".nav-tab")).find((btn) => btn.innerText.toLowerCase().trim().includes(id.toLowerCase()));
+  if (tabBtn) { tabBtn.classList.add("active"); tabBtn.setAttribute("aria-selected", "true"); }
+  const targetContent = document.getElementById(`tab-${id}`);
+  if (targetContent) targetContent.classList.add("active");
+  if (id === "intel") { if (window.fetchGDELTEvents) window.fetchGDELTEvents(window.selectedCountry); }
+  if (id === "economic") { if (window.fetchECBRates) window.fetchECBRates(); }
+  if (id === "markets") { if (window.initializeMarkets) window.initializeMarkets(window.selectedCountry || "Global"); }
 };
-
-window.backToOrbital = () => {
-  const modSector = document.getElementById("modular-intelligence-sector");
-  if (modSector) modSector.classList.remove("active");
-  document.querySelectorAll(".nav-sector-link").forEach(link => {
-    if (link.innerText.trim().toLowerCase() === 'globe') link.classList.add("active");
-    else link.classList.remove("active");
-  });
-  window.history.pushState({}, "", "/app");
-};
-
-// LIVE IST CLOCK
-setInterval(() => {
-  const time = new Date().toLocaleTimeString("en-GB", {
-    timeZone: "Asia/Kolkata",
-    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
-  });
-  setText("ist-time", `${time} IST`);
-}, 1000);
-
 window.handleCountryClick = async function (event, d) {
+  window.playTacticalSound("click");
+  selectedCountry = d;
   window.selectedCountry = d;
   window.switchTab("intel");
   if (d && d.properties) {
     const countryName = d.properties.name;
     setText("selected-country-name", countryName);
-    fetchAllData(countryName);
-    if (window.mapEngine && window.mapEngine.ready && event && event.lngLat) {
-       window.mapEngine.flyToCountry(event.lngLat, 4.5);
+    const flagEl = document.getElementById("header-country-flag");
+    if (flagEl) {
+      const iso = d.properties.iso_a2 || d.properties.ISO_A2;
+      if (iso) { flagEl.src = `https://flagcdn.com/w40/${iso.toLowerCase()}.png`; flagEl.classList.remove("hidden"); }
+      else flagEl.classList.add("hidden");
     }
-    if (window.updateAISummary) window.updateAISummary(countryName);
+    const backWrap = safeEl("back-to-global-wrap");
+    if (backWrap) backWrap.classList.remove("hidden");
+    fetchAllData(countryName);
+    if (window.mapEngine && window.mapEngine.ready) {
+      if (event && event.lngLat) { window.mapEngine.flyToCountry(event.lngLat, 4.5); }
+    }
+    generateAIBriefing(countryName);
   }
 };
-
 window.resetToGlobalCenter = () => {
+  selectedCountry = null;
   window.selectedCountry = null;
-  window.iso2Code = null;
   setText("selected-country-name", "Worldwide");
   
-  // Reset Context HUD
-  const ctxFlag = document.getElementById("ctx-flag");
-  const ctxGlobe = document.getElementById("ctx-globe-icon");
-  const ctxCountry = document.getElementById("ctx-country");
-  const ctxLocation = document.getElementById("ctx-location");
+  // Reset Sector HUD
+  const globeIcon = document.getElementById("sector-globe-icon");
+  const flagImg = document.getElementById("sector-flag");
+  const sectorName = document.getElementById("sector-name");
+  if (globeIcon) globeIcon.classList.remove("hidden");
+  if (flagImg) flagImg.classList.add("hidden");
+  if (sectorName) sectorName.innerText = "Global Sector";
+
+  const backWrap = safeEl("back-to-global-wrap");
+  if (backWrap) backWrap.classList.add("hidden");
+  if (window.generateAIBriefing) window.generateAIBriefing("Global Context");
   
-  if (ctxFlag) ctxFlag.classList.add("hidden");
-  if (ctxGlobe) ctxGlobe.classList.remove("hidden");
-  if (ctxCountry) ctxCountry.innerText = "GLOBAL VIEW";
-  if (ctxLocation) ctxLocation.innerText = "SELECT A LOCATION";
-
-  window.backToOrbital();
-
-  // Resize map after sidebar collapses, then fly to global center
-  setTimeout(() => {
-    if (window.mapEngine && window.mapEngine.map) {
-      window.mapEngine.map.resize();
-      window.mapEngine.clearSelection();
-      window.mapEngine.map.flyTo({ center: [15, 0], zoom: 1.6, duration: 2000, pitch: 0, bearing: 0 });
-    }
-  }, 50);
-
+  if (window.mapEngine && window.mapEngine.map) {
+    window.mapEngine.clearSelection();
+    window.mapEngine.map.flyTo({ center: [20, 20], zoom: 1.6, duration: 2000 });
+  }
+  
   window.fetchNews();
+  const headerFlagContainer = safeEl("search-flag-container");
+  const headerSearchIcon = safeEl("search-icon-main");
+  const headerInput = safeEl("map-search-input");
+  if (headerFlagContainer) headerFlagContainer.classList.add("hidden");
+  if (headerSearchIcon) headerSearchIcon.classList.remove("hidden");
+  if (headerInput) headerInput.value = "";
+};
+window.toggleTheme = function() {
+  const isLight = document.body.classList.toggle('light-theme');
+  localStorage.setItem('terminal-theme', isLight ? 'light' : 'dark');
 };
 
 window.toggleMapProjection = function() {
@@ -341,16 +361,32 @@ window.toggleMapProjection = function() {
   const current = window.mapEngine.getProjection();
   const next = current === 'globe' ? 'mercator' : 'globe';
   window.mapEngine.setProjection(next);
+  const btn = document.getElementById('projection-toggle-btn');
+  if (btn) btn.innerHTML = next === 'globe' ? '<i class="fas fa-globe text-sm"></i>' : '<i class="fas fa-map text-sm"></i>';
+};
+
+window.goToIndiaHome = function() {
+  if (window.mapEngine && window.mapEngine.map) {
+    window.mapEngine.map.flyTo({ center: [78.9629, 20.5937], zoom: 4.5, duration: 2000 });
+    if (window.fetchAllData) window.fetchAllData("India");
+    if (window.playTacticalSound) window.playTacticalSound("success");
+  }
 };
 
 window.toggleMapStyle = function() {
   if (!window.mapEngine) return;
-  const styles = [
-    'mapbox://styles/mapbox/satellite-streets-v12',
-    'mapbox://styles/mapbox/dark-v11'
-  ];
-  window._styleIdx = ((window._styleIdx || 0) + 1) % styles.length;
-  window.mapEngine.setStyle(styles[window._styleIdx]);
+  const styles = ['dark-v11', 'light-v11', 'satellite-streets-v12'];
+  window._styleIdx = (window._styleIdx || 0) + 1;
+  if (window._styleIdx >= styles.length) window._styleIdx = 0;
+  window.mapEngine.setStyle('mapbox://styles/mapbox/' + styles[window._styleIdx]);
+};
+
+window.toggleGlobeTheme = function() {
+  window.toggleTheme();
+  if (window.mapEngine) {
+    const isLight = document.body.classList.contains('light-theme');
+    window.mapEngine.setStyle(isLight ? 'mapbox://styles/mapbox/light-v11' : 'mapbox://styles/mapbox/dark-v11');
+  }
 };
 
 window.zoomMap = function(factor) {
@@ -359,15 +395,111 @@ window.zoomMap = function(factor) {
     window.mapEngine.map.zoomTo(factor > 1 ? current + 1 : current - 1);
   }
 };
-
 function setupEventListeners() {
   window.addEventListener("keydown", (e) => {
+    // Esc handling
     if (e.key === "Escape") {
-      window.backToOrbital();
+      const so = safeEl("search-overlay");
+      const ao = safeEl("about-overlay");
+      if (so && !so.classList.contains("hidden")) so.classList.add("hidden");
+      if (ao && !ao.classList.contains("hidden")) ao.classList.add("hidden");
+    }
+
+    // Tab Navigation (1-5)
+    // Ignore if user is typing in an input field
+    if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+
+    const navMap = {
+      "1": "summary",
+      "2": "news",
+      "3": "markets",
+      "4": "weather",
+      "5": "economic"
+    };
+
+    if (navMap[e.key]) {
+      e.preventDefault();
+      window.switchTab(navMap[e.key]);
+      if (window.playTacticalSound) window.playTacticalSound("click");
     }
   });
 }
+function updateSystemTime() {
+  const now = new Date();
+  const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Kolkata' };
+  const timeStr = now.toLocaleTimeString('en-US', options);
+  setText("ist-time", `${timeStr} IST`);
+}
 
+window.switchTab = (id) => {
+  const tabs = document.querySelectorAll(".nav-tab");
+  const contents = document.querySelectorAll(".tab-content");
+  
+  // 1. Try to find by custom data-target or ID if 'id' looks like an ID
+  let targetTab = document.getElementById(`tab-btn-${id}`) || 
+                  Array.from(tabs).find(t => t.id === id || t.getAttribute("data-target") === id);
+
+  // 2. If not found, try text match
+  if (!targetTab) {
+    tabs.forEach(tab => {
+        const txt = tab.innerText.trim().toLowerCase();
+        if (txt.includes(id.toLowerCase())) {
+            targetTab = tab;
+        }
+    });
+  }
+
+  if (!targetTab) {
+    console.warn("Sector Uplink Lost: Tab not found for", id);
+    return;
+  }
+
+  const targetContentId = targetTab.getAttribute("aria-controls") || 
+                          targetTab.getAttribute("data-target") || 
+                          (targetTab.id ? targetTab.id.replace('btn-', '') : null);
+  
+  if (!targetContentId) return;
+
+  tabs.forEach(t => t.classList.remove("active"));
+  contents.forEach(c => c.classList.remove("active"));
+  
+  targetTab.classList.add("active");
+  window._currentTab = targetContentId;
+  const targetContent = document.getElementById(targetContentId);
+  if (targetContent) {
+    targetContent.classList.add("active");
+    if (targetContentId === 'markets' && window.initializeMarkets) {
+        window.initializeMarkets(window._currentCountryName || "Global");
+    }
+    window.dispatchEvent(new Event('resize'));
+  }
+
+  const sidebar = document.getElementById("sidebar");
+  if (sidebar && targetTab) {
+    targetTab.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+};
+
+async function fetchGlobalSearchData() {
+  try {
+    const res = await fetch("/api/countries?all=true");
+    if (!res.ok) throw new Error("Index relay failed");
+    window.globalSearchData = await res.json();
+    if (window.renderTrendingHeader) window.renderTrendingHeader();
+  } catch (e) { window.globalSearchData = []; }
+}
+window.renderTrendingHeader = () => {
+  const container = document.getElementById("trending-quick-container");
+  if (!container || !window.globalSearchData || window.globalSearchData.length === 0) return;
+  const trending = ["India", "United States", "Japan", "Russia", "United Kingdom"];
+  container.innerHTML = trending.map(name => {
+    const c = window.globalSearchData.find(x => x.name.common === name || (name === "United States" && x.name.common === "United States of America"));
+    if (!c) return "";
+    return `<button onclick="window.handleCountryClick(null, {properties:{name:'${c.name.common.replace(/'/g, "\\'")}',iso_a2:'${c.cca2}'}})" class="w-7 h-4.5 rounded-sm overflow-hidden border border-white/10 hover:border-blue-400 hover:scale-110 transition-all shadow-sm">
+               <img src="${c.flags.svg}" class="w-full h-full object-cover">
+             </button>`;
+  }).join("");
+};
 window.searchCityForTab = async (tabId) => {
   const inputEl = document.getElementById(`${tabId}-city-search`);
   if (!inputEl) return;
@@ -380,117 +512,50 @@ window.searchCityForTab = async (tabId) => {
       const city = data.results[0];
       if (window.mapEngine && window.mapEngine.map) {
         window.mapEngine.map.flyTo({ center: [city.longitude, city.latitude], zoom: 9, duration: 2000 });
+        if (window.mapEngine.setHoloHUD) window.mapEngine.setHoloHUD([city.longitude, city.latitude], city.name, { TARGET: "CITY" });
       }
       setText("selected-country-name", city.name.toUpperCase());
-      if (window.fetchAllData) window.fetchAllData(city.name);
+      window.generateAIBriefing(city.name);
+      inputEl.value = "";
     }
-  } catch (e) {
-    console.error(e);
-  }
+  } catch (e) { }
 };
-
-window.updateAISummary = async (country) => {
-    const textEl = document.getElementById("ai-summary-text");
-    const loadingEl = document.getElementById("ai-summary-loading");
-    if (loadingEl) loadingEl.classList.remove("hidden");
-    if (textEl) textEl.style.opacity = "0.4";
-
-    try {
-        const prompt = `Provide a professional news summary for ${country}.
-        Return ONLY a JSON object with these keys: 
-        {
-          "summary": "General overview of the country.",
-          "political": "Current government and political situation.",
-          "trade": "Trade, imports, and exports.",
-          "infra": "Infrastructure and public utilities.",
-          "social": "Society and public sentiment.",
-          "mil": "Security and safety outlook.",
-          "tech": "Technology and innovation landscape.",
-          "health": "Healthcare and public health status.",
-          "finance": "Financial markets and fiscal status.",
-          "eco": "Environment and climate issues.",
-          "prod": "Industrial and business performance.",
-          "edu": "Education and skills development.",
-          "log": "Logistics, transport, and supply chains.",
-          "energy": "Energy resources, production, and security.",
-          "agri": "Agriculture, farming, and food security.",
-          "demo": "Demographics, population trends, and labor.",
-          "media": "Media freedom and information environment.",
-          "tourism": "Travel industry and visitation trends.",
-          "justice": "Rule of law and legal indicators.",
-          "sports": "Cultural athletic influence.",
-          "space": "Space exploration and aerospace status.",
-          "rights": "Civil liberties and human rights status.",
-          "innovation": "Research, IP, and emerging tech.",
-          "sentiment": "Overall public optimism and sentiment.",
-          "digital": "E-commerce, digital transformation, and internet economy."
-        }
-        Use a professional, objective news reporting tone. No markdown. No preambles.`;
-
-        const res = await fetch("/api/ai", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt })
-        });
-        const data = await res.json();
-        const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || data.response || "{}";
-        const clean = raw.replace(/```json/g, "").replace(/```/g, "").trim();
-        let summaryData = {};
-        try {
-            summaryData = JSON.parse(clean);
-        } catch (e) {
-            console.error("Failed to parse Summary JSON:", clean);
-        }
-
-        const map = {
-            "intel-lead": summaryData.summary || summaryData.lead,
-            "intel-pol": summaryData.political || summaryData.governance,
-            "intel-trade": summaryData.trade || summaryData.economics,
-            "intel-infra": summaryData.infra || summaryData.infrastructure,
-            "intel-social": summaryData.social || summaryData.society,
-            "intel-mil": summaryData.mil || summaryData.security || summaryData.safety,
-            "intel-tech": summaryData.tech || summaryData.technology,
-            "intel-health": summaryData.health || summaryData.medical,
-            "intel-finance": summaryData.finance || summaryData.fiscal,
-            "intel-eco": summaryData.eco || summaryData.environment,
-            "intel-prod": summaryData.prod || summaryData.business,
-            "intel-edu": summaryData.edu || summaryData.education,
-            "intel-log": summaryData.log || summaryData.logistics,
-            "intel-energy": summaryData.energy || summaryData.resources,
-            "intel-agri": summaryData.agri || summaryData.agriculture,
-            "intel-demo": summaryData.demo || summaryData.demographics,
-            "intel-media": summaryData.media,
-            "intel-tourism": summaryData.tourism,
-            "intel-justice": summaryData.justice,
-            "intel-sports": summaryData.sports,
-            "intel-space": summaryData.space,
-            "intel-rights": summaryData.rights,
-            "intel-innovation": summaryData.innovation,
-            "intel-sentiment": summaryData.sentiment,
-            "intel-digital": summaryData.digital || summaryData.digital_economy
-        };
-
-        Object.keys(map).forEach(id => {
-            if (map[id]) setText(id, map[id]);
-        });
-
-    } catch (e) {
-        console.error("AI Update failed:", e);
-    } finally {
-        if (loadingEl) loadingEl.classList.add("hidden");
-        if (textEl) textEl.style.opacity = "1";
-    }
-};
-
 window.mapEngine = new MapboxEngine('map-container');
-window.mapEngine.init(); // interactions enabled inside style.load callback in mapbox-engine.js
-
-initDashboard();
+window.mapEngine.init();
+initTerminal();
 setupEventListeners();
-
+setInterval(updateSystemTime, 1000);
+window.playTacticalSound = function() {};
+window.showToast = function() {};
+window.toggleShortcuts = () => {
+    window.showToast("Shortcuts: Esc=Close, Ctrl+K=Search, ?=Help", "info");
+};
+window.onCountrySelected = (name) => {
+    console.log("Country selected:", name);
+};
+window.resetWeatherData = () => {
+    setText("atmo-feels", "--");
+    setText("atmo-hl", "-- / --");
+};
 window.initializeMarkets = (loc) => {
     if (window.displayPreciousMetals) window.displayPreciousMetals();
     if (window.displayCountryIndices) window.displayCountryIndices(loc);
     if (window.displayForex) window.displayForex();
     if (window.displayCommodities) window.displayCommodities();
+};
+window.fetchMarketIntel = (loc, cur) => {
+    console.log("Market intel for", loc, cur);
+};
+window.activateMapInteraction = () => {
+    const map = document.getElementById('map-container');
+    const overlay = document.getElementById('map-interaction-overlay');
+    if (map) {
+        map.classList.remove('map-locked');
+        map.classList.add('map-unlocked');
+    }
+    if (overlay) overlay.classList.add('hidden');
+    if (window.playTacticalSound) window.playTacticalSound('success');
+    if (window.mapEngine && !window.mapEngine.ready) {
+        window.mapEngine.init();
+    }
 };

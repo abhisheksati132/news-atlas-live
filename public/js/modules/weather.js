@@ -12,27 +12,27 @@ function getWeatherMeta(code, isDay = 1) {
       color: "text-blue-200",
     },
     2: { text: "Partly Cloudy", icon: "fa-cloud", color: "text-slate-300" },
-    3: { text: "Overcast", icon: "fa-cloud", color: "text-slate-600" },
-    45: { text: "Fog", icon: "fa-smog", color: "text-slate-600" },
+    3: { text: "Overcast", icon: "fa-cloud", color: "text-slate-400" },
+    45: { text: "Fog", icon: "fa-smog", color: "text-slate-400" },
     48: {
       text: "Depositing Rime Fog",
       icon: "fa-smog",
-      color: "text-slate-600",
+      color: "text-slate-400",
     },
     51: {
       text: "Light Drizzle",
       icon: "fa-cloud-rain",
-      color: "text-blue-600",
+      color: "text-blue-400",
     },
     53: {
       text: "Moderate Drizzle",
       icon: "fa-cloud-rain",
-      color: "text-blue-600",
+      color: "text-blue-400",
     },
     55: {
       text: "Dense Drizzle",
       icon: "fa-cloud-showers-heavy",
-      color: "text-blue-600",
+      color: "text-blue-400",
     },
     61: { text: "Slight Rain", icon: "fa-cloud-rain", color: "text-blue-500" },
     63: {
@@ -104,14 +104,14 @@ async function fetchWeather(lat, lon) {
     const data = await res.json();
     const locationLabel = document.getElementById("atmo-location-label");
     if (locationLabel && window._currentWeatherLocation) {
-      locationLabel.innerHTML = `<i class="fas fa-map-marker-alt mr-1 text-blue-600"></i>${window._currentWeatherLocation}`;
+      locationLabel.innerHTML = `<i class="fas fa-map-marker-alt mr-1 text-blue-400"></i>${window._currentWeatherLocation}`;
       locationLabel.classList.remove("hidden");
     }
     if (data.current) {
       const curr = data.current;
       const meta = getWeatherMeta(curr.weather_code, curr.is_day);
       const atmoTemp = document.getElementById("atmo-temp");
-      if (atmoTemp) atmoTemp.innerText = `${Math.round(curr.temperature_2m)}\u00B0`;
+      if (atmoTemp) atmoTemp.innerText = `${Math.round(curr.temperature_2m)}°`;
       const atmoCondition = document.getElementById("atmo-condition");
       if (atmoCondition) atmoCondition.innerText = meta.text;
       const iconEl = document.getElementById("atmo-main-icon");
@@ -119,7 +119,7 @@ async function fetchWeather(lat, lon) {
         iconEl.className = `fas ${meta.icon} text-9xl ${meta.color} opacity-80`;
       const atmoFeels = document.getElementById("atmo-feels");
       if (atmoFeels)
-        atmoFeels.innerText = `${Math.round(curr.apparent_temperature)}\u00B0`;
+        atmoFeels.innerText = `${Math.round(curr.apparent_temperature)}°`;
       const atmoWindSpeed = document.getElementById("atmo-wind-speed");
       if (atmoWindSpeed)
         atmoWindSpeed.innerText = Math.round(curr.wind_speed_10m);
@@ -144,7 +144,7 @@ async function fetchWeather(lat, lon) {
 
       const atmoDew = document.getElementById("atmo-dew");
       if (atmoDew)
-        atmoDew.innerText = curr.dew_point_2m !== undefined ? `${Math.round(curr.dew_point_2m)}\u00B0` : "--\u00B0";
+        atmoDew.innerText = curr.dew_point_2m !== undefined ? `${Math.round(curr.dew_point_2m)}°` : "--°";
 
       let estimatedCeiling = 8.0;
       const code = curr.weather_code;
@@ -161,23 +161,23 @@ async function fetchWeather(lat, lon) {
 
       const atmoAqi = document.getElementById("atmo-aqi");
       if (atmoAqi) {
-        const aqiValue = curr.aqi || Math.floor(Math.random() * 40) + 10;
-        atmoAqi.innerText = aqiValue;
-        atmoAqi.className = `text-[1.6rem] font-bold leading-none ${aqiValue <= 50 ? 'text-emerald-600' :
-          aqiValue <= 100 ? 'text-amber-500' : 'text-rose-600'}`;
-      }
-      
-      const atmoPrecipProb = document.getElementById("atmo-precip-prob");
-      if (atmoPrecipProb) {
-          const prob = data.hourly?.precipitation_probability ? data.hourly.precipitation_probability[new Date().getHours()] : 0;
-          atmoPrecipProb.innerHTML = `${prob} <span class="text-[12px] font-medium text-slate-500">%</span>`;
+        if (curr.aqi !== undefined) {
+          atmoAqi.innerText = curr.aqi;
+          atmoAqi.className = `text-2xl font-black leading-none ${curr.aqi <= 20 ? 'text-emerald-400' :
+            curr.aqi <= 50 ? 'text-yellow-400' :
+              curr.aqi <= 100 ? 'text-orange-400' : 'text-red-500'
+            }`;
+        } else {
+          atmoAqi.innerText = "--";
+          atmoAqi.className = "text-2xl font-black text-white leading-none";
+        }
       }
     }
     if (data.daily) {
       const todayHigh = data.daily.temperature_2m_max[0];
       const todayLow = data.daily.temperature_2m_min[0];
       const atmoHl = document.getElementById("atmo-hl");
-      if (atmoHl) atmoHl.innerText = `${Math.round(todayLow)}\u00B0 / ${Math.round(todayHigh)}\u00B0`;
+      if (atmoHl) atmoHl.innerText = `${Math.round(todayLow)}° / ${Math.round(todayHigh)}°`;
       const sunrise = new Date(data.daily.sunrise[0]).toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -230,10 +230,10 @@ async function fetchWeather(lat, lon) {
             hDiv.className =
               "flex flex-col items-center gap-2 min-w-[3.5rem] p-2 rounded-xl hover:bg-white/5 transition-colors cursor-default border border-transparent hover:border-white/5";
             hDiv.innerHTML = `
-                            <span class="text-sm text-slate-600 font-bold tracking-tight">${i === currentHour ? "Now" : timeStr}</span>
+                            <span class="text-sm text-slate-400 font-bold tracking-tight">${i === currentHour ? "Now" : timeStr}</span>
                             <i class="fas ${hMeta.icon} text-lg ${hMeta.color}"></i>
-                            <span class="text-sm font-bold text-white">${hTemp}\u00B0</span>
-                            ${hRain > 20 ? `<span class="text-[11px] text-blue-600 font-bold">${hRain}%</span>` : ""}
+                            <span class="text-sm font-bold text-white">${hTemp}°</span>
+                            ${hRain > 20 ? `<span class="text-[11px] text-blue-400 font-bold">${hRain}%</span>` : ""}
                         `;
             hourlyContainer.appendChild(hDiv);
           }
@@ -256,46 +256,39 @@ async function fetchWeather(lat, lon) {
         : 0;
     const atmoPrecipTotal = document.getElementById("atmo-precip-total");
     if (atmoPrecipTotal) atmoPrecipTotal.innerText = precipTotal.toFixed(1);
-    if (data.daily) {
-      const dailyContainer = document.getElementById("atmo-daily-container");
-      if (dailyContainer && data.daily) {
-        dailyContainer.innerHTML = "";
-        for (let i = 1; i < 7; i++) {
-          if (!data.daily.time[i]) break;
-          const dateObj = new Date(data.daily.time[i]);
-          const dayName = dateObj.toLocaleDateString("en-US", {
-            weekday: "long",
-          }).toUpperCase();
-          const dMax = Math.round(data.daily.temperature_2m_max[i]);
-          const dMin = Math.round(data.daily.temperature_2m_min[i]);
-          const dMeta = getWeatherMeta(data.daily.weather_code[i], 1);
-          const dPrecipSum = data.daily.precipitation_sum
-            ? data.daily.precipitation_sum[i]
-            : 0;
-          const dRow = document.createElement("div");
-          dRow.className = "px-6 py-4 flex items-center justify-between border-b border-gray-100 hover:bg-gray-50 transition-all group";
-          dRow.innerHTML = `
-                      <div class="flex flex-col gap-1 w-32">
-                        <span class="text-[10px] text-gray-600 font-bold uppercase tracking-wider">${dayName}</span>
-                        <div class="flex items-center gap-2">
-                          <i class="fas ${dMeta.icon} ${dMeta.color} text-xs"></i>
-                          <span class="text-[11px] text-gray-800 font-bold group-hover:text-blue-600 transition-colors">${dMeta.text}</span>
-                        </div>
-                      </div>
-                      <div class="flex items-center gap-8 text-right flex-1 justify-end">
-                          ${dPrecipSum > 0 ? `<div class="flex flex-col"><span class="text-[8px] text-blue-600 font-bold uppercase tracking-wider">Rain</span><span class="text-[11px] text-blue-600 font-bold">${Math.round(dPrecipSum)}mm</span></div>` : ""}
-                          <div class="flex flex-col">
-                            <span class="text-[8px] text-gray-600 font-bold uppercase tracking-wider">High / Low</span>
-                            <span class="text-[11px] font-bold text-gray-900">${dMax}\u00B0 <span class="text-gray-400">/</span> ${dMin}\u00B0</span>
-                          </div>
-                      </div>
-                  `;
-          dailyContainer.appendChild(dRow);
-        }
+    const dailyContainer = document.getElementById("atmo-daily-container");
+    if (dailyContainer && data.daily) {
+      dailyContainer.innerHTML = "";
+      for (let i = 1; i < 7; i++) {
+        if (!data.daily.time[i]) break;
+        const dateObj = new Date(data.daily.time[i]);
+        const dayName = dateObj.toLocaleDateString("en-US", {
+          weekday: "long",
+        });
+        const dMax = Math.round(data.daily.temperature_2m_max[i]);
+        const dMin = Math.round(data.daily.temperature_2m_min[i]);
+        const dMeta = getWeatherMeta(data.daily.weather_code[i], 1);
+        const dPrecipSum = data.daily.precipitation_sum
+          ? data.daily.precipitation_sum[i]
+          : 0;
+        const dRow = document.createElement("div");
+        dRow.className =
+          "px-6 py-3 flex items-center justify-between hover:bg-white/5 transition-colors group";
+        dRow.innerHTML = `
+                    <span class="text-sm text-slate-300 font-bold w-24">${dayName}</span>
+                    <div class="flex items-center gap-3 w-32">
+                        <i class="fas ${dMeta.icon} ${dMeta.color} w-6 text-center text-lg"></i>
+                        <span class="text-xs text-slate-500 font-bold uppercase tracking-wider group-hover:text-blue-400 transition-colors">${dMeta.text}</span>
+                    </div>
+                    <div class="flex items-center gap-4 text-right flex-1 justify-end">
+                        ${dPrecipSum > 0 ? `<div class="flex items-center gap-1 text-[11px] text-blue-400 font-bold"><i class="fas fa-umbrella"></i> ${Math.round(dPrecipSum)}mm</div>` : ""}
+                        <div class="font-mono text-sm font-bold text-white"><span class="text-slate-500">${dMin}°</span> / ${dMax}°</div>
+                    </div>
+                `;
+        dailyContainer.appendChild(dRow);
       }
     }
-    // Success handler
-
+    window.playTacticalSound("success");
     try {
       const weatherSummary = {
         temp: data.current ? Math.round(data.current.temperature_2m) : "--",
@@ -330,7 +323,6 @@ async function fetchWeather(lat, lon) {
           ? window.selectedCountry.properties.name
           : "this location",
       );
-      generateWeatherAlerts(weatherSummary);
     } catch (err) { }
   } catch (e) {
     console.error("Atmosphere Error:", e);
@@ -339,26 +331,38 @@ async function fetchWeather(lat, lon) {
 async function generateWeatherAnalysis(weatherData, cityName) {
   const el = document.getElementById("weather-ai-analysis");
   if (!el) return;
-  el.innerHTML = '<span class="animate-pulse text-slate-500 font-mono text-[9px] uppercase tracking-widest">Processing Atmospheric Intelligence...</span>';
+  el.innerHTML = '<span class="animate-pulse text-slate-500 font-mono text-sm">Analyzing atmospheric conditions...</span>';
   try {
     const forecastStr = (weatherData.forecast || [])
       .map((d) => `${d.date}: ${d.temp}°C, ${d.condition}`)
       .join("\n");
-    const prompt = `Provide a professional environmental assessment for ${cityName} in this EXACT format:
+    const prompt = `Provide a tactical weather assessment for ${cityName} in this EXACT format with each section on its own:
 
-[SITUATIONAL_OVERVIEW]
-Provide a 2-sentence highly technical summary.
+[EXECUTIVE SUMMARY]
+Tactical Rating: X/10
+2-3 sentence overall weather overview.
 
-[ATMOSPHERIC_ASSESSMENT]
-Analyze core metrics and 7-day projection.
+[WEATHER ASSESSMENT]
+Tactical Rating: X/10
+Current conditions and 7-day forecast analysis.
 
-[TRAVEL_LOGISTICS]
-Operational impact on movement/logistics.
+[TRAVEL ADVISORIES]
+Tactical Rating: X/10
+Travel and movement recommendations.
 
-[OPERATIONAL_IMPACT]
-Impact on outdoor equipment/personnel.
+[HEALTH WARNINGS]
+Tactical Rating: X/10
+UV, air quality, and health impact notes.
 
-Current data: ${weatherData.temp}°C (feels like ${weatherData.feels_like}°C), ${weatherData.condition}, Humidity: ${weatherData.humidity}%, Wind: ${weatherData.wind_speed} km/h, UV: ${weatherData.uv_index}, Visibility: ${weatherData.visibility} km. 7-Day: ${forecastStr}. Keep each section to 2 sentences max. Use professional, sparse, intelligence-grade language.`;
+[OUTDOOR IMPACT]
+Tactical Rating: X/10
+Impact on outdoor operations and activities.
+
+[RECOMMENDED ACTIONS]
+Tactical Rating: X/10
+Specific action items for the next 24-48 hours.
+
+Current data: ${weatherData.temp}°C (feels like ${weatherData.feels_like}°C), ${weatherData.condition}, Humidity: ${weatherData.humidity}%, Wind: ${weatherData.wind_speed} km/h, UV: ${weatherData.uv_index}, Visibility: ${weatherData.visibility} km. 7-Day: ${forecastStr}. Keep each section to 2-3 sentences max.`;
 
     const res = await fetch("/api/ai", {
       method: "POST",
@@ -370,30 +374,31 @@ Current data: ${weatherData.temp}°C (feels like ${weatherData.feels_like}°C), 
     if (rawText) {
       renderWeatherCards(rawText, el);
     } else {
-      el.innerHTML = '<div class="text-slate-600 font-sans text-[11px] uppercase">Data connection timeout. Advisory unavailable.</div>';
+      el.innerHTML = '<div class="apple-glass p-5 text-slate-400 font-mono text-sm">Weather analysis unavailable.</div>';
     }
   } catch (e) {
-    el.innerHTML = '<div class="text-red-900/50 font-sans text-[11px] uppercase">Connection failure. Weather system offline.</div>';
+    el.innerHTML = '<div class="apple-glass p-5 text-red-400 font-mono text-sm">Weather analysis link failed.</div>';
   }
+  generateWeatherAlerts(weatherData);
 }
 
 function renderWeatherCards(rawText, container) {
   let clean = rawText.replace(/\*\*/g, '').trim();
   const parts = clean.split(/(?=\[[A-Z][A-Z_ ]+\])/);
-  let html = '<div class="flex flex-col gap-6">';
+  let html = '<div class="space-y-6 pt-2">';
 
   parts.forEach(block => {
     const headerMatch = block.match(/\[([A-Z][A-Z_ ]+)\]/);
     if (!headerMatch) return;
     const key = headerMatch[1].trim();
     const displayName = key.replace(/_/g, ' ');
-    const bodyRaw = block.slice(block.indexOf(']') + 1).trim().replace(/\*\*/g, '');
+    const bodyRaw = block.slice(block.indexOf(']') + 1).trim().replace(/Tactical Rating:\s*\d+\s*\/\s*10\n?/gi, '').replace(/\*\*/g, '');
     if (!bodyRaw) return;
 
     html += `
-      <div class="flex flex-col gap-1.5 px-0">
-        <h4 class="text-[9px] font-bold text-blue-600 uppercase tracking-widest font-sans">${displayName}</h4>
-        <p class="text-[11px] text-slate-700 leading-relaxed font-sans">${bodyRaw}</p>
+      <div class="border-l-2 border-amber-500/30 pl-4">
+        <h4 class="text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-1.5">${displayName}</h4>
+        <p class="text-[13px] text-slate-300 leading-relaxed font-normal">${bodyRaw}</p>
       </div>
     `;
   });
@@ -406,26 +411,25 @@ function generateWeatherAlerts(weatherData) {
   if (weatherData.temp > 35)
     alerts.push({
       type: "danger",
-      icon: "EXTREME_HEAT_ALERT",
-      title: "Critical Temperature Warning",
-      description: `Ambient temperature has exceeded 35°C (${weatherData.temp}°C). High physiological risk for outdoor activities.`,
+      icon: "🔥",
+      title: "Extreme Heat Warning",
+      description: `Temperature ${weatherData.temp}°C. Stay hydrated and avoid prolonged sun exposure.`,
     });
   if (weatherData.uv_index >= 8)
     alerts.push({
       type: "warning",
-      icon: "HIGH_UV_EXPOSURE",
-      title: "Strong UV Radiation Level",
-      description: `Solar UV intensity recorded at level ${weatherData.uv_index}. Limit direct exposure.`,
+      icon: "☀️",
+      title: "High UV Index",
+      description: `UV Index ${weatherData.uv_index}. Wear sunscreen and protective clothing.`,
     });
   if (weatherData.wind_speed > 50)
     alerts.push({
       type: "warning",
-      icon: "VELOCITY_THRESHOLD",
-      title: "Sustained Velocity Warning",
-      description: `Atmospheric wind velocity exceeded 50 km/h baseline. Potential for structural disruption.`,
+      icon: "💨",
+      title: "Strong Wind Advisory",
+      description: `Wind speed ${weatherData.wind_speed} km/h. Secure loose objects.`,
     });
   if (alerts.length > 0) displayWeatherAlerts(alerts);
-  else document.getElementById("weather-alerts")?.classList.add("hidden");
 }
 function displayWeatherAlerts(alerts) {
   const container = document.getElementById("weather-alerts");
@@ -433,24 +437,19 @@ function displayWeatherAlerts(alerts) {
   container.innerHTML = "";
   container.classList.remove("hidden");
   const colors = {
-    danger: "border-rose-500/50 bg-rose-500/5",
-    warning: "border-cyan-500/30 bg-cyan-500/5",
+    danger: "border-red-500/30 bg-red-500/10",
+    warning: "border-amber-500/30 bg-amber-500/10",
   };
   alerts.forEach((alert) => {
     const el = document.createElement("div");
-    el.className = `p-4 border border-white/5 border-l-2 ${colors[alert.type] || colors.warning} relative overflow-hidden group`;
+    el.className = `dossier-card p-3 border-l-4 ${colors[alert.type] || colors.warning}`;
     el.innerHTML = `
-            <div class="absolute inset-0 bg-gradient-to-r from-transparent to-white/[0.01]"></div>
-            <div class="relative flex items-start gap-4">
-               <div class="flex flex-col gap-1">
-                  <span class="text-[8px] font-bold text-slate-500 font-sans tracking-widest uppercase">ALERT_TYPE</span>
-                  <span class="text-[9px] font-bold text-rose-600 font-sans">${alert.icon}</span>
-               </div>
-               <div class="w-px h-8 bg-white/5 mt-1"></div>
-               <div class="flex-1">
-                 <div class="text-[10px] font-black text-white uppercase tracking-widest font-mono mb-1">${alert.title}</div>
-                 <div class="text-[9px] text-slate-500 font-mono uppercase tracking-tight">${alert.description}</div>
-               </div>
+            <div class="flex items-start gap-3">
+              <span class="text-2xl">${alert.icon}</span>
+              <div class="flex-1">
+                <div class="font-bold text-white text-sm mb-1">${alert.title}</div>
+                <div class="text-xs text-slate-300">${alert.description}</div>
+              </div>
             </div>
         `;
     container.appendChild(el);
@@ -486,19 +485,21 @@ window.resetWeatherData = () => {
     iconEl.className = "fas fa-meteor text-9xl text-slate-500 opacity-20";
   if (document.getElementById("atmo-wind-arrow"))
     document.getElementById("atmo-wind-arrow").style.transform = "rotate(0deg)";
+  if (document.getElementById("atmo-uv-bar"))
+    document.getElementById("atmo-uv-bar").style.width = "0%";
   const hourlyContainer = document.getElementById("atmo-hourly-container");
   if (hourlyContainer)
     hourlyContainer.innerHTML =
-      '<div class="text-[10px] text-slate-600 font-mono p-4 text-center">AWAITING SECTOR UPLINK...</div>';
+      '<div class="text-xs text-slate-600 font-mono p-4 text-center">AWAITING SECTOR UPLINK...</div>';
 };
 window.searchAtmosphereCity = async () => {
-  const inputEl = document.getElementById("atmosphere-city-search");
+  const inputEl = document.getElementById("atmo-city-search");
   if (!inputEl) return;
   const q = inputEl.value.trim();
   if (!q) return;
   const btn = inputEl.nextElementSibling;
-  const originalBtnText = btn.innerHTML;
-  btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i>';
+  const originalBtnText = btn.innerText;
+  btn.innerText = "WAIT..";
   btn.disabled = true;
   try {
     const res = await fetch(
@@ -522,6 +523,6 @@ window.searchAtmosphereCity = async () => {
   } catch (e) {
     console.error("Meteorological Geocoding Failed:", e);
   }
-  btn.innerHTML = originalBtnText;
+  btn.innerText = originalBtnText;
   btn.disabled = false;
 };

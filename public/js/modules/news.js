@@ -1,10 +1,11 @@
 let allNews = [];
-let displayedNewsCount = 20;
+let displayedNewsCount = 21;
 let currentNewsFilters = { search: "", time: "All Time", sort: "Most Recent" };
 let newsSearchQuery = "";
 let newsSearchTimer = null;
 let isLiveSearching = false;
 
+// Security: escape HTML special chars to prevent XSS from external RSS content
 function escapeHtml(str) {
   if (!str) return "";
   return String(str)
@@ -43,13 +44,25 @@ function getFavicon(sourceUrl) {
     return null;
   }
 }
-function showNewsSkeletons(container) { }
+function showNewsSkeletons(container) {
+  if (!container) return;
+  const skels = Array.from({ length: 3 }, () => `
+    <div class="dossier-card mb-4 skeleton" style="height:140px;">
+      <div class="flex items-center gap-2 mb-4">
+        <div class="w-16 h-3 rounded-full skeleton" style="background:rgba(255,255,255,0.05)"></div>
+        <div class="ml-auto w-10 h-3 rounded-full skeleton" style="background:rgba(255,255,255,0.04)"></div>
+      </div>
+      <div class="w-full h-4 rounded skeleton mb-2" style="background:rgba(255,255,255,0.05)"></div>
+      <div class="w-4/5 h-4 rounded skeleton" style="background:rgba(255,255,255,0.04)"></div>
+    </div>`).join("");
+  container.innerHTML = skels;
+}
 async function fetchNews(overrideQ) {
   const loading = document.getElementById("news-loading");
   const container = document.getElementById("articles-container");
   if (loading) loading.classList.remove("hidden");
-  if (container) container.innerHTML = "";
-  displayedNewsCount = 20;
+  if (container) showNewsSkeletons(container);
+  displayedNewsCount = 21;
   isLiveSearching = false;
   const previousNews = allNews.length > 0 ? [...allNews] : null;
   try {
@@ -86,6 +99,8 @@ async function fetchNews(overrideQ) {
     if (window.showToast) window.showToast("News feed unavailable. Check your connection.", "error");
   } finally {
     if (loading) loading.classList.add("hidden");
+    const stamp = document.getElementById("news-last-updated");
+    if (stamp) stamp.innerText = `Updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
   }
 }
 window.filterNews = (searchTerm) => {
@@ -141,16 +156,9 @@ function displayFilteredNews() {
   });
 
   let countToDisplay = Math.min(displayedNewsCount, filtered.length);
+  const remainder = countToDisplay % 3;
+  if (remainder !== 0 && countToDisplay > remainder) countToDisplay -= remainder;
   displayNewsArticles(filtered.slice(0, countToDisplay));
-
-  const loadMoreContainer = document.getElementById("load-more-news-container");
-  if (loadMoreContainer) {
-    if (countToDisplay >= filtered.length) {
-      loadMoreContainer.classList.add("hidden");
-    } else {
-      loadMoreContainer.classList.remove("hidden");
-    }
-  }
 }
 function displayNewsArticles(articles) {
   const container = document.getElementById("articles-container");
@@ -167,57 +175,48 @@ function displayNewsArticles(articles) {
   }
   articles.forEach((art, i) => {
     const sentiment = getNewsSentiment(art.title, art.description);
-    const timeAgo = (art.pubDate ? relativeTime(art.pubDate) : "RECENT");
-    const source = (art.source_id || "GLOBAL").toUpperCase();
+    const timeAgo = relativeTime(art.pubDate);
+    const favicon = getFavicon(art.source_url);
+    const faviconHtml = favicon
+      ? `<img src="${favicon}" alt="" class="w-3 h-3 rounded-full object-cover grayscale opacity-60">`
+      : `<i class="fas fa-newspaper text-[8px] text-slate-500"></i>`;
     
     const imgHtml = art.image_url
-      ? `<div style="width:100%; height:180px; margin-top:1rem; overflow:hidden; background:var(--surface-2); border-bottom:1px solid var(--border);">
-              <img src="${art.image_url}" 
-                   style="width:100%; height:100%; object-fit:cover; opacity:0.95; transition:transform 0.4s ease;" 
-                   class="group-hover:scale-105"
-                   onerror="this.parentElement.style.display='none'">
+      ? `<div class="w-full mt-3 rounded-xl border border-white/[0.05] overflow-hidden bg-slate-900/50" 
+              style="height: 180px;">
+              <img src="${art.image_url}" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'">
          </div>`
       : "";
 
-    const card = document.createElement("div");
-    card.className = "news-card-animate group";
-    card.style.cssText = "background:var(--surface); border:1px solid var(--border); overflow:hidden; display:flex; flex-direction:column; cursor:pointer; transition:border-color 0.15s ease, background 0.15s ease;";
-    card.style.animationDelay = `${i * 30}ms`;
-    card.onmouseover = () => { card.style.borderColor = "var(--ink-900)"; card.style.background = "var(--surface-2)" };
-    card.onmouseout = () => { card.style.borderColor = "var(--border)"; card.style.background = "var(--surface)" };
-    card.onclick = () => window.open(art.link, '_blank');
-    
-    card.innerHTML = `
-      ${imgHtml}
-      <div style="padding:1.5rem; display:flex; flex-direction:column; flex:1;">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
-          <div style="font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; font-family:var(--font-sans);">
-            ${source} <span style="margin:0 0.4rem; color:var(--border-2);">|</span> ${timeAgo}
-          </div>
-          <div style="display:flex; align-items:center; gap:0.4rem;">
-            <div style="width:6px; height:6px; background:${sentiment.label === 'POSITIVE' ? 'var(--up)' : sentiment.label === 'CRITICAL' ? 'var(--down)' : 'var(--text-faint)'};"></div>
-            <span style="font-size:9px; font-weight:700; font-family:var(--font-sans); color:${sentiment.label === 'POSITIVE' ? 'var(--up)' : sentiment.label === 'CRITICAL' ? 'var(--down)' : 'var(--text-faint)'}; uppercase tracking-widest">${sentiment.label}</span>
-          </div>
+    const row = document.createElement("div");
+    row.className = `p-4 border-b border-white/5 cursor-pointer hover:bg-white/[0.03] transition-colors news-card-animate whitespace-normal`;
+    row.style.animationDelay = `${i * 30}ms`;
+    row.innerHTML = `
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center gap-2">
+          ${faviconHtml}
+          <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">${art.source_id || "UPLINK"}</span>
+          <span class="text-[8px] font-mono text-slate-600">/</span>
+          <span class="text-[8px] font-mono text-slate-600 uppercase">${timeAgo}</span>
+          <span class="text-[8px] font-bold px-1.5 py-0.5 rounded-sm ${sentiment.cls} uppercase ml-auto">${sentiment.label}</span>
         </div>
-        
-        <h3 style="font-size:1.15rem; font-weight:700; color:var(--text); font-family:var(--font-serif); line-height:1.3; margin-bottom:0.75rem;">
-          ${escapeHtml(art.title)}
-        </h3>
-        
-        ${art.description ? `<p style="font-size:13px; color:var(--text-2); line-height:1.6; font-family:var(--font-sans); display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:1.5rem;">${escapeHtml(art.description)}</p>` : '<div style="margin-bottom:1.5rem;"></div>'}
-
-        <div style="margin-top:auto; padding-top:1rem; border-top:1px solid var(--divider); display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--text);">Read Analysis</span>
-          <i class="fas fa-arrow-right" style="font-size:10px; color:var(--text-muted);"></i>
-        </div>
+        ${imgHtml}
+        <h3 class="text-base font-bold text-slate-100 leading-tight hover:text-blue-400 transition-colors pt-1" onclick="window.open('${escapeHtml(art.link)}', '_blank')">${escapeHtml(art.title)}</h3>
+        ${art.description ? `<p class="text-[12px] text-slate-400 leading-relaxed font-normal line-clamp-3">${escapeHtml(art.description)}</p>` : ''}
       </div>
     `;
-    container.appendChild(card);
+    container.appendChild(row);
   });
 }
 window.loadMoreNews = () => {
-  displayedNewsCount += 20;
+  displayedNewsCount += 21;
   displayFilteredNews();
+};
+window.checkNewsScroll = () => {
+  const container = document.getElementById("news-scroll-container");
+  if (!container) return;
+  if (container.scrollTop + container.clientHeight >= container.scrollHeight - 100)
+    window.loadMoreNews();
 };
 window.fetchNews = fetchNews;
 window.displayFilteredNews = displayFilteredNews;
@@ -225,6 +224,17 @@ async function fetchGDELTEvents(country) {
   const container = document.getElementById("gdelt-events-content");
   if (!container) return;
   container.innerHTML = '<div class="text-slate-500 text-xs animate-pulse py-2">Loading intelligence events...</div>';
+
+  const simulated = [
+    { title: "Global trade negotiations enter critical phase amid supply chain concerns", tone: -1.2, domain: "Reuters", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
+    { title: "Central banks coordinate on inflation response strategy", tone: 2.5, domain: "Bloomberg", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
+    { title: "Regional security summit addresses emerging threat vectors", tone: -2.8, domain: "FT", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
+    { title: "Technology export controls reshape global semiconductor landscape", tone: -0.5, domain: "WSJ", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
+    { title: "UN peacekeeping mission reports progress in conflict zones", tone: 3.1, domain: "AP News", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
+    { title: "Energy markets adjust to new geopolitical supply dynamics", tone: -1.8, domain: "CNBC", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
+    { title: "Climate cooperation framework achieves binding commitments", tone: 4.2, domain: "Guardian", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
+    { title: "Diplomatic channels reopened after months of tension", tone: 3.8, domain: "BBC", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") }
+  ];
 
   function renderRows(articles) {
     container.innerHTML = "";
@@ -256,14 +266,14 @@ async function fetchGDELTEvents(country) {
     if (!res.ok) throw new Error("GDELT unavailable");
     const data = await res.json();
     const articles = data.articles || [];
-    if (!articles.length) throw new Error("No recent events found");
+    if (!articles.length) throw new Error("No articles");
     renderRows(articles);
     const stamp = document.getElementById("gdelt-timestamp");
     if (stamp) stamp.innerText = `Intel · ${articles.length} events · Live`;
   } catch (e) {
-    container.innerHTML = `<div class="text-slate-600 text-[10px] py-10 text-center uppercase tracking-widest font-mono">No live intelligence events found for this sector</div>`;
+    renderRows(simulated);
     const stamp = document.getElementById("gdelt-timestamp");
-    if (stamp) stamp.innerText = `Intel · Offline`;
+    if (stamp) stamp.innerText = `Intel · ${simulated.length} events · Simulated`;
   }
 }
 window.fetchGDELTEvents = fetchGDELTEvents;
@@ -288,14 +298,14 @@ setInterval(fetchSeismicStatus, 300000);
 
 let _newsRefreshTimer = null;
 function startNewsAutoRefresh() {
-  if (_newsRefreshTimer) clearInterval(_newsRefreshTimer);
-  _newsRefreshTimer = setInterval(() => {
-    if (document.visibilityState === 'visible' && !isLiveSearching) {
-      fetchNews();
-    }
-  }, 5 * 60 * 1000);
+    if (_newsRefreshTimer) clearInterval(_newsRefreshTimer);
+    _newsRefreshTimer = setInterval(() => {
+        if (document.visibilityState === 'visible' && !isLiveSearching) {
+            fetchNews();
+        }
+    }, 5 * 60 * 1000);
 }
 startNewsAutoRefresh();
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') startNewsAutoRefresh();
+    if (document.visibilityState === 'visible') startNewsAutoRefresh();
 });

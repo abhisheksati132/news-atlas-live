@@ -9,14 +9,13 @@
             "config": { "distDir": "dist" }
         },
         {
-            "src": "api/**/*.js",
+            "src": "api/*.js",
             "use": "@vercel/node"
         }
     ],
     "routes": [
         { "src": "/api/([^.]+)", "dest": "/api/$1.js" },
         { "src": "/api/(.*)", "dest": "/api/$1" },
-        { "src": "/app/(.*)", "dest": "/app.html" },
         { "src": "/app", "dest": "/app.html" },
         { "src": "/(.*)", "dest": "/$1" }
     ]

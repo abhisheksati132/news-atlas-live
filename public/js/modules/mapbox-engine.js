@@ -38,18 +38,13 @@ class MapboxEngine {
         this.map = new mapboxgl.Map({
             container: this.containerId,
             style: 'mapbox://styles/mapbox/satellite-streets-v12',
-            center: [15, 0],
+            center: [10, 10],
             zoom: 1.6,
             pitch: 0,
             bearing: 0,
             projection: 'globe',
-            padding: { top: 72 },
             attributionControl: false,
-            antialias: true,
-            scrollZoom: true,
-            dragRotate: true,
-            dragPan: true,
-            touchZoomRotate: true
+            antialias: true
         });
 
         this.map.on('style.load', () => {
@@ -59,27 +54,11 @@ class MapboxEngine {
             this.initMapboxLayers();
             this._startDeckAnimation();
             this.ready = true;
-            // Always enable interactions on load — no gateway needed
-            this.enableInteractions();
             this.onReady();
-            // Start subtle auto-rotation
-            this._startAutoRotation();
         });
 
         this.map.on('zoom', () => {
             this._toggle3DBuildings();
-        });
-
-        // Initialize Geo-Tracker HUD telemetry stream
-        this.map.on('mousemove', (e) => {
-            const el = document.getElementById('geo-lat-lng');
-            if(el) {
-                const lat = e.lngLat.lat.toFixed(4);
-                const lng = e.lngLat.lng.toFixed(4);
-                const latDir = lat >= 0 ? 'N' : 'S';
-                const lngDir = lng >= 0 ? 'E' : 'W';
-                el.innerText = `${Math.abs(lat)}° ${latDir} / ${Math.abs(lng)}° ${lngDir}`;
-            }
         });
 
         return true;
@@ -108,11 +87,11 @@ class MapboxEngine {
     _applyAtmosphere() {
         try {
             this.map.setFog({
-                'color': 'rgb(5, 8, 20)',
-                'high-color': 'rgb(3, 6, 15)',
-                'horizon-blend': 0.02,
-                'space-color': 'rgb(2, 3, 8)',
-                'star-intensity': 0.85,
+                'color': 'rgb(13, 17, 23)',
+                'high-color': 'rgb(9, 12, 18)',
+                'horizon-blend': 0.03,
+                'space-color': 'rgb(3, 5, 10)',
+                'star-intensity': 0,
                 'range': [0.5, 10]
             });
         } catch (e) {
@@ -261,34 +240,8 @@ class MapboxEngine {
 
     flyToCountry(lngLat, zoom = 4.5) {
         if (!this.map) return;
-        
-        // Cancel any existing orbit
-        if (this._orbitAnimId) {
-            cancelAnimationFrame(this._orbitAnimId);
-            this._orbitAnimId = null;
-        }
-
         const currentZoom = this.map.getZoom();
         const isGlobeView = currentZoom < 3;
-
-        const startOrbit = () => {
-            let bearing = this.map.getBearing();
-            const orbit = () => {
-                if(this.map.isUserInteracting() || this._orbitAnimId === null) return;
-                bearing += 0.08;
-                this.map.easeTo({ bearing, duration: 0, easing: t => t });
-                this._orbitAnimId = requestAnimationFrame(orbit);
-            };
-            this._orbitAnimId = requestAnimationFrame(orbit);
-            
-            // Auto-cancel orbit when user drags map manually
-            this.map.once('dragstart', () => {
-                if (this._orbitAnimId) {
-                    cancelAnimationFrame(this._orbitAnimId);
-                    this._orbitAnimId = null;
-                }
-            });
-        };
 
         if (isGlobeView) {
             this.map.easeTo({ zoom: 1.8, pitch: 0, bearing: 0, duration: 600 });
@@ -296,33 +249,31 @@ class MapboxEngine {
                 this.map.flyTo({
                     center: lngLat,
                     zoom,
-                    pitch: 55,
+                    pitch: 45,
                     bearing: -15,
                     essential: true,
-                    duration: 3200,
-                    curve: 1.4,
+                    duration: 2800,
+                    curve: 1.6,
                     easing: t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
                 });
-                this.map.once('moveend', startOrbit);
             }, 700);
         } else {
             this.map.flyTo({
                 center: lngLat,
                 zoom,
-                pitch: 55,
+                pitch: 42,
                 bearing: -10,
                 essential: true,
-                duration: 2500,
-                curve: 1.2
+                duration: 2200,
+                curve: 1.42
             });
-            this.map.once('moveend', startOrbit);
         }
     }
 
     resetToGlobe() {
         if (!this.map) return;
         this.map.flyTo({
-            center: [15, 0],
+            center: [10, 15],
             zoom: 1.5,
             pitch: 0,
             bearing: 0,
@@ -518,35 +469,12 @@ class MapboxEngine {
         this.clearHoloHUD();
     }
 
-    _startAutoRotation() {
-        if (!this.map) return;
-        this._isRotating = true;
-
-        const rotate = () => {
-            if (!this._isRotating || !this.map) return;
-            this.map.setBearing((this.map.getBearing() + 0.008) % 360);
-            this._rotateAnimId = requestAnimationFrame(rotate);
-        };
-        this._rotateAnimId = requestAnimationFrame(rotate);
-
-        // Stop rotation on any user interaction
-        const stopRotation = () => {
-            this._isRotating = false;
-            if (this._rotateAnimId) cancelAnimationFrame(this._rotateAnimId);
-        };
-        this.map.once('mousedown', stopRotation);
-        this.map.once('touchstart', stopRotation);
-        this.map.once('wheel', stopRotation);
-    }
-
     enableInteractions() {
         if (!this.map) return;
         this.map.scrollZoom.enable();
         this.map.dragPan.enable();
         this.map.dragRotate.enable();
         this.map.touchZoomRotate.enable();
-        this.map.keyboard.enable();
-        this.map.doubleClickZoom.enable();
     }
 
     disableInteractions() {

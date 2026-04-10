@@ -36,7 +36,6 @@ app.use((req, res, next) => {
   res.on('finish', () => {
     const elapsed = Date.now() - start;
     console.log(`[RES] ${new Date().toISOString()} | ${req.method} ${req.url} -> ${res.statusCode} (${elapsed}ms)`);
-    res.setHeader('X-Response-Time', `${elapsed}ms`);
   });
   next();
 });

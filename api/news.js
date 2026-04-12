@@ -37,11 +37,10 @@ export default async function handler(req, res) {
             page: String(pageNum),
         });
 
-        // NewsAPI.org: if we have a search query, use /everything, else use /top-headlines
-        let endpoint = `${BASE_URL}/top-headlines?${params}`;
-
+        let endpoint;
         if (q) {
-            endpoint = `${BASE_URL}/everything?${params}&q=${encodeURIComponent(q)}`;
+            params.set("q", q);
+            endpoint = `${BASE_URL}/everything?${params.toString()}`;
         } else {
             const supportedCountries = ['ae','ar','at','au','be','bg','br','ca','ch','cn','co','cu','cz','de','eg','fr','gb','gr','hk','hu','id','ie','il','in','it','jp','kr','lt','lv','ma','mx','my','ng','nl','no','nz','ph','pl','pt','ro','rs','ru','sa','se','sg','si','sk','th','tr','tw','ua','us','ve','za'];
             if (iso2 && supportedCountries.includes(iso2.toLowerCase())) params.set("country", iso2.toLowerCase());
@@ -50,7 +49,7 @@ export default async function handler(req, res) {
             let targetCat = (category || 'general').toLowerCase();
             if (targetCat === 'top' || !validCats.includes(targetCat)) targetCat = 'general';
             params.set("category", targetCat);
-            endpoint = `${BASE_URL}/top-headlines?${params}`;
+            endpoint = `${BASE_URL}/top-headlines?${params.toString()}`;
         }
 
         const response = await fetch(endpoint);

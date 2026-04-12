@@ -110,6 +110,12 @@ async function fetchWeather(lat, lon) {
     if (data.current) {
       const curr = data.current;
       const meta = getWeatherMeta(curr.weather_code, curr.is_day);
+      
+      // Update Atmospheric FX
+      if (window.mapEngine) {
+        window.mapEngine.setAtmosphericFX(curr.weather_code, curr.is_day === 1);
+      }
+
       const atmoTemp = document.getElementById("atmo-temp");
       if (atmoTemp) atmoTemp.innerText = `${Math.round(curr.temperature_2m)}°`;
       const atmoCondition = document.getElementById("atmo-condition");

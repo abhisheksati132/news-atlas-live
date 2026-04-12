@@ -1,7 +1,16 @@
+import { getCache, setCache } from "./utils/cache.js";
+
 export default async function handler(req, res) {
   const { lat, lon } = req.query;
   if (!lat || !lon) {
     return res.status(400).json({ error: 'Missing latitude/longitude query params' });
+  }
+
+  const cacheKey = `weather_${lat}_${lon}`;
+  const cached = getCache(cacheKey);
+  if (cached) {
+    res.setHeader("X-Cache", "HIT");
+    return res.status(200).json(cached);
   }
 
   const params = new URLSearchParams({
@@ -30,6 +39,8 @@ export default async function handler(req, res) {
       } catch { /* AQ is supplementary, ignore parse errors */ }
     }
 
+    setCache(cacheKey, data, 900); // 15 min cache
+    res.setHeader("X-Cache", "MISS");
     res.status(200).json(data);
   } catch (error) {
     console.error('[weather] Error:', error.message);

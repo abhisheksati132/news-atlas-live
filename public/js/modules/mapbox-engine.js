@@ -447,6 +447,117 @@ class MapboxEngine {
         }
     }
 
+    setStabilityHeatmap(reports) {
+        if (!this.deckOverlay) return;
+
+        this._heatmapLayer = new deck.HeatmapLayer({
+            id: 'stability-heatmap',
+            data: reports,
+            getPosition: d => d.coordinates,
+            getWeight: d => d.score || 0.5,
+            radiusPixels: 80,
+            intensity: 1.5,
+            threshold: 0.1,
+            colorRange: [
+                [0, 255, 0, 50],    // Stable
+                [255, 255, 0, 150], // Volatile
+                [255, 0, 0, 200]    // Conflict
+            ]
+        });
+
+        this._updateDeckLayers();
+    }
+
+    setAtmosphericFX(weatherCode, isDay = true) {
+        if (!this.map) return;
+        this.map.setFog({
+            'range': [0.5, 10],
+            'color': isDay ? 'rgba(255, 255, 255, 0.5)' : 'rgba(2, 6, 23, 0.9)',
+            'high-color': isDay ? 'rgba(200, 230, 255, 0.7)' : 'rgba(10, 20, 40, 0.8)',
+            'space-color': 'rgba(2, 6, 23, 1)',
+            'star-intensity': isDay ? 0 : 0.4
+        });
+    }
+
+    setVesselFlow(routes) {
+        if (!this.deckOverlay) return;
+        this._vesselLayer = new deck.ArcLayer({
+            id: 'vessel-routes',
+            data: routes,
+            getSourcePosition: d => d.from,
+            getTargetPosition: d => d.to,
+            getSourceColor: [125, 211, 252, 100],
+            getTargetColor: [59, 130, 246, 100],
+            getWidth: 1.5,
+            pickable: true
+        });
+        this._updateDeckLayers();
+    }
+
+    setEnergyHubs(hubs) {
+        if (!this.deckOverlay) return;
+        this._energyLayer = new deck.ScatterplotLayer({
+            id: 'energy-hubs',
+            data: hubs,
+            getPosition: d => d.coordinates,
+            getFillColor: [245, 158, 11, 200],
+            getRadius: 60000,
+            radiusMinPixels: 6,
+            pickable: true
+        });
+        this._updateDeckLayers();
+    }
+
+    _updateDeckLayers() {
+        if (!this.deckOverlay) return;
+        const layers = [];
+        if (this._heatmapLayer) layers.push(this._heatmapLayer);
+        if (this._vesselLayer) layers.push(this._vesselLayer);
+        if (this._energyLayer) layers.push(this._energyLayer);
+        if (this._flightLayer) layers.push(this._flightLayer);
+        if (this._newsPulseLayer) layers.push(this._newsPulseLayer);
+        this.deckOverlay.setProps({ layers });
+    }
+
+    setNewsPulses(pulses) {
+        if (!this.deckOverlay) return;
+        
+        this._newsPulseLayer = new deck.ScatterplotLayer({
+            id: 'news-pulses',
+            data: pulses,
+            getPosition: d => d.coordinates,
+            getFillColor: [59, 130, 246, 180],
+            getRadius: d => d.radius || 40000,
+            radiusMinPixels: 4,
+            radiusMaxPixels: 12,
+            pickable: true
+        });
+
+        this._updateDeckLayers();
+    }
+
+    setFlightRadar(flights) {
+        if (!this.deckOverlay) return;
+
+        this._flightLayer = new deck.IconLayer({
+            id: 'flights',
+            data: flights,
+            pickable: true,
+            iconAtlas: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.png',
+            iconMapping: {
+                airplane: { x: 0, y: 0, width: 128, height: 128, anchorY: 64, mask: true }
+            },
+            getIcon: d => 'airplane',
+            sizeScale: 15,
+            getPosition: d => d.coordinates,
+            getSize: d => 2,
+            getColor: [255, 255, 255, 200],
+            getAngle: d => -d.heading || 0
+        });
+
+        this._updateDeckLayers();
+    }
+
     _startDeckAnimation() {
         if (typeof deck === 'undefined') return;
         this.deckOverlay = new deck.MapboxOverlay({
@@ -454,6 +565,16 @@ class MapboxEngine {
             layers: []
         });
         this.map.addControl(this.deckOverlay);
+
+        // Sub-animation pulse logic
+        let radius = 10000;
+        const animate = () => {
+            radius = (radius + 2000) % 200000;
+            // Only update if we have pulsed data
+            // This is a placeholder for more complex deck.gl animation handling
+            requestAnimationFrame(animate);
+        };
+        animate();
     }
 
     clearSelection() {

@@ -25,9 +25,11 @@
     "framer-motion": "^12.38.0",
     "helmet": "^8.1.0",
     "lucide-react": "^1.7.0",
+    "node-cache": "^5.1.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-router-dom": "^7.13.2"
+    "react-router-dom": "^7.13.2",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.2.0",

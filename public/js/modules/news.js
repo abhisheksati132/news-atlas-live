@@ -74,6 +74,18 @@ async function fetchNews(overrideQ) {
       if (el) el.innerText = data.totalResults;
     }
     allNews = data.results && data.results.length > 0 ? data.results : [];
+    
+    // Geographical Pulse Relay
+    if (window.mapEngine && allNews.length > 0) {
+      const pulses = allNews.slice(0, 10).map(art => ({
+        title: art.title,
+        // If we have a country name, try to get coordinates, else random-ish global clusters
+        coordinates: window.mapEngine.map.getCenter().toArray(), // Placeholder: in Phase 4 we use per-article geocoding
+        radius: 80000
+      }));
+      window.mapEngine.setNewsPulses(pulses);
+    }
+
     if (window.updateHeadlineTicker) window.updateHeadlineTicker(allNews);
     displayFilteredNews();
   } catch (e) {

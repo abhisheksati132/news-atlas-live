@@ -40,6 +40,7 @@ function escapeHtml(str) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
+window.escapeHtml = escapeHtml;
 window.extractJSON = (str) => {
   if (!str) return null;
   let clean = String(str).replace(/```json/gi, '').replace(/```/g, '').trim();
@@ -256,12 +257,22 @@ window.fetchAllData = fetchAllData;
 function renderBriefingCards(rawText) {
   const container = safeEl("ai-briefing-text");
   if (!container) return;
+  
   let clean = rawText.replace(/\[(STRATEGIC METRICS DASHBOARD|OVERVIEW)\]\s*/gi, '').trim();
   const parts = clean.split(/(?=\[[A-Z_ ]+\])/);
+  
+  if (parts.length <= 1 && !clean.includes('[')) {
+    container.innerHTML = `<div class="intel-summary-text pt-2">${escapeHtml(clean)}</div>`;
+    return;
+  }
+
   let html = '<div class="space-y-6 pt-2">';
   parts.forEach(block => {
     const headerMatch = block.match(/\[([A-Z_ ]+)\]/);
-    if (!headerMatch) return;
+    if (!headerMatch) {
+       if (block.trim()) html += `<p class="intel-summary-text px-1 mb-4">${escapeHtml(block.trim())}</p>`;
+       return;
+    }
     const key = headerMatch[1].trim();
     const displayName = key.replace(/_/g, ' ');
     const bodyRaw = block.slice(block.indexOf(']') + 1).trim().replace(/Rating:\s*\d+\s*\/\s*10\n?/gi, '').replace(/\*\*/g, '');
@@ -593,11 +604,125 @@ window.searchCityForTab = async (tabId) => {
     }
   } catch (e) { }
 };
+// Intelligence Link - WebSocket connection
+function initIntelligenceLink() {
+  if (typeof io === 'undefined') {
+    console.warn("Socket.io not found. Real-time link disabled.");
+    return;
+  }
+
+  const socket = io();
+  window.intelSocket = socket;
+
+  socket.on("connect", () => {
+    console.log("%c[LINK] Intelligence Uplink Established: " + socket.id, "color: #10b981; font-weight: bold;");
+    const idEl = document.getElementById("neural-id");
+    if (idEl) idEl.classList.add("socket-active");
+  });
+
+  socket.on("intelligence_link", (data) => {
+    console.log("[DATA] System Signal:", data);
+    if (window.showToast) window.showToast(`Uplink: ${data.node} ${data.status}`, "success");
+  });
+
+  socket.on("breaking_news", (data) => {
+    if (window.showToast) window.showToast(`🚨 BREAKING: ${data.title}`, "info");
+    // Refresh news if it's the current tab
+    if (window.currentTab === "tab-news") window.fetchNews(window._currentCountryName);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("%c[LINK] Intelligence Uplink Lost", "color: #ef4444; font-weight: bold;");
+    const idEl = document.getElementById("neural-id");
+    if (idEl) idEl.classList.remove("socket-active");
+  });
+}
+
+// Command Palette Engine
+function initCommandPalette() {
+  const overlay = document.getElementById("cmd-palette-overlay");
+  const input = document.getElementById("cmd-palette-input");
+  const list = document.getElementById("cmd-palette-list");
+  if (!overlay || !input || !list) return;
+
+  const commands = [
+    { id: "intel", title: "View Intel Dashboard", icon: "fa-satellite", action: () => window.switchTab("intel") },
+    { id: "news", title: "Global News Feed", icon: "fa-newspaper", action: () => window.switchTab("news") },
+    { id: "markets", title: "Financial Markets", icon: "fa-chart-line", action: () => window.switchTab("markets") },
+    { id: "theme", title: "Toggle Terminal Theme", icon: "fa-adjust", action: () => window.toggleTheme() },
+    { id: "refresh", title: "Refresh Intelligence", icon: "fa-sync", action: () => window.generateAIBriefing(window._currentCountryName || "Global") },
+    { id: "global", title: "Reset to Global Overview", icon: "fa-globe", action: () => window.resetToGlobalCenter() }
+  ];
+
+  function search(q) {
+    const query = q.toLowerCase();
+    const results = commands.filter(c => c.title.toLowerCase().includes(query));
+    
+    // Also search countries
+    if (window.globalSearchData) {
+      const countries = window.globalSearchData
+        .filter(c => c.name.common.toLowerCase().includes(query))
+        .slice(0, 5)
+        .map(c => ({
+          title: `Navigate to ${c.name.common}`,
+          icon: "fa-map-marker-alt",
+          action: () => window.handleCountryClick(null, { properties: { name: c.name.common, iso_a2: c.cca2 } })
+        }));
+      results.push(...countries);
+    }
+
+    render(results);
+  }
+
+  function render(results) {
+    list.innerHTML = results.map((c, i) => `
+      <div class="cmd-item flex items-center justify-between px-4 py-3 hover:bg-blue-600/10 cursor-pointer group" data-idx="${i}">
+        <div class="flex items-center gap-3">
+          <i class="fas ${c.icon} text-slate-500 group-hover:text-blue-400 text-xs"></i>
+          <span class="text-sm font-bold text-slate-300 group-hover:text-white">${c.title}</span>
+        </div>
+        <kbd class="text-[9px] text-slate-600 group-hover:text-blue-400">ENTER</kbd>
+      </div>
+    `).join("");
+
+    const items = list.querySelectorAll(".cmd-item");
+    items.forEach((item, idx) => {
+      item.addEventListener("click", () => {
+        results[idx].action();
+        close();
+      });
+    });
+  }
+
+  function open() {
+    overlay.style.display = "flex";
+    input.value = "";
+    input.focus();
+    search("");
+  }
+
+  function close() {
+    overlay.style.display = "none";
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+      e.preventDefault();
+      open();
+    }
+    if (e.key === "Escape") close();
+  });
+
+  input.addEventListener("input", (e) => search(e.target.value));
+}
+
 window.mapEngine = new MapboxEngine('map-container');
 window.mapEngine.init();
 initTerminal();
 setupEventListeners();
 initMobileBottomNav();
+initIntelligenceLink();
+initCommandPalette();
 setInterval(updateSystemTime, 1000);
 window.toggleShortcuts = () => {
     window.showToast("Shortcuts: Esc=Close, Ctrl+K=Search, ?=Help", "info");

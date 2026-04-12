@@ -1,4 +1,7 @@
 import express from "express";
+import http from "http";
+import { Server } from "socket.io";
+import NodeCache from "node-cache";
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
@@ -16,17 +19,26 @@ import searchHandler from "./api/search.js";
 import countriesHandler from "./api/countries.js";
 import geoHandler from "./api/geo.js";
 import gdeltHandler from "./api/gdelt.js";
+import stabilityHandler from "./api/stability.js";
 
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
-const port = 3000;
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: "*" }
+});
+const port = process.env.PORT || 3000;
+
+// Intelligence Cache (15 min default TTL)
+const intelCache = new NodeCache({ stdTTL: 900, checkperiod: 120 });
+app.set('cache', intelCache);
 
 // Professional Middleware Stack
 app.use(helmet({
-  contentSecurityPolicy: false, // Disabled for simplicity, but in a real production app we'd configure this carefully
+  contentSecurityPolicy: false,
 }));
 app.use(compression());
 app.use(express.json());
@@ -39,17 +51,37 @@ app.use(cors({
 // Request time logger
 app.use((req, res, next) => {
   const start = Date.now();
-  console.log(`[REQ] ${new Date().toISOString()} | ${req.method} ${req.url}`);
   res.on('finish', () => {
     const elapsed = Date.now() - start;
-    console.log(`[RES] ${new Date().toISOString()} | ${req.method} ${req.url} -> ${res.statusCode} (${elapsed}ms)`);
+    if (res.statusCode >= 400) {
+      console.log(`\x1b[31m[ERR]\x1b[0m ${req.method} ${req.url} -> ${res.statusCode} (${elapsed}ms)`);
+    } else {
+      console.log(`\x1b[32m[OK]\x1b[0m ${req.method} ${req.url} -> ${res.statusCode} (${elapsed}ms)`);
+    }
   });
+  next();
+});
+
+// WebSocket orchestration
+io.on("connection", (socket) => {
+  console.log(`\x1b[35m[WS]\x1b[0m Client Connected: ${socket.id}`);
+  
+  // Send initial signal
+  socket.emit("intelligence_link", { status: "ACTIVE", node: "GLOBAL_PRIMARY" });
+
+  socket.on("disconnect", () => {
+    console.log(`\x1b[35m[WS]\x1b[0m Client Disconnected`);
+  });
+});
+
+// Provide io instance to request for route-initiated pushes
+app.use((req, res, next) => {
+  req.io = io;
   next();
 });
 
 // API Routes
 const apiRouter = express.Router();
-
 apiRouter.get("/news", (req, res) => newsHandler(req, res).catch(e => res.status(500).json({error: e.message})));
 apiRouter.get("/weather", (req, res) => weatherHandler(req, res).catch(e => res.status(500).json({error: e.message})));
 apiRouter.get("/markets", (req, res) => marketsHandler(req, res).catch(e => res.status(500).json({error: e.message})));
@@ -60,15 +92,14 @@ apiRouter.get("/ai", (req, res) => aiHandler(req, res).catch(e => res.status(500
 apiRouter.get("/countries", (req, res) => countriesHandler(req, res).catch(e => res.status(500).json({error: e.message})));
 apiRouter.get("/geo", (req, res) => geoHandler(req, res).catch(e => res.status(500).json({error: e.message})));
 apiRouter.get("/gdelt", (req, res) => gdeltHandler(req, res).catch(e => res.status(500).json({error: e.message})));
+apiRouter.get("/stability", (req, res) => stabilityHandler(req, res).catch(e => res.status(500).json({error: e.message})));
 
 app.use("/api", apiRouter);
 
-// Health check (must be registered before the production SPA catch-all)
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-// Serve Static Assets in production
 if (process.env.NODE_ENV === "production") {
   app.use(express.static("dist"));
   app.get("*", (req, res) => {
@@ -76,9 +107,10 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-app.listen(port, () => {
-  console.log(`\n\x1b[36m%s\x1b[0m`, `  NewsAtlas Intelligence Terminal - Backend v2.0`);
-  console.log(`\x1b[34m%s\x1b[0m`, `  > Serving API at http://localhost:${port}/api`);
-  console.log(`\x1b[34m%s\x1b[0m`, `  > Node Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`\x1b[2m%s\x1b[0m`, `  --------------------------------------------------\n`);
+server.listen(port, () => {
+  console.log(`\n\x1b[36m%s\x1b[0m`, `  NewsAtlas Intelligence Terminal - High-Fidelity Engine v3.0`);
+  console.log(`\x1b[34m%s\x1b[0m`, `  > Local Discovery: http://localhost:${port}`);
+  console.log(`\x1b[34m%s\x1b[0m`, `  > WebSocket: ws://localhost:${port}`);
+  console.log(`\x1b[35m[CACHE]\x1b[0m Intelligent persistence active.`);
+  console.log(`\x1b[2m%s\x1b[0m`, `  ----------------------------------------------------------\n`);
 });

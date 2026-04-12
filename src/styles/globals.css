@@ -3,17 +3,19 @@
 @import "tailwindcss/utilities";
 
 :root {
-  --bg-deep: #020617;
+  --bg-deep: #070b14;
   --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --accent-ice: #7dd3fc;
 }
 
 body {
   margin: 0;
   background-color: var(--bg-deep);
-  color: white;
-  font-family: 'Inter', sans-serif;
+  color: #f1f5f9;
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 .main-content {
@@ -35,7 +37,6 @@ header {
   border-bottom: 1px solid var(--glass-border) !important;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -47,5 +48,5 @@ header {
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.18);
 }

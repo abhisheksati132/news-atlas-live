@@ -4,17 +4,21 @@ export default async function handler(req, res) {
     const hasKey = !!rawKey;
     const isStream = req.query.stream === "true";
     
-    // Mission Request Normalization
     let body = req.body;
-    if (!body || (typeof body === "object" && Object.keys(body).length === 0)) {
-        // Fallback for some serverless environments
-        try { body = JSON.parse(req.body); } catch (e) { body = req.body || {}; }
+    if (typeof body === "string" && body.length > 0) {
+        try {
+            body = JSON.parse(body);
+        } catch {
+            body = {};
+        }
+    } else if (!body || typeof body !== "object") {
+        body = {};
     }
 
     const locName = body.prompt?.match(/Location: ([^.]+)/)?.[1]?.trim() || "Global Sector";
     const promptText = (body.prompt || "").toLowerCase();
 
-    const returnSimulation = (reason = "Key Probe Failed") => {
+    const returnSimulation = () => {
         const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
         
         // Detect if prompt is requesting JSON data
@@ -54,27 +58,33 @@ export default async function handler(req, res) {
             const words = responseText.split(" ");
             let i = 0;
             const interval = setInterval(() => {
+                if (res.writableEnded) {
+                    clearInterval(interval);
+                    return;
+                }
                 if (i >= words.length) {
                     res.write("data: [DONE]\n\n");
                     clearInterval(interval);
-                    res.end(); return;
+                    res.end();
+                    return;
                 }
                 const payload = JSON.stringify({ choices: [{ delta: { content: words.slice(i, i + 3).join(" ") + " " } }] });
                 res.write(`data: ${payload}\n\n`);
                 i += 3;
             }, 50);
+            req.on("close", () => clearInterval(interval));
             return;
         }
         return res.status(200).json({ candidates: [{ content: { parts: [{ text: responseText }] } }] });
     };
 
-    if (!hasKey) return returnSimulation("Key Probe Failed: Verify Environment Variables");
+    if (!hasKey) return returnSimulation();
 
     const apiURL = "https://api.groq.com/openai/v1/chat/completions";
 
     try {
         const messages = [
-            { role: "system", content: "You are a professional tactical intelligence interface. Be concise and data-driven. Format with [EXECUTIVE_SUMMARY] and [CATEGORY] headers." },
+            { role: "system", content: "You are the NewsAtlas Intelligence Engine. Goal: Provide high-density, multi-domain situational awareness briefings. Correlate news headlines with economic indicators and regional stability. Identify underlying trends or risks. Be concise, tactical, and direct (2-4 sentences max)." },
             { role: "user", content: body.prompt || "Strategic briefing" }
         ];
 
@@ -115,6 +125,6 @@ export default async function handler(req, res) {
         const aiText = data.choices?.[0]?.message?.content || "No response generated.";
         return res.status(200).json({ candidates: [{ content: { parts: [{ text: aiText }] } }] });
     } catch (err) {
-        return returnSimulation(`Relay Intercepted: ${err.message}`);
+        return returnSimulation();
     }
 }

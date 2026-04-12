@@ -33,18 +33,12 @@ async function fetchDetailedEconomics(country) {
     });
     const data = await res.json();
     if (!data.candidates) throw new Error("AI Busy");
-    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-    text = text
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
-    let eco = {};
-    try {
-      eco = typeof text === "string" ? JSON.parse(text) : text;
-    } catch (parseErr) {
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+    const eco = window.extractJSON(text) || {};
+    
+    if (Object.keys(eco).length === 0) {
       if (ecoEl("eco-market-ticker"))
-        ecoEl("eco-market-ticker").innerText =
-          "ECONOMIC DATALINK SEVERED. RETRYING...";
+        ecoEl("eco-market-ticker").innerText = "ECONOMIC DATALINK SEVERED. RETRYING...";
       drawGDPTrend(country);
       return;
     }

@@ -31,6 +31,35 @@ function setText(id, text) {
   const el = safeEl(id);
   if (el) el.innerText = text;
 }
+function escapeHtml(str) {
+  if (str == null) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+window.extractJSON = (str) => {
+  if (!str) return null;
+  let clean = String(str).replace(/```json/gi, '').replace(/```/g, '').trim();
+  try {
+    return JSON.parse(clean);
+  } catch (e) {
+    const match = clean.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        return JSON.parse(match[0]);
+      } catch (innerE) { }
+    }
+  }
+  return null;
+};
+function formatPopulationM(n) {
+  const p = Number(n);
+  if (!Number.isFinite(p) || p < 0) return "—";
+  return (p / 1e6).toFixed(1) + "M";
+}
 function setSrc(id, src) {
   const el = safeEl(id);
   if (el) el.src = src;
@@ -75,7 +104,6 @@ async function initTerminal() {
     showBackendRequiredBanner();
     if (window.showToast) window.showToast("Config unavailable. Running in local mode.", "info");
   }
-  fetchGlobalSearchData();
   const hasFirebaseConfig = config && config.apiKey && config.projectId;
   if (hasFirebaseConfig && window.firebaseCore) {
     try {
@@ -143,7 +171,8 @@ async function startStockTicker() {
   async function fetchAndRender() {
     try {
       const fetcher = window.fetchWithRetry || fetch;
-      const url = `/api/markets?type=ticker&region=${window._isoAlpha3 || 'IN'}`;
+      const countryParam = encodeURIComponent(window._currentCountryName || "Global");
+      const url = `/api/markets?type=ticker&country=${countryParam}`;
       const res = await fetcher(url, {}, { retries: 1, timeoutMs: 10000 });
       if (!res.ok) throw new Error();
       const data = await res.json();
@@ -169,12 +198,13 @@ async function fetchAllData(countryName) {
     const data = await res.json();
     const c = Array.isArray(data) ? data[0] : data;
     if (c) {
+      window._currentCountryName = c.name?.common || null;
       currencyCode = c.currencies ? Object.keys(c.currencies)[0] : "USD";
       iso2Code = c.cca2 || "";
       window._isoAlpha3 = c.cca3 || "";
       window.iso2Code = iso2Code;
       window.currencyCode = currencyCode;
-      setText("fact-pop", (c.population / 1000000).toFixed(1) + "M");
+      setText("fact-pop", formatPopulationM(c.population));
       setText("fact-cap", c.capital ? c.capital[0] : "N/A");
       setText("fact-region", c.region || "--");
       setText("fact-area", c.area ? c.area.toLocaleString() : "--");
@@ -208,7 +238,7 @@ async function fetchAllData(countryName) {
       const capitalName = c.capital ? c.capital[0] : c.name.common;
       window._currentWeatherLocation = `${capitalName}, ${c.name.common}`;
       if (lat || lon) window.fetchWeather(lat, lon);
-      setText("fact-pop-2", (c.population / 1000000).toFixed(1) + "M");
+      setText("fact-pop-2", formatPopulationM(c.population));
       setText("fact-gini-2", c.gini ? Object.values(c.gini)[0] : "N/A");
       setText("fact-demonym-2", c.demonyms?.eng?.m || "--");
       setText("fact-area-2", c.area ? c.area.toLocaleString() + " km²" : "--");
@@ -238,8 +268,8 @@ function renderBriefingCards(rawText) {
     if (!bodyRaw) return;
     html += `
       <div class="mb-6">
-        <h4 class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1.5">${displayName}</h4>
-        <p class="intel-summary-text px-1">${bodyRaw}</p>
+        <h4 class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1.5">${escapeHtml(displayName)}</h4>
+        <p class="intel-summary-text px-1">${escapeHtml(bodyRaw)}</p>
       </div>
     `;
   });
@@ -286,18 +316,6 @@ async function generateAIBriefing(loc) {
   }
 }
 window.generateAIBriefing = generateAIBriefing;
-window.switchTab = (id) => {
-  window.playTacticalSound("tab");
-  document.querySelectorAll(".nav-tab").forEach((t) => { t.classList.remove("active"); t.setAttribute("aria-selected", "false"); });
-  document.querySelectorAll(".tab-content").forEach((c) => c.classList.remove("active"));
-  const tabBtn = Array.from(document.querySelectorAll(".nav-tab")).find((btn) => btn.innerText.toLowerCase().trim().includes(id.toLowerCase()));
-  if (tabBtn) { tabBtn.classList.add("active"); tabBtn.setAttribute("aria-selected", "true"); }
-  const targetContent = document.getElementById(`tab-${id}`);
-  if (targetContent) targetContent.classList.add("active");
-  if (id === "intel") { if (window.fetchGDELTEvents) window.fetchGDELTEvents(window.selectedCountry); }
-  if (id === "economic") { if (window.fetchECBRates) window.fetchECBRates(); }
-  if (id === "markets") { if (window.initializeMarkets) window.initializeMarkets(window.selectedCountry || "Global"); }
-};
 window.handleCountryClick = async function (event, d) {
   window.playTacticalSound("click");
   selectedCountry = d;
@@ -305,6 +323,7 @@ window.handleCountryClick = async function (event, d) {
   window.switchTab("intel");
   if (d && d.properties) {
     const countryName = d.properties.name;
+    window._currentCountryName = countryName;
     setText("selected-country-name", countryName);
     const flagEl = document.getElementById("header-country-flag");
     if (flagEl) {
@@ -324,6 +343,7 @@ window.handleCountryClick = async function (event, d) {
 window.resetToGlobalCenter = () => {
   selectedCountry = null;
   window.selectedCountry = null;
+  window._currentCountryName = null;
   setText("selected-country-name", "Worldwide");
   
   // Reset Sector HUD
@@ -410,10 +430,10 @@ function setupEventListeners() {
     if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
 
     const navMap = {
-      "1": "summary",
+      "1": "intel",
       "2": "news",
       "3": "markets",
-      "4": "weather",
+      "4": "atmosphere",
       "5": "economic"
     };
 
@@ -432,10 +452,10 @@ function updateSystemTime() {
 }
 
 window.switchTab = (id) => {
+  if (typeof window.playTacticalSound === "function") window.playTacticalSound("tab");
   const tabs = document.querySelectorAll(".nav-tab");
   const contents = document.querySelectorAll(".tab-content");
-  
-  // 1. Try to find by custom data-target or ID if 'id' looks like an ID
+
   let targetTab = document.getElementById(`tab-btn-${id}`) || 
                   Array.from(tabs).find(t => t.id === id || t.getAttribute("data-target") === id);
 
@@ -460,25 +480,78 @@ window.switchTab = (id) => {
   
   if (!targetContentId) return;
 
-  tabs.forEach(t => t.classList.remove("active"));
-  contents.forEach(c => c.classList.remove("active"));
-  
+  tabs.forEach((t) => {
+    t.classList.remove("active");
+    t.setAttribute("aria-selected", "false");
+  });
+  contents.forEach((c) => c.classList.remove("active"));
+
   targetTab.classList.add("active");
+  targetTab.setAttribute("aria-selected", "true");
   window._currentTab = targetContentId;
   const targetContent = document.getElementById(targetContentId);
   if (targetContent) {
     targetContent.classList.add("active");
-    if (targetContentId === 'markets' && window.initializeMarkets) {
-        window.initializeMarkets(window._currentCountryName || "Global");
+    if (targetContentId === "tab-intel" && window.fetchGDELTEvents) {
+      const name =
+        window.selectedCountry?.properties?.name ||
+        window._currentCountryName ||
+        "";
+      window.fetchGDELTEvents(name);
     }
-    window.dispatchEvent(new Event('resize'));
+    if (targetContentId === "tab-economic" && window.fetchECBRates) {
+      window.fetchECBRates();
+    }
+    if (targetContentId === "tab-markets" && window.initializeMarkets) {
+      window.initializeMarkets(window._currentCountryName || "Global");
+    }
+    window.dispatchEvent(new Event("resize"));
   }
 
   const sidebar = document.getElementById("sidebar");
   if (sidebar && targetTab) {
     targetTab.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
+
+  syncMobileBottomNav(id);
 };
+
+function syncMobileBottomNav(tabId) {
+  const nav = document.getElementById("mobile-bottom-nav");
+  if (!nav) return;
+  const mapBtn = nav.querySelector('[data-action="map"]');
+  mapBtn?.classList.remove("active");
+  nav.querySelectorAll(".mobile-nav-item[data-tab]").forEach((b) => {
+    const on = b.getAttribute("data-tab") === tabId;
+    b.classList.toggle("active", on);
+    b.setAttribute("aria-current", on ? "page" : "false");
+  });
+}
+
+function initMobileBottomNav() {
+  const nav = document.getElementById("mobile-bottom-nav");
+  if (!nav) return;
+  const mapBtn = nav.querySelector('[data-action="map"]');
+  const tabBtns = nav.querySelectorAll(".mobile-nav-item[data-tab]");
+
+  mapBtn?.addEventListener("click", () => {
+    tabBtns.forEach((b) => {
+      b.classList.remove("active");
+      b.setAttribute("aria-current", "false");
+    });
+    mapBtn.classList.add("active");
+    document.getElementById("map-box-id")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  tabBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      mapBtn?.classList.remove("active");
+      const id = btn.getAttribute("data-tab");
+      if (id) window.switchTab(id);
+      document.getElementById("sidebar")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+}
 
 async function fetchGlobalSearchData() {
   try {
@@ -524,15 +597,12 @@ window.mapEngine = new MapboxEngine('map-container');
 window.mapEngine.init();
 initTerminal();
 setupEventListeners();
+initMobileBottomNav();
 setInterval(updateSystemTime, 1000);
-window.playTacticalSound = function() {};
-window.showToast = function() {};
 window.toggleShortcuts = () => {
     window.showToast("Shortcuts: Esc=Close, Ctrl+K=Search, ?=Help", "info");
 };
-window.onCountrySelected = (name) => {
-    console.log("Country selected:", name);
-};
+window.onCountrySelected = () => {};
 window.resetWeatherData = () => {
     setText("atmo-feels", "--");
     setText("atmo-hl", "-- / --");
@@ -543,9 +613,7 @@ window.initializeMarkets = (loc) => {
     if (window.displayForex) window.displayForex();
     if (window.displayCommodities) window.displayCommodities();
 };
-window.fetchMarketIntel = (loc, cur) => {
-    console.log("Market intel for", loc, cur);
-};
+window.fetchMarketIntel = () => {};
 window.activateMapInteraction = () => {
     const map = document.getElementById('map-container');
     const overlay = document.getElementById('map-interaction-overlay');

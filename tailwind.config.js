@@ -6,8 +6,14 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        mono: ["JetBrains Mono", "monospace"],
-        sans: ["Inter", "sans-serif"],
+        mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+        sans: ["IBM Plex Sans", "system-ui", "sans-serif"],
+      },
+      colors: {
+        ice: {
+          400: "#7dd3fc",
+          500: "#38bdf8",
+        },
       },
     },
   },

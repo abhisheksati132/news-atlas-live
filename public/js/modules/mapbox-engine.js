@@ -14,8 +14,6 @@ class MapboxEngine {
     }
 
     async init() {
-        console.log('🚀 Initializing Mapbox GL JS Engine...');
-
         try {
             const res = await fetch('/api/config');
             if (!res.ok) throw new Error('Failed to fetch config');
@@ -249,12 +247,12 @@ class MapboxEngine {
                 this.map.flyTo({
                     center: lngLat,
                     zoom,
-                    pitch: 45,
-                    bearing: -15,
+                    pitch: 55,
+                    bearing: (Math.random() * 20) - 10,
                     essential: true,
-                    duration: 2800,
-                    curve: 1.6,
-                    easing: t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
+                    duration: 3500,
+                    curve: 1.1,
+                    speed: 0.8
                 });
             }, 700);
         } else {
@@ -409,8 +407,6 @@ class MapboxEngine {
             });
 
             this._applyAtmosphere();
-
-            console.log('✅ Mapbox layers: fills, borders, glow — all active');
         } catch (err) {
             console.error('Failed to load map geometry:', err);
         }

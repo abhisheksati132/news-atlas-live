@@ -42,8 +42,7 @@ window.showToast = function (message, type = "info") {
   if (!toastTimeout) showNextToast();
 };
 
-let mapboxToken = null;
-fetch('/api/config').then(r => r.json()).then(d => mapboxToken = d.mapboxToken);
+// Geocoding is now handled via secure backend proxy
 
 function renderTrending() {
   const resContainer = document.getElementById("search-results");
@@ -80,7 +79,7 @@ function renderTrending() {
         clearTimeout(window._searchDebounce);
         window._searchDebounce = setTimeout(async () => {
             try {
-                const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&types=place,region,locality&limit=5`);
+                const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
                 const json = await res.json();
                 if (json.features && json.features.length > 0) {
                     const registryHtml = `<div style="padding: 1.25rem 1.5rem 0.75rem; font-size: 11px; font-weight: 900; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.15em; font-family: 'JetBrains Mono', monospace;">Registry Matches (Cities/States)</div>` + 
@@ -168,7 +167,7 @@ window.selectFromSearch = (name) => {
     }
     // Deep geocoding link for cities/states
     if (window.mapEngine && window.mapEngine.map) {
-        fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(name)}.json?access_token=${mapboxToken}&limit=1`)
+        fetch(`/api/search?q=${encodeURIComponent(name)}`)
             .then(r => r.json())
             .then(data => {
                 if (data.features && data.features[0]) {
@@ -299,7 +298,7 @@ function cliPrint(lines) {
     output.scrollTop = output.scrollHeight;
   });
 }
-function escH(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+function escH(s) { return window.escapeHtml(s); }
 const CLI_BUILTINS = {
   help: () => [
     `<span class="cli-head">AVAILABLE COMMANDS</span>`,

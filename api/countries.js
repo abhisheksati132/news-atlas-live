@@ -70,6 +70,12 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: 'Country not found' });
     } catch (err) {
         console.error('[countries] Error:', err.message);
-        return res.status(200).json(FALLBACK_COUNTRIES);
+        if (all === 'true') {
+            return res.status(200).json(FALLBACK_COUNTRIES);
+        }
+        if (code || name) {
+            return res.status(503).json({ error: 'Country lookup service unavailable' });
+        }
+        return res.status(500).json({ error: err.message });
     }
 }

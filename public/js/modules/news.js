@@ -5,16 +5,7 @@ let newsSearchQuery = "";
 let newsSearchTimer = null;
 let isLiveSearching = false;
 
-// Security: escape HTML special chars to prevent XSS from external RSS content
-function escapeHtml(str) {
-  if (!str) return "";
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
+// Using global escapeHtml from app.js
 function getNewsSentiment(title, desc) {
   const text = ((title || "") + " " + (desc || "")).toLowerCase();
   const neg = /\b(war|attack|kill|crisis|conflict|crash|terror|dead|threat|sanction|protest|clash|bomb|missile|coup|unrest|disaster|explosion|violence|strike|riot|collapse|invasion|arrest|death|victim|destruction)\b/;
@@ -223,6 +214,10 @@ window.displayFilteredNews = displayFilteredNews;
 async function fetchGDELTEvents(country) {
   const container = document.getElementById("gdelt-events-content");
   if (!container) return;
+  const countryLabel =
+    typeof country === "string"
+      ? country
+      : country?.properties?.name || country?.name || "";
   container.innerHTML = '<div class="text-slate-500 text-xs animate-pulse py-2">Loading intelligence events...</div>';
 
   const simulated = [
@@ -261,7 +256,9 @@ async function fetchGDELTEvents(country) {
   }
 
   try {
-    const query = country ? `${country} sourcelang:english` : "conflict OR economy OR geopolitics sourcelang:english";
+    const query = countryLabel
+      ? `${countryLabel} sourcelang:english`
+      : "conflict OR economy OR geopolitics sourcelang:english";
     const res = await fetch(`/api/gdelt?query=${encodeURIComponent(query)}&timespan=72H`);
     if (!res.ok) throw new Error("GDELT unavailable");
     const data = await res.json();

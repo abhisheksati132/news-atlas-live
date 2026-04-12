@@ -14,10 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const applyGlowTracking = () => {
         const trackers = document.querySelectorAll('.glass-glow-track, .apple-glass, .glass-panel, div.rounded-2xl, div.rounded-3xl, footer, nav [class*="glass"]');
-        trackers.forEach(el => {
-
+        trackers.forEach((el) => {
+            if (el.dataset.glowPointerBound === 'true') return;
             if (!el.classList.contains('glass-glow-track')) el.classList.add('glass-glow-track');
-
+            el.dataset.glowPointerBound = 'true';
             el.addEventListener('mousemove', (e) => {
                 const rect = el.getBoundingClientRect();
                 const x = e.clientX - rect.left;
@@ -73,6 +73,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!audioCtx) {
             try {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                // Start ambient Terminal Hum
+                const hum = audioCtx.createOscillator();
+                const humGain = audioCtx.createGain();
+                hum.type = 'sine';
+                hum.frequency.setValueAtTime(45, audioCtx.currentTime); 
+                humGain.gain.setValueAtTime(0.003, audioCtx.currentTime);
+                hum.connect(humGain);
+                humGain.connect(audioCtx.destination);
+                hum.start();
             } catch (e) { return; }
         }
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -95,62 +104,62 @@ document.addEventListener('DOMContentLoaded', () => {
         el.addEventListener('mouseenter', playTacticalHover);
     });
 
-    if (!document.getElementById('cmd-palette-overlay')) {
-        const cmdPaletteHtml = `
-        <div id="cmd-palette-container" class="fixed inset-0 z-[10001] hidden flex flex-col items-center pt-[15vh]">
-          <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity" onclick="toggleCmdPalette(false)"></div>
-          <div class="relative w-full max-w-2xl bg-slate-900/90 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-xl overflow-hidden glass-glow-track transform transition-all scale-95 opacity-0" id="cmd-palette-modal">
-            <div class="p-4 flex items-center gap-3 border-b border-white/5">
-              <i class="fas fa-terminal text-cyan-400"></i>
-              <input type="text" id="cmd-palette-input" class="w-full bg-transparent border-none outline-none text-white font-mono text-lg placeholder-slate-500" placeholder="Search Intel, Queries, or Actions..." autocomplete="off">
-              <div class="text-[10px] text-slate-500 font-mono tracking-widest border border-white/10 px-2 py-0.5 rounded bg-white/5">ESC</div>
-            </div>
-            <div class="p-2" id="cmd-palette-results">
-                <div class="px-4 py-3 text-xs font-mono text-slate-500 uppercase tracking-widest">Suggested Actions</div>
-                <a href="terminal" class="flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl cursor-pointer transition-colors group">
-                    <i class="fas fa-map text-blue-400 group-hover:scale-110 transition-transform"></i>
-                    <span class="text-slate-300 font-mono text-sm">Launch Terminal App</span>
-                </a>
-                <div class="flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl cursor-pointer transition-colors group" onclick="if(window.toggleAbout) { toggleAbout(true); toggleCmdPalette(false); } else { window.location.href='terminal' }">
-                    <i class="fas fa-microchip text-emerald-400 group-hover:scale-110 transition-transform"></i>
-                    <span class="text-slate-300 font-mono text-sm">View System Telemetry</span>
-                </div>
-                <div class="flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl cursor-pointer transition-colors group" onclick="if(document.getElementById('cli-input')) { document.getElementById('cli-input').focus(); toggleCmdPalette(false); } else { window.location.href='terminal' }">
-                    <i class="fas fa-terminal text-cyan-400 group-hover:scale-110 transition-transform"></i>
-                    <span class="text-slate-300 font-mono text-sm">Execute AI Action Query</span>
-                </div>
-            </div>
-          </div>
-        </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', cmdPaletteHtml);
+    // Boot Sequence Logic
+    const initBoot = async () => {
+        const sequence = [
+            { msg: "Loading System Kernel...", wait: 400, percent: 15, status: "KERNEL LOADED" },
+            { msg: "Initializing Neural Map Network...", wait: 600, percent: 35, status: "MAP_NET READY" },
+            { msg: "Authenticating Satellite Uplink...", wait: 800, percent: 55, status: "UPLINK_SECURE" },
+            { msg: "Ingesting Global Intelligence Feed (GDELT)...", wait: 500, percent: 75, status: "INGESTION_START" },
+            { msg: "Calibrating Economic Analysis Engine...", wait: 400, percent: 90, status: "CALIBRATION_OK" },
+            { msg: "Terminal Online.", wait: 300, percent: 100, status: "READY" }
+        ];
 
-        window.toggleCmdPalette = (show) => {
-            const container = document.getElementById('cmd-palette-container');
-            const modal = document.getElementById('cmd-palette-modal');
-            const input = document.getElementById('cmd-palette-input');
-            if (show) {
-                container.classList.remove('hidden');
-                setTimeout(() => {
-                    modal.classList.remove('scale-95', 'opacity-0');
-                    modal.classList.add('scale-100', 'opacity-100');
-                    input.focus();
-                }, 10);
-            } else {
-                modal.classList.remove('scale-100', 'opacity-100');
-                modal.classList.add('scale-95', 'opacity-0');
-                setTimeout(() => container.classList.add('hidden'), 200);
-            }
+        const logEl = document.getElementById('boot-log');
+        const progressEl = document.getElementById('boot-progress');
+        const statusEl = document.getElementById('boot-status');
+        const percentEl = document.getElementById('boot-percent');
+        const bootOverlay = document.getElementById('boot-sequence');
+
+        if (!logEl) return;
+
+        for (const step of sequence) {
+            const row = document.createElement('div');
+            row.innerHTML = `<span class="text-blue-400">[ OK ]</span> ${step.msg}`;
+            logEl.appendChild(row);
+            logEl.scrollTop = logEl.scrollHeight;
+
+            progressEl.style.width = step.percent + '%';
+            percentEl.innerText = step.percent + '%';
+            statusEl.innerText = step.status;
+
+            // Play sound for each step
+            try {
+                const osc = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(400 + (step.percent * 2), audioCtx.currentTime);
+                g.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
+                osc.connect(g);
+                g.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } catch(e) {}
+
+            await new Promise(r => setTimeout(r, step.wait));
         }
 
-        document.addEventListener('keydown', (e) => {
-            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-                e.preventDefault();
-                window.toggleCmdPalette(true);
-            }
-            if (e.key === 'Escape') {
-                window.toggleCmdPalette(false);
-            }
-        });
+        // Complete sequence
+        setTimeout(() => {
+            bootOverlay.style.opacity = '0';
+            bootOverlay.style.transition = 'opacity 0.8s ease-in-out';
+            setTimeout(() => bootOverlay.remove(), 800);
+            if (window.playTacticalSound) window.playTacticalSound("success");
+        }, 500);
+    };
+
+    if (document.getElementById('boot-sequence')) {
+        setTimeout(initBoot, 300);
     }
 });

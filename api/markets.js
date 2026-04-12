@@ -1,9 +1,34 @@
 import { getCache, setCache } from "./utils/cache.js";
 
+/** Map ISO2/ISO3 (and common aliases) to display names used by COUNTRY_INDICES */
+const ISO_TO_COUNTRY = {
+    IN: "India", IND: "India",
+    US: "United States", USA: "United States",
+    GB: "United Kingdom", GBR: "United Kingdom", UK: "United Kingdom",
+    JP: "Japan", JPN: "Japan",
+    CN: "China", CHN: "China",
+    DE: "Germany", DEU: "Germany",
+    FR: "France", FRA: "France",
+    AU: "Australia", AUS: "Australia",
+    BR: "Brazil", BRA: "Brazil",
+    KR: "South Korea", KOR: "South Korea",
+    CA: "Canada", CAN: "Canada",
+    RU: "Russia", RUS: "Russia",
+};
+
+function resolveCountryLabel(raw) {
+    if (raw == null || raw === "") return "Global";
+    const s = String(raw).trim();
+    if (!s || /^global$/i.test(s) || /^worldwide$/i.test(s)) return "Global";
+    const code = s.toUpperCase();
+    if (ISO_TO_COUNTRY[code]) return ISO_TO_COUNTRY[code];
+    return s;
+}
+
 export default async function handler(req, res) {
-    const { type, currency = "USD", country = "Global" } = req.query;
-    const cur = currency.toUpperCase();
-    const loc = country.trim();
+    const { type, currency = "USD", country, region } = req.query;
+    const cur = String(currency).toUpperCase();
+    const loc = resolveCountryLabel(country ?? region ?? "Global");
     const cacheKey = `markets_${type}_${cur}_${loc}`;
     const cached = getCache(cacheKey);
     if (cached) return res.status(200).json(cached);

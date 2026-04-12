@@ -5,6 +5,8 @@ const BASE_URL = "https://newsapi.org/v2";
 
 export default async function handler(req, res) {
     const { category, q, iso2, page = 1, pageSize = 12 } = req.query;
+    const pageNum = Math.min(100, Math.max(1, parseInt(String(page), 10) || 1));
+    const sizeNum = Math.min(100, Math.max(1, parseInt(String(pageSize), 10) || 12));
     const apiKey = process.env.NEWS_API_KEY;
 
     if (!apiKey) {
@@ -20,7 +22,7 @@ export default async function handler(req, res) {
         return res.status(200).json({ status: "success", results, totalResults: results.length });
     }
 
-    const cacheKey = `news|${iso2 || "global"}|${category || "general"}|${q || ""}|${page}`;
+    const cacheKey = `news|${iso2 || "global"}|${category || "general"}|${q || ""}|${pageNum}|${sizeNum}`;
     const cached = getCache(cacheKey);
     if (cached) {
         res.setHeader("X-Cache", "HIT");
@@ -31,8 +33,8 @@ export default async function handler(req, res) {
         const params = new URLSearchParams({
             apiKey,
             language: "en",
-            pageSize: 100,
-            page: parseInt(page)
+            pageSize: String(sizeNum),
+            page: String(pageNum),
         });
 
         // NewsAPI.org: if we have a search query, use /everything, else use /top-headlines
@@ -54,9 +56,13 @@ export default async function handler(req, res) {
         const response = await fetch(endpoint);
         const data = await response.json();
 
-        // FALLBACK LOGIC: If top-headlines returned 0 results for a country, try /everything with the country/category as a query
-        if ((!data.results || data.results.length === 0) && (!data.articles || data.articles.length === 0) && !q && iso2) {
-            console.log(`[news] No headlines for ${iso2}, falling back to Everything search...`);
+        if (data.status === "error") {
+            return res.status(502).json({ status: "error", message: data.message || "NewsAPI.org error" });
+        }
+
+        // If top-headlines returned 0 results for a country, try /everything with iso2 as keyword
+        if ((!data.articles || data.articles.length === 0) && !q && iso2) {
+            console.warn(`[news] No headlines for ${iso2}, falling back to Everything search...`);
             const fallbackParams = new URLSearchParams({
                 apiKey,
                 language: "en",
@@ -70,10 +76,6 @@ export default async function handler(req, res) {
                 data.articles = (data.articles || []).concat(fallbackData.articles || []);
                 data.totalResults = (data.totalResults || 0) + (fallbackData.totalResults || 0);
             }
-        }
-
-        if (data.status === 'error') {
-            return res.status(502).json({ status: "error", message: data.message || "NewsAPI.org error" });
         }
 
         const results = (data.articles || [])
@@ -95,7 +97,7 @@ export default async function handler(req, res) {
         const payload = {
             status: "success",
             totalResults: data.totalResults || results.length,
-            results,
+            results: results.slice(0, sizeNum),
         };
 
         setCache(cacheKey, payload, CACHE_TTL);

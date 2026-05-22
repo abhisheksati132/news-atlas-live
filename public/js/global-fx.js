@@ -1,33 +1,28 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    const glowSelector = '.glass-glow-track, .apple-glass, .glass-panel, div.rounded-2xl, div.rounded-3xl, footer, nav [class*="glass"]';
+
+    // 1. High Performance Delegated Mousemove Glow Tracker
     document.addEventListener('mousemove', (e) => {
         const bgX = (e.clientX / window.innerWidth - 0.5) * -20;
         const bgY = (e.clientY / window.innerHeight - 0.5) * -20;
         document.documentElement.style.setProperty('--bg-mouse-x', bgX);
         document.documentElement.style.setProperty('--bg-mouse-y', bgY);
+
+        const target = e.target.closest(glowSelector);
+        if (target) {
+            if (!target.classList.contains('glass-glow-track')) {
+                target.classList.add('glass-glow-track');
+            }
+            const rect = target.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            target.style.setProperty('--mouse-x', x + 'px');
+            target.style.setProperty('--mouse-y', y + 'px');
+        }
     });
 
     const interactiveSelectors = 'a, button, input, .nav-tab, .map-box, .glass-glow-track, .shortcut-item, [onclick]';
-
-    const glowSyncObserver = new MutationObserver(() => applyGlowTracking());
-    glowSyncObserver.observe(document.body, { childList: true, subtree: true });
-
-    const applyGlowTracking = () => {
-        const trackers = document.querySelectorAll('.glass-glow-track, .apple-glass, .glass-panel, div.rounded-2xl, div.rounded-3xl, footer, nav [class*="glass"]');
-        trackers.forEach((el) => {
-            if (el.dataset.glowPointerBound === 'true') return;
-            if (!el.classList.contains('glass-glow-track')) el.classList.add('glass-glow-track');
-            el.dataset.glowPointerBound = 'true';
-            el.addEventListener('mousemove', (e) => {
-                const rect = el.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                el.style.setProperty('--mouse-x', x + 'px');
-                el.style.setProperty('--mouse-y', y + 'px');
-            });
-        });
-    };
-    applyGlowTracking();
 
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
     window.scrambleText = function (element, finalString, duration = 1000) {
@@ -65,46 +60,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
     decryptElements.forEach(el => decryptObserver.observe(el));
 
-
-    let audioCtx = null;
-
-
+    // 2. Optimized Sound Generators
     const playTacticalHover = () => {
-        if (!audioCtx) {
-            try {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                // Start ambient Terminal Hum
-                const hum = audioCtx.createOscillator();
-                const humGain = audioCtx.createGain();
-                hum.type = 'sine';
-                hum.frequency.setValueAtTime(45, audioCtx.currentTime); 
-                humGain.gain.setValueAtTime(0.003, audioCtx.currentTime);
-                hum.connect(humGain);
-                humGain.connect(audioCtx.destination);
-                hum.start();
-            } catch (e) { return; }
-        }
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.03);
+        if (window._audioMuted) return;
+        const ctx = window.getAudioContext ? window.getAudioContext() : null;
+        if (!ctx) return;
 
-        gain.gain.setValueAtTime(0.005, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.03);
+        try {
+            if (ctx.state === 'suspended') ctx.resume();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.03);
 
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.04);
+            gain.gain.setValueAtTime(0.005, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.03);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.04);
+        } catch (e) {}
     };
 
-    document.querySelectorAll(interactiveSelectors).forEach(el => {
-        el.addEventListener('mouseenter', playTacticalHover);
+    // Delegated Hover Sound
+    document.addEventListener('mouseover', (e) => {
+        const interactive = e.target.closest(interactiveSelectors);
+        if (interactive) {
+            if (window.lastActiveInteractive === interactive) return;
+            window.lastActiveInteractive = interactive;
+            playTacticalHover();
+        } else {
+            window.lastActiveInteractive = null;
+        }
     });
 
-    // Boot Sequence Logic
+    // Auto-resume AudioContext on user gesture
+    const resumeAudio = () => {
+        const ctx = window.getAudioContext ? window.getAudioContext() : null;
+        if (ctx && ctx.state === 'suspended') {
+            ctx.resume();
+        }
+    };
+    document.addEventListener('click', resumeAudio);
+    document.addEventListener('keydown', resumeAudio);
+
+    // 3. Boot Sequence Logic
     const initBoot = async () => {
         const sequence = [
             { msg: "Loading System Kernel...", wait: 400, percent: 15, status: "KERNEL LOADED" },
@@ -133,18 +135,23 @@ document.addEventListener('DOMContentLoaded', () => {
             percentEl.innerText = step.percent + '%';
             statusEl.innerText = step.status;
 
-            // Play sound for each step
+            // Play step sound
             try {
-                const osc = audioCtx.createOscillator();
-                const g = audioCtx.createGain();
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(400 + (step.percent * 2), audioCtx.currentTime);
-                g.gain.setValueAtTime(0.01, audioCtx.currentTime);
-                g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
-                osc.connect(g);
-                g.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.1);
+                if (!window._audioMuted) {
+                    const ctx = window.getAudioContext ? window.getAudioContext() : null;
+                    if (ctx) {
+                        const osc = ctx.createOscillator();
+                        const g = ctx.createGain();
+                        osc.type = 'square';
+                        osc.frequency.setValueAtTime(400 + (step.percent * 2), ctx.currentTime);
+                        g.gain.setValueAtTime(0.01, ctx.currentTime);
+                        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.1);
+                        osc.connect(g);
+                        g.connect(ctx.destination);
+                        osc.start();
+                        osc.stop(ctx.currentTime + 0.1);
+                    }
+                }
             } catch(e) {}
 
             await new Promise(r => setTimeout(r, step.wait));
@@ -152,9 +159,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Complete sequence
         setTimeout(() => {
-            bootOverlay.style.opacity = '0';
-            bootOverlay.style.transition = 'opacity 0.8s ease-in-out';
-            setTimeout(() => bootOverlay.remove(), 800);
+            if (bootOverlay) {
+                bootOverlay.style.opacity = '0';
+                bootOverlay.style.transition = 'opacity 0.8s ease-in-out';
+                setTimeout(() => bootOverlay.remove(), 800);
+            }
             if (window.playTacticalSound) window.playTacticalSound("success");
         }, 500);
     };

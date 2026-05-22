@@ -1,7 +1,6 @@
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
-import NodeCache from "node-cache";
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
@@ -32,9 +31,7 @@ const io = new Server(server, {
 });
 const port = process.env.PORT || 3000;
 
-// Intelligence Cache (15 min default TTL)
-const intelCache = new NodeCache({ stdTTL: 900, checkperiod: 120 });
-app.set('cache', intelCache);
+// Intelligence caching relies on dedicated api/utils/cache module.
 
 // Professional Middleware Stack
 app.use(helmet({
@@ -102,6 +99,9 @@ app.get("/health", (req, res) => {
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static("dist"));
+  app.get("/app", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "dist", "app.html"));
+  });
   app.get("*", (req, res) => {
     res.sendFile(path.resolve(__dirname, "dist", "index.html"));
   });

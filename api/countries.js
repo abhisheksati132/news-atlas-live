@@ -48,34 +48,69 @@ export default async function handler(req, res) {
 
         // Lookup by ISO code
         if (code) {
-            const response = await fetch(`https://restcountries.com/v3.1/alpha/${encodeURIComponent(code)}`);
-            if (response.ok) return res.status(200).json(await response.json());
-        }
-
-        // Lookup by name (exact first, then partial)
-        if (name) {
-            let response = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fullText=true`);
-            if (!response.ok) {
-                response = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}`);
+            try {
+                const response = await fetch(`https://restcountries.com/v3.1/alpha/${encodeURIComponent(code)}`);
+                if (response.ok) return res.status(200).json(await response.json());
+            } catch (err) {
+                console.warn('[countries] Code lookup failed, trying fallback:', err.message);
             }
-            if (response.ok) return res.status(200).json(await response.json());
-
-            // Fallback to local list
+            // Try lookup in local fallback
+            const codeUpper = code.toUpperCase();
             const found = FALLBACK_COUNTRIES.find(
-                (c) => c.name.common.toLowerCase() === name.toLowerCase()
+                (c) => c.cca2 === codeUpper || c.cca3 === codeUpper
             );
             if (found) return res.status(200).json([found]);
         }
 
+        // Lookup by name (exact first, then partial)
+        if (name) {
+            try {
+                let response = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fullText=true`);
+                if (!response.ok) {
+                    response = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}`);
+                }
+                if (response.ok) return res.status(200).json(await response.json());
+            } catch (err) {
+                console.warn('[countries] Name lookup failed, trying fallback:', err.message);
+            }
+
+            // Fallback to local list (exact match)
+            const searchName = name.toLowerCase();
+            const found = FALLBACK_COUNTRIES.find(
+                (c) => c.name.common.toLowerCase() === searchName
+            );
+            if (found) return res.status(200).json([found]);
+
+            // Try partial/includes match in fallback
+            const partialFound = FALLBACK_COUNTRIES.find(
+                (c) => c.name.common.toLowerCase().includes(searchName)
+            );
+            if (partialFound) return res.status(200).json([partialFound]);
+        }
+
         return res.status(404).json({ error: 'Country not found' });
     } catch (err) {
-        console.error('[countries] Error:', err.message);
+        console.error('[countries] Global Catch Error:', err.message);
         if (all === 'true') {
             return res.status(200).json(FALLBACK_COUNTRIES);
         }
-        if (code || name) {
-            return res.status(503).json({ error: 'Country lookup service unavailable' });
+        
+        // Final fallback safeguard for code or name if an unexpected exception escaped
+        if (code) {
+            const codeUpper = code.toUpperCase();
+            const found = FALLBACK_COUNTRIES.find(
+                (c) => c.cca2 === codeUpper || c.cca3 === codeUpper
+            );
+            if (found) return res.status(200).json([found]);
         }
-        return res.status(500).json({ error: err.message });
+        if (name) {
+            const searchName = name.toLowerCase();
+            const found = FALLBACK_COUNTRIES.find(
+                (c) => c.name.common.toLowerCase() === searchName || c.name.common.toLowerCase().includes(searchName)
+            );
+            if (found) return res.status(200).json([found]);
+        }
+
+        return res.status(404).json({ error: 'Country not found or lookup failed' });
     }
 }

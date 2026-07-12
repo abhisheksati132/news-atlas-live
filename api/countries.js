@@ -21,6 +21,23 @@ const CORS_HEADERS = {
     'Access-Control-Allow-Headers': 'Content-Type',
 };
 
+const NAME_MAPPINGS = {
+    'united states of america': 'United States',
+    'united states': 'United States',
+    'russian federation': 'Russia',
+    'united kingdom': 'United Kingdom',
+    'great britain': 'United Kingdom',
+    'south korea': 'South Korea',
+    'viet nam': 'Vietnam',
+    'syrian arab republic': 'Syria',
+    'venezuela bolivarian republic of': 'Venezuela',
+    'iran islamic republic of': 'Iran',
+    'peoples republic of china': 'China',
+    'republic of korea': 'South Korea',
+    'korea (republic of)': 'South Korea',
+    'korea': 'South Korea'
+};
+
 export default async function handler(req, res) {
     Object.entries(CORS_HEADERS).forEach(([k, v]) => res.setHeader(k, v));
     if (req.method === 'OPTIONS') return res.status(200).end();
@@ -64,28 +81,29 @@ export default async function handler(req, res) {
 
         // Lookup by name (exact first, then partial)
         if (name) {
+            let normalizedName = name.trim();
+            const lowerName = normalizedName.toLowerCase();
+            if (NAME_MAPPINGS[lowerName]) {
+                normalizedName = NAME_MAPPINGS[lowerName];
+            }
             try {
-                let response = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}?fullText=true`);
+                let response = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(normalizedName)}?fullText=true`);
                 if (!response.ok) {
-                    response = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(name)}`);
+                    response = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(normalizedName)}`);
                 }
                 if (response.ok) return res.status(200).json(await response.json());
             } catch (err) {
                 console.warn('[countries] Name lookup failed, trying fallback:', err.message);
             }
 
-            // Fallback to local list (exact match)
-            const searchName = name.toLowerCase();
+            // Fallback to local list (exact match or bidirectional substring match)
+            const searchName = normalizedName.toLowerCase();
             const found = FALLBACK_COUNTRIES.find(
-                (c) => c.name.common.toLowerCase() === searchName
+                (c) => c.name.common.toLowerCase() === searchName ||
+                       c.name.common.toLowerCase().includes(searchName) ||
+                       searchName.includes(c.name.common.toLowerCase())
             );
             if (found) return res.status(200).json([found]);
-
-            // Try partial/includes match in fallback
-            const partialFound = FALLBACK_COUNTRIES.find(
-                (c) => c.name.common.toLowerCase().includes(searchName)
-            );
-            if (partialFound) return res.status(200).json([partialFound]);
         }
 
         return res.status(404).json({ error: 'Country not found' });
@@ -104,9 +122,13 @@ export default async function handler(req, res) {
             if (found) return res.status(200).json([found]);
         }
         if (name) {
-            const searchName = name.toLowerCase();
+            const lowerName = name.toLowerCase();
+            const resolvedName = NAME_MAPPINGS[lowerName] || name;
+            const searchName = resolvedName.toLowerCase();
             const found = FALLBACK_COUNTRIES.find(
-                (c) => c.name.common.toLowerCase() === searchName || c.name.common.toLowerCase().includes(searchName)
+                (c) => c.name.common.toLowerCase() === searchName ||
+                       c.name.common.toLowerCase().includes(searchName) ||
+                       searchName.includes(c.name.common.toLowerCase())
             );
             if (found) return res.status(200).json([found]);
         }

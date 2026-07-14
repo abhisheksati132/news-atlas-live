@@ -16,7 +16,17 @@ function getNewsSentiment(title, desc) {
 }
 function relativeTime(pubDate) {
   if (!pubDate) return "";
-  const diff = Date.now() - new Date(pubDate).getTime();
+  let parsedDate;
+  if (typeof pubDate === "string") {
+    const cleanDate = pubDate.replace(" ", "T");
+    parsedDate = new Date(cleanDate);
+    if (isNaN(parsedDate.getTime())) {
+      parsedDate = new Date(pubDate);
+    }
+  } else {
+    parsedDate = new Date(pubDate);
+  }
+  const diff = Date.now() - parsedDate.getTime();
   if (isNaN(diff) || diff < 0) return "";
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return "Just now";

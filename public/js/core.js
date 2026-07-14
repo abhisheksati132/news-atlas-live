@@ -211,18 +211,24 @@ Wind: ${safeText("atmo-wind-speed")} KM/H
 };
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signInAnonymously, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
 window.firebaseCore = {
   initializeApp,
   getAuth,
   onAuthStateChanged,
   signInAnonymously,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
   getFirestore,
   doc,
+  getDoc,
   setDoc,
+  updateDoc,
+  deleteDoc,
   serverTimestamp,
-};
-window.upgradeToGoogle = async () => {
-  if (window.showToast) window.showToast("Account services restricted in professional mode.", "info");
+  collection,
+  onSnapshot
 };

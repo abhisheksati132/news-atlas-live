@@ -148,8 +148,11 @@
         <i id="sector-globe-icon" class="fas fa-globe text-[10px] text-sky-400/90"></i>
         <img id="sector-flag" src="" class="hidden w-full h-full object-cover">
       </div>
-      <span id="sector-name" class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest font-mono truncate min-w-0">Global
-        Sector</span>
+      <span id="sector-name" class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest font-mono truncate min-w-0">Global Sector</span>
+      <!-- Sector Pin / Bookmark Button -->
+      <button type="button" id="sector-pin-btn" onclick="togglePinCountry()" class="text-slate-500 hover:text-yellow-400 transition-colors ml-1.5 focus:outline-none hidden" title="Pin / Bookmark Sector">
+        <i class="far fa-star text-[10px]"></i>
+      </button>
     </div>
 
     <!-- CENTER: Tactical Shortcuts -->
@@ -188,6 +191,23 @@
       <button type="button" onclick="toggleTheme()" class="header-widget p-2 text-slate-500 hover:text-sky-400/90 transition-colors lg:hidden" title="Light or dark appearance" aria-label="Toggle theme">
         <i class="fas fa-adjust" aria-hidden="true"></i>
       </button>
+      <!-- User profile / login widget -->
+      <div id="user-profile-widget" class="flex items-center gap-2 border-l border-white/5 pl-2 relative">
+        <button type="button" id="login-btn" onclick="loginWithGoogle()" class="header-widget flex items-center gap-1.5 px-3 h-8 shadow-sm text-slate-400 hover:text-white" title="Sign In with Google">
+          <i class="fab fa-google text-[10px]"></i>
+          <span class="text-[9px] font-bold uppercase tracking-widest font-mono">Sign In</span>
+        </button>
+        <div id="user-info" class="hidden flex items-center gap-2 cursor-pointer group" onclick="toggleUserMenu()">
+          <img id="user-avatar" src="" class="w-6 h-6 rounded-full border border-white/10 group-hover:border-sky-400/50 transition-all object-cover">
+          <span id="user-name" class="hidden sm:inline text-[9px] font-bold text-slate-400 uppercase tracking-widest font-mono group-hover:text-white transition-colors truncate max-w-[80px]">User</span>
+          <!-- User Dropdown Menu -->
+          <div id="user-dropdown-menu" class="hidden absolute top-9 right-0 w-36 bg-slate-900 border border-white/10 rounded-xl p-1 shadow-xl z-[2100]">
+            <button type="button" onclick="logout()" class="w-full text-left px-3 py-2 text-[10px] font-bold text-red-400 hover:bg-white/5 rounded-lg flex items-center gap-2 uppercase tracking-wider font-mono">
+              <i class="fas fa-sign-out-alt text-xs"></i> Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </header>
   <main class="main-content">
@@ -345,6 +365,17 @@
                 </button>
               </div>
             </div>
+            <!-- Pinned Sectors Card -->
+            <div id="pinned-sectors-card" class="apple-glass p-5 mb-2 hidden">
+              <div class="flex justify-between items-center mb-2 border-b border-white/5 pb-2">
+                <span class="text-xs text-yellow-500 uppercase font-black tracking-widest font-mono">
+                  <i class="fas fa-star mr-2 animate-pulse"></i>Pinned Sectors
+                </span>
+              </div>
+              <div id="pinned-sectors-list" class="flex flex-wrap gap-2 pt-1">
+                <!-- Pinned sectors will be injected here -->
+              </div>
+            </div>
             <div id="hierarchy-panel" class="hidden">
               <div class="flex items-center gap-2 text-sm font-mono mb-3">
                 <span class="text-blue-400 cursor-pointer" onclick="resetToCountry()">
@@ -421,8 +452,26 @@
               <div id="ai-briefing-text" class="text-slate-300 font-mono text-[11px] leading-relaxed">
                 Select a country on the map to generate a real-time AI summary.
               </div>
-              <div id="ai-briefing-loading" class="hidden text-center py-4">
-                <i class="fas fa-circle-notch fa-spin text-blue-400"></i>
+            </div>
+            <!-- Classified Strategic Notes Card -->
+            <div id="classified-notes-card" class="apple-glass p-5 mb-2 hidden">
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-xs text-yellow-500 uppercase font-black tracking-widest font-mono">
+                  <i class="fas fa-user-secret mr-2 animate-pulse"></i>Classified Dossier Notes
+                </span>
+                <span id="notes-save-status" class="text-[9px] font-bold text-slate-500 uppercase tracking-widest font-mono">Autosaved</span>
+              </div>
+              <div class="relative">
+                <textarea id="classified-notes-input" placeholder="Enter classified intelligence observations, target strategies, or observations for this sector..." 
+                  class="w-full h-32 bg-black/40 border border-white/10 rounded-xl p-3.5 text-xs text-slate-300 placeholder-slate-600 focus:border-yellow-500/50 focus:outline-none transition-colors shadow-inner resize-none font-mono leading-relaxed"
+                  oninput="onNotesInput()"></textarea>
+                <div id="notes-auth-prompt" class="absolute inset-0 bg-slate-900/90 backdrop-blur-sm flex flex-col justify-center items-center p-4 text-center rounded-xl z-20">
+                  <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 font-mono">Cloud Sync Offline</p>
+                  <p class="text-[9px] text-slate-500 mb-3 tracking-wide leading-relaxed font-sans">Sign in with Google to enable secure database persistence for classified notes, bookmarked sectors, and preferences.</p>
+                  <button type="button" onclick="loginWithGoogle()" class="px-4 py-1.5 text-[9px] bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 font-bold tracking-widest uppercase rounded-lg border border-sky-500/20 transition-all font-mono">
+                    Authorize Uplink
+                  </button>
+                </div>
               </div>
             </div>
           </div>

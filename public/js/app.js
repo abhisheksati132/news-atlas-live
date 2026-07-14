@@ -122,27 +122,71 @@ async function initTerminal() {
       const firebaseApp = window.firebaseCore.initializeApp(config);
       const auth = window.firebaseCore.getAuth(firebaseApp);
       const db = window.firebaseCore.getFirestore(firebaseApp);
-      await window.firebaseCore.signInAnonymously(auth);
+      window.authInstance = auth;
+      window.dbInstance = db;
+
+      let unsubscribeBookmarks = null;
+
       window.firebaseCore.onAuthStateChanged(auth, (u) => {
+        window.currentUser = u;
+        const loginBtn = document.getElementById("login-btn");
+        const userInfo = document.getElementById("user-info");
+        const userAvatar = document.getElementById("user-avatar");
+        const userName = document.getElementById("user-name");
+        const idEl = safeEl("neural-id");
+
+        if (unsubscribeBookmarks) {
+          unsubscribeBookmarks();
+          unsubscribeBookmarks = null;
+        }
+
         if (u) {
-          const idEl = safeEl("neural-id");
-          if (idEl && !u.isAnonymous && u.displayName) {
-            idEl.innerText = `SESSION: ${u.displayName.toUpperCase()}`;
+          if (loginBtn) loginBtn.classList.add("hidden");
+          if (userInfo) userInfo.classList.remove("hidden");
+          if (userAvatar) userAvatar.src = u.photoURL || "https://www.gravatar.com/avatar/?d=mp";
+          if (userName) userName.innerText = u.displayName || u.email || "AUTHORIZED USER";
+
+          if (idEl) {
+            idEl.innerText = `SESSION: ${(u.displayName || u.email || u.uid).toUpperCase()}`;
             idEl.classList.add("text-emerald-500");
-          } else if (idEl && u.isAnonymous) {
-            idEl.innerText = `SESSION: ${u.uid.substring(0, 8).toUpperCase()}`;
           }
+
           try {
             const userRef = window.firebaseCore.doc(db, "visitors", u.uid);
-            window.firebaseCore.setDoc(userRef, { last_login: window.firebaseCore.serverTimestamp(), device: navigator.userAgent }, { merge: true });
+            window.firebaseCore.setDoc(userRef, { last_login: window.firebaseCore.serverTimestamp(), device: navigator.userAgent, email: u.email }, { merge: true });
           } catch (e) { }
+
+          // Sync bookmarks in real-time
+          const userDocRef = window.firebaseCore.doc(db, "users", u.uid);
+          unsubscribeBookmarks = window.firebaseCore.onSnapshot(userDocRef, (docSnap) => {
+            if (docSnap.exists()) {
+              window.userBookmarks = docSnap.data().bookmarks || [];
+            } else {
+              window.userBookmarks = [];
+            }
+            window.renderPinnedSectors();
+            window.updateNotesAndBookmarksUI();
+          });
+
+        } else {
+          if (loginBtn) loginBtn.classList.remove("hidden");
+          if (userInfo) userInfo.classList.add("hidden");
+          if (idEl) {
+            idEl.innerText = "GUEST SESSION";
+            idEl.classList.remove("text-emerald-500");
+          }
+          window.userBookmarks = [];
+          window.renderPinnedSectors();
+          window.updateNotesAndBookmarksUI();
         }
       });
     } catch (e) {
-      console.warn("Auth limited:", e);
+      console.warn("Auth initialization failed:", e);
       setText("neural-id", "GUEST SESSION");
     }
-  } else { setText("neural-id", "GUEST SESSION"); }
+  } else {
+    setText("neural-id", "GUEST SESSION");
+  }
   try {
     const res = await fetch("/api/countries?all=true");
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -361,6 +405,7 @@ window.handleCountryClick = async function (event, d) {
     }
     generateAIBriefing(countryName);
   }
+  if (window.updateNotesAndBookmarksUI) window.updateNotesAndBookmarksUI();
 };
 window.resetToGlobalCenter = () => {
   selectedCountry = null;
@@ -392,6 +437,7 @@ window.resetToGlobalCenter = () => {
   if (headerFlagContainer) headerFlagContainer.classList.add("hidden");
   if (headerSearchIcon) headerSearchIcon.classList.remove("hidden");
   if (headerInput) headerInput.value = "";
+  if (window.updateNotesAndBookmarksUI) window.updateNotesAndBookmarksUI();
 };
 window.toggleTheme = function() {
   const isLight = document.body.classList.toggle('light-theme');
@@ -792,4 +838,188 @@ window.activateMapInteraction = () => {
     if (window.mapEngine && !window.mapEngine.ready) {
         window.mapEngine.init();
     }
+};
+
+window.loginWithGoogle = async function() {
+  if (!window.authInstance) {
+    if (window.showToast) window.showToast("Auth services offline.", "error");
+    return;
+  }
+  try {
+    const provider = new window.firebaseCore.GoogleAuthProvider();
+    await window.firebaseCore.signInWithPopup(window.authInstance, provider);
+    if (window.showToast) window.showToast("Google authorization successful.", "success");
+  } catch (e) {
+    console.error("Google login failed:", e);
+    if (window.showToast) window.showToast("Sign in aborted or failed.", "error");
+  }
+};
+
+window.logout = async function() {
+  if (!window.authInstance) return;
+  try {
+    await window.firebaseCore.signOut(window.authInstance);
+    if (window.showToast) window.showToast("Logged out successfully.", "info");
+    const menu = document.getElementById("user-dropdown-menu");
+    if (menu) menu.classList.add("hidden");
+  } catch (e) {
+    console.error("Sign out failed:", e);
+  }
+};
+
+window.toggleUserMenu = function() {
+  const menu = document.getElementById("user-dropdown-menu");
+  if (menu) {
+    menu.classList.toggle("hidden");
+  }
+};
+
+document.addEventListener("click", (e) => {
+  const menu = document.getElementById("user-dropdown-menu");
+  const userInfo = document.getElementById("user-info");
+  if (menu && userInfo && !userInfo.contains(e.target)) {
+    menu.classList.add("hidden");
+  }
+});
+
+let notesSaveTimeout = null;
+window.onNotesInput = function() {
+  const notesInput = document.getElementById("classified-notes-input");
+  const saveStatus = document.getElementById("notes-save-status");
+  if (!notesInput || !window.currentUser || !window.selectedCountry) return;
+
+  const countryName = window.selectedCountry.properties.name;
+  const content = notesInput.value;
+
+  if (saveStatus) saveStatus.innerText = "Saving...";
+
+  clearTimeout(notesSaveTimeout);
+  notesSaveTimeout = setTimeout(async () => {
+    try {
+      const docRef = window.firebaseCore.doc(window.dbInstance, "users", window.currentUser.uid, "notes", countryName);
+      await window.firebaseCore.setDoc(docRef, {
+        content: content,
+        updatedAt: window.firebaseCore.serverTimestamp()
+      }, { merge: true });
+      if (saveStatus) saveStatus.innerText = "Autosaved";
+    } catch (e) {
+      console.error("Notes autosave failed:", e);
+      if (saveStatus) saveStatus.innerText = "Sync Error";
+    }
+  }, 800);
+};
+
+window.togglePinCountry = async function() {
+  if (!window.currentUser) {
+    if (window.showToast) window.showToast("Please sign in to pin sectors.", "warning");
+    return;
+  }
+  if (!window.selectedCountry || !window.selectedCountry.properties) return;
+
+  const countryName = window.selectedCountry.properties.name;
+  if (!window.userBookmarks) window.userBookmarks = [];
+
+  const idx = window.userBookmarks.indexOf(countryName);
+  let isPinned = false;
+  if (idx > -1) {
+    window.userBookmarks.splice(idx, 1);
+  } else {
+    window.userBookmarks.push(countryName);
+    isPinned = true;
+  }
+
+  const pinBtn = document.getElementById("sector-pin-btn");
+  if (pinBtn) {
+    pinBtn.innerHTML = isPinned ? '<i class="fas fa-star text-[10px] text-yellow-400"></i>' : '<i class="far fa-star text-[10px]"></i>';
+  }
+
+  try {
+    const docRef = window.firebaseCore.doc(window.dbInstance, "users", window.currentUser.uid);
+    await window.firebaseCore.setDoc(docRef, {
+      bookmarks: window.userBookmarks,
+      updatedAt: window.firebaseCore.serverTimestamp()
+    }, { merge: true });
+    
+    if (window.showToast) {
+      window.showToast(isPinned ? `Sector ${countryName} pinned.` : `Sector ${countryName} unpinned.`, "success");
+    }
+  } catch (e) {
+    console.error("Failed to save bookmark:", e);
+    if (window.showToast) window.showToast("Sync bookmark failed.", "error");
+  }
+};
+
+window.renderPinnedSectors = function() {
+  const card = document.getElementById("pinned-sectors-card");
+  const list = document.getElementById("pinned-sectors-list");
+  if (!card || !list) return;
+
+  if (!window.currentUser || !window.userBookmarks || window.userBookmarks.length === 0) {
+    card.classList.add("hidden");
+    list.innerHTML = "";
+    return;
+  }
+
+  card.classList.remove("hidden");
+  list.innerHTML = window.userBookmarks.map(country => {
+    const safeName = country.replace(/'/g, "\\'");
+    return `
+      <button type="button" onclick="window.handleCountryClick(null, {properties:{name:'${safeName}'}})" 
+        class="px-2.5 py-1.5 text-[9px] bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 font-bold tracking-widest uppercase rounded-lg border border-yellow-500/20 transition-all font-mono flex items-center gap-1.5">
+        <i class="fas fa-map-marker-alt text-[8px]"></i> ${country}
+      </button>
+    `;
+  }).join("");
+};
+
+window.updateNotesAndBookmarksUI = async function() {
+  const noteCard = document.getElementById("classified-notes-card");
+  const pinBtn = document.getElementById("sector-pin-btn");
+  const notesInput = document.getElementById("classified-notes-input");
+  const authPrompt = document.getElementById("notes-auth-prompt");
+  const saveStatus = document.getElementById("notes-save-status");
+
+  if (!window.selectedCountry || !window.selectedCountry.properties) {
+    if (noteCard) noteCard.classList.add("hidden");
+    if (pinBtn) pinBtn.classList.add("hidden");
+    if (notesInput) notesInput.value = "";
+    return;
+  }
+
+  const countryName = window.selectedCountry.properties.name;
+
+  if (noteCard) noteCard.classList.remove("hidden");
+  if (pinBtn) pinBtn.classList.remove("hidden");
+
+  if (pinBtn) {
+    const isPinned = window.userBookmarks && window.userBookmarks.includes(countryName);
+    pinBtn.innerHTML = isPinned ? '<i class="fas fa-star text-[10px] text-yellow-400"></i>' : '<i class="far fa-star text-[10px]"></i>';
+    pinBtn.title = isPinned ? "Unpin Sector" : "Pin Sector";
+  }
+
+  if (window.currentUser) {
+    if (authPrompt) authPrompt.classList.add("hidden");
+    if (notesInput) notesInput.disabled = false;
+    
+    if (saveStatus) saveStatus.innerText = "Synchronizing...";
+    try {
+      const docRef = window.firebaseCore.doc(window.dbInstance, "users", window.currentUser.uid, "notes", countryName);
+      const docSnap = await window.firebaseCore.getDoc(docRef);
+      if (docSnap.exists()) {
+        notesInput.value = docSnap.data().content || "";
+      } else {
+        notesInput.value = "";
+      }
+      if (saveStatus) saveStatus.innerText = "Autosaved";
+    } catch (e) {
+      console.warn("Failed to load notes:", e.message);
+      if (saveStatus) saveStatus.innerText = "Sync Failed";
+    }
+  } else {
+    if (authPrompt) authPrompt.classList.remove("hidden");
+    if (notesInput) {
+      notesInput.disabled = true;
+      notesInput.value = "";
+    }
+  }
 };

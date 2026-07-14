@@ -108,6 +108,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. Boot Sequence Logic
     const initBoot = async () => {
+        const bootOverlay = document.getElementById('boot-sequence');
+        const skipBoot = localStorage.getItem('newsatlas_booted') === 'true';
+
+        const skipHandler = (e) => {
+            if (e.key === 'Escape') {
+                cleanupBoot();
+            }
+        };
+
+        const cleanupBoot = () => {
+            window.removeEventListener('keydown', skipHandler);
+            localStorage.setItem('newsatlas_booted', 'true');
+            if (bootOverlay) bootOverlay.remove();
+            if (window.playTacticalSound) window.playTacticalSound("success");
+        };
+
+        if (skipBoot) {
+            if (bootOverlay) bootOverlay.remove();
+            return;
+        }
+
+        window.addEventListener('keydown', skipHandler);
+
         const sequence = [
             { msg: "Loading System Kernel...", wait: 400, percent: 15, status: "KERNEL LOADED" },
             { msg: "Initializing Neural Map Network...", wait: 600, percent: 35, status: "MAP_NET READY" },
@@ -121,11 +144,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const progressEl = document.getElementById('boot-progress');
         const statusEl = document.getElementById('boot-status');
         const percentEl = document.getElementById('boot-percent');
-        const bootOverlay = document.getElementById('boot-sequence');
 
         if (!logEl) return;
 
         for (const step of sequence) {
+            // Check if user skipped mid-flight
+            if (!document.getElementById('boot-sequence')) return;
+
             const row = document.createElement('div');
             row.innerHTML = `<span class="text-blue-400">[ OK ]</span> ${step.msg}`;
             logEl.appendChild(row);
@@ -156,6 +181,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             await new Promise(r => setTimeout(r, step.wait));
         }
+
+        localStorage.setItem('newsatlas_booted', 'true');
+        window.removeEventListener('keydown', skipHandler);
 
         // Complete sequence
         setTimeout(() => {

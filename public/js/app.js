@@ -75,6 +75,17 @@ function runWhenIdle(callback, timeout = 2000) {
 async function runBootSequence() {
   const savedTheme = localStorage.getItem('terminal-theme');
   if (savedTheme === 'light') document.body.classList.add('light-theme');
+
+  const savedPerf = localStorage.getItem('terminal-low-fx');
+  if (savedPerf === 'true') {
+    document.body.classList.add('low-fx');
+    const btn = document.getElementById('perf-toggle');
+    if (btn) {
+      btn.classList.add('text-sky-400');
+      btn.classList.remove('text-slate-500');
+      btn.title = "Performance Mode Active (Low FX)";
+    }
+  }
 }
 function showBackendRequiredBanner() {
   if (document.getElementById("backend-required-banner")) return;
@@ -385,6 +396,36 @@ window.resetToGlobalCenter = () => {
 window.toggleTheme = function() {
   const isLight = document.body.classList.toggle('light-theme');
   localStorage.setItem('terminal-theme', isLight ? 'light' : 'dark');
+};
+
+window.togglePerformanceMode = function() {
+  const isLowFx = document.body.classList.toggle('low-fx');
+  localStorage.setItem('terminal-low-fx', isLowFx ? 'true' : 'false');
+  if (window.mapEngine && window.mapEngine.map) {
+    try {
+      if (isLowFx) {
+        window.mapEngine.map.setTerrain(null);
+        window.mapEngine.map.setFog(null);
+      } else {
+        window.mapEngine._addTerrain();
+        window.mapEngine._applyAtmosphere();
+      }
+    } catch (e) {
+      console.warn("Mapbox low-fx update failed:", e.message);
+    }
+  }
+  const btn = document.getElementById('perf-toggle');
+  if (btn) {
+    if (isLowFx) {
+      btn.classList.add('text-sky-400');
+      btn.classList.remove('text-slate-500');
+      btn.title = "Performance Mode Active (Low FX)";
+    } else {
+      btn.classList.add('text-slate-500');
+      btn.classList.remove('text-sky-400');
+      btn.title = "Toggle performance mode (Low FX)";
+    }
+  }
 };
 
 window.toggleMapProjection = function() {

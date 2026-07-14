@@ -978,3 +978,24 @@ body.light-theme .mobile-nav-item.active {
     z-index: 1900 !important;
   }
 }
+
+/* Performance Mode (Low FX) overrides */
+body.low-fx {
+  --glass-blur: 0px !important;
+}
+
+body.low-fx * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  transition-duration: 0s !important;
+  animation-duration: 0s !important;
+}
+
+body.low-fx .brand-mark, 
+body.low-fx .brand-wordmark,
+body.low-fx .glow-text {
+  text-shadow: none !important;
+  box-shadow: none !important;
+}

@@ -47,8 +47,11 @@ class MapboxEngine {
 
         this.map.on('style.load', () => {
             this.map.resize();
-            this._applyAtmosphere();
-            this._addTerrain();
+            const isLowFx = document.body.classList.contains('low-fx');
+            if (!isLowFx) {
+                this._applyAtmosphere();
+                this._addTerrain();
+            }
             this.initMapboxLayers();
             this._startDeckAnimation();
             this.ready = true;
@@ -565,16 +568,6 @@ class MapboxEngine {
             layers: []
         });
         this.map.addControl(this.deckOverlay);
-
-        // Sub-animation pulse logic
-        let radius = 10000;
-        const animate = () => {
-            radius = (radius + 2000) % 200000;
-            // Only update if we have pulsed data
-            // This is a placeholder for more complex deck.gl animation handling
-            requestAnimationFrame(animate);
-        };
-        animate();
     }
 
     clearSelection() {

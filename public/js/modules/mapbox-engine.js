@@ -89,7 +89,7 @@ class MapboxEngine {
                 'high-color': 'rgb(9, 12, 18)',
                 'horizon-blend': 0.03,
                 'space-color': 'rgb(3, 5, 10)',
-                'star-intensity': 0,
+                'star-intensity': 0.8,
                 'range': [0.5, 10]
             });
         } catch (e) {

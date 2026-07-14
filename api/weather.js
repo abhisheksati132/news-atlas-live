@@ -26,11 +26,23 @@ export default async function handler(req, res) {
   const aqUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=european_aqi&timezone=auto`;
 
   try {
-    const [weatherRes, aqRes] = await Promise.all([fetch(weatherUrl), fetch(aqUrl)]);
+    let weatherRes;
+    try {
+      weatherRes = await fetch(weatherUrl);
+    } catch (e) {
+      throw new Error(`Weather API fetch failed: ${e.message}`);
+    }
     if (!weatherRes.ok) throw new Error(`Weather API error: ${weatherRes.status}`);
 
     const data = await weatherRes.json();
-    if (aqRes.ok) {
+    let aqRes = null;
+    try {
+      aqRes = await fetch(aqUrl);
+    } catch (e) {
+      console.warn('[weather] Air Quality fetch failed:', e.message);
+    }
+
+    if (aqRes && aqRes.ok) {
       try {
         const aqData = await aqRes.json();
         if (aqData?.current?.european_aqi !== undefined) {

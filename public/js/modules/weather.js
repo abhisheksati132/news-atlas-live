@@ -184,16 +184,14 @@ async function fetchWeather(lat, lon) {
       const todayLow = data.daily.temperature_2m_min[0];
       const atmoHl = document.getElementById("atmo-hl");
       if (atmoHl) atmoHl.innerText = `${Math.round(todayLow)}° / ${Math.round(todayHigh)}°`;
-      const sunrise = new Date(data.daily.sunrise[0]).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
-      const sunset = new Date(data.daily.sunset[0]).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
+      const formatTimeSafe = (isoStr) => {
+        if (!isoStr) return "--:--";
+        const parts = isoStr.split("T");
+        if (parts.length === 2) return parts[1].substring(0, 5);
+        return "--:--";
+      };
+      const sunrise = formatTimeSafe(data.daily.sunrise[0]);
+      const sunset = formatTimeSafe(data.daily.sunset[0]);
       const atmoSunrise = document.getElementById("atmo-sunrise");
       if (atmoSunrise) atmoSunrise.innerText = sunrise;
       const atmoSunset = document.getElementById("atmo-sunset");
@@ -220,9 +218,22 @@ async function fetchWeather(lat, lon) {
         try {
           for (let i = currentHour; i < currentHour + 24; i++) {
             if (!data.hourly.time[i]) break;
-            const timeStr = new Date(data.hourly.time[i])
-              .toLocaleTimeString([], { hour: "numeric", hour12: true })
-              .replace(" ", "");
+            const formatHourlyTimeSafe = (isoStr) => {
+              if (!isoStr) return "--";
+              const parts = isoStr.split("T");
+              if (parts.length === 2) {
+                const timeParts = parts[1].split(":");
+                if (timeParts.length >= 2) {
+                  let hour = parseInt(timeParts[0], 10);
+                  const ampm = hour >= 12 ? "PM" : "AM";
+                  hour = hour % 12;
+                  hour = hour ? hour : 12;
+                  return `${hour}${ampm}`;
+                }
+              }
+              return "--";
+            };
+            const timeStr = formatHourlyTimeSafe(data.hourly.time[i]);
             const hTemp = Math.round(data.hourly.temperature_2m[i]);
             const hCode = data.hourly.weather_code[i];
             const hMeta = getWeatherMeta(

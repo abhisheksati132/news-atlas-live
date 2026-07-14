@@ -22,7 +22,7 @@ window.fetchWithRetry = function (url, options, config) {
   return attempt(0);
 };
 
-window._audioMuted = false;
+window._audioMuted = true;
 window.isAmbiencePlaying = false;
 window.audioCtx = null;
 

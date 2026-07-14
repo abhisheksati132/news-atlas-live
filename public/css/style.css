@@ -1,40 +1,40 @@
 :root {
-  --bg: #030712;
-  --bg-elevated: #090d16;
-  --surface: rgba(10, 15, 30, 0.35);
-  --surface-solid: #090d16;
-  --surface-2: rgba(17, 24, 39, 0.55);
-  --border: rgba(255, 255, 255, 0.04);
-  --border-bright: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(255, 255, 255, 0.12);
-  --accent: #38bdf8;
-  --accent-deep: #0ea5e9;
-  --accent-dim: rgba(56, 189, 248, 0.04);
+  --bg: #08090d;
+  --bg-elevated: #0c0d12;
+  --surface: rgba(15, 17, 23, 0.4);
+  --surface-solid: #0e1017;
+  --surface-2: rgba(18, 20, 28, 0.5);
+  --border: rgba(255, 255, 255, 0.06);
+  --border-bright: rgba(255, 255, 255, 0.1);
+  --border-hover: rgba(255, 255, 255, 0.16);
+  --accent: #ffffff;
+  --accent-deep: #cbd5e1;
+  --accent-dim: rgba(255, 255, 255, 0.04);
   --text: #f8fafc;
   --text-muted: #94a3b8;
   --text-faint: #475569;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --gap: 1.35rem;
-  --panel-pad: 1.5rem;
-  --glass-blur: 28px;
-  --shadow-soft: 0 12px 32px -8px rgba(0, 0, 0, 0.65);
-  --shadow-lift: 0 24px 64px -16px rgba(0, 0, 0, 0.8);
-  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  --radius: 10px;
+  --radius-sm: 6px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --gap: 1.2rem;
+  --panel-pad: 1.25rem;
+  --glass-blur: 16px;
+  --shadow-soft: 0 8px 24px -6px rgba(0, 0, 0, 0.6);
+  --shadow-lift: 0 16px 48px -12px rgba(0, 0, 0, 0.7);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.02);
   --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
-  --font-display: "Outfit", sans-serif;
-  --header-h: 60px;
+  --font-mono: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Inter", system-ui, -apple-system, sans-serif;
+  --header-h: 56px;
   --green: #10b981;
   --red: #ef4444;
   --yellow: #f59e0b;
-  --accent-glow: rgba(56, 189, 248, 0.1);
-  --accent-text: #e0f2fe;
+  --accent-glow: rgba(255, 255, 255, 0.03);
+  --accent-text: #ffffff;
 }
 
 *,
@@ -108,7 +108,7 @@ button:focus:not(:focus-visible),
   position: fixed;
   inset: 0;
   z-index: -1;
-  background-color: #0b0f1a;
+  background-color: #08090d;
   background-image: 
     radial-gradient(at 0% 0%, rgba(15, 23, 42, 0.4) 0px, transparent 50%),
     radial-gradient(at 100% 0%, rgba(15, 23, 42, 0.4) 0px, transparent 50%);

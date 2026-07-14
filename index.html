@@ -63,26 +63,7 @@
 </head>
 
 <body class="flex flex-col night-theme">
-  <!-- Cinematic Terminal Boot Sequence -->
-  <div id="boot-sequence" class="fixed inset-0 z-[10000] bg-[#020617] flex items-center justify-center font-mono overflow-hidden">
-    <div class="max-w-2xl w-full p-6 sm:p-8 flex flex-col gap-5 sm:gap-6">
-      <div class="flex items-center gap-4">
-        <div class="w-3 h-3 rounded-full bg-blue-500 animate-pulse"></div>
-        <span class="text-blue-500 font-bold tracking-[0.3em] text-xs">NEWSATLAS SATELLITE UPLINK ENGINE V4.2</span>
-      </div>
-      <div id="boot-log" class="text-[10px] text-slate-500 flex flex-col gap-1 h-48 overflow-hidden">
-        <!-- Logs will be injected here -->
-      </div>
-      <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden relative">
-        <div id="boot-progress" class="absolute inset-y-0 left-0 bg-blue-500 transition-all duration-300" style="width: 0%"></div>
-      </div>
-      <div class="flex justify-between items-center text-[9px] font-bold tracking-widest text-slate-600 uppercase">
-        <span id="boot-status">Initializing hardware...</span>
-        <button type="button" onclick="localStorage.setItem('newsatlas_booted', 'true'); document.getElementById('boot-sequence')?.remove();" class="text-blue-500 hover:text-blue-400 transition-colors uppercase tracking-widest font-bold font-mono">Skip [Esc]</button>
-        <span id="boot-percent">0%</span>
-      </div>
-    </div>
-  </div>
+
 
   <div class="terminal-grain"></div>
   <div class="aurora-container">
@@ -318,7 +299,7 @@
         style="border-radius: 1rem 1rem 0 0; -webkit-overflow-scrolling: touch;"
         role="tablist" aria-label="Main sections">
         <button type="button" class="nav-tab active min-h-[44px] flex-1" role="tab" aria-selected="true"
-          aria-controls="tab-intel" id="tab-btn-intel" title="Intel: AI briefing, GDELT events"
+          aria-controls="tab-intel" id="tab-btn-intel" title="Summary: AI briefing, global events"
           onclick="switchTab('intel')">
           Summary
         </button>
@@ -361,7 +342,7 @@
                     " autocomplete="off" />
                 <button onclick="searchCityForTab('intel')"
                   class="px-5 py-2 text-sm bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-bold tracking-widest uppercase rounded-xl transition-all border border-blue-500/20 shadow-sm">
-                  SCAN
+                  FIND
                 </button>
               </div>
             </div>
@@ -454,22 +435,23 @@
               </div>
             </div>
             <!-- Classified Strategic Notes Card -->
+            <!-- Research Notes Card -->
             <div id="classified-notes-card" class="apple-glass p-5 mb-2 hidden">
               <div class="flex justify-between items-center mb-3">
-                <span class="text-xs text-yellow-500 uppercase font-black tracking-widest font-mono">
-                  <i class="fas fa-user-secret mr-2 animate-pulse"></i>Classified Dossier Notes
+                <span class="text-xs text-slate-400 uppercase font-black tracking-widest font-mono">
+                  <i class="fas fa-pen-fancy mr-2"></i>Research Notes
                 </span>
                 <span id="notes-save-status" class="text-[9px] font-bold text-slate-500 uppercase tracking-widest font-mono">Autosaved</span>
               </div>
               <div class="relative">
-                <textarea id="classified-notes-input" placeholder="Enter classified intelligence observations, target strategies, or observations for this sector..." 
-                  class="w-full h-32 bg-black/40 border border-white/10 rounded-xl p-3.5 text-xs text-slate-300 placeholder-slate-600 focus:border-yellow-500/50 focus:outline-none transition-colors shadow-inner resize-none font-mono leading-relaxed"
+                <textarea id="classified-notes-input" placeholder="Enter research observations, target strategies, or observations for this country..." 
+                  class="w-full h-32 bg-black/40 border border-white/10 rounded-xl p-3.5 text-xs text-slate-300 placeholder-slate-600 focus:border-white/20 focus:outline-none transition-colors shadow-inner resize-none font-mono leading-relaxed"
                   oninput="onNotesInput()"></textarea>
                 <div id="notes-auth-prompt" class="absolute inset-0 bg-slate-900/90 backdrop-blur-sm flex flex-col justify-center items-center p-4 text-center rounded-xl z-20">
                   <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 font-mono">Cloud Sync Offline</p>
-                  <p class="text-[9px] text-slate-500 mb-3 tracking-wide leading-relaxed font-sans">Sign in with Google to enable secure database persistence for classified notes, bookmarked sectors, and preferences.</p>
+                  <p class="text-[9px] text-slate-500 mb-3 tracking-wide leading-relaxed font-sans">Sign in with Google to enable secure database persistence for notes, bookmarks, and preferences.</p>
                   <button type="button" onclick="loginWithGoogle()" class="px-4 py-1.5 text-[9px] bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 font-bold tracking-widest uppercase rounded-lg border border-sky-500/20 transition-all font-mono">
-                    Authorize Uplink
+                    Authorize Sync
                   </button>
                 </div>
               </div>
@@ -496,7 +478,7 @@
                     " autocomplete="off" />
                 <button onclick="searchCityForTab('news')"
                   class="px-5 py-2 text-sm bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-bold tracking-widest uppercase rounded-xl transition-all border border-cyan-500/20 shadow-sm">
-                  SCAN
+                  FIND
                 </button>
               </div>
             </div>
@@ -641,7 +623,7 @@
                     " autocomplete="off" />
                 <button onclick="searchCityForTab('atmosphere')"
                   class="px-5 py-2 text-sm bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-bold tracking-widest uppercase rounded-xl transition-all border border-blue-500/20 shadow-sm">
-                  SCAN
+                  FIND
                 </button>
               </div>
             </div>
@@ -992,7 +974,7 @@
                     " autocomplete="off" />
                 <button onclick="searchCityForTab('economic')"
                   class="px-5 py-2 text-sm bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-bold tracking-widest uppercase rounded-xl transition-all border border-amber-500/20 shadow-sm">
-                  SCAN
+                  FIND
                 </button>
               </div>
             </div>

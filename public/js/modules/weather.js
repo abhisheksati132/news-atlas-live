@@ -99,9 +99,38 @@ async function fetchWeather(lat, lon) {
     return;
   }
   try {
-    const res = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
-    if (!res.ok) throw new Error(`Weather fetch failed: ${res.status}`);
-    const data = await res.json();
+    const params = new URLSearchParams({
+      latitude: lat,
+      longitude: lon,
+      current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m,dew_point_2m',
+      hourly: 'temperature_2m,weather_code,visibility,uv_index,precipitation_probability',
+      daily: 'weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum',
+      timezone: 'auto',
+    });
+    
+    const weatherUrl = `https://api.open-meteo.com/v1/forecast?${params}`;
+    const aqUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=european_aqi&timezone=auto`;
+
+    let data;
+    try {
+      const weatherRes = await fetch(weatherUrl);
+      if (!weatherRes.ok) throw new Error(`Weather error status ${weatherRes.status}`);
+      data = await weatherRes.json();
+    } catch (e) {
+      throw new Error(`Weather API connection failed: ${e.message}`);
+    }
+
+    try {
+      const aqRes = await fetch(aqUrl);
+      if (aqRes.ok) {
+        const aqData = await aqRes.json();
+        if (aqData?.current?.european_aqi !== undefined && data.current) {
+          data.current.aqi = Math.round(aqData.current.european_aqi);
+        }
+      }
+    } catch (e) {
+      console.warn("Client air quality fetch failed:", e.message);
+    }
     const locationLabel = document.getElementById("atmo-location-label");
     if (locationLabel && window._currentWeatherLocation) {
       locationLabel.innerHTML = `<i class="fas fa-map-marker-alt mr-1 text-blue-400"></i>${window._currentWeatherLocation}`;

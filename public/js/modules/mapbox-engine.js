@@ -594,6 +594,53 @@ class MapboxEngine {
         this.map.dragRotate.disable();
         this.map.touchZoomRotate.disable();
     }
+
+    setMapDataLayer(type) {
+        if (!this.map || !this.map.getLayer('country-fills')) return;
+
+        if (type === 'default' || !type) {
+            this.map.setPaintProperty('country-fills', 'fill-color', '#3b82f6');
+            this.map.setPaintProperty('country-fills', 'fill-opacity', [
+                'case',
+                ['boolean', ['feature-state', 'selected'], false], 0.18,
+                ['boolean', ['feature-state', 'hover'], false], 0.06,
+                0
+            ]);
+            return;
+        }
+
+        const expression = ['match', ['get', 'name']];
+        
+        if (type === 'gdp') {
+            expression.push('United States of America', '#ffffff');
+            expression.push('China', '#cbd5e1');
+            expression.push('Japan', '#94a3b8');
+            expression.push('Germany', '#94a3b8');
+            expression.push('India', '#94a3b8');
+            expression.push('United Kingdom', '#64748b');
+            expression.push('France', '#64748b');
+            expression.push('Brazil', '#475569');
+            expression.push('Russian Federation', '#475569');
+            expression.push('Canada', '#475569');
+            expression.push('Australia', '#334155');
+            expression.push('rgba(255, 255, 255, 0.04)'); 
+            
+            this.map.setPaintProperty('country-fills', 'fill-color', expression);
+            this.map.setPaintProperty('country-fills', 'fill-opacity', 0.65);
+        } else if (type === 'growth') {
+            expression.push('India', '#10b981');
+            expression.push('China', '#10b981');
+            expression.push('Ukraine', '#10b981');
+            expression.push('Russian Federation', '#f59e0b');
+            expression.push('Brazil', '#f59e0b');
+            expression.push('United States of America', '#f59e0b');
+            expression.push('Germany', '#ef4444');
+            expression.push('rgba(255, 255, 255, 0.06)');
+            
+            this.map.setPaintProperty('country-fills', 'fill-color', expression);
+            this.map.setPaintProperty('country-fills', 'fill-opacity', 0.6);
+        }
+    }
 }
 
 window.MapboxEngine = MapboxEngine;

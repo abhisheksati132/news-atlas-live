@@ -134,6 +134,10 @@
       <button type="button" id="sector-pin-btn" onclick="togglePinCountry()" class="text-slate-500 hover:text-yellow-400 transition-colors ml-1.5 focus:outline-none hidden" title="Pin / Bookmark Sector">
         <i class="far fa-star text-[10px]"></i>
       </button>
+      <!-- Sector Compare Button -->
+      <button type="button" id="sector-compare-btn" onclick="toggleCompareMode()" class="text-slate-500 hover:text-indigo-400 transition-colors ml-1.5 focus:outline-none hidden" title="Compare with another country">
+        <i class="fas fa-columns text-[10px]"></i>
+      </button>
     </div>
 
     <!-- CENTER: Tactical Shortcuts -->
@@ -228,6 +232,12 @@
               class="map-ctrl-btn text-blue-400/80 hover:text-blue-400 transition-colors" title="Reset View">
               <i class="fas fa-expand text-sm"></i>
             </button>
+            <div class="w-px h-4 bg-white/5 mx-2"></div>
+            <select id="map-layer-select" onchange="changeMapLayer(this.value)" class="bg-black/40 border border-white/10 rounded px-2.5 py-1 text-[9px] text-slate-400 hover:text-white focus:outline-none font-mono font-bold tracking-wider">
+              <option value="default">LAYER: STANDARD</option>
+              <option value="gdp">LAYER: GDP RANKINGS</option>
+              <option value="growth">LAYER: GDP GROWTH</option>
+            </select>
           </div>
 
         </div>
@@ -435,6 +445,16 @@
               </div>
             </div>
             <!-- Classified Strategic Notes Card -->
+            <!-- Geopolitical News Sentiment Trends Chart -->
+            <div id="geopolitical-trends-card" class="apple-glass p-5 mb-2 hidden">
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-xs text-indigo-400 uppercase font-black tracking-widest font-mono">
+                  <i class="fas fa-chart-area mr-2"></i>Global Sentiment Trends
+                </span>
+                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest font-mono">10-Day Volume</span>
+              </div>
+              <canvas id="trends-line-chart" class="w-full h-24 rounded-lg bg-black/20 border border-white/5"></canvas>
+            </div>
             <!-- Research Notes Card -->
             <div id="classified-notes-card" class="apple-glass p-5 mb-2 hidden">
               <div class="flex justify-between items-center mb-3">

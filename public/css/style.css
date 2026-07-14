@@ -263,24 +263,21 @@ body.light-theme header {
 .apple-glass,
 .dossier-card {
   position: relative;
-  background: rgba(10, 15, 30, 0.38) !important;
-  backdrop-filter: blur(var(--glass-blur)) saturate(1.15) !important;
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.15) !important;
-  border: 1px solid rgba(255, 255, 255, 0.04) !important;
+  background: var(--surface-solid) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
   border-radius: var(--radius-lg);
   padding: var(--panel-pad);
-  box-shadow: var(--shadow-soft), var(--shadow-inset);
+  box-shadow: var(--shadow-soft);
   overflow: hidden;
-  transition: all 200ms var(--ease-standard) !important;
+  transition: border-color 100ms ease-out, transform 100ms ease-out !important;
 }
 
 .glass-panel:hover,
 .apple-glass:hover,
 .dossier-card:hover {
-  background: rgba(10, 15, 30, 0.48) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
-  transform: translateY(-1.5px) scale(1.003);
-  box-shadow: var(--shadow-lift);
+  background: var(--surface-solid) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  transform: translateY(-1px);
 }
 
 
@@ -998,4 +995,56 @@ body.low-fx .brand-wordmark,
 body.low-fx .glow-text {
   text-shadow: none !important;
   box-shadow: none !important;
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  }
+  
+  header,
+  #map-box-id,
+  .nav-tab-strip,
+  .autocomplete-dropdown,
+  #perf-toggle,
+  #notes-auth-prompt,
+  button,
+  footer {
+    display: none !important;
+  }
+
+  #sidebar {
+    width: 100% !important;
+    max-width: 100% !important;
+    position: static !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+    color: #000000 !important;
+    padding: 0 !important;
+  }
+
+  .apple-glass, .glass-panel {
+    background: transparent !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    margin-bottom: 16px !important;
+    page-break-inside: avoid !important;
+  }
+
+  h1, h2, h3, h4, span, div, p {
+    color: #000000 !important;
+    text-shadow: none !important;
+  }
+
+  textarea {
+    border: 1px solid #cbd5e1 !important;
+    background: transparent !important;
+    color: #000000 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
 }

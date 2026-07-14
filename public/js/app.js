@@ -193,6 +193,7 @@ async function initTerminal() {
     globalSearchData = await res.json();
     window.globalSearchData = globalSearchData;
     if (window.renderTrendingHeader) window.renderTrendingHeader();
+    if (window.initAutocompleteSearch) window.initAutocompleteSearch();
   } catch (e) { 
     console.error("Search data load failed:", e); 
     window.globalSearchData = [];
@@ -384,6 +385,18 @@ async function generateAIBriefing(loc) {
 window.generateAIBriefing = generateAIBriefing;
 window.handleCountryClick = async function (event, d) {
   window.playTacticalSound("click");
+  
+  if (window.compareModeActive && window.primaryCountry && d && d.properties) {
+    window.secondaryCountry = d;
+    const pName = window.primaryCountry.properties.name;
+    const sName = window.secondaryCountry.properties.name;
+    const sectorName = document.getElementById("sector-name");
+    if (sectorName) sectorName.innerText = `${pName.substring(0,10)} vs ${sName.substring(0,10)}`;
+    if (window.showToast) window.showToast(`Comparing ${pName} and ${sName}`, "success");
+    window.runGeopoliticalComparison(window.primaryCountry, window.secondaryCountry);
+    return;
+  }
+
   selectedCountry = d;
   window.selectedCountry = d;
   window.switchTab("intel");
@@ -404,6 +417,7 @@ window.handleCountryClick = async function (event, d) {
       if (event && event.lngLat) { window.mapEngine.flyToCountry(event.lngLat, 4.5); }
     }
     generateAIBriefing(countryName);
+    if (window.drawGeopoliticalTrendsChart) window.drawGeopoliticalTrendsChart(countryName);
   }
   if (window.updateNotesAndBookmarksUI) window.updateNotesAndBookmarksUI();
 };
@@ -420,6 +434,20 @@ window.resetToGlobalCenter = () => {
   if (globeIcon) globeIcon.classList.remove("hidden");
   if (flagImg) flagImg.classList.add("hidden");
   if (sectorName) sectorName.innerText = "Global Sector";
+
+  // Reset Compare Mode
+  window.compareModeActive = false;
+  window.primaryCountry = null;
+  window.secondaryCountry = null;
+  const compareBtn = document.getElementById("sector-compare-btn");
+  if (compareBtn) {
+    compareBtn.innerHTML = '<i class="fas fa-columns text-[10px]"></i>';
+    compareBtn.classList.add("hidden");
+  }
+  
+  // Hide trends card
+  const trendsCard = document.getElementById("geopolitical-trends-card");
+  if (trendsCard) trendsCard.classList.add("hidden");
 
   const backWrap = safeEl("back-to-global-wrap");
   if (backWrap) backWrap.classList.add("hidden");
@@ -979,9 +1007,12 @@ window.updateNotesAndBookmarksUI = async function() {
   const authPrompt = document.getElementById("notes-auth-prompt");
   const saveStatus = document.getElementById("notes-save-status");
 
+  const compareBtn = document.getElementById("sector-compare-btn");
+
   if (!window.selectedCountry || !window.selectedCountry.properties) {
     if (noteCard) noteCard.classList.add("hidden");
     if (pinBtn) pinBtn.classList.add("hidden");
+    if (compareBtn) compareBtn.classList.add("hidden");
     if (notesInput) notesInput.value = "";
     return;
   }
@@ -990,6 +1021,7 @@ window.updateNotesAndBookmarksUI = async function() {
 
   if (noteCard) noteCard.classList.remove("hidden");
   if (pinBtn) pinBtn.classList.remove("hidden");
+  if (compareBtn) compareBtn.classList.remove("hidden");
 
   if (pinBtn) {
     const isPinned = window.userBookmarks && window.userBookmarks.includes(countryName);
@@ -1021,5 +1053,286 @@ window.updateNotesAndBookmarksUI = async function() {
       notesInput.disabled = true;
       notesInput.value = "";
     }
+  }
+};
+
+window.initAutocompleteSearch = function() {
+  const searchInputs = [
+    { id: "intel-city-search", tab: "intel" },
+    { id: "news-city-search", tab: "news" },
+    { id: "atmosphere-city-search", tab: "atmosphere" },
+    { id: "economic-city-search", tab: "economic" }
+  ];
+
+  searchInputs.forEach(({ id, tab }) => {
+    const input = document.getElementById(id);
+    if (!input) return;
+
+    if (input.parentElement) {
+      input.parentElement.style.position = "relative";
+    }
+
+    const dropdown = document.createElement("div");
+    dropdown.className = "autocomplete-dropdown hidden absolute left-0 right-0 mt-1 bg-[#0e1017] border border-white/10 rounded-xl shadow-2xl z-50 p-1 overflow-hidden";
+    dropdown.style.top = "100%";
+    input.parentElement.appendChild(dropdown);
+
+    let activeIndex = -1;
+    let currentResults = [];
+
+    const hideDropdown = () => {
+      dropdown.classList.add("hidden");
+      dropdown.innerHTML = "";
+      activeIndex = -1;
+    };
+
+    const selectResult = (country) => {
+      input.value = country.name.common;
+      hideDropdown();
+      window.handleCountryClick(null, {
+        properties: { name: country.name.common, iso_a2: country.cca2 }
+      });
+      window.switchTab(tab);
+    };
+
+    input.addEventListener("input", () => {
+      const q = input.value.toLowerCase().trim();
+      if (!q || !window.globalSearchData) {
+        hideDropdown();
+        return;
+      }
+
+      currentResults = window.globalSearchData
+        .filter(c => c.name.common.toLowerCase().includes(q))
+        .slice(0, 5);
+
+      if (currentResults.length === 0) {
+        hideDropdown();
+        return;
+      }
+
+      activeIndex = -1;
+      dropdown.innerHTML = currentResults.map((c, idx) => {
+        const flagUrl = c.cca2 ? `https://flagcdn.com/w20/${c.cca2.toLowerCase()}.png` : '';
+        const flagTag = flagUrl ? `<img src="${flagUrl}" class="w-4 h-2.5 object-cover rounded-sm">` : `<i class="fas fa-globe text-slate-500 text-[10px]"></i>`;
+        return `
+          <div class="autocomplete-item px-3.5 py-2 hover:bg-white/5 rounded-lg cursor-pointer flex items-center gap-2.5 text-[10px] text-slate-400 hover:text-white font-mono transition-colors uppercase tracking-wider" data-index="${idx}">
+            ${flagTag}
+            <span>${c.name.common}</span>
+          </div>
+        `;
+      }).join("");
+
+      dropdown.classList.remove("hidden");
+
+      dropdown.querySelectorAll(".autocomplete-item").forEach(item => {
+        item.addEventListener("click", () => {
+          const idx = parseInt(item.getAttribute("data-index"));
+          selectResult(currentResults[idx]);
+        });
+      });
+    });
+
+    input.addEventListener("keydown", (e) => {
+      const items = dropdown.querySelectorAll(".autocomplete-item");
+      if (dropdown.classList.contains("hidden")) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        activeIndex = (activeIndex + 1) % currentResults.length;
+        items.forEach((item, idx) => {
+          if (idx === activeIndex) {
+            item.classList.add("bg-white/5", "text-white");
+          } else {
+            item.classList.remove("bg-white/5", "text-white");
+          }
+        });
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        activeIndex = (activeIndex - 1 + currentResults.length) % currentResults.length;
+        items.forEach((item, idx) => {
+          if (idx === activeIndex) {
+            item.classList.add("bg-white/5", "text-white");
+          } else {
+            item.classList.remove("bg-white/5", "text-white");
+          }
+        });
+      } else if (e.key === "Enter") {
+        if (activeIndex > -1 && currentResults[activeIndex]) {
+          e.preventDefault();
+          selectResult(currentResults[activeIndex]);
+        } else if (currentResults.length > 0) {
+          e.preventDefault();
+          selectResult(currentResults[0]);
+        }
+      } else if (e.key === "Escape") {
+        hideDropdown();
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+        hideDropdown();
+      }
+    });
+  });
+};
+
+window.compareModeActive = false;
+window.primaryCountry = null;
+window.secondaryCountry = null;
+
+window.toggleCompareMode = function() {
+  if (!window.selectedCountry) {
+    if (window.showToast) window.showToast("Select a primary country first.", "warning");
+    return;
+  }
+  
+  window.compareModeActive = !window.compareModeActive;
+  const btn = document.getElementById("sector-compare-btn");
+  
+  if (window.compareModeActive) {
+    window.primaryCountry = window.selectedCountry;
+    window.secondaryCountry = null;
+    if (btn) btn.innerHTML = '<i class="fas fa-columns text-[10px] text-indigo-400"></i>';
+    if (window.showToast) window.showToast("Compare Mode enabled. Select a secondary country.", "info");
+  } else {
+    window.primaryCountry = null;
+    window.secondaryCountry = null;
+    if (btn) btn.innerHTML = '<i class="fas fa-columns text-[10px]"></i>';
+    if (window.showToast) window.showToast("Compare Mode disabled.", "info");
+    if (window.selectedCountry) {
+      window.handleCountryClick(null, window.selectedCountry);
+    }
+  }
+};
+
+window.runGeopoliticalComparison = async function(c1, c2) {
+  const pName = c1.properties.name;
+  const sName = c2.properties.name;
+  
+  const getDynamicEstimate = (name) => {
+    if (window.getDynamicEconomicEstimate) return window.getDynamicEconomicEstimate(name);
+    return { gdp_billions: "150", gdp_growth_percent: 1.5, gdp_per_capita: 5000, inflation_rate: 3.5, unemployment_rate: 6.5, interest_rate: 4.5, debt_to_gdp: 50, major_exports: ["Raw Goods"] };
+  };
+
+  const pEco = getDynamicEstimate(pName);
+  const sEco = getDynamicEstimate(sName);
+  
+  const renderSplit = (elId, v1, v2) => {
+    const el = document.getElementById(elId);
+    if (el) el.innerText = `${v1} | ${v2}`;
+  };
+  
+  renderSplit("eco-gdp", `$${pEco.gdp_billions}B`, `$${sEco.gdp_billions}B`);
+  renderSplit("eco-growth", `${pEco.gdp_growth_percent > 0 ? "+" : ""}${pEco.gdp_growth_percent}%`, `${sEco.gdp_growth_percent > 0 ? "+" : ""}${sEco.gdp_growth_percent}%`);
+  renderSplit("eco-capita", `$${pEco.gdp_per_capita.toLocaleString()}`, `$${sEco.gdp_per_capita.toLocaleString()}`);
+  renderSplit("eco-inflation", `${pEco.inflation_rate}%`, `${sEco.inflation_rate}%`);
+  renderSplit("eco-unemployment", `${pEco.unemployment_rate}%`, `${sEco.unemployment_rate}%`);
+  renderSplit("eco-interest", `${pEco.interest_rate}%`, `${sEco.interest_rate}%`);
+  renderSplit("eco-debt", `${pEco.debt_to_gdp}%`, `${sEco.debt_to_gdp}%`);
+  
+  const ticker = document.getElementById("eco-market-ticker");
+  if (ticker) ticker.innerText = `COMPARING: ${pName.toUpperCase()} VS ${sName.toUpperCase()}`;
+  
+  const exportsEl = document.getElementById("eco-exports");
+  if (exportsEl) {
+    const pTags = pEco.major_exports.slice(0,2).map(item => `
+      <div class="apple-glass px-2.5 py-1.5 border border-blue-500/10 flex items-center gap-1.5 rounded-full">
+         <span class="text-[8px] text-slate-500 font-black uppercase">${pName.substring(0,3)}:</span>
+         <span class="text-[8px] text-white font-black uppercase">${item}</span>
+      </div>
+    `);
+    const sTags = sEco.major_exports.slice(0,2).map(item => `
+      <div class="apple-glass px-2.5 py-1.5 border border-indigo-500/10 flex items-center gap-1.5 rounded-full">
+         <span class="text-[8px] text-slate-500 font-black uppercase">${sName.substring(0,3)}:</span>
+         <span class="text-[8px] text-white font-black uppercase">${item}</span>
+      </div>
+    `);
+    exportsEl.innerHTML = [...pTags, ...sTags].join("");
+  }
+
+  const lat1 = c1.properties.lat || 20;
+  const lon1 = c1.properties.lon || 20;
+  const lat2 = c2.properties.lat || 20;
+  const lon2 = c2.properties.lon || 20;
+  
+  const weatherUrl1 = `https://api.open-meteo.com/v1/forecast?latitude=${lat1}&longitude=${lon1}&current=temperature_2m,relative_humidity_2m`;
+  const weatherUrl2 = `https://api.open-meteo.com/v1/forecast?latitude=${lat2}&longitude=${lon2}&current=temperature_2m,relative_humidity_2m`;
+  
+  try {
+    const [r1, r2] = await Promise.all([
+      fetch(weatherUrl1).then(res => res.json()),
+      fetch(weatherUrl2).then(res => res.json())
+    ]);
+    
+    renderSplit("atmo-temp", `${Math.round(r1.current.temperature_2m)}°C`, `${Math.round(r2.current.temperature_2m)}°C`);
+    renderSplit("atmo-humidity", `${Math.round(r1.current.relative_humidity_2m)}%`, `${Math.round(r2.current.relative_humidity_2m)}%`);
+  } catch(e) {
+    console.warn("Weather comparison fetch failed:", e.message);
+  }
+
+  if (window.drawGeopoliticalTrendsChart) {
+    window.drawGeopoliticalTrendsChart(pName, sName);
+  }
+};
+
+window.drawGeopoliticalTrendsChart = function(countryName, compareName = null) {
+  const card = document.getElementById("geopolitical-trends-card");
+  const canvas = document.getElementById("trends-line-chart");
+  if (!card || !canvas) return;
+
+  card.classList.remove("hidden");
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.parentElement.offsetWidth || 300;
+  canvas.height = 80;
+  
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  const getTimelinePoints = (name) => {
+    const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return Array.from({ length: 10 }, (_, idx) => {
+      return (Math.sin(hash + idx) * 20 + 40) + (idx * 1.5); 
+    });
+  };
+
+  const pts1 = getTimelinePoints(countryName);
+  const pts2 = compareName ? getTimelinePoints(compareName) : null;
+
+  const drawLine = (pts, color, name) => {
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    
+    const step = canvas.width / (pts.length - 1);
+    pts.forEach((pt, idx) => {
+      const x = idx * step;
+      const y = canvas.height - 8 - (pt / 100) * (canvas.height - 16);
+      if (idx === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+      
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, 2.5, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.moveTo(x, y);
+    });
+    ctx.stroke();
+
+    ctx.fillStyle = color;
+    ctx.font = "bold 8px system-ui, sans-serif";
+    ctx.fillText(name.toUpperCase(), 12, pts[0] < 50 ? canvas.height - 10 : 16);
+  };
+
+  drawLine(pts1, "#38bdf8", countryName);
+  if (pts2) {
+    drawLine(pts2, "#6366f1", compareName);
+  }
+};
+
+window.changeMapLayer = function(val) {
+  if (window.mapEngine && window.mapEngine.ready) {
+    window.mapEngine.setMapDataLayer(val);
+    if (window.showToast) window.showToast(`Map layer switched: ${val.toUpperCase()}`, "info");
   }
 };

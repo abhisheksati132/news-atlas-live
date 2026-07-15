@@ -20,6 +20,62 @@ const AIAssistant = () => {
     const userMsg = input.trim();
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
     setInput('');
+
+    if (userMsg.startsWith("/")) {
+      const parts = userMsg.split(" ");
+      const cmd = parts[0].toLowerCase();
+      const arg = parts.slice(1).join(" ");
+      
+      let responseText = "";
+
+      if (cmd === "/compare") {
+        const countries = arg.split(" vs ");
+        if (countries.length === 2 && window.handleCountryClickByName && window.toggleCompareMode) {
+          window.compareModeActive = false;
+          window.handleCountryClickByName(countries[0]);
+          setTimeout(() => {
+            window.toggleCompareMode();
+            setTimeout(() => {
+              window.handleCountryClickByName(countries[1]);
+            }, 600);
+          }, 600);
+          responseText = `COMMAND EXECUTED: Commencing tactical compare mode sequence between "${countries[0]}" and "${countries[1]}".`;
+        } else {
+          responseText = "COMMAND ERROR: Invalid parameters. Format: `/compare [Country 1] vs [Country 2]` (e.g. `/compare India vs United States`).";
+        }
+      } 
+      else if (cmd === "/weather") {
+        if (arg && window.searchCityForTab) {
+          window.switchTab("atmosphere");
+          const searchInput = document.getElementById("atmosphere-city-search");
+          if (searchInput) {
+            searchInput.value = arg;
+            window.searchCityForTab("atmosphere");
+          }
+          responseText = `COMMAND EXECUTED: Scanning meteorological telemetry zones for "${arg}".`;
+        } else {
+          responseText = "COMMAND ERROR: Missing target query. Format: `/weather [City Name]`.";
+        }
+      }
+      else if (cmd === "/layer") {
+        const layers = ["gdp", "growth", "default"];
+        if (layers.includes(arg.toLowerCase()) && window.changeMapLayer) {
+          const select = document.getElementById("map-layer-select");
+          if (select) select.value = arg.toLowerCase();
+          window.changeMapLayer(arg.toLowerCase());
+          responseText = `COMMAND EXECUTED: Changing active visual choropleth sensor overlay to "${arg.toUpperCase()}".`;
+        } else {
+          responseText = "COMMAND ERROR: Invalid overlay mode. Available: `/layer gdp`, `/layer growth`, or `/layer default`.";
+        }
+      }
+      else {
+        responseText = `COMMAND ERROR: Unrecognized protocol code "${cmd}". Type /compare, /weather, or /layer.`;
+      }
+
+      setMessages(prev => [...prev, { role: 'assistant', content: responseText }]);
+      return;
+    }
+
     setLoading(true);
 
     try {

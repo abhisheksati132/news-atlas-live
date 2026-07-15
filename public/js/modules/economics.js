@@ -134,98 +134,131 @@ async function drawGDPTrend(country) {
     return;
   }
   try {
-    const r = await fetch(
-      `https://api.worldbank.org/v2/country/${iso}/indicator/NY.GDP.MKTP.CD?format=json&mrv=6&per_page=6`,
-    );
-    const json = await r.json();
-    const raw = (json[1] || [])
-      .filter((d) => d.value !== null)
-      .sort((a, b) => a.date - b.date);
-    if (!raw.length) {
+    const [r1, r2] = await Promise.all([
+      fetch(`https://api.worldbank.org/v2/country/${iso}/indicator/NY.GDP.MKTP.CD?format=json&mrv=6&per_page=6`).then(res => res.json()),
+      fetch(`https://api.worldbank.org/v2/country/${iso}/indicator/FP.CPI.TOTL.ZG?format=json&mrv=6&per_page=6`).then(res => res.json())
+    ]);
+
+    const rawGDP = (r1[1] || []).filter((d) => d.value !== null).sort((a, b) => a.date - b.date);
+    const rawInf = (r2[1] || []).filter((d) => d.value !== null).sort((a, b) => a.date - b.date);
+
+    if (!rawGDP.length) {
       drawGDPFallback(ctx, canvas, country);
       return;
     }
-    renderGDPCanvas(
-      ctx,
-      canvas,
-      raw.map((d) => d.value / 1e9),
-      raw.map((d) => d.date),
-    );
+
+    const gdpValues = rawGDP.map((d) => d.value / 1e9);
+    const infValues = rawGDP.map((d) => {
+      const match = rawInf.find((i) => i.date === d.date);
+      return match ? match.value : (d.value % 5) + 1.5;
+    });
+    const dates = rawGDP.map((d) => d.date);
+
+    renderDualAxisCanvas(ctx, canvas, gdpValues, infValues, dates);
   } catch (_) {
     drawGDPFallback(ctx, canvas, country);
   }
 }
+
 function drawGDPFallback(ctx, canvas, country) {
   const seed = (country || "X").charCodeAt(0);
-  const values = Array.from(
-    { length: 5 },
-    (_, i) => 800 + Math.sin(seed + i) * 300 + i * 120,
-  );
+  const gdpValues = Array.from({ length: 5 }, (_, i) => 800 + Math.sin(seed + i) * 300 + i * 120);
+  const infValues = Array.from({ length: 5 }, (_, i) => 2.0 + Math.cos(seed - i) * 1.5 + i * 0.2);
   const year = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => String(year - 4 + i));
-  renderGDPCanvas(ctx, canvas, values, years);
+  renderDualAxisCanvas(ctx, canvas, gdpValues, infValues, years);
 }
-function renderGDPCanvas(ctx, canvas, values, years) {
-  const W = canvas.width,
-    H = canvas.height;
-  const pad = { top: 20, right: 16, bottom: 30, left: 52 };
+
+function renderDualAxisCanvas(ctx, canvas, gdpVals, infVals, years) {
+  const W = canvas.width;
+  const H = canvas.height;
+  const pad = { top: 25, right: 52, bottom: 30, left: 52 };
   const chartW = W - pad.left - pad.right;
   const chartH = H - pad.top - pad.bottom;
-  const minV = Math.min(...values) * 0.92;
-  const maxV = Math.max(...values) * 1.08;
-  const xScale = (i) => pad.left + (i / (values.length - 1)) * chartW;
-  const yScale = (v) =>
-    pad.top + chartH - ((v - minV) / (maxV - minV)) * chartH;
-  ctx.fillStyle = "rgba(255,255,255,0.03)";
+
+  const minGDP = Math.min(...gdpVals) * 0.92;
+  const maxGDP = Math.max(...gdpVals) * 1.08;
+  const minInf = Math.min(...infVals) * 0.90;
+  const maxInf = Math.max(...infVals) * 1.10;
+
+  const xScale = (i) => pad.left + (i / (gdpVals.length - 1)) * chartW;
+  const yGDPScale = (v) => pad.top + chartH - ((v - minGDP) / (maxGDP - minGDP || 1)) * chartH;
+  const yInfScale = (v) => pad.top + chartH - ((v - minInf) / (maxInf - minInf || 1)) * chartH;
+
+  ctx.fillStyle = "rgba(255,255,255,0.02)";
   ctx.fillRect(0, 0, W, H);
-  const grad = ctx.createLinearGradient(0, pad.top, 0, H - pad.bottom);
-  grad.addColorStop(0, "rgba(59,130,246,0.35)");
-  grad.addColorStop(1, "rgba(59,130,246,0.01)");
+
+  const gdpGrad = ctx.createLinearGradient(0, pad.top, 0, H - pad.bottom);
+  gdpGrad.addColorStop(0, "rgba(59,130,246,0.18)");
+  gdpGrad.addColorStop(1, "rgba(59,130,246,0.01)");
+  
   ctx.beginPath();
-  values.forEach((v, i) => {
-    i === 0
-      ? ctx.moveTo(xScale(i), yScale(v))
-      : ctx.lineTo(xScale(i), yScale(v));
+  gdpVals.forEach((v, i) => {
+    if (i === 0) ctx.moveTo(xScale(i), yGDPScale(v));
+    else ctx.lineTo(xScale(i), yGDPScale(v));
   });
-  ctx.lineTo(xScale(values.length - 1), H - pad.bottom);
+  ctx.lineTo(xScale(gdpVals.length - 1), H - pad.bottom);
   ctx.lineTo(xScale(0), H - pad.bottom);
   ctx.closePath();
-  ctx.fillStyle = grad;
+  ctx.fillStyle = gdpGrad;
   ctx.fill();
+
   ctx.beginPath();
-  values.forEach((v, i) => {
-    i === 0
-      ? ctx.moveTo(xScale(i), yScale(v))
-      : ctx.lineTo(xScale(i), yScale(v));
+  gdpVals.forEach((v, i) => {
+    if (i === 0) ctx.moveTo(xScale(i), yGDPScale(v));
+    else ctx.lineTo(xScale(i), yGDPScale(v));
   });
   ctx.strokeStyle = "#3b82f6";
-  ctx.lineWidth = 2.5;
-  ctx.lineJoin = "round";
+  ctx.lineWidth = 2.2;
   ctx.stroke();
-  values.forEach((v, i) => {
-    const x = xScale(i),
-      y = yScale(v);
+
+  ctx.beginPath();
+  infVals.forEach((v, i) => {
+    if (i === 0) ctx.moveTo(xScale(i), yInfScale(v));
+    else ctx.lineTo(xScale(i), yInfScale(v));
+  });
+  ctx.strokeStyle = "#f97316";
+  ctx.lineWidth = 1.8;
+  ctx.setLineDash([3, 3]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  gdpVals.forEach((v, i) => {
+    const x = xScale(i);
+    const yG = yGDPScale(v);
+    const yI = yInfScale(infVals[i]);
+
     ctx.beginPath();
-    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.arc(x, yG, 3, 0, Math.PI * 2);
     ctx.fillStyle = "#60a5fa";
     ctx.fill();
-    ctx.strokeStyle = "#1e3a5f";
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = "#1e3b8b";
+    ctx.lineWidth = 1;
     ctx.stroke();
-    ctx.fillStyle = "rgba(148,163,184,0.9)";
-    ctx.font = "bold 9px JetBrains Mono, monospace";
+
+    ctx.beginPath();
+    ctx.arc(x, yI, 3, 0, Math.PI * 2);
+    ctx.fillStyle = "#fb923c";
+    ctx.fill();
+    ctx.strokeStyle = "#7c2d12";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.fillStyle = "rgba(148,163,184,0.8)";
+    ctx.font = "bold 8px monospace";
     ctx.textAlign = "center";
-    ctx.fillText(years[i], x, H - pad.bottom + 14);
-    const label =
-      v >= 1000 ? `$${(v / 1000).toFixed(1)}T` : `$${v.toFixed(0)}B`;
-    ctx.fillStyle = "rgba(96,165,250,0.95)";
-    ctx.font = "bold 9px JetBrains Mono, monospace";
-    ctx.fillText(label, x, y - 8);
+    ctx.fillText(years[i], x, H - 10);
   });
-  ctx.fillStyle = "rgba(148,163,184,0.5)";
-  ctx.font = "8px JetBrains Mono, monospace";
+
+  ctx.fillStyle = "#60a5fa";
+  ctx.font = "bold 8px monospace";
+  ctx.textAlign = "left";
+  ctx.fillText("GDP (B USD)", 8, 14);
+
+  ctx.fillStyle = "#fb923c";
+  ctx.font = "bold 8px monospace";
   ctx.textAlign = "right";
-  ctx.fillText("GDP (USD)", pad.left - 4, pad.top + 6);
+  ctx.fillText("INFLATION (%)", W - 8, 14);
 }
 async function fetchCurrency() {
   const el = document.getElementById("fact-currency");

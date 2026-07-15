@@ -18,6 +18,8 @@ import searchHandler from "./api/search.js";
 import countriesHandler from "./api/countries.js";
 import geoHandler from "./api/geo.js";
 import gdeltHandler from "./api/gdelt.js";
+import gdeltGeoHandler from "./api/gdelt-geo.js";
+import newsAlertsHandler from "./api/news-alerts.js";
 import stabilityHandler from "./api/stability.js";
 
 dotenv.config();
@@ -89,6 +91,8 @@ apiRouter.get("/ai", (req, res) => aiHandler(req, res).catch(e => res.status(500
 apiRouter.get("/countries", (req, res) => countriesHandler(req, res).catch(e => res.status(500).json({error: e.message})));
 apiRouter.get("/geo", (req, res) => geoHandler(req, res).catch(e => res.status(500).json({error: e.message})));
 apiRouter.get("/gdelt", (req, res) => gdeltHandler(req, res).catch(e => res.status(500).json({error: e.message})));
+apiRouter.get("/gdelt-geo", (req, res) => gdeltGeoHandler(req, res).catch(e => res.status(500).json({error: e.message})));
+apiRouter.get("/news-alerts", (req, res) => newsAlertsHandler(req, res).catch(e => res.status(500).json({error: e.message})));
 apiRouter.get("/stability", (req, res) => stabilityHandler(req, res).catch(e => res.status(500).json({error: e.message})));
 
 app.use("/api", apiRouter);

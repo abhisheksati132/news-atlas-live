@@ -646,6 +646,12 @@
                   FIND
                 </button>
               </div>
+              <div class="flex items-center gap-2.5 mt-3 pt-3 border-t border-white/5">
+                <input type="checkbox" id="toggle-weather-radar" onchange="toggleWeatherRadar(this.checked)" class="w-3.5 h-3.5 rounded border-white/10 bg-black/40 text-blue-500 focus:ring-0 focus:ring-offset-0 cursor-pointer" />
+                <label for="toggle-weather-radar" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest cursor-pointer font-mono select-none">
+                  <i class="fas fa-satellite-dish mr-1.5 text-blue-400"></i>Live Weather Radar (RainViewer)
+                </label>
+              </div>
             </div>
 
             <div id="weather-alerts" class="hidden space-y-2"></div>

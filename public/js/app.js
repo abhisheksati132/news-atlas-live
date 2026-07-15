@@ -1361,3 +1361,75 @@ window.changeMapLayer = function(val) {
     if (window.showToast) window.showToast(`Map layer switched: ${val.toUpperCase()}`, "info");
   }
 };
+
+window.toggleWeatherRadar = async function(checked) {
+  if (!window.mapEngine || !window.mapEngine.ready || !window.mapEngine.map) return;
+  const map = window.mapEngine.map;
+
+  if (!checked) {
+    if (map.getLayer("rainviewer-radar")) map.removeLayer("rainviewer-radar");
+    if (map.getSource("rainviewer")) map.removeSource("rainviewer");
+    return;
+  }
+
+  if (window.showToast) window.showToast("Initializing satellite weather radar scan...", "info");
+
+  try {
+    const apiRes = await fetch("https://api.rainviewer.com/public/weather-maps.json");
+    const maps = await apiRes.json();
+    
+    if (!maps.radar || !maps.radar.past || maps.radar.past.length === 0) {
+      throw new Error("No recent radar frames detected.");
+    }
+    
+    const latestFrame = maps.radar.past[maps.radar.past.length - 1];
+    const radarPath = latestFrame.path; 
+    
+    if (map.getSource("rainviewer")) map.removeSource("rainviewer");
+    map.addSource("rainviewer", {
+      type: "raster",
+      tiles: [`https://tilecache.rainviewer.com${radarPath}/256/{z}/{x}/{y}/2/1_1.png`],
+      tileSize: 256
+    });
+
+    if (map.getLayer("rainviewer-radar")) map.removeLayer("rainviewer-radar");
+    map.addLayer({
+      id: "rainviewer-radar",
+      type: "raster",
+      source: "rainviewer",
+      minzoom: 0,
+      maxzoom: 22,
+      paint: {
+        "raster-opacity": 0.55,
+        "raster-fade-duration": 300
+      }
+    });
+
+    if (window.showToast) window.showToast("Radar uplink active. Satellite overlays merged.", "success");
+  } catch(e) {
+    console.error("RainViewer loading failed:", e);
+    if (window.showToast) window.showToast("Radar Link Offline: " + e.message, "error");
+    const checkbox = document.getElementById("toggle-weather-radar");
+    if (checkbox) checkbox.checked = false;
+  }
+};
+
+function startNewsAlertsStream() {
+  setInterval(async () => {
+    try {
+      const res = await fetch("/api/news-alerts");
+      if (!res.ok) return;
+      const alert = await res.json();
+      if (alert && alert.title && window.showToast) {
+        window.showToast(alert.title, alert.type || "info");
+        if (window.playTacticalSound) {
+          window.playTacticalSound("success");
+        }
+      }
+    } catch(e) {
+      console.warn("Geopolitical alerts uplink silent:", e.message);
+    }
+  }, 90000);
+}
+
+setTimeout(startNewsAlertsStream, 15000);

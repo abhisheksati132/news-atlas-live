@@ -410,6 +410,7 @@ class MapboxEngine {
             });
 
             this._applyAtmosphere();
+            this.loadGDELTHotspots();
         } catch (err) {
             console.error('Failed to load map geometry:', err);
         }
@@ -593,6 +594,66 @@ class MapboxEngine {
         this.map.dragPan.disable();
         this.map.dragRotate.disable();
         this.map.touchZoomRotate.disable();
+    }
+
+    async loadGDELTHotspots() {
+        if (!this.map) return;
+
+        try {
+            const res = await fetch("/api/gdelt-geo?query=war&timespan=24h");
+            const geojson = await res.json();
+
+            if (this.map.getLayer("gdelt-beacons")) this.map.removeLayer("gdelt-beacons");
+            if (this.map.getSource("gdelt-hotspots")) this.map.removeSource("gdelt-hotspots");
+
+            this.map.addSource("gdelt-hotspots", {
+                type: "geojson",
+                data: geojson
+            });
+
+            this.map.addLayer({
+                id: "gdelt-beacons",
+                type: "circle",
+                source: "gdelt-hotspots",
+                paint: {
+                    "circle-radius": [
+                        "interpolate", ["linear"], ["zoom"],
+                        1, 4,
+                        10, 12
+                    ],
+                    "circle-color": "#ef4444",
+                    "circle-opacity": 0.65,
+                    "circle-stroke-width": 1.5,
+                    "circle-stroke-color": "#ffffff"
+                }
+            });
+
+            this.map.on('click', 'gdelt-beacons', (e) => {
+                const props = e.features[0].properties;
+                const html = `
+                    <div style="background:#0e1017; color:#f8fafc; border:1px solid rgba(255,255,255,0.08); padding:8px 12px; border-radius:8px; font-family:monospace; font-size:10px; max-width:200px;">
+                        <div style="color:#ef4444; font-weight:bold; margin-bottom:4px; text-transform:uppercase; letter-spacing:1px;"><i class="fas fa-exclamation-triangle mr-1"></i>Hotspot Alert</div>
+                        <div style="font-weight:bold; margin-bottom:6px; color:#ffffff;">${props.html || "Incident details detected"}</div>
+                        <div style="color:rgba(255,255,255,0.4); font-size:8px;">GDELT TELEMETRY</div>
+                    </div>
+                `;
+
+                new mapboxgl.Popup({ closeButton: false, className: 'premium-popup' })
+                    .setLngLat(e.lngLat)
+                    .setHTML(html)
+                    .addTo(this.map);
+            });
+
+            this.map.on('mouseenter', 'gdelt-beacons', () => {
+                this.map.getCanvas().style.cursor = 'pointer';
+            });
+            this.map.on('mouseleave', 'gdelt-beacons', () => {
+                this.map.getCanvas().style.cursor = '';
+            });
+
+        } catch (err) {
+            console.warn("GDELT Event Mapping Failed:", err.message);
+        }
     }
 
     setMapDataLayer(type) {

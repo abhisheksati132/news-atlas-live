@@ -1,5 +1,5 @@
 function ecoEl(id) {
-  return document.getElementById(id);
+  return window.safeEl ? window.safeEl(id) : document.getElementById(id);
 }
 
 const STATIC_ECONOMICS_FALLBACK = {

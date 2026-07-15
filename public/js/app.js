@@ -24,9 +24,14 @@ window.currentCategory = currentCategory;
 function magColor(m) {
   return m >= 7 ? "#ef4444" : m >= 6 ? "#f97316" : m >= 5 ? "#eab308" : "#10b981";
 }
+const elCache = new Map();
 function safeEl(id) {
-  return document.getElementById(id);
+  if (elCache.has(id)) return elCache.get(id);
+  const el = document.getElementById(id);
+  if (el) elCache.set(id, el);
+  return el;
 }
+window.safeEl = safeEl;
 function setText(id, text) {
   const el = safeEl(id);
   if (el) el.innerText = text;

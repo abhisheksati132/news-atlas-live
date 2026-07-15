@@ -714,15 +714,35 @@ window.searchCityForTab = async (tabId) => {
     const data = await res.json();
     if (data.results && data.results.length > 0) {
       const city = data.results[0];
+      const name = city.name;
+      const countryName = city.country || city.admin1 || name;
+      
       if (window.mapEngine && window.mapEngine.map) {
         window.mapEngine.map.flyTo({ center: [city.longitude, city.latitude], zoom: 9, duration: 2000 });
-        if (window.mapEngine.setHoloHUD) window.mapEngine.setHoloHUD([city.longitude, city.latitude], city.name, { TARGET: "CITY" });
+        if (window.mapEngine.setHoloHUD) window.mapEngine.setHoloHUD([city.longitude, city.latitude], name, { TARGET: "CITY" });
       }
-      setText("selected-country-name", city.name.toUpperCase());
-      window.generateAIBriefing(city.name);
+      
+      window._currentWeatherLocation = `${name}, ${countryName}`;
+      setText("selected-country-name", name.toUpperCase());
+      
+      if (window.fetchWeather) {
+        window.fetchWeather(city.latitude, city.longitude);
+      }
+      
+      window.fetchNews(countryName);
+      if (window.fetchDetailedEconomics) {
+        window.fetchDetailedEconomics(countryName);
+      }
+      if (window.initializeMarkets) {
+        window.initializeMarkets(countryName);
+      }
+      
+      window.generateAIBriefing(name);
       inputEl.value = "";
     }
-  } catch (e) { }
+  } catch (e) {
+    console.error("Tab search city failure:", e);
+  }
 };
 // Intelligence Link - WebSocket connection
 function initIntelligenceLink() {

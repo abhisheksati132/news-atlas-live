@@ -28,6 +28,18 @@ window.restoreFromURL = function () {
             }
         };
         setTimeout(() => tryRestore(8), 800);
+    } else {
+        const tryDefault = (attempts) => {
+            if (attempts <= 0) return;
+            if (window.globalSearchData && window.globalSearchData.length > 0) {
+                if (window.handleCountryClickByName) {
+                    window.handleCountryClickByName("United States");
+                }
+            } else {
+                setTimeout(() => tryDefault(attempts - 1), 500);
+            }
+        };
+        setTimeout(() => tryDefault(8), 1200);
     }
 };
 

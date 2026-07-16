@@ -590,7 +590,6 @@ window.switchTab = (id) => {
   let targetTab = document.getElementById(`tab-btn-${id}`) || 
                   Array.from(tabs).find(t => t.id === id || t.getAttribute("data-target") === id);
 
-  // 2. If not found, try text match
   if (!targetTab) {
     tabs.forEach(tab => {
         const txt = tab.innerText.trim().toLowerCase();
@@ -605,11 +604,16 @@ window.switchTab = (id) => {
     return;
   }
 
-  const targetContentId = targetTab.getAttribute("aria-controls") || 
-                          targetTab.getAttribute("data-target") || 
-                          (targetTab.id ? targetTab.id.replace('btn-', '') : null);
-  
-  if (!targetContentId) return;
+  if (id === "map") {
+    document.body.classList.remove("view-state-analytics");
+    document.body.classList.add("view-state-map");
+    if (window.mapEngine && window.mapEngine.map) {
+      setTimeout(() => window.mapEngine.map.resize(), 120);
+    }
+  } else {
+    document.body.classList.remove("view-state-map");
+    document.body.classList.add("view-state-analytics");
+  }
 
   tabs.forEach((t) => {
     t.classList.remove("active");
@@ -619,29 +623,29 @@ window.switchTab = (id) => {
 
   targetTab.classList.add("active");
   targetTab.setAttribute("aria-selected", "true");
-  window._currentTab = targetContentId;
-  const targetContent = document.getElementById(targetContentId);
-  if (targetContent) {
-    targetContent.classList.add("active");
+
+  const targetContentId = targetTab.getAttribute("aria-controls") || 
+                          targetTab.getAttribute("data-target") || 
+                          (targetTab.id ? targetTab.id.replace('tab-btn-', '').replace('btn-', '') : null);
+  
+  if (targetContentId && id !== "map") {
+    window._currentTab = targetContentId;
+    const targetContent = document.getElementById(targetContentId);
+    if (targetContent) {
+      targetContent.classList.add("active");
+    }
+
+    const countryName = window.selectedCountry?.properties?.name || window._currentCountryName || "";
     if (targetContentId === "tab-intel" && window.fetchGDELTEvents) {
-      const name =
-        window.selectedCountry?.properties?.name ||
-        window._currentCountryName ||
-        "";
-      window.fetchGDELTEvents(name);
+      window.fetchGDELTEvents(countryName);
     }
     if (targetContentId === "tab-economic" && window.fetchECBRates) {
       window.fetchECBRates();
     }
     if (targetContentId === "tab-markets" && window.initializeMarkets) {
-      window.initializeMarkets(window._currentCountryName || "Global");
+      window.initializeMarkets(countryName || "Global");
     }
     window.dispatchEvent(new Event("resize"));
-  }
-
-  const sidebar = document.getElementById("sidebar");
-  if (sidebar && targetTab) {
-    targetTab.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   syncMobileBottomNav(id);
@@ -651,12 +655,20 @@ function syncMobileBottomNav(tabId) {
   const nav = document.getElementById("mobile-bottom-nav");
   if (!nav) return;
   const mapBtn = nav.querySelector('[data-action="map"]');
-  mapBtn?.classList.remove("active");
-  nav.querySelectorAll(".mobile-nav-item[data-tab]").forEach((b) => {
-    const on = b.getAttribute("data-tab") === tabId;
-    b.classList.toggle("active", on);
-    b.setAttribute("aria-current", on ? "page" : "false");
-  });
+  if (tabId === "map") {
+    mapBtn?.classList.add("active");
+    nav.querySelectorAll(".mobile-nav-item[data-tab]").forEach((b) => {
+      b.classList.remove("active");
+      b.setAttribute("aria-current", "false");
+    });
+  } else {
+    mapBtn?.classList.remove("active");
+    nav.querySelectorAll(".mobile-nav-item[data-tab]").forEach((b) => {
+      const on = b.getAttribute("data-tab") === tabId;
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-current", on ? "page" : "false");
+    });
+  }
 }
 
 function initMobileBottomNav() {
@@ -666,20 +678,13 @@ function initMobileBottomNav() {
   const tabBtns = nav.querySelectorAll(".mobile-nav-item[data-tab]");
 
   mapBtn?.addEventListener("click", () => {
-    tabBtns.forEach((b) => {
-      b.classList.remove("active");
-      b.setAttribute("aria-current", "false");
-    });
-    mapBtn.classList.add("active");
-    document.getElementById("map-box-id")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.switchTab("map");
   });
 
   tabBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
-      mapBtn?.classList.remove("active");
       const id = btn.getAttribute("data-tab");
       if (id) window.switchTab(id);
-      document.getElementById("sidebar")?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   });
 }

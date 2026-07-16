@@ -62,7 +62,7 @@
   </script>
 </head>
 
-<body class="flex flex-col night-theme">
+<body class="flex flex-col night-theme view-state-map">
 
 
   <div class="terminal-grain"></div>
@@ -140,13 +140,26 @@
       </button>
     </div>
 
-    <!-- CENTER: Tactical Shortcuts -->
-    <div class="hidden lg:flex items-center gap-1 px-2 h-9 flex-wrap justify-center max-w-[min(520px,40vw)]">
-      <button type="button" onclick="switchTab('intel')" class="header-link">Summary</button>
-      <button type="button" onclick="switchTab('news')" class="header-link">News</button>
-      <button type="button" onclick="switchTab('markets')" class="header-link">Markets</button>
-      <button type="button" onclick="switchTab('atmosphere')" class="header-link">Weather</button>
-      <button type="button" onclick="switchTab('economic')" class="header-link">Economic</button>
+    <!-- CENTER: Main Dashboard Navigation Docks -->
+    <div class="hidden lg:flex items-center gap-1.5 px-3 h-10 bg-black/25 border border-white/5 rounded-full shadow-inner nav-tab-strip">
+      <button type="button" class="nav-tab active px-4 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition-all" id="tab-btn-map" onclick="switchTab('map')">
+        <i class="fas fa-map mr-1.5 text-sky-400"></i>Map
+      </button>
+      <button type="button" class="nav-tab px-4 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition-all" id="tab-btn-intel" onclick="switchTab('intel')">
+        Summary
+      </button>
+      <button type="button" class="nav-tab px-4 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition-all" id="tab-btn-news" onclick="switchTab('news')">
+        News
+      </button>
+      <button type="button" class="nav-tab px-4 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition-all" id="tab-btn-markets" onclick="switchTab('markets')">
+        Markets
+      </button>
+      <button type="button" class="nav-tab px-4 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition-all" id="tab-btn-atmosphere" onclick="switchTab('atmosphere')">
+        Weather
+      </button>
+      <button type="button" class="nav-tab px-4 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition-all" id="tab-btn-economic" onclick="switchTab('economic')">
+        Economic
+      </button>
     </div>
 
     <div class="flex items-center gap-4">
@@ -305,34 +318,7 @@
     </div>
 
     <aside id="sidebar" class="intel-sidebar glass-panel dashboard-panel" aria-label="Data panels">
-      <nav class="nav-tab-strip flex border-b border-white/6 w-full overflow-x-auto overflow-y-hidden shrink-0 scrollbar-thin"
-        style="border-radius: 1rem 1rem 0 0; -webkit-overflow-scrolling: touch;"
-        role="tablist" aria-label="Main sections">
-        <button type="button" class="nav-tab active min-h-[44px] flex-1" role="tab" aria-selected="true"
-          aria-controls="tab-intel" id="tab-btn-intel" title="Summary: AI briefing, global events"
-          onclick="switchTab('intel')">
-          Summary
-        </button>
-        <button type="button" class="nav-tab min-h-[44px] flex-1" role="tab" aria-selected="false"
-          aria-controls="tab-news" id="tab-btn-news" title="News: live feeds by category" onclick="switchTab('news')">
-          News
-        </button>
-        <button type="button" class="nav-tab min-h-[44px] flex-1" role="tab" aria-selected="false"
-          aria-controls="tab-markets" id="tab-btn-markets" title="Markets: indices, commodities, forex"
-          onclick="switchTab('markets')">
-          Markets
-        </button>
-        <button type="button" class="nav-tab min-h-[44px] flex-1" role="tab" aria-selected="false"
-          aria-controls="tab-atmosphere" id="tab-btn-atmosphere" title="Atmosphere: weather & air quality"
-          onclick="switchTab('atmosphere')">
-          Weather
-        </button>
-        <button type="button" class="nav-tab min-h-[44px] flex-1" role="tab" aria-selected="false"
-          aria-controls="tab-economic" id="tab-btn-economic" title="Economic: GDP, macro indicators"
-          onclick="switchTab('economic')">
-          Economic
-        </button>
-      </nav>
+
       <div id="sidebar-content" class="flex-1 overflow-hidden relative">
         <div id="tab-intel" class="tab-content active">
           <div class="content-scroll-area space-y-4">

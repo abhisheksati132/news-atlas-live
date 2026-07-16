@@ -917,11 +917,17 @@ body.light-theme #articles-container>div:hover {
 
 /* Default View-States (Map active on boot) */
 body.view-state-map #map-box-id {
-  display: flex;
+  display: flex !important;
   flex-direction: column !important;
-  flex: 1;
+  flex: 1 !important;
   width: 100vw !important;
+  max-width: 100vw !important;
   height: 100% !important;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 body.view-state-map #sidebar {
@@ -933,14 +939,18 @@ body.view-state-analytics #map-box-id {
 }
 
 body.view-state-analytics #sidebar {
-  display: flex;
-  flex: 1;
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
   width: 100vw !important;
   max-width: 100vw !important;
   height: 100% !important;
   border-radius: 0 !important;
   border: none !important;
   box-shadow: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: var(--bg) !important;
 }
 
 #sidebar-content {

@@ -140,27 +140,6 @@
       </button>
     </div>
 
-    <!-- CENTER: Main Dashboard Navigation Docks -->
-    <div class="hidden lg:flex items-center gap-1.5 px-3 h-10 bg-black/25 border border-white/5 rounded-full shadow-inner nav-tab-strip">
-      <button type="button" class="nav-tab active px-4 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition-all" id="tab-btn-map" onclick="switchTab('map')">
-        <i class="fas fa-map mr-1.5 text-sky-400"></i>Map
-      </button>
-      <button type="button" class="nav-tab px-4 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition-all" id="tab-btn-intel" onclick="switchTab('intel')">
-        Summary
-      </button>
-      <button type="button" class="nav-tab px-4 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition-all" id="tab-btn-news" onclick="switchTab('news')">
-        News
-      </button>
-      <button type="button" class="nav-tab px-4 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition-all" id="tab-btn-markets" onclick="switchTab('markets')">
-        Markets
-      </button>
-      <button type="button" class="nav-tab px-4 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition-all" id="tab-btn-atmosphere" onclick="switchTab('atmosphere')">
-        Weather
-      </button>
-      <button type="button" class="nav-tab px-4 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition-all" id="tab-btn-economic" onclick="switchTab('economic')">
-        Economic
-      </button>
-    </div>
 
     <div class="flex items-center gap-4">
       <button type="button" onclick="toggleSearch()"
@@ -208,6 +187,26 @@
       </div>
     </div>
   </header>
+  <nav class="nav-tab-strip flex items-center justify-center gap-1.5 px-4 h-11 bg-slate-950/80 border-b border-white/[0.06] backdrop-blur-md z-[950] relative shrink-0">
+    <button type="button" class="nav-tab active px-4.5 py-1.5 rounded-full text-[10px] font-extrabold tracking-wider uppercase transition-all" id="tab-btn-map" onclick="switchTab('map')">
+      <i class="fas fa-map mr-1.5 text-sky-400"></i>Map
+    </button>
+    <button type="button" class="nav-tab px-4.5 py-1.5 rounded-full text-[10px] font-extrabold tracking-wider uppercase transition-all" id="tab-btn-intel" onclick="switchTab('intel')">
+      Summary
+    </button>
+    <button type="button" class="nav-tab px-4.5 py-1.5 rounded-full text-[10px] font-extrabold tracking-wider uppercase transition-all" id="tab-btn-news" onclick="switchTab('news')">
+      News
+    </button>
+    <button type="button" class="nav-tab px-4.5 py-1.5 rounded-full text-[10px] font-extrabold tracking-wider uppercase transition-all" id="tab-btn-markets" onclick="switchTab('markets')">
+      Markets
+    </button>
+    <button type="button" class="nav-tab px-4.5 py-1.5 rounded-full text-[10px] font-extrabold tracking-wider uppercase transition-all" id="tab-btn-atmosphere" onclick="switchTab('atmosphere')">
+      Weather
+    </button>
+    <button type="button" class="nav-tab px-4.5 py-1.5 rounded-full text-[10px] font-extrabold tracking-wider uppercase transition-all" id="tab-btn-economic" onclick="switchTab('economic')">
+      Economic
+    </button>
+  </nav>
   <main class="main-content">
     <div class="dashboard-layout">
     <div id="map-box-id" class="map-box dashboard-map">

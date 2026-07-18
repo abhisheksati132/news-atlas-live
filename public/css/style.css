@@ -1,39 +1,39 @@
 :root {
-  --bg: #08090d;
-  --bg-elevated: #0c0d12;
-  --surface: rgba(15, 17, 23, 0.4);
-  --surface-solid: #0e1017;
-  --surface-2: rgba(18, 20, 28, 0.5);
-  --border: rgba(255, 255, 255, 0.06);
-  --border-bright: rgba(255, 255, 255, 0.1);
-  --border-hover: rgba(255, 255, 255, 0.16);
+  --bg: #090a0f;
+  --bg-elevated: #0f121d;
+  --surface: rgba(15, 17, 23, 0.45);
+  --surface-solid: #0e111a;
+  --surface-2: rgba(18, 20, 28, 0.45);
+  --border: rgba(255, 255, 255, 0.04);
+  --border-bright: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.12);
   --accent: #ffffff;
   --accent-deep: #cbd5e1;
-  --accent-dim: rgba(255, 255, 255, 0.04);
+  --accent-dim: rgba(255, 255, 255, 0.03);
   --text: #f8fafc;
-  --text-muted: #94a3b8;
+  --text-muted: #8a95a5;
   --text-faint: #475569;
-  --radius: 10px;
-  --radius-sm: 6px;
-  --radius-lg: 14px;
-  --radius-xl: 20px;
+  --radius: 8px;
+  --radius-sm: 4px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
   --gap: 1.2rem;
   --panel-pad: 1.25rem;
   --glass-blur: 16px;
-  --shadow-soft: 0 8px 24px -6px rgba(0, 0, 0, 0.6);
-  --shadow-lift: 0 16px 48px -12px rgba(0, 0, 0, 0.7);
-  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  --shadow-soft: 0 4px 20px -4px rgba(0, 0, 0, 0.4);
+  --shadow-lift: 0 12px 36px -8px rgba(0, 0, 0, 0.5);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.01);
   --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --font-mono: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
   --font-display: "Inter", system-ui, -apple-system, sans-serif;
   --header-h: 56px;
   --green: #10b981;
   --red: #ef4444;
   --yellow: #f59e0b;
-  --accent-glow: rgba(255, 255, 255, 0.03);
+  --accent-glow: rgba(255, 255, 255, 0.01);
   --accent-text: #ffffff;
 }
 
@@ -945,6 +945,8 @@ body.view-state-analytics #sidebar {
   margin: 0 !important;
   padding: 0 !important;
   background: var(--bg) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 body.view-state-map #map-box-id::before,
@@ -989,16 +991,16 @@ body.view-state-analytics #sidebar::before {
 }
 
 .nav-tab-strip .nav-tab.active {
-  color: #38bdf8 !important;
-  background: rgba(56, 189, 248, 0.1) !important;
-  border-color: rgba(56, 189, 248, 0.25) !important;
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
   opacity: 1;
 }
 
 body.light-theme .nav-tab-strip .nav-tab.active {
-  color: #0284c7 !important;
-  background: rgba(2, 132, 199, 0.08) !important;
-  border-color: rgba(2, 132, 199, 0.2) !important;
+  color: #0f172a !important;
+  background: rgba(15, 23, 42, 0.06) !important;
+  border-color: rgba(15, 23, 42, 0.1) !important;
 }
 
 @media (max-width: 1023px) {
@@ -1136,6 +1138,55 @@ body.low-fx .glow-text {
   text-shadow: none !important;
   box-shadow: none !important;
 }
+
+/* Modern Minimal Typography, Shadows, and Scrollbar Overrides */
+.tab-content .font-black,
+.tab-content h2,
+.tab-content h3,
+.tab-content span.font-black {
+  font-weight: 600 !important;
+}
+
+.tab-content .tracking-widest,
+.tab-content .tracking-\[0\.3em\],
+.tab-content .tracking-\[\.3em\],
+.tab-content .tracking-wider {
+  letter-spacing: 0.04em !important;
+}
+
+.tab-content .font-mono,
+.tab-content [style*="font-family: 'JetBrains Mono'"],
+.tab-content [style*="font-family: \"JetBrains Mono\""] {
+  font-family: var(--font-mono) !important;
+}
+
+#articles-container > div:hover,
+#metals-content > div:hover,
+#indices-content > div:hover,
+#forex-content > div:hover,
+#commodities-content > div:hover {
+  background: rgba(255, 255, 255, 0.015) !important;
+  border-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
 
 @media print {
   body {

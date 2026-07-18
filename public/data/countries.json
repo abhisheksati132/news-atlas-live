@@ -1,0 +1,4996 @@
+[
+  {
+    "name": {
+      "common": "Afghanistan"
+    },
+    "cca2": "AF",
+    "cca3": "AFG",
+    "latlng": [
+      33,
+      65
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Kabul"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Åland Islands"
+    },
+    "cca2": "AX",
+    "cca3": "ALA",
+    "latlng": [
+      60.116667,
+      19.9
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Mariehamn"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Albania"
+    },
+    "cca2": "AL",
+    "cca3": "ALB",
+    "latlng": [
+      41,
+      20
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Tirana"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Algeria"
+    },
+    "cca2": "DZ",
+    "cca3": "DZA",
+    "latlng": [
+      28,
+      3
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Algiers"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "American Samoa"
+    },
+    "cca2": "AS",
+    "cca3": "ASM",
+    "latlng": [
+      -14.33333333,
+      -170
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Pago Pago"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Andorra"
+    },
+    "cca2": "AD",
+    "cca3": "AND",
+    "latlng": [
+      42.5,
+      1.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Andorra la Vella"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Angola"
+    },
+    "cca2": "AO",
+    "cca3": "AGO",
+    "latlng": [
+      -12.5,
+      18.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Luanda"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Anguilla"
+    },
+    "cca2": "AI",
+    "cca3": "AIA",
+    "latlng": [
+      18.25,
+      -63.16666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "The Valley"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Antarctica"
+    },
+    "cca2": "AQ",
+    "cca3": "ATA",
+    "latlng": [
+      -90,
+      0
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [],
+    "region": "Antarctic"
+  },
+  {
+    "name": {
+      "common": "Antigua and Barbuda"
+    },
+    "cca2": "AG",
+    "cca3": "ATG",
+    "latlng": [
+      17.05,
+      -61.8
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Saint John's"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Argentina"
+    },
+    "cca2": "AR",
+    "cca3": "ARG",
+    "latlng": [
+      -34,
+      -64
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Buenos Aires"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Armenia"
+    },
+    "cca2": "AM",
+    "cca3": "ARM",
+    "latlng": [
+      40,
+      45
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Yerevan"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Aruba"
+    },
+    "cca2": "AW",
+    "cca3": "ABW",
+    "latlng": [
+      12.5,
+      -69.96666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Oranjestad"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Australia"
+    },
+    "cca2": "AU",
+    "cca3": "AUS",
+    "latlng": [
+      -27,
+      133
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Canberra"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Austria"
+    },
+    "cca2": "AT",
+    "cca3": "AUT",
+    "latlng": [
+      47.33333333,
+      13.33333333
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Vienna"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Azerbaijan"
+    },
+    "cca2": "AZ",
+    "cca3": "AZE",
+    "latlng": [
+      40.5,
+      47.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Baku"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Bahamas"
+    },
+    "cca2": "BS",
+    "cca3": "BHS",
+    "latlng": [
+      24.25,
+      -76
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Nassau"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Bahrain"
+    },
+    "cca2": "BH",
+    "cca3": "BHR",
+    "latlng": [
+      26,
+      50.55
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Manama"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Bangladesh"
+    },
+    "cca2": "BD",
+    "cca3": "BGD",
+    "latlng": [
+      24,
+      90
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Dhaka"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Barbados"
+    },
+    "cca2": "BB",
+    "cca3": "BRB",
+    "latlng": [
+      13.16666666,
+      -59.53333333
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Bridgetown"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Belarus"
+    },
+    "cca2": "BY",
+    "cca3": "BLR",
+    "latlng": [
+      53,
+      28
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Minsk"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Belgium"
+    },
+    "cca2": "BE",
+    "cca3": "BEL",
+    "latlng": [
+      50.83333333,
+      4
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Brussels"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Belize"
+    },
+    "cca2": "BZ",
+    "cca3": "BLZ",
+    "latlng": [
+      17.25,
+      -88.75
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Belmopan"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Benin"
+    },
+    "cca2": "BJ",
+    "cca3": "BEN",
+    "latlng": [
+      9.5,
+      2.25
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Porto-Novo"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Bermuda"
+    },
+    "cca2": "BM",
+    "cca3": "BMU",
+    "latlng": [
+      32.33333333,
+      -64.75
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Hamilton"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Bhutan"
+    },
+    "cca2": "BT",
+    "cca3": "BTN",
+    "latlng": [
+      27.5,
+      90.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Thimphu"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Bolivia"
+    },
+    "cca2": "BO",
+    "cca3": "BOL",
+    "latlng": [
+      -17,
+      -65
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Sucre"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Bosnia and Herzegovina"
+    },
+    "cca2": "BA",
+    "cca3": "BIH",
+    "latlng": [
+      44,
+      18
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Sarajevo"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Botswana"
+    },
+    "cca2": "BW",
+    "cca3": "BWA",
+    "latlng": [
+      -22,
+      24
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Gaborone"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Bouvet Island"
+    },
+    "cca2": "BV",
+    "cca3": "BVT",
+    "latlng": [
+      -54.43333333,
+      3.4
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [],
+    "region": "Antarctic"
+  },
+  {
+    "name": {
+      "common": "Brazil"
+    },
+    "cca2": "BR",
+    "cca3": "BRA",
+    "latlng": [
+      -10,
+      -55
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Brasília"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "British Indian Ocean Territory"
+    },
+    "cca2": "IO",
+    "cca3": "IOT",
+    "latlng": [
+      -6,
+      71.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Diego Garcia"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "British Virgin Islands"
+    },
+    "cca2": "VG",
+    "cca3": "VGB",
+    "latlng": [
+      18.431383,
+      -64.62305
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Road Town"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Brunei"
+    },
+    "cca2": "BN",
+    "cca3": "BRN",
+    "latlng": [
+      4.5,
+      114.66666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Bandar Seri Begawan"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Bulgaria"
+    },
+    "cca2": "BG",
+    "cca3": "BGR",
+    "latlng": [
+      43,
+      25
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Sofia"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Burkina Faso"
+    },
+    "cca2": "BF",
+    "cca3": "BFA",
+    "latlng": [
+      13,
+      -2
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Ouagadougou"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Burundi"
+    },
+    "cca2": "BI",
+    "cca3": "BDI",
+    "latlng": [
+      -3.5,
+      30
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Gitega"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Cambodia"
+    },
+    "cca2": "KH",
+    "cca3": "KHM",
+    "latlng": [
+      13,
+      105
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Phnom Penh"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Cameroon"
+    },
+    "cca2": "CM",
+    "cca3": "CMR",
+    "latlng": [
+      6,
+      12
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Yaoundé"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Canada"
+    },
+    "cca2": "CA",
+    "cca3": "CAN",
+    "latlng": [
+      60,
+      -95
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Ottawa"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Cape Verde"
+    },
+    "cca2": "CV",
+    "cca3": "CPV",
+    "latlng": [
+      16,
+      -24
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Praia"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Caribbean Netherlands"
+    },
+    "cca2": "BQ",
+    "cca3": "BES",
+    "latlng": [
+      12.18,
+      -68.25
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Kralendijk",
+      "Oranjestad",
+      "The Bottom"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Cayman Islands"
+    },
+    "cca2": "KY",
+    "cca3": "CYM",
+    "latlng": [
+      19.5,
+      -80.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "George Town"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Central African Republic"
+    },
+    "cca2": "CF",
+    "cca3": "CAF",
+    "latlng": [
+      7,
+      21
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Bangui"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Chad"
+    },
+    "cca2": "TD",
+    "cca3": "TCD",
+    "latlng": [
+      15,
+      19
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "N'Djamena"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Chile"
+    },
+    "cca2": "CL",
+    "cca3": "CHL",
+    "latlng": [
+      -30,
+      -71
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Santiago"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "China"
+    },
+    "cca2": "CN",
+    "cca3": "CHN",
+    "latlng": [
+      35,
+      105
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Beijing"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Christmas Island"
+    },
+    "cca2": "CX",
+    "cca3": "CXR",
+    "latlng": [
+      -10.5,
+      105.66666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Flying Fish Cove"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Cocos (Keeling) Islands"
+    },
+    "cca2": "CC",
+    "cca3": "CCK",
+    "latlng": [
+      -12.5,
+      96.83333333
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "West Island"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Colombia"
+    },
+    "cca2": "CO",
+    "cca3": "COL",
+    "latlng": [
+      4,
+      -72
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Bogotá"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Comoros"
+    },
+    "cca2": "KM",
+    "cca3": "COM",
+    "latlng": [
+      -12.16666666,
+      44.25
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Moroni"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Congo"
+    },
+    "cca2": "CG",
+    "cca3": "COG",
+    "latlng": [
+      -1,
+      15
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Brazzaville"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Cook Islands"
+    },
+    "cca2": "CK",
+    "cca3": "COK",
+    "latlng": [
+      -21.23333333,
+      -159.76666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Avarua"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Costa Rica"
+    },
+    "cca2": "CR",
+    "cca3": "CRI",
+    "latlng": [
+      10,
+      -84
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "San José"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Croatia"
+    },
+    "cca2": "HR",
+    "cca3": "HRV",
+    "latlng": [
+      45.16666666,
+      15.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Zagreb"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Cuba"
+    },
+    "cca2": "CU",
+    "cca3": "CUB",
+    "latlng": [
+      21.5,
+      -80
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Havana"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Curaçao"
+    },
+    "cca2": "CW",
+    "cca3": "CUW",
+    "latlng": [
+      12.116667,
+      -68.933333
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Willemstad"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Cyprus"
+    },
+    "cca2": "CY",
+    "cca3": "CYP",
+    "latlng": [
+      35,
+      33
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Nicosia"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Czechia"
+    },
+    "cca2": "CZ",
+    "cca3": "CZE",
+    "latlng": [
+      49.75,
+      15.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Prague"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Denmark"
+    },
+    "cca2": "DK",
+    "cca3": "DNK",
+    "latlng": [
+      56,
+      10
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Copenhagen"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Djibouti"
+    },
+    "cca2": "DJ",
+    "cca3": "DJI",
+    "latlng": [
+      11.5,
+      43
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Djibouti"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Dominica"
+    },
+    "cca2": "DM",
+    "cca3": "DMA",
+    "latlng": [
+      15.41666666,
+      -61.33333333
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Roseau"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Dominican Republic"
+    },
+    "cca2": "DO",
+    "cca3": "DOM",
+    "latlng": [
+      19,
+      -70.66666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Santo Domingo"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "DR Congo"
+    },
+    "cca2": "CD",
+    "cca3": "COD",
+    "latlng": [
+      0,
+      25
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Kinshasa"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Ecuador"
+    },
+    "cca2": "EC",
+    "cca3": "ECU",
+    "latlng": [
+      -2,
+      -77.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Quito"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Egypt"
+    },
+    "cca2": "EG",
+    "cca3": "EGY",
+    "latlng": [
+      27,
+      30
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Cairo"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "El Salvador"
+    },
+    "cca2": "SV",
+    "cca3": "SLV",
+    "latlng": [
+      13.83333333,
+      -88.91666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "San Salvador"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Equatorial Guinea"
+    },
+    "cca2": "GQ",
+    "cca3": "GNQ",
+    "latlng": [
+      2,
+      10
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Malabo"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Eritrea"
+    },
+    "cca2": "ER",
+    "cca3": "ERI",
+    "latlng": [
+      15,
+      39
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Asmara"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Estonia"
+    },
+    "cca2": "EE",
+    "cca3": "EST",
+    "latlng": [
+      59,
+      26
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Tallinn"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Eswatini"
+    },
+    "cca2": "SZ",
+    "cca3": "SWZ",
+    "latlng": [
+      -26.5,
+      31.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Lobamba"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Ethiopia"
+    },
+    "cca2": "ET",
+    "cca3": "ETH",
+    "latlng": [
+      8,
+      38
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Addis Ababa"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Falkland Islands"
+    },
+    "cca2": "FK",
+    "cca3": "FLK",
+    "latlng": [
+      -51.75,
+      -59
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Stanley"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Faroe Islands"
+    },
+    "cca2": "FO",
+    "cca3": "FRO",
+    "latlng": [
+      62,
+      -7
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Tórshavn"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Fiji"
+    },
+    "cca2": "FJ",
+    "cca3": "FJI",
+    "latlng": [
+      -18,
+      175
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Suva"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Finland"
+    },
+    "cca2": "FI",
+    "cca3": "FIN",
+    "latlng": [
+      64,
+      26
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Helsinki"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "France"
+    },
+    "cca2": "FR",
+    "cca3": "FRA",
+    "latlng": [
+      46,
+      2
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Paris"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "French Guiana"
+    },
+    "cca2": "GF",
+    "cca3": "GUF",
+    "latlng": [
+      4,
+      -53
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Cayenne"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "French Polynesia"
+    },
+    "cca2": "PF",
+    "cca3": "PYF",
+    "latlng": [
+      -15,
+      -140
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Papeetē"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "French Southern and Antarctic Lands"
+    },
+    "cca2": "TF",
+    "cca3": "ATF",
+    "latlng": [
+      -49.25,
+      69.167
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Port-aux-Français"
+    ],
+    "region": "Antarctic"
+  },
+  {
+    "name": {
+      "common": "Gabon"
+    },
+    "cca2": "GA",
+    "cca3": "GAB",
+    "latlng": [
+      -1,
+      11.75
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Libreville"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Gambia"
+    },
+    "cca2": "GM",
+    "cca3": "GMB",
+    "latlng": [
+      13.46666666,
+      -16.56666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Banjul"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Georgia"
+    },
+    "cca2": "GE",
+    "cca3": "GEO",
+    "latlng": [
+      42,
+      43.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Tbilisi"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Germany"
+    },
+    "cca2": "DE",
+    "cca3": "DEU",
+    "latlng": [
+      51,
+      9
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Berlin"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Ghana"
+    },
+    "cca2": "GH",
+    "cca3": "GHA",
+    "latlng": [
+      8,
+      -2
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Accra"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Gibraltar"
+    },
+    "cca2": "GI",
+    "cca3": "GIB",
+    "latlng": [
+      36.13333333,
+      -5.35
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Gibraltar"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Greece"
+    },
+    "cca2": "GR",
+    "cca3": "GRC",
+    "latlng": [
+      39,
+      22
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Athens"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Greenland"
+    },
+    "cca2": "GL",
+    "cca3": "GRL",
+    "latlng": [
+      72,
+      -40
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Nuuk"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Grenada"
+    },
+    "cca2": "GD",
+    "cca3": "GRD",
+    "latlng": [
+      12.11666666,
+      -61.66666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "St. George's"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Guadeloupe"
+    },
+    "cca2": "GP",
+    "cca3": "GLP",
+    "latlng": [
+      16.25,
+      -61.583333
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Basse-Terre"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Guam"
+    },
+    "cca2": "GU",
+    "cca3": "GUM",
+    "latlng": [
+      13.46666666,
+      144.78333333
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Hagåtña"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Guatemala"
+    },
+    "cca2": "GT",
+    "cca3": "GTM",
+    "latlng": [
+      15.5,
+      -90.25
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Guatemala City"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Guernsey"
+    },
+    "cca2": "GG",
+    "cca3": "GGY",
+    "latlng": [
+      49.46666666,
+      -2.58333333
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "St. Peter Port"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Guinea"
+    },
+    "cca2": "GN",
+    "cca3": "GIN",
+    "latlng": [
+      11,
+      -10
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Conakry"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Guinea-Bissau"
+    },
+    "cca2": "GW",
+    "cca3": "GNB",
+    "latlng": [
+      12,
+      -15
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Bissau"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Guyana"
+    },
+    "cca2": "GY",
+    "cca3": "GUY",
+    "latlng": [
+      5,
+      -59
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Georgetown"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Haiti"
+    },
+    "cca2": "HT",
+    "cca3": "HTI",
+    "latlng": [
+      19,
+      -72.41666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Port-au-Prince"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Heard Island and McDonald Islands"
+    },
+    "cca2": "HM",
+    "cca3": "HMD",
+    "latlng": [
+      -53.1,
+      72.51666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [],
+    "region": "Antarctic"
+  },
+  {
+    "name": {
+      "common": "Honduras"
+    },
+    "cca2": "HN",
+    "cca3": "HND",
+    "latlng": [
+      15,
+      -86.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Tegucigalpa"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Hong Kong"
+    },
+    "cca2": "HK",
+    "cca3": "HKG",
+    "latlng": [
+      22.267,
+      114.188
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "City of Victoria"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Hungary"
+    },
+    "cca2": "HU",
+    "cca3": "HUN",
+    "latlng": [
+      47,
+      20
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Budapest"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Iceland"
+    },
+    "cca2": "IS",
+    "cca3": "ISL",
+    "latlng": [
+      65,
+      -18
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Reykjavik"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "India"
+    },
+    "cca2": "IN",
+    "cca3": "IND",
+    "latlng": [
+      20,
+      77
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "New Delhi"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Indonesia"
+    },
+    "cca2": "ID",
+    "cca3": "IDN",
+    "latlng": [
+      -5,
+      120
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Jakarta"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Iran"
+    },
+    "cca2": "IR",
+    "cca3": "IRN",
+    "latlng": [
+      32,
+      53
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Tehran"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Iraq"
+    },
+    "cca2": "IQ",
+    "cca3": "IRQ",
+    "latlng": [
+      33,
+      44
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Baghdad"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Ireland"
+    },
+    "cca2": "IE",
+    "cca3": "IRL",
+    "latlng": [
+      53,
+      -8
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Dublin"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Isle of Man"
+    },
+    "cca2": "IM",
+    "cca3": "IMN",
+    "latlng": [
+      54.25,
+      -4.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Douglas"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Israel"
+    },
+    "cca2": "IL",
+    "cca3": "ISR",
+    "latlng": [
+      31.47,
+      35.13
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Jerusalem"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Italy"
+    },
+    "cca2": "IT",
+    "cca3": "ITA",
+    "latlng": [
+      42.83333333,
+      12.83333333
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Rome"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Ivory Coast"
+    },
+    "cca2": "CI",
+    "cca3": "CIV",
+    "latlng": [
+      8,
+      -5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Yamoussoukro"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Jamaica"
+    },
+    "cca2": "JM",
+    "cca3": "JAM",
+    "latlng": [
+      18.25,
+      -77.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Kingston"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Japan"
+    },
+    "cca2": "JP",
+    "cca3": "JPN",
+    "latlng": [
+      36,
+      138
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Tokyo"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Jersey"
+    },
+    "cca2": "JE",
+    "cca3": "JEY",
+    "latlng": [
+      49.25,
+      -2.16666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Saint Helier"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Jordan"
+    },
+    "cca2": "JO",
+    "cca3": "JOR",
+    "latlng": [
+      31,
+      36
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Amman"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Kazakhstan"
+    },
+    "cca2": "KZ",
+    "cca3": "KAZ",
+    "latlng": [
+      48,
+      68
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Astana"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Kenya"
+    },
+    "cca2": "KE",
+    "cca3": "KEN",
+    "latlng": [
+      1,
+      38
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Nairobi"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Kiribati"
+    },
+    "cca2": "KI",
+    "cca3": "KIR",
+    "latlng": [
+      1.41666666,
+      173
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "South Tarawa"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Kosovo"
+    },
+    "cca2": "XK",
+    "cca3": "UNK",
+    "latlng": [
+      42.666667,
+      21.166667
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Pristina"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Kuwait"
+    },
+    "cca2": "KW",
+    "cca3": "KWT",
+    "latlng": [
+      29.5,
+      45.75
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Kuwait City"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Kyrgyzstan"
+    },
+    "cca2": "KG",
+    "cca3": "KGZ",
+    "latlng": [
+      41,
+      75
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Bishkek"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Laos"
+    },
+    "cca2": "LA",
+    "cca3": "LAO",
+    "latlng": [
+      18,
+      105
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Vientiane"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Latvia"
+    },
+    "cca2": "LV",
+    "cca3": "LVA",
+    "latlng": [
+      57,
+      25
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Riga"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Lebanon"
+    },
+    "cca2": "LB",
+    "cca3": "LBN",
+    "latlng": [
+      33.83333333,
+      35.83333333
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Beirut"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Lesotho"
+    },
+    "cca2": "LS",
+    "cca3": "LSO",
+    "latlng": [
+      -29.5,
+      28.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Maseru"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Liberia"
+    },
+    "cca2": "LR",
+    "cca3": "LBR",
+    "latlng": [
+      6.5,
+      -9.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Monrovia"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Libya"
+    },
+    "cca2": "LY",
+    "cca3": "LBY",
+    "latlng": [
+      25,
+      17
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Tripoli"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Liechtenstein"
+    },
+    "cca2": "LI",
+    "cca3": "LIE",
+    "latlng": [
+      47.26666666,
+      9.53333333
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Vaduz"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Lithuania"
+    },
+    "cca2": "LT",
+    "cca3": "LTU",
+    "latlng": [
+      56,
+      24
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Vilnius"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Luxembourg"
+    },
+    "cca2": "LU",
+    "cca3": "LUX",
+    "latlng": [
+      49.75,
+      6.16666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Luxembourg"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Macau"
+    },
+    "cca2": "MO",
+    "cca3": "MAC",
+    "latlng": [
+      22.16666666,
+      113.55
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Madagascar"
+    },
+    "cca2": "MG",
+    "cca3": "MDG",
+    "latlng": [
+      -20,
+      47
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Antananarivo"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Malawi"
+    },
+    "cca2": "MW",
+    "cca3": "MWI",
+    "latlng": [
+      -13.5,
+      34
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Lilongwe"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Malaysia"
+    },
+    "cca2": "MY",
+    "cca3": "MYS",
+    "latlng": [
+      2.5,
+      112.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Kuala Lumpur"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Maldives"
+    },
+    "cca2": "MV",
+    "cca3": "MDV",
+    "latlng": [
+      3.25,
+      73
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Malé"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Mali"
+    },
+    "cca2": "ML",
+    "cca3": "MLI",
+    "latlng": [
+      17,
+      -4
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Bamako"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Malta"
+    },
+    "cca2": "MT",
+    "cca3": "MLT",
+    "latlng": [
+      35.83333333,
+      14.58333333
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Valletta"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Marshall Islands"
+    },
+    "cca2": "MH",
+    "cca3": "MHL",
+    "latlng": [
+      9,
+      168
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Majuro"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Martinique"
+    },
+    "cca2": "MQ",
+    "cca3": "MTQ",
+    "latlng": [
+      14.666667,
+      -61
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Fort-de-France"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Mauritania"
+    },
+    "cca2": "MR",
+    "cca3": "MRT",
+    "latlng": [
+      20,
+      -12
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Nouakchott"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Mauritius"
+    },
+    "cca2": "MU",
+    "cca3": "MUS",
+    "latlng": [
+      -20.28333333,
+      57.55
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Port Louis"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Mayotte"
+    },
+    "cca2": "YT",
+    "cca3": "MYT",
+    "latlng": [
+      -12.83333333,
+      45.16666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Mamoudzou"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Mexico"
+    },
+    "cca2": "MX",
+    "cca3": "MEX",
+    "latlng": [
+      23,
+      -102
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Mexico City"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Micronesia"
+    },
+    "cca2": "FM",
+    "cca3": "FSM",
+    "latlng": [
+      6.91666666,
+      158.25
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Palikir"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Moldova"
+    },
+    "cca2": "MD",
+    "cca3": "MDA",
+    "latlng": [
+      47,
+      29
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Chișinău"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Monaco"
+    },
+    "cca2": "MC",
+    "cca3": "MCO",
+    "latlng": [
+      43.73333333,
+      7.4
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Monaco"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Mongolia"
+    },
+    "cca2": "MN",
+    "cca3": "MNG",
+    "latlng": [
+      46,
+      105
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Ulan Bator"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Montenegro"
+    },
+    "cca2": "ME",
+    "cca3": "MNE",
+    "latlng": [
+      42.5,
+      19.3
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Podgorica"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Montserrat"
+    },
+    "cca2": "MS",
+    "cca3": "MSR",
+    "latlng": [
+      16.75,
+      -62.2
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Plymouth"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Morocco"
+    },
+    "cca2": "MA",
+    "cca3": "MAR",
+    "latlng": [
+      32,
+      -5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Rabat"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Mozambique"
+    },
+    "cca2": "MZ",
+    "cca3": "MOZ",
+    "latlng": [
+      -18.25,
+      35
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Maputo"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Myanmar"
+    },
+    "cca2": "MM",
+    "cca3": "MMR",
+    "latlng": [
+      22,
+      98
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Naypyidaw"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Namibia"
+    },
+    "cca2": "NA",
+    "cca3": "NAM",
+    "latlng": [
+      -22,
+      17
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Windhoek"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Nauru"
+    },
+    "cca2": "NR",
+    "cca3": "NRU",
+    "latlng": [
+      -0.53333333,
+      166.91666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Yaren"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Nepal"
+    },
+    "cca2": "NP",
+    "cca3": "NPL",
+    "latlng": [
+      28,
+      84
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Kathmandu"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Netherlands"
+    },
+    "cca2": "NL",
+    "cca3": "NLD",
+    "latlng": [
+      52.5,
+      5.75
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Amsterdam"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "New Caledonia"
+    },
+    "cca2": "NC",
+    "cca3": "NCL",
+    "latlng": [
+      -21.5,
+      165.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Nouméa"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "New Zealand"
+    },
+    "cca2": "NZ",
+    "cca3": "NZL",
+    "latlng": [
+      -41,
+      174
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Wellington"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Nicaragua"
+    },
+    "cca2": "NI",
+    "cca3": "NIC",
+    "latlng": [
+      13,
+      -85
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Managua"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Niger"
+    },
+    "cca2": "NE",
+    "cca3": "NER",
+    "latlng": [
+      16,
+      8
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Niamey"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Nigeria"
+    },
+    "cca2": "NG",
+    "cca3": "NGA",
+    "latlng": [
+      10,
+      8
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Abuja"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Niue"
+    },
+    "cca2": "NU",
+    "cca3": "NIU",
+    "latlng": [
+      -19.03333333,
+      -169.86666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Alofi"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Norfolk Island"
+    },
+    "cca2": "NF",
+    "cca3": "NFK",
+    "latlng": [
+      -29.03333333,
+      167.95
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Kingston"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "North Korea"
+    },
+    "cca2": "KP",
+    "cca3": "PRK",
+    "latlng": [
+      40,
+      127
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Pyongyang"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "North Macedonia"
+    },
+    "cca2": "MK",
+    "cca3": "MKD",
+    "latlng": [
+      41.83333333,
+      22
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Skopje"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Northern Mariana Islands"
+    },
+    "cca2": "MP",
+    "cca3": "MNP",
+    "latlng": [
+      15.2,
+      145.75
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Saipan"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Norway"
+    },
+    "cca2": "NO",
+    "cca3": "NOR",
+    "latlng": [
+      62,
+      10
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Oslo"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Oman"
+    },
+    "cca2": "OM",
+    "cca3": "OMN",
+    "latlng": [
+      21,
+      57
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Muscat"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Pakistan"
+    },
+    "cca2": "PK",
+    "cca3": "PAK",
+    "latlng": [
+      30,
+      70
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Islamabad"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Palau"
+    },
+    "cca2": "PW",
+    "cca3": "PLW",
+    "latlng": [
+      7.5,
+      134.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Ngerulmud"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Palestine"
+    },
+    "cca2": "PS",
+    "cca3": "PSE",
+    "latlng": [
+      31.9,
+      35.2
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Ramallah"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Panama"
+    },
+    "cca2": "PA",
+    "cca3": "PAN",
+    "latlng": [
+      9,
+      -80
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Panama City"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Papua New Guinea"
+    },
+    "cca2": "PG",
+    "cca3": "PNG",
+    "latlng": [
+      -6,
+      147
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Port Moresby"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Paraguay"
+    },
+    "cca2": "PY",
+    "cca3": "PRY",
+    "latlng": [
+      -23,
+      -58
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Asunción"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Peru"
+    },
+    "cca2": "PE",
+    "cca3": "PER",
+    "latlng": [
+      -10,
+      -76
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Lima"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Philippines"
+    },
+    "cca2": "PH",
+    "cca3": "PHL",
+    "latlng": [
+      13,
+      122
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Manila"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Pitcairn Islands"
+    },
+    "cca2": "PN",
+    "cca3": "PCN",
+    "latlng": [
+      -25.06666666,
+      -130.1
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Adamstown"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Poland"
+    },
+    "cca2": "PL",
+    "cca3": "POL",
+    "latlng": [
+      52,
+      20
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Warsaw"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Portugal"
+    },
+    "cca2": "PT",
+    "cca3": "PRT",
+    "latlng": [
+      39.5,
+      -8
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Lisbon"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Puerto Rico"
+    },
+    "cca2": "PR",
+    "cca3": "PRI",
+    "latlng": [
+      18.25,
+      -66.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "San Juan"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Qatar"
+    },
+    "cca2": "QA",
+    "cca3": "QAT",
+    "latlng": [
+      25.5,
+      51.25
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Doha"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Réunion"
+    },
+    "cca2": "RE",
+    "cca3": "REU",
+    "latlng": [
+      -21.15,
+      55.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Saint-Denis"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Romania"
+    },
+    "cca2": "RO",
+    "cca3": "ROU",
+    "latlng": [
+      46,
+      25
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Bucharest"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Russia"
+    },
+    "cca2": "RU",
+    "cca3": "RUS",
+    "latlng": [
+      60,
+      100
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Moscow"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Rwanda"
+    },
+    "cca2": "RW",
+    "cca3": "RWA",
+    "latlng": [
+      -2,
+      30
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Kigali"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Saint Barthélemy"
+    },
+    "cca2": "BL",
+    "cca3": "BLM",
+    "latlng": [
+      18.5,
+      -63.41666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Gustavia"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Saint Helena, Ascension and Tristan da Cunha"
+    },
+    "cca2": "SH",
+    "cca3": "SHN",
+    "latlng": [
+      -15.95,
+      -5.72
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Jamestown"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Saint Kitts and Nevis"
+    },
+    "cca2": "KN",
+    "cca3": "KNA",
+    "latlng": [
+      17.33333333,
+      -62.75
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Basseterre"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Saint Lucia"
+    },
+    "cca2": "LC",
+    "cca3": "LCA",
+    "latlng": [
+      13.88333333,
+      -60.96666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Castries"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Saint Martin"
+    },
+    "cca2": "MF",
+    "cca3": "MAF",
+    "latlng": [
+      18.08333333,
+      -63.95
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Marigot"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Saint Pierre and Miquelon"
+    },
+    "cca2": "PM",
+    "cca3": "SPM",
+    "latlng": [
+      46.83333333,
+      -56.33333333
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Saint-Pierre"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Saint Vincent and the Grenadines"
+    },
+    "cca2": "VC",
+    "cca3": "VCT",
+    "latlng": [
+      13.25,
+      -61.2
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Kingstown"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Samoa"
+    },
+    "cca2": "WS",
+    "cca3": "WSM",
+    "latlng": [
+      -13.58333333,
+      -172.33333333
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Apia"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "San Marino"
+    },
+    "cca2": "SM",
+    "cca3": "SMR",
+    "latlng": [
+      43.76666666,
+      12.41666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "City of San Marino"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "São Tomé and Príncipe"
+    },
+    "cca2": "ST",
+    "cca3": "STP",
+    "latlng": [
+      1,
+      7
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "São Tomé"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Saudi Arabia"
+    },
+    "cca2": "SA",
+    "cca3": "SAU",
+    "latlng": [
+      25,
+      45
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Riyadh"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Senegal"
+    },
+    "cca2": "SN",
+    "cca3": "SEN",
+    "latlng": [
+      14,
+      -14
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Dakar"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Serbia"
+    },
+    "cca2": "RS",
+    "cca3": "SRB",
+    "latlng": [
+      44,
+      21
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Belgrade"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Seychelles"
+    },
+    "cca2": "SC",
+    "cca3": "SYC",
+    "latlng": [
+      -4.58333333,
+      55.66666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Victoria"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Sierra Leone"
+    },
+    "cca2": "SL",
+    "cca3": "SLE",
+    "latlng": [
+      8.5,
+      -11.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Freetown"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Singapore"
+    },
+    "cca2": "SG",
+    "cca3": "SGP",
+    "latlng": [
+      1.36666666,
+      103.8
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Singapore"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Sint Maarten"
+    },
+    "cca2": "SX",
+    "cca3": "SXM",
+    "latlng": [
+      18.033333,
+      -63.05
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Philipsburg"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Slovakia"
+    },
+    "cca2": "SK",
+    "cca3": "SVK",
+    "latlng": [
+      48.66666666,
+      19.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Bratislava"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Slovenia"
+    },
+    "cca2": "SI",
+    "cca3": "SVN",
+    "latlng": [
+      46.11666666,
+      14.81666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Ljubljana"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Solomon Islands"
+    },
+    "cca2": "SB",
+    "cca3": "SLB",
+    "latlng": [
+      -8,
+      159
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Honiara"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Somalia"
+    },
+    "cca2": "SO",
+    "cca3": "SOM",
+    "latlng": [
+      10,
+      49
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Mogadishu"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "South Africa"
+    },
+    "cca2": "ZA",
+    "cca3": "ZAF",
+    "latlng": [
+      -29,
+      24
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Pretoria",
+      "Bloemfontein",
+      "Cape Town"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "South Georgia"
+    },
+    "cca2": "GS",
+    "cca3": "SGS",
+    "latlng": [
+      -54.5,
+      -37
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "King Edward Point"
+    ],
+    "region": "Antarctic"
+  },
+  {
+    "name": {
+      "common": "South Korea"
+    },
+    "cca2": "KR",
+    "cca3": "KOR",
+    "latlng": [
+      37,
+      127.5
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Seoul"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "South Sudan"
+    },
+    "cca2": "SS",
+    "cca3": "SSD",
+    "latlng": [
+      7,
+      30
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Juba"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Spain"
+    },
+    "cca2": "ES",
+    "cca3": "ESP",
+    "latlng": [
+      40,
+      -4
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Madrid"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Sri Lanka"
+    },
+    "cca2": "LK",
+    "cca3": "LKA",
+    "latlng": [
+      7,
+      81
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Colombo"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Sudan"
+    },
+    "cca2": "SD",
+    "cca3": "SDN",
+    "latlng": [
+      15,
+      30
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Khartoum"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Suriname"
+    },
+    "cca2": "SR",
+    "cca3": "SUR",
+    "latlng": [
+      4,
+      -56
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Paramaribo"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Svalbard and Jan Mayen"
+    },
+    "cca2": "SJ",
+    "cca3": "SJM",
+    "latlng": [
+      78,
+      20
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Longyearbyen"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Sweden"
+    },
+    "cca2": "SE",
+    "cca3": "SWE",
+    "latlng": [
+      62,
+      15
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Stockholm"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Switzerland"
+    },
+    "cca2": "CH",
+    "cca3": "CHE",
+    "latlng": [
+      47,
+      8
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Bern"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Syria"
+    },
+    "cca2": "SY",
+    "cca3": "SYR",
+    "latlng": [
+      35,
+      38
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Damascus"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Taiwan"
+    },
+    "cca2": "TW",
+    "cca3": "TWN",
+    "latlng": [
+      23.5,
+      121
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Taipei"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Tajikistan"
+    },
+    "cca2": "TJ",
+    "cca3": "TJK",
+    "latlng": [
+      39,
+      71
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Dushanbe"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Tanzania"
+    },
+    "cca2": "TZ",
+    "cca3": "TZA",
+    "latlng": [
+      -6,
+      35
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Dodoma"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Thailand"
+    },
+    "cca2": "TH",
+    "cca3": "THA",
+    "latlng": [
+      15,
+      100
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Bangkok"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Timor-Leste"
+    },
+    "cca2": "TL",
+    "cca3": "TLS",
+    "latlng": [
+      -8.83333333,
+      125.91666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Dili"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Togo"
+    },
+    "cca2": "TG",
+    "cca3": "TGO",
+    "latlng": [
+      8,
+      1.16666666
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Lomé"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Tokelau"
+    },
+    "cca2": "TK",
+    "cca3": "TKL",
+    "latlng": [
+      -9,
+      -172
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Fakaofo"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Tonga"
+    },
+    "cca2": "TO",
+    "cca3": "TON",
+    "latlng": [
+      -20,
+      -175
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Nuku'alofa"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Trinidad and Tobago"
+    },
+    "cca2": "TT",
+    "cca3": "TTO",
+    "latlng": [
+      11,
+      -61
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Port of Spain"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Tunisia"
+    },
+    "cca2": "TN",
+    "cca3": "TUN",
+    "latlng": [
+      34,
+      9
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Tunis"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Türkiye"
+    },
+    "cca2": "TR",
+    "cca3": "TUR",
+    "latlng": [
+      39,
+      35
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Ankara"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Turkmenistan"
+    },
+    "cca2": "TM",
+    "cca3": "TKM",
+    "latlng": [
+      40,
+      60
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Ashgabat"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Turks and Caicos Islands"
+    },
+    "cca2": "TC",
+    "cca3": "TCA",
+    "latlng": [
+      21.75,
+      -71.58333333
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Cockburn Town"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Tuvalu"
+    },
+    "cca2": "TV",
+    "cca3": "TUV",
+    "latlng": [
+      -8,
+      178
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Funafuti"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Uganda"
+    },
+    "cca2": "UG",
+    "cca3": "UGA",
+    "latlng": [
+      1,
+      32
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Kampala"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Ukraine"
+    },
+    "cca2": "UA",
+    "cca3": "UKR",
+    "latlng": [
+      49,
+      32
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Kyiv"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "United Arab Emirates"
+    },
+    "cca2": "AE",
+    "cca3": "ARE",
+    "latlng": [
+      24,
+      54
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Abu Dhabi"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "United Kingdom"
+    },
+    "cca2": "GB",
+    "cca3": "GBR",
+    "latlng": [
+      54,
+      -2
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "London"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "United States"
+    },
+    "cca2": "US",
+    "cca3": "USA",
+    "latlng": [
+      38,
+      -97
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Washington D.C."
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "United States Minor Outlying Islands"
+    },
+    "cca2": "UM",
+    "cca3": "UMI",
+    "latlng": [
+      19.3,
+      166.633333
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "United States Virgin Islands"
+    },
+    "cca2": "VI",
+    "cca3": "VIR",
+    "latlng": [
+      18.35,
+      -64.933333
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Charlotte Amalie"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Uruguay"
+    },
+    "cca2": "UY",
+    "cca3": "URY",
+    "latlng": [
+      -33,
+      -56
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Montevideo"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Uzbekistan"
+    },
+    "cca2": "UZ",
+    "cca3": "UZB",
+    "latlng": [
+      41,
+      64
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Tashkent"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Vanuatu"
+    },
+    "cca2": "VU",
+    "cca3": "VUT",
+    "latlng": [
+      -16,
+      167
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Port Vila"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Vatican City"
+    },
+    "cca2": "VA",
+    "cca3": "VAT",
+    "latlng": [
+      41.9,
+      12.45
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Vatican City"
+    ],
+    "region": "Europe"
+  },
+  {
+    "name": {
+      "common": "Venezuela"
+    },
+    "cca2": "VE",
+    "cca3": "VEN",
+    "latlng": [
+      8,
+      -66
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Caracas"
+    ],
+    "region": "Americas"
+  },
+  {
+    "name": {
+      "common": "Vietnam"
+    },
+    "cca2": "VN",
+    "cca3": "VNM",
+    "latlng": [
+      16.16666666,
+      107.83333333
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Hanoi"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Wallis and Futuna"
+    },
+    "cca2": "WF",
+    "cca3": "WLF",
+    "latlng": [
+      -13.3,
+      -176.2
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Mata-Utu"
+    ],
+    "region": "Oceania"
+  },
+  {
+    "name": {
+      "common": "Western Sahara"
+    },
+    "cca2": "EH",
+    "cca3": "ESH",
+    "latlng": [
+      24.5,
+      -13
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "El Aaiún"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Yemen"
+    },
+    "cca2": "YE",
+    "cca3": "YEM",
+    "latlng": [
+      15,
+      48
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Sana'a"
+    ],
+    "region": "Asia"
+  },
+  {
+    "name": {
+      "common": "Zambia"
+    },
+    "cca2": "ZM",
+    "cca3": "ZMB",
+    "latlng": [
+      -15,
+      30
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Lusaka"
+    ],
+    "region": "Africa"
+  },
+  {
+    "name": {
+      "common": "Zimbabwe"
+    },
+    "cca2": "ZW",
+    "cca3": "ZWE",
+    "latlng": [
+      -20,
+      30
+    ],
+    "flags": {
+      "svg": "",
+      "png": ""
+    },
+    "population": 0,
+    "capital": [
+      "Harare"
+    ],
+    "region": "Africa"
+  }
+]

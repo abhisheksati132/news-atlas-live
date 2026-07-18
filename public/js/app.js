@@ -193,7 +193,7 @@ async function initTerminal() {
     setText("neural-id", "GUEST SESSION");
   }
   try {
-    const res = await fetch("/api/countries?all=true");
+    const res = await fetch("/data/countries.json");
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     globalSearchData = await res.json();
     window.globalSearchData = globalSearchData;
@@ -691,7 +691,7 @@ function initMobileBottomNav() {
 
 async function fetchGlobalSearchData() {
   try {
-    const res = await fetch("/api/countries?all=true");
+    const res = await fetch("/data/countries.json");
     if (!res.ok) throw new Error("Index relay failed");
     window.globalSearchData = await res.json();
     if (window.renderTrendingHeader) window.renderTrendingHeader();
@@ -729,9 +729,19 @@ window.searchCityForTab = async (tabId) => {
       
       window._currentWeatherLocation = `${name}, ${countryName}`;
       setText("selected-country-name", name.toUpperCase());
+
+      // Trigger the parent country's map click handler to update active state & dossier
+      if (countryName && window.handleCountryClickByName) {
+        window.handleCountryClickByName(countryName);
+      }
       
+      // Delay specific city weather fetch to let country load complete first
       if (window.fetchWeather) {
-        window.fetchWeather(city.latitude, city.longitude);
+        setTimeout(() => {
+          window.fetchWeather(city.latitude, city.longitude);
+          window._currentWeatherLocation = `${name}, ${countryName}`;
+          setText("selected-country-name", name.toUpperCase());
+        }, 300);
       }
       
       window.fetchNews(countryName);

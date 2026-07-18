@@ -110,13 +110,28 @@ window.updateHeadlineTicker = function (articles) {
 };
 
 window.handleCountryClickByName = function (name) {
-    if (window.globalSearchData) {
-        const match = window.globalSearchData.find(
-            (c) => c.name.common.toLowerCase() === name.toLowerCase()
+    if (!name || !window.globalSearchData) return;
+    const cleanName = name.trim().toLowerCase();
+    
+    const mappings = {
+        'united states of america': 'united states',
+        'russian federation': 'russia',
+        'korea (republic of)': 'south korea',
+        'republic of korea': 'south korea'
+    };
+    const searchName = mappings[cleanName] || cleanName;
+
+    let match = window.globalSearchData.find(
+        (c) => c.name.common.toLowerCase() === searchName
+    );
+    if (!match) {
+        match = window.globalSearchData.find(
+            (c) => c.name.common.toLowerCase().includes(searchName) || 
+                   searchName.includes(c.name.common.toLowerCase())
         );
-        if (match && window.handleCountryClick) {
-            window.handleCountryClick(null, { properties: { name: match.name.common, iso_a2: match.cca2 } });
-        }
+    }
+    if (match && window.handleCountryClick) {
+        window.handleCountryClick(null, { properties: { name: match.name.common, iso_a2: match.cca2 } });
     }
 };
 

@@ -851,12 +851,17 @@ body.light-theme .intel-sidebar>nav {
 }
 
 .map-toolbar-bar {
-  position: relative;
-  z-index: 20;
-  background: rgba(5, 8, 16, 0.65);
-  border-bottom: 1px solid var(--border);
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 40;
+  background: rgba(8, 9, 13, 0.65) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-lg);
   backdrop-filter: blur(14px) saturate(1.1);
   -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -971,6 +976,10 @@ body.view-state-analytics #sidebar::before {
   display: flex;
   align-items: center;
   gap: 0.35rem;
+}
+
+.nav-tab-strip .nav-tab::after {
+  display: none !important;
 }
 
 .nav-tab-strip .nav-tab:hover {

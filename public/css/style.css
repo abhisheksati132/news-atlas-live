@@ -165,14 +165,10 @@ body.light-theme .text-emerald-400 {
 body.light-theme .text-white {
   color: #0f172a !important;
 }
-/* Ensure dark elements (buttons, widgets, logo, compare HUD) retain white text */
+/* Ensure dark elements (buttons, widgets, compare HUD) retain white text */
 body.light-theme button .text-white,
 body.light-theme .btn .text-white,
 body.light-theme button.text-white,
-body.light-theme .brand-wordmark,
-body.light-theme .brand-mark,
-body.light-theme .brand-wordmark .text-white,
-body.light-theme .brand-mark .text-white,
 body.light-theme .active-sector-pill,
 body.light-theme .map-scan-card,
 body.light-theme .nav-tab.active,
@@ -187,6 +183,9 @@ body.light-theme .bg-rose-500 .text-white,
 body.light-theme .bg-amber-500 .text-white,
 body.light-theme .map-ctrl-btn {
   color: #ffffff !important;
+}
+body.light-theme .brand-wordmark {
+  color: #0f172a !important;
 }
 body.light-theme .placeholder-slate-600::placeholder {
   color: #94a3b8 !important;
@@ -1390,11 +1389,11 @@ body.light-theme .autocomplete-item.active {
 
 /* 1. Increase overall readability (make text slightly larger) */
 body {
-  font-size: 15.5px !important;
+  font-size: 17px !important;
 }
 
 p, div, span, button, input, select, textarea {
-  font-size: 14.5px;
+  font-size: 15.5px;
 }
 
 /* Adjust small elements to be more legible */
@@ -1402,11 +1401,11 @@ p, div, span, button, input, select, textarea {
 .text-[11px], 
 .text-[10px], 
 .text-[9px] {
-  font-size: 11.5px !important;
+  font-size: 13px !important;
 }
 
 .text-[8px] {
-  font-size: 10px !important;
+  font-size: 11px !important;
 }
 
 /* 2. Light Theme - Solid White Navigation Capsule Tab Strip */

@@ -119,18 +119,22 @@ button:focus:not(:focus-visible),
 
 
 body.light-theme {
-  --bg: #f4f6fa;
+  --bg: #f8fafc;
   --bg-elevated: #ffffff;
-  --surface: rgba(255, 255, 255, 0.82);
+  --surface: rgba(255, 255, 255, 0.85);
   --surface-solid: #ffffff;
-  --surface-2: rgba(241, 245, 249, 0.9);
-  --border: rgba(15, 23, 42, 0.08);
-  --border-bright: rgba(15, 23, 42, 0.12);
+  --surface-2: #f1f5f9;
+  --border: rgba(15, 23, 42, 0.05);
+  --border-bright: rgba(15, 23, 42, 0.08);
+  --border-hover: rgba(15, 23, 42, 0.12);
+  --accent: #0f172a;
+  --accent-deep: #1e293b;
+  --accent-dim: rgba(15, 23, 42, 0.03);
   --text: #0f172a;
   --text-muted: #475569;
   --text-faint: #64748b;
-  --accent-dim: rgba(14, 165, 233, 0.12);
-  --shadow-soft: 0 20px 40px -18px rgba(15, 23, 42, 0.12);
+  --shadow-soft: 0 8px 30px rgba(15, 23, 42, 0.03);
+  --shadow-lift: 0 16px 40px rgba(15, 23, 42, 0.06);
 }
 
 body.light-theme .text-slate-300,
@@ -158,7 +162,7 @@ body.light-theme .text-emerald-300,
 body.light-theme .text-emerald-400 {
   color: #059669 !important;
 }
-body.light-theme .text-white {
+body.light-theme .text-white:not(.btn *, button *, .button *, [class*="bg-"] *, .brand-mark *, .map-scan-card *) {
   color: #0f172a !important;
 }
 body.light-theme .placeholder-slate-600::placeholder {
@@ -330,7 +334,7 @@ body.light-theme header {
 .dossier-card {
   position: relative;
   background: var(--surface-solid) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid var(--border) !important;
   border-radius: var(--radius-lg);
   padding: var(--panel-pad);
   box-shadow: var(--shadow-soft);
@@ -342,7 +346,7 @@ body.light-theme header {
 .apple-glass:hover,
 .dossier-card:hover {
   background: var(--surface-solid) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
+  border-color: var(--border-bright) !important;
   transform: translateY(-1px);
 }
 
@@ -350,7 +354,13 @@ body.light-theme header {
 body.light-theme .glass-panel,
 body.light-theme .apple-glass,
 body.light-theme .dossier-card {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.88) 100%) !important;
+  background: #ffffff !important;
+}
+
+body.light-theme .apple-glass::before,
+body.light-theme .glass-panel::before,
+body.light-theme .dossier-card::before {
+  display: none !important;
 }
 
 .apple-glass::before,

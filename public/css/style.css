@@ -1415,6 +1415,56 @@ body.light-theme .nav-tab-strip {
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
 }
 
+/* 2b. Global Header & Navigation Tab Strip Dimension Overrides */
+.nav-tab-strip {
+  gap: 8px !important;
+  padding: 5px !important;
+}
+
+.nav-tab-strip .nav-tab {
+  font-size: 13.5px !important; /* Larger text on navigation tabs */
+  padding: 0.45rem 1.1rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Header widgets and search button sizing */
+.header-widget {
+  height: 36px !important;
+  padding: 0 16px !important;
+}
+
+.header-widget span {
+  font-size: 13px !important; /* Larger search button text */
+}
+
+.header-clock-wrap {
+  height: 36px !important;
+  padding: 0 14px !important;
+}
+
+.header-clock {
+  font-size: 13px !important; /* Larger IST clock text */
+}
+
+.active-sector-pill {
+  height: 36px !important;
+  padding: 0 14px !important;
+}
+
+.active-sector-pill span {
+  font-size: 13px !important; /* Larger active country text */
+}
+
+/* Main search overlay modal width and input sizing */
+#search-overlay .apple-glass {
+  max-width: 820px !important; /* Widen the search modal overlay */
+}
+
+#country-search {
+  font-size: 19px !important; /* Larger search input text */
+}
+
 body.light-theme .nav-tab-strip .nav-tab {
   color: #475569 !important;
   opacity: 0.85;

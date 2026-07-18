@@ -1197,10 +1197,79 @@ body.low-fx .glow-text {
   border-radius: 99px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.18);
+/* ==========================================
+   PREMIUM ENTERPRISE SAAS BRAND OVERRIDES
+   ========================================== */
+
+/* 1. Global typography cleanup to remove sci-fi font styling */
+h1, h2, h3, h4, h5, h6,
+.nav-tab,
+.sector-pill,
+.header-widget,
+.brand-wordmark,
+.content-scroll-area span,
+.apple-glass span:not([id]),
+.apple-glass h2,
+label,
+button {
+  font-family: var(--font-sans) !important;
+  text-transform: none !important;
+  letter-spacing: -0.01em !important;
 }
 
+/* Retain monospaced typography ONLY for numbers, timestamps, and codes */
+[id^="fact-"],
+[id^="eco-"],
+[id^="atmo-"]:not(#atmo-condition),
+#ist-time,
+.ticker-item,
+.headline-ticker-item,
+.font-mono,
+#news-count {
+  font-family: var(--font-mono) !important;
+  letter-spacing: -0.02em !important;
+}
+
+/* 2. Remove glowing shadows and border gradient overlays */
+.apple-glass::before,
+.glass-panel::before,
+.dossier-card::before {
+  display: none !important;
+}
+
+.apple-glass,
+.glass-panel,
+.dossier-card {
+  background: var(--surface-solid) !important;
+  border: 1px solid rgba(255, 255, 255, 0.065) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+body.light-theme .apple-glass,
+body.light-theme .glass-panel,
+body.light-theme .dossier-card {
+  background: #ffffff !important;
+  border: 1px solid rgba(15, 23, 42, 0.065) !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.02) !important;
+}
+
+/* 3. Rebrand neon lights to clean SaaS indicator badges */
+.animate-pulse {
+  animation: none !important;
+}
+
+.w-1.5.h-1.5.bg-emerald-400.rounded-full {
+  display: none !important; /* Hide blinking dots next to subheadings */
+}
+
+/* 4. Tone down news filters and category pills */
+.intel-tab {
+  border-radius: 6px !important;
+  font-family: var(--font-sans) !important;
+  text-transform: none !important;
+  font-weight: 500 !important;
+  font-size: 12px !important;
+}
 
 @media print {
   body {

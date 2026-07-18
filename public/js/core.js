@@ -106,70 +106,7 @@ window.toggleAmbience = function () {
 };
 
 window.playTacticalSound = function (type) {
-  if (window._audioMuted) return;
-  const ctx = window.getAudioContext();
-  if (!ctx) return;
-
-  try {
-    if (ctx.state === 'suspended') {
-      // In suspended state, attempt to resume if we are inside a user gesture
-      ctx.resume();
-    }
-
-    const now = ctx.currentTime;
-    
-    if (type === "click") {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(800, now);
-      osc.frequency.exponentialRampToValueAtTime(100, now + 0.04);
-      
-      gain.gain.setValueAtTime(0.012, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
-      
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.05);
-    } 
-    else if (type === "success") {
-      // Satisfying sci-fi multi-tone success chime
-      const notes = [440, 554.37, 659.25, 880];
-      notes.forEach((freq, idx) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, now + idx * 0.07);
-        
-        gain.gain.setValueAtTime(0, now + idx * 0.07);
-        gain.gain.linearRampToValueAtTime(0.006, now + idx * 0.07 + 0.015);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.07 + 0.12);
-        
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now + idx * 0.07);
-        osc.stop(now + idx * 0.07 + 0.14);
-      });
-    } 
-    else if (type === "tab") {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(500, now);
-      osc.frequency.exponentialRampToValueAtTime(250, now + 0.08);
-      
-      gain.gain.setValueAtTime(0.006, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
-      
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.09);
-    }
-  } catch (err) {
-    // Fail silently to prevent interrupting application flows
-  }
+  // Silent, quiet SaaS operation
 };
 
 function safeText(id) {

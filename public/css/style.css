@@ -1271,6 +1271,10 @@ body.light-theme .dossier-card {
   font-size: 12px !important;
 }
 
+.overflow-visible-card {
+  overflow: visible !important;
+}
+
 @media print {
   body {
     background: #ffffff !important;

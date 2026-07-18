@@ -255,60 +255,83 @@ async function startStockTicker() {
 }
 async function fetchAllData(countryName) {
   try {
-    const res = await fetch(`/api/countries?name=${encodeURIComponent(countryName)}`);
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    const data = await res.json();
-    const c = Array.isArray(data) ? data[0] : data;
-    if (c) {
-      window._currentCountryName = c.name?.common || null;
-      currencyCode = c.currencies ? Object.keys(c.currencies)[0] : "USD";
-      iso2Code = c.cca2 || "";
-      window._isoAlpha3 = c.cca3 || "";
-      window.iso2Code = iso2Code;
-      window.currencyCode = currencyCode;
-      setText("fact-pop", formatPopulationM(c.population));
-      setText("fact-cap", c.capital ? c.capital[0] : "N/A");
-      setText("fact-region", c.region || "--");
-      setText("fact-area", c.area ? c.area.toLocaleString() : "--");
-      setText("fact-code", c.idd ? (c.idd.root || "") + (c.idd.suffixes ? c.idd.suffixes[0] : "") : "--");
-      setText("fact-demonym", c.demonyms?.eng?.m || "--");
-      setText("fact-gini", c.gini ? Object.values(c.gini)[0] : "N/A");
-      setText("fact-drive", c.car ? c.car.side.toUpperCase() : "--");
-      const flagEl = safeEl("sector-flag");
-      const nameEl = safeEl("sector-name");
-      const globeIcon = safeEl("sector-globe-icon");
-      if (flagEl && nameEl) {
-        flagEl.src = c.flags?.svg || "";
-        flagEl.classList.remove("hidden");
-        if (globeIcon) globeIcon.classList.add("hidden");
-        nameEl.innerText = c.name.common;
-      }
-      const headerFlagContainer = safeEl("search-flag-container");
-      const headerFlagImg = safeEl("search-active-flag");
-      const headerSearchIcon = safeEl("search-icon-main");
-      const headerInput = safeEl("map-search-input");
-      if (headerFlagContainer && headerFlagImg && headerSearchIcon) {
-        headerFlagImg.src = c.flags?.svg || "";
-        headerFlagContainer.classList.remove("hidden");
-        headerSearchIcon.classList.add("hidden");
-        if (headerInput) headerInput.value = c.name.common;
-      }
-      countryUTCOffset = c.timezones ? c.timezones[0] : "UTC+00:00";
-      let lat = 0, lon = 0;
-      if (c.latlng && c.latlng.length === 2) [lat, lon] = c.latlng;
-      else if (c.capitalInfo && c.capitalInfo.latlng) [lat, lon] = c.capitalInfo.latlng;
-      const capitalName = c.capital ? c.capital[0] : c.name.common;
-      window._currentWeatherLocation = `${capitalName}, ${c.name.common}`;
-      if (lat || lon) window.fetchWeather(lat, lon);
-      setText("fact-pop-2", formatPopulationM(c.population));
-      setText("fact-gini-2", c.gini ? Object.values(c.gini)[0] : "N/A");
-      setText("fact-demonym-2", c.demonyms?.eng?.m || "--");
-      setText("fact-area-2", c.area ? c.area.toLocaleString() + " km²" : "--");
-      window.fetchNews(c.name.common);
-      if (window.initializeMarkets) window.initializeMarkets(c.name.common);
-      if (window.fetchDetailedEconomics) window.fetchDetailedEconomics(c.name.common);
-      if (window.generateAIBriefing) window.generateAIBriefing(c.name.common);
+    let c = null;
+    if (window.globalSearchData && window.globalSearchData.length > 0) {
+      c = window.globalSearchData.find(x => x.name?.common?.toLowerCase() === countryName.toLowerCase());
     }
+    
+    if (!c) {
+      const res = await fetch(`/api/countries?name=${encodeURIComponent(countryName)}`);
+      if (res.ok) {
+        const data = await res.json();
+        c = Array.isArray(data) ? data[0] : data;
+      }
+    }
+
+    if (!c) {
+      throw new Error(`Country ${countryName} not found in local index or API`);
+    }
+
+    window._currentCountryName = c.name?.common || null;
+    currencyCode = c.currencies ? Object.keys(c.currencies)[0] : "USD";
+    iso2Code = c.cca2 || "";
+    window._isoAlpha3 = c.cca3 || "";
+    window.iso2Code = iso2Code;
+    window.currencyCode = currencyCode;
+
+    setText("fact-pop", formatPopulationM(c.population));
+    setText("fact-cap", c.capital ? c.capital[0] : "N/A");
+    setText("fact-region", c.region || "--");
+    setText("fact-area", c.area ? c.area.toLocaleString() : "--");
+    setText("fact-code", c.idd ? (c.idd.root || "") + (c.idd.suffixes ? c.idd.suffixes[0] : "") : "--");
+    setText("fact-demonym", c.demonyms?.eng?.m || "--");
+    setText("fact-gini", c.gini ? Object.values(c.gini)[0] : "N/A");
+    setText("fact-drive", c.car ? c.car.side.toUpperCase() : "--");
+
+    const flagUrl = c.flags?.svg || c.flags?.png || (c.cca2 ? `https://flagcdn.com/w80/${c.cca2.toLowerCase()}.png` : "");
+
+    const flagEl = safeEl("sector-flag");
+    const nameEl = safeEl("sector-name");
+    const globeIcon = safeEl("sector-globe-icon");
+    if (flagEl && nameEl) {
+      flagEl.src = flagUrl;
+      flagEl.classList.remove("hidden");
+      if (globeIcon) globeIcon.classList.add("hidden");
+      nameEl.innerText = c.name.common;
+    }
+
+    const headerFlagContainer = safeEl("search-flag-container");
+    const headerFlagImg = safeEl("search-active-flag");
+    const headerSearchIcon = safeEl("search-icon-main");
+    const headerInput = safeEl("map-search-input");
+    if (headerFlagContainer && headerFlagImg && headerSearchIcon) {
+      headerFlagImg.src = flagUrl;
+      headerFlagContainer.classList.remove("hidden");
+      headerSearchIcon.classList.add("hidden");
+      if (headerInput) headerInput.value = c.name.common;
+    }
+
+    countryUTCOffset = c.timezones ? c.timezones[0] : "UTC+00:00";
+    let lat = 0, lon = 0;
+    if (c.latlng && c.latlng.length === 2) [lat, lon] = c.latlng;
+    else if (c.capitalInfo && c.capitalInfo.latlng) [lat, lon] = c.capitalInfo.latlng;
+    const capitalName = c.capital ? c.capital[0] : c.name.common;
+    window._currentWeatherLocation = `${capitalName}, ${c.name.common}`;
+
+    setText("fact-pop-2", formatPopulationM(c.population));
+    setText("fact-gini-2", c.gini ? Object.values(c.gini)[0] : "N/A");
+    setText("fact-demonym-2", c.demonyms?.eng?.m || "--");
+    setText("fact-area-2", c.area ? c.area.toLocaleString() + " km²" : "--");
+
+    // Fault-tolerant subsystem loading
+    if (lat || lon) {
+      try { window.fetchWeather(lat, lon); } catch(err) { console.error("Weather load failure:", err); }
+    }
+    try { window.fetchNews(c.name.common); } catch(err) { console.error("News load failure:", err); }
+    try { if (window.initializeMarkets) window.initializeMarkets(c.name.common); } catch(err) { console.error("Markets load failure:", err); }
+    try { if (window.fetchDetailedEconomics) window.fetchDetailedEconomics(c.name.common); } catch(err) { console.error("Economics load failure:", err); }
+    try { if (window.generateAIBriefing) window.generateAIBriefing(c.name.common); } catch(err) { console.error("AIBriefing load failure:", err); }
+
   } catch (e) {
     console.error("Data Fetch Error", e);
     if (window.showToast) window.showToast("Country data failed.", "error");

@@ -42,16 +42,32 @@ window.restoreFromURL = function () {
         setTimeout(() => tryDefault(8), 1200);
     }
 };
+document.addEventListener("DOMContentLoaded", () => {
+    const _origSwitchTab = window.switchTab;
+    if (_origSwitchTab) {
+        window.switchTab = function (id) {
+            _origSwitchTab(id);
+            const params = new URLSearchParams(window.location.search);
+            params.set("tab", id);
+            history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+        };
+    }
 
-const _origSwitchTab = window.switchTab;
-if (_origSwitchTab) {
-    window.switchTab = function (id) {
-        _origSwitchTab(id);
-        const params = new URLSearchParams(window.location.search);
-        params.set("tab", id);
-        history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
-    };
-}
+    const _origFetchEconomics = window.fetchDetailedEconomics;
+    if (_origFetchEconomics) {
+        window.fetchDetailedEconomics = async function (country) {
+            await _origFetchEconomics(country);
+            setTimeout(() => {
+                ["eco-gdp", "eco-growth", "eco-inflation", "eco-unemployment", "eco-interest", "eco-debt", "eco-capita"].forEach((id) => {
+                    const el = document.getElementById(id);
+                    if (el && el.textContent && el.textContent !== "--" && !el.textContent.includes("|")) {
+                        window.animateNumber(el, el.textContent, 800);
+                    }
+                });
+            }, 100);
+        };
+    }
+});
 
 window.addEventListener("load", () => setTimeout(window.restoreFromURL, 300));
 
@@ -76,21 +92,6 @@ window.animateNumber = function (el, targetStr, duration = 800) {
     };
     requestAnimationFrame(step);
 };
-
-const _origFetchEconomics = window.fetchDetailedEconomics;
-if (_origFetchEconomics) {
-    window.fetchDetailedEconomics = async function (country) {
-        await _origFetchEconomics(country);
-        setTimeout(() => {
-            ["eco-gdp", "eco-growth", "eco-inflation", "eco-unemployment", "eco-interest", "eco-debt", "eco-capita"].forEach((id) => {
-                const el = document.getElementById(id);
-                if (el && el.textContent && el.textContent !== "--" && !el.textContent.includes("|")) {
-                    window.animateNumber(el, el.textContent, 800);
-                }
-            });
-        }, 100);
-    };
-}
 
 window.updateHeadlineTicker = function (articles) {
     const wrap = document.getElementById("headline-ticker-content");

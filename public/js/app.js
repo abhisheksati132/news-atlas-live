@@ -409,12 +409,29 @@ window.handleCountryClick = async function (event, d) {
     const countryName = d.properties.name;
     window._currentCountryName = countryName;
     setText("selected-country-name", countryName);
-    const flagEl = document.getElementById("header-country-flag");
-    if (flagEl) {
-      const iso = d.properties.iso_a2 || d.properties.ISO_A2;
-      if (iso) { flagEl.src = `https://flagcdn.com/w40/${iso.toLowerCase()}.png`; flagEl.classList.remove("hidden"); }
-      else flagEl.classList.add("hidden");
+    const flagEl = document.getElementById("sector-flag");
+    const globeIcon = document.getElementById("sector-globe-icon");
+    const sectorName = document.getElementById("sector-name");
+    const compareBtn = document.getElementById("sector-compare-btn");
+    
+    const iso = d.properties.iso_a2 || d.properties.ISO_A2 || d.properties.iso_a3 || d.properties.ISO_A3;
+    if (iso && flagEl) {
+      flagEl.src = `https://flagcdn.com/w40/${iso.toLowerCase().substring(0, 2)}.png`;
+      flagEl.classList.remove("hidden");
+      if (globeIcon) globeIcon.classList.add("hidden");
+    } else if (flagEl) {
+      flagEl.classList.add("hidden");
+      if (globeIcon) globeIcon.classList.remove("hidden");
     }
+    
+    if (sectorName) {
+      sectorName.innerText = countryName.toUpperCase();
+    }
+    
+    if (compareBtn) {
+      compareBtn.classList.remove("hidden");
+    }
+
     const backWrap = safeEl("back-to-global-wrap");
     if (backWrap) backWrap.classList.remove("hidden");
     fetchAllData(countryName);

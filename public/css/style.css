@@ -1275,6 +1275,51 @@ body.light-theme .dossier-card {
   overflow: visible !important;
 }
 
+.autocomplete-dropdown {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+  background-color: #0c101b !important; /* Solid dark background */
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6) !important;
+  z-index: 99999 !important; /* Float on top of all siblings and inputs */
+  padding: 4px !important;
+  margin-top: 4px !important;
+  display: block;
+}
+
+body.light-theme .autocomplete-dropdown {
+  background-color: #ffffff !important; /* Solid light background */
+  border: 1px solid rgba(15, 23, 42, 0.12) !important;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08) !important;
+}
+
+.autocomplete-item {
+  padding: 8px 12px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  font-size: 11px !important;
+  color: var(--text-muted) !important;
+  transition: background-color 100ms ease, color 100ms ease !important;
+  text-transform: none !important; /* Mixed case support */
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.active {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+body.light-theme .autocomplete-item:hover,
+body.light-theme .autocomplete-item.active {
+  background-color: rgba(15, 23, 42, 0.05) !important;
+  color: #0f172a !important;
+}
+
 @media print {
   body {
     background: #ffffff !important;

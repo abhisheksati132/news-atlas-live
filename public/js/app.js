@@ -1222,9 +1222,9 @@ window.initAutocompleteSearch = function() {
         activeIndex = (activeIndex + 1) % currentResults.length;
         items.forEach((item, idx) => {
           if (idx === activeIndex) {
-            item.classList.add("bg-white/5", "text-white");
+            item.classList.add("bg-white/5", "text-white", "active");
           } else {
-            item.classList.remove("bg-white/5", "text-white");
+            item.classList.remove("bg-white/5", "text-white", "active");
           }
         });
       } else if (e.key === "ArrowUp") {
@@ -1232,18 +1232,15 @@ window.initAutocompleteSearch = function() {
         activeIndex = (activeIndex - 1 + currentResults.length) % currentResults.length;
         items.forEach((item, idx) => {
           if (idx === activeIndex) {
-            item.classList.add("bg-white/5", "text-white");
+            item.classList.add("bg-white/5", "text-white", "active");
           } else {
-            item.classList.remove("bg-white/5", "text-white");
+            item.classList.remove("bg-white/5", "text-white", "active");
           }
         });
       } else if (e.key === "Enter") {
-        if (activeIndex > -1 && currentResults[activeIndex]) {
+        if (activeIndex >= 0 && activeIndex < currentResults.length) {
           e.preventDefault();
           selectResult(currentResults[activeIndex]);
-        } else if (currentResults.length > 0) {
-          e.preventDefault();
-          selectResult(currentResults[0]);
         }
       } else if (e.key === "Escape") {
         hideDropdown();

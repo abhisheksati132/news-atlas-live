@@ -75,7 +75,7 @@ function renderTrending() {
     resContainer.innerHTML = html;
 
     // Background scan for cities/states
-    if (query.length > 2 && mapboxToken) {
+    if (query.length > 2) {
         clearTimeout(window._searchDebounce);
         window._searchDebounce = setTimeout(async () => {
             try {
@@ -171,8 +171,18 @@ window.selectFromSearch = (name) => {
             .then(r => r.json())
             .then(data => {
                 if (data.features && data.features[0]) {
-                    const [lng, lat] = data.features[0].center;
+                    const feat = data.features[0];
+                    const [lng, lat] = feat.center;
                     window.mapEngine.map.flyTo({ center: [lng, lat], zoom: 6, duration: 2000 });
+
+                    // Automatically load the parent country's dossier
+                    const isCountry = feat.place_type?.includes("country");
+                    const countryName = isCountry ? feat.text : (feat.context?.find(c => c.id.startsWith("country"))?.text);
+                    if (countryName && window.handleCountryClickByName) {
+                        setTimeout(() => {
+                            window.handleCountryClickByName(countryName);
+                        }, 500);
+                    }
                 }
             }).catch(e => console.warn("Selection geocoding failed"));
     }

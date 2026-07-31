@@ -920,7 +920,7 @@ initIntelligenceLink();
 initCommandPalette();
 setInterval(updateSystemTime, 1000);
 window.toggleShortcuts = () => {
-    window.showToast("Shortcuts: Esc=Close, Ctrl+K=Search, ?=Help", "info");
+    if (window.showToast) window.showToast("Shortcuts: Esc=Close, Ctrl+K=Search, ?=Help", "info");
 };
 window.onCountrySelected = () => {};
 window.resetWeatherData = () => {

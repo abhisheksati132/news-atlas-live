@@ -187,8 +187,15 @@ body.light-theme .map-ctrl-btn {
 body.light-theme .brand-wordmark {
   color: #0f172a !important;
 }
-body.light-theme .placeholder-slate-600::placeholder {
-  color: #94a3b8 !important;
+body.light-theme .text-red-400,
+body.light-theme .text-red-500 {
+  color: #dc2626 !important;
+}
+body.light-theme .text-emerald-400 {
+  color: #059669 !important;
+}
+body.light-theme .text-amber-400 {
+  color: #d97706 !important;
 }
 .bg-glass-dim {
   background-color: rgba(0, 0, 0, 0.3) !important;

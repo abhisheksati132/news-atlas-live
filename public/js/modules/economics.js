@@ -125,7 +125,7 @@ async function drawGDPTrend(country) {
   const canvas = document.getElementById("gdp-trend-chart");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
-  canvas.width = canvas.parentElement.offsetWidth || 600;
+  canvas.width = Math.max(300, canvas.parentElement?.offsetWidth || 600);
   canvas.height = 150;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const iso = window._isoAlpha3 || "";

@@ -111,6 +111,14 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("\x1b[31m[SYS] Unhandled Rejection at:\x1b[0m", promise, "reason:", reason);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("\x1b[31m[SYS] Uncaught Exception:\x1b[0m", err);
+});
+
 server.listen(port, () => {
   console.log(`\n\x1b[36m%s\x1b[0m`, `  NewsAtlas Intelligence Terminal - High-Fidelity Engine v3.0`);
   console.log(`\x1b[34m%s\x1b[0m`, `  > Local Discovery: http://localhost:${port}`);

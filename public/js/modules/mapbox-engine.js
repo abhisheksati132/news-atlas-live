@@ -18,12 +18,13 @@ class MapboxEngine {
             const res = await fetch('/api/config');
             if (!res.ok) throw new Error('Failed to fetch config');
             const data = await res.json();
-            if (!data.mapboxToken) {
-                console.error('❌ Mapbox token not found.');
-                if (window.showToast) window.showToast('Mapbox Engine offline. Token missing.', 'error');
+            const token = data.mapboxToken;
+            if (!token) {
+                console.warn('⚠️ Mapbox token missing in configuration. Set MAPBOX_TOKEN in .env to enable satellite layers.');
+                if (window.showToast) window.showToast('Mapbox Engine offline: MAPBOX_TOKEN missing in .env', 'warning');
                 return false;
             }
-            mapboxgl.accessToken = data.mapboxToken;
+            mapboxgl.accessToken = token;
         } catch (err) {
             console.error('❌ Error loading Mapbox token:', err);
             return false;

@@ -16,8 +16,10 @@ export default async function handler(req, res) {
       console.warn("Invalid FIREBASE_CONFIG JSON:", e.message);
     }
   }
+  const mapboxToken = process.env.MAPBOX_TOKEN || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
+
   res.status(200).json({
     firebase,
-    mapboxToken: process.env.MAPBOX_TOKEN || null
+    mapboxToken: mapboxToken || null
   });
 }

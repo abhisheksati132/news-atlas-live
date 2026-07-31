@@ -86,14 +86,19 @@ async function fetchNews(overrideQ) {
     allNews = data.results && data.results.length > 0 ? data.results : [];
     
     // Geographical Pulse Relay
-    if (window.mapEngine && allNews.length > 0) {
-      const pulses = allNews.slice(0, 10).map(art => ({
-        title: art.title,
-        // If we have a country name, try to get coordinates, else random-ish global clusters
-        coordinates: window.mapEngine.map.getCenter().toArray(), // Placeholder: in Phase 4 we use per-article geocoding
-        radius: 80000
-      }));
-      window.mapEngine.setNewsPulses(pulses);
+    if (window.mapEngine && window.mapEngine.map && window.mapEngine.ready && allNews.length > 0) {
+      try {
+        const pulses = allNews.slice(0, 10).map(art => ({
+          title: art.title,
+          coordinates: window.mapEngine.map.getCenter().toArray(),
+          radius: 80000
+        }));
+        if (window.mapEngine.setNewsPulses) {
+          window.mapEngine.setNewsPulses(pulses);
+        }
+      } catch (err) {
+        console.warn("[news] setNewsPulses skipped:", err.message);
+      }
     }
 
     if (window.updateHeadlineTicker) window.updateHeadlineTicker(allNews);

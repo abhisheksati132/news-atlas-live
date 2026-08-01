@@ -14,42 +14,69 @@ class MapboxEngine {
     }
 
     async init() {
+        let hasToken = false;
         try {
             const res = await fetch('/api/config');
-            if (!res.ok) throw new Error('Failed to fetch config');
-            const data = await res.json();
-            const token = data.mapboxToken;
-            if (!token) {
-                console.warn('⚠️ Mapbox token missing in configuration. Set MAPBOX_TOKEN in .env to enable satellite layers.');
-                if (window.showToast) window.showToast('Mapbox Engine offline: MAPBOX_TOKEN missing in .env', 'warning');
-                return false;
+            if (res.ok) {
+                const data = await res.json();
+                if (data.mapboxToken) {
+                    mapboxgl.accessToken = data.mapboxToken;
+                    hasToken = true;
+                }
             }
-            mapboxgl.accessToken = token;
         } catch (err) {
-            console.error('❌ Error loading Mapbox token:', err);
-            return false;
+            console.warn('⚠️ Config fetch warning:', err.message);
         }
 
         const container = document.getElementById(this.containerId);
         if (!container) return false;
         container.innerHTML = '';
 
-        this.map = new mapboxgl.Map({
-            container: this.containerId,
-            style: 'mapbox://styles/mapbox/satellite-streets-v12',
-            center: [10, 10],
-            zoom: 1.6,
-            pitch: 0,
-            bearing: 0,
-            projection: 'globe',
-            attributionControl: false,
-            antialias: true
+        const isLight = document.body.classList.contains('light-theme');
+        const defaultStyle = hasToken 
+            ? 'mapbox://styles/mapbox/satellite-streets-v12'
+            : (isLight 
+                ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
+                : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json');
+
+        try {
+            this.map = new mapboxgl.Map({
+                container: this.containerId,
+                style: defaultStyle,
+                center: [10, 10],
+                zoom: 1.6,
+                pitch: 0,
+                bearing: 0,
+                projection: 'globe',
+                attributionControl: false,
+                antialias: true
+            });
+        } catch (e) {
+            console.warn('Mapbox satellite init fallback:', e.message);
+            this.map = new mapboxgl.Map({
+                container: this.containerId,
+                style: isLight 
+                    ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
+                    : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+                center: [10, 10],
+                zoom: 1.6,
+                projection: 'globe',
+                attributionControl: false
+            });
+        }
+
+        this.map.on('error', (e) => {
+            if (e && e.error && (e.error.status === 401 || e.error.status === 403) && hasToken) {
+                console.warn('Mapbox token unauthorized or expired, auto-recovering with open vector basemap...');
+                hasToken = false;
+                this.map.setStyle(isLight ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json' : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json');
+            }
         });
 
         this.map.on('style.load', () => {
             this.map.resize();
             const isLowFx = document.body.classList.contains('low-fx');
-            if (!isLowFx) {
+            if (!isLowFx && hasToken) {
                 this._applyAtmosphere();
                 this._addTerrain();
             }
@@ -102,15 +129,19 @@ class MapboxEngine {
     }
 
     _addTerrain() {
-        if (!this.map.getSource('mapbox-dem')) {
-            this.map.addSource('mapbox-dem', {
-                type: 'raster-dem',
-                url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
-                tileSize: 512,
-                maxzoom: 14
-            });
+        try {
+            if (!this.map.getSource('mapbox-dem')) {
+                this.map.addSource('mapbox-dem', {
+                    type: 'raster-dem',
+                    url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+                    tileSize: 512,
+                    maxzoom: 14
+                });
+            }
+            this.map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
+        } catch (e) {
+            console.warn('Terrain DEM unavailable:', e.message);
         }
-        this.map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
     }
 
     _addDayNightTerminator() {

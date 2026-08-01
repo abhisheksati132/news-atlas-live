@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     const cleanQuery = q.trim();
     if (!cleanQuery) return res.status(200).json({ features: [] });
 
-    const token = process.env.MAPBOX_TOKEN;
+    const token = process.env.MAPBOX_TOKEN || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || process.env.VITE_MAPBOX_TOKEN;
 
     if (token) {
         try {

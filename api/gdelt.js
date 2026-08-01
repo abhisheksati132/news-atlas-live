@@ -3,7 +3,12 @@
  * @see https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/
  */
 export default async function handler(req, res) {
-  const { query, timespan } = req.query;
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") return res.status(200).end();
+
+  const { query, timespan } = req.query || {};
   if (!query || typeof query !== "string") {
     return res.status(400).json({ error: "Missing query", articles: [] });
   }

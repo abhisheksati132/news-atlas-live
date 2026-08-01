@@ -1,5 +1,10 @@
 export default async function handler(req, res) {
-    const { q } = req.query;
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    if (req.method === "OPTIONS") return res.status(200).end();
+
+    const { q } = req.query || {};
     if (!q || typeof q !== "string") return res.status(400).json({ error: "Missing query parameter", features: [] });
 
     const cleanQuery = q.trim();

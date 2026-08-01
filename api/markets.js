@@ -26,7 +26,12 @@ function resolveCountryLabel(raw) {
 }
 
 export default async function handler(req, res) {
-    const { type, currency = "USD", country, region } = req.query;
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    if (req.method === "OPTIONS") return res.status(200).end();
+
+    const { type, currency = "USD", country, region } = req.query || {};
     const cur = String(currency).toUpperCase();
     const loc = resolveCountryLabel(country ?? region ?? "Global");
     const cacheKey = `markets_${type}_${cur}_${loc}`;

@@ -1,9 +1,14 @@
 import { getCache, setCache } from "./utils/cache.js";
 
 export default async function handler(req, res) {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    if (req.method === "OPTIONS") return res.status(200).end();
+
     const rawKey = process.env.GROQ_API_KEY || process.env.GROQ_KEY;
     const hasKey = !!rawKey;
-    const isStream = req.query.stream === "true";
+    const isStream = req.query?.stream === "true";
     
     let body = req.body;
     if (typeof body === "string" && body.length > 0) {

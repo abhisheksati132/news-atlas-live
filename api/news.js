@@ -4,7 +4,12 @@ const CACHE_TTL = 5 * 60 * 1000;
 const BASE_URL = "https://newsapi.org/v2";
 
 export default async function handler(req, res) {
-    const { category, q, iso2, page = 1, pageSize = 12 } = req.query;
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    if (req.method === "OPTIONS") return res.status(200).end();
+
+    const { category, q, iso2, page = 1, pageSize = 12 } = req.query || {};
     const pageNum = Math.min(100, Math.max(1, parseInt(String(page), 10) || 1));
     const sizeNum = Math.min(100, Math.max(1, parseInt(String(pageSize), 10) || 12));
     const apiKey = process.env.NEWS_API_KEY;

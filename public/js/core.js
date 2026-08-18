@@ -114,7 +114,25 @@ function safeText(id) {
   return el ? el.innerText : "--";
 }
 window.downloadDossier = () => {
-  window.print();
+  const title = safeText("sector-name");
+  const sections = [
+    ["Briefing", safeText("ai-briefing-text")],
+    ["Weather", safeText("atmo-temp")],
+    ["News", safeText("news-count")],
+    ["Economic GDP", safeText("eco-gdp")]
+  ];
+  const content = [
+    `# NewsAtlas Intelligence Dossier: ${title}`,
+    `Generated: ${new Date().toISOString()}`,
+    "",
+    ...sections.flatMap(([heading, value]) => [`## ${heading}`, value, ""])
+  ].join("\n");
+  const url = URL.createObjectURL(new Blob([content], { type: "text/markdown;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "global"}-newsatlas-dossier.md`;
+  link.click();
+  URL.revokeObjectURL(url);
 };
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";

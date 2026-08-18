@@ -112,9 +112,11 @@ async function initTerminal() {
   try {
     const res = await fetch("/api/config");
     if (res.status === 404) showBackendRequiredBanner();
-    if (res.ok) {
+      if (res.ok) {
         const data = await res.json();
         config = data.firebase || {};
+        window.runtimeConfig = data;
+        if (data.realtime?.enabled) initIntelligenceLink();
     }
   } catch (e) {
     console.warn("Config fetch failed:", e);
@@ -916,24 +918,11 @@ window.mapEngine.init();
 initTerminal();
 setupEventListeners();
 initMobileBottomNav();
-initIntelligenceLink();
 initCommandPalette();
 setInterval(updateSystemTime, 1000);
 window.toggleShortcuts = () => {
     if (window.showToast) window.showToast("Shortcuts: Esc=Close, Ctrl+K=Search, ?=Help", "info");
 };
-window.onCountrySelected = () => {};
-window.resetWeatherData = () => {
-    setText("atmo-feels", "--");
-    setText("atmo-hl", "-- / --");
-};
-window.initializeMarkets = (loc) => {
-    if (window.displayPreciousMetals) window.displayPreciousMetals();
-    if (window.displayCountryIndices) window.displayCountryIndices(loc);
-    if (window.displayForex) window.displayForex();
-    if (window.displayCommodities) window.displayCommodities();
-};
-window.fetchMarketIntel = () => {};
 window.activateMapInteraction = () => {
     const map = document.getElementById('map-container');
     const overlay = document.getElementById('map-interaction-overlay');
@@ -1287,46 +1276,56 @@ window.toggleCompareMode = function() {
 window.runGeopoliticalComparison = async function(c1, c2) {
   const pName = c1.properties.name;
   const sName = c2.properties.name;
-  
-  const getDynamicEstimate = (name) => {
-    if (window.getDynamicEconomicEstimate) return window.getDynamicEconomicEstimate(name);
-    return { gdp_billions: "150", gdp_growth_percent: 1.5, gdp_per_capita: 5000, inflation_rate: 3.5, unemployment_rate: 6.5, interest_rate: 4.5, debt_to_gdp: 50, major_exports: ["Raw Goods"] };
+  const getLiveEconomics = async (country) => {
+    const iso3 = country.properties.iso_a3 || country.properties.ISO_A3;
+    if (!iso3) throw new Error("Country ISO code is unavailable");
+    const response = await fetch(`/api/economics?iso3=${encodeURIComponent(iso3)}`);
+    if (!response.ok) throw new Error(`Economics API HTTP ${response.status}`);
+    return response.json();
   };
 
-  const pEco = getDynamicEstimate(pName);
-  const sEco = getDynamicEstimate(sName);
+  let pEco, sEco;
+  try {
+    [pEco, sEco] = await Promise.all([getLiveEconomics(c1), getLiveEconomics(c2)]);
+  } catch (error) {
+    console.warn("Comparison economics request failed:", error.message);
+    const ticker = document.getElementById("eco-market-ticker");
+    if (ticker) ticker.innerText = "LIVE COMPARISON DATA UNAVAILABLE";
+    return;
+  }
   
   const renderSplit = (elId, v1, v2) => {
     const el = document.getElementById(elId);
     if (el) el.innerText = `${v1} | ${v2}`;
   };
   
-  renderSplit("eco-gdp", `$${pEco.gdp_billions}B`, `$${sEco.gdp_billions}B`);
-  renderSplit("eco-growth", `${pEco.gdp_growth_percent > 0 ? "+" : ""}${pEco.gdp_growth_percent}%`, `${sEco.gdp_growth_percent > 0 ? "+" : ""}${sEco.gdp_growth_percent}%`);
-  renderSplit("eco-capita", `$${pEco.gdp_per_capita.toLocaleString()}`, `$${sEco.gdp_per_capita.toLocaleString()}`);
-  renderSplit("eco-inflation", `${pEco.inflation_rate}%`, `${sEco.inflation_rate}%`);
-  renderSplit("eco-unemployment", `${pEco.unemployment_rate}%`, `${sEco.unemployment_rate}%`);
-  renderSplit("eco-interest", `${pEco.interest_rate}%`, `${sEco.interest_rate}%`);
-  renderSplit("eco-debt", `${pEco.debt_to_gdp}%`, `${sEco.debt_to_gdp}%`);
+  const metric = (value, suffix = "") => value == null ? "N/A" : `${value}${suffix}`;
+  renderSplit("eco-gdp", metric(pEco.gdp_billions, "B"), metric(sEco.gdp_billions, "B"));
+  renderSplit("eco-growth", metric(pEco.gdp_growth_percent, "%"), metric(sEco.gdp_growth_percent, "%"));
+  renderSplit("eco-capita", pEco.gdp_per_capita == null ? "N/A" : `$${pEco.gdp_per_capita.toLocaleString()}`, sEco.gdp_per_capita == null ? "N/A" : `$${sEco.gdp_per_capita.toLocaleString()}`);
+  renderSplit("eco-inflation", metric(pEco.inflation_rate, "%"), metric(sEco.inflation_rate, "%"));
+  renderSplit("eco-unemployment", metric(pEco.unemployment_rate, "%"), metric(sEco.unemployment_rate, "%"));
+  renderSplit("eco-interest", metric(pEco.interest_rate, "%"), metric(sEco.interest_rate, "%"));
+  renderSplit("eco-debt", metric(pEco.debt_to_gdp, "%"), metric(sEco.debt_to_gdp, "%"));
   
   const ticker = document.getElementById("eco-market-ticker");
   if (ticker) ticker.innerText = `COMPARING: ${pName.toUpperCase()} VS ${sName.toUpperCase()}`;
   
   const exportsEl = document.getElementById("eco-exports");
   if (exportsEl) {
-    const pTags = pEco.major_exports.slice(0,2).map(item => `
+    const pTags = (pEco.major_exports || []).slice(0,2).map(item => `
       <div class="apple-glass px-2.5 py-1.5 border border-blue-500/10 flex items-center gap-1.5 rounded-full">
          <span class="text-[8px] text-slate-500 font-black uppercase">${pName.substring(0,3)}:</span>
          <span class="text-[8px] text-white font-black uppercase">${item}</span>
       </div>
     `);
-    const sTags = sEco.major_exports.slice(0,2).map(item => `
+    const sTags = (sEco.major_exports || []).slice(0,2).map(item => `
       <div class="apple-glass px-2.5 py-1.5 border border-indigo-500/10 flex items-center gap-1.5 rounded-full">
          <span class="text-[8px] text-slate-500 font-black uppercase">${sName.substring(0,3)}:</span>
          <span class="text-[8px] text-white font-black uppercase">${item}</span>
       </div>
     `);
-    exportsEl.innerHTML = [...pTags, ...sTags].join("");
+    exportsEl.innerHTML = [...pTags, ...sTags].join("") || '<div class="text-slate-500 text-xs">No verified export comparison data available.</div>';
   }
 
   const lat1 = c1.properties.lat || 20;

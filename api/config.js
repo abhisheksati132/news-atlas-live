@@ -20,6 +20,7 @@ export default async function handler(req, res) {
 
   res.status(200).json({
     firebase,
-    mapboxToken: mapboxToken || null
+    mapboxToken: mapboxToken || null,
+    realtime: { enabled: process.env.SOCKET_IO_ENABLED === "true" }
   });
 }

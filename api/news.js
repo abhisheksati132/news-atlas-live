@@ -3,6 +3,55 @@ import { getCache, setCache } from "./utils/cache.js";
 const CACHE_TTL = 5 * 60 * 1000;
 const BASE_URL = "https://newsapi.org/v2";
 
+function decodeXml(value = "") {
+    return value
+        .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
+        .replace(/&amp;/g, "&")
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">");
+}
+
+function tagValue(xml, tag) {
+    return decodeXml((xml.match(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, "i")) || [])[1] || "").trim();
+}
+
+async function fetchGoogleNews({ category, q, iso2, size }) {
+    const searchTerm = q?.trim() || (category && category !== "top" ? `${category} news` : "world news");
+    const countryHint = iso2 ? ` ${iso2}` : "";
+    const feedUrl = `https://news.google.com/rss/search?${new URLSearchParams({ q: `${searchTerm}${countryHint}`, hl: "en-US", gl: "US", ceid: "US:en" })}`;
+    const response = await fetch(feedUrl, { headers: { "User-Agent": "NewsAtlas/1.0" } });
+    if (!response.ok) throw new Error(`Google News RSS HTTP ${response.status}`);
+
+    const xml = await response.text();
+    const results = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)].map((match) => {
+        const item = match[1];
+        const sourceMatch = item.match(/<source(?:\s+url="([^"]*)")?>([\s\S]*?)<\/source>/i);
+        return {
+            title: tagValue(item, "title"),
+            link: tagValue(item, "link"),
+            pubDate: tagValue(item, "pubDate") || null,
+            source: decodeXml(sourceMatch?.[2] || "Google News"),
+            source_id: "google-news-rss",
+            source_url: decodeXml(sourceMatch?.[1] || ""),
+            category: category || "general",
+            description: tagValue(item, "description"),
+            image: null,
+            image_url: null,
+            author: null,
+        };
+    }).filter((article) => article.title && article.link).slice(0, size);
+
+    return {
+        status: "success",
+        totalResults: results.length,
+        results,
+        source: "Google News RSS",
+        freshness: "provider-managed",
+    };
+}
+
 export default async function handler(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
@@ -13,25 +62,27 @@ export default async function handler(req, res) {
     const pageNum = Math.min(100, Math.max(1, parseInt(String(page), 10) || 1));
     const sizeNum = Math.min(100, Math.max(1, parseInt(String(pageSize), 10) || 12));
     const apiKey = process.env.NEWS_API_KEY;
-
-    if (!apiKey) {
-        console.warn("NEWS_API_KEY not found. Running in simulation mode.");
-        const results = [
-            { title: "Global Markets Stabilize Amidst Policy Shifts", link: "#", pubDate: new Date().toISOString(), source: "Intelligence Feed", description: "Market analysts report a stabilized baseline for global equities.", category: "general", image: null },
-            { title: "Geopolitical Tensions Ease in Strategic Corridors", link: "#", pubDate: new Date().toISOString(), source: "Global Monitor", description: "Diplomatic efforts lead to successful de-escalation in key trade zones.", category: "general", image: null },
-            { title: "Climate Summit Reaches Historic Agreement", link: "#", pubDate: new Date().toISOString(), source: "Environment Desk", description: "World leaders commit to accelerated emissions reduction targets.", category: "general", image: null },
-            { title: "Technology Sector Drives Economic Momentum", link: "#", pubDate: new Date().toISOString(), source: "Tech Intel", description: "AI and semiconductor industries lead global GDP contributions this quarter.", category: "general", image: null },
-            { title: "Strategic Infrastructure Investments Announced", link: "#", pubDate: new Date().toISOString(), source: "Policy Watch", description: "Major economies unveil coordinated infrastructure spending programs.", category: "general", image: null },
-            { title: "Energy Transition Accelerates Across G20 Nations", link: "#", pubDate: new Date().toISOString(), source: "Energy Monitor", description: "Renewable capacity additions reach record levels for second consecutive year.", category: "general", image: null }
-        ];
-        return res.status(200).json({ status: "success", results, totalResults: results.length });
-    }
-
     const cacheKey = `news|${iso2 || "global"}|${category || "general"}|${q || ""}|${pageNum}|${sizeNum}`;
     const cached = getCache(cacheKey);
     if (cached) {
         res.setHeader("X-Cache", "HIT");
         return res.status(200).json(cached);
+    }
+
+    if (!apiKey) {
+        try {
+            const payload = await fetchGoogleNews({ category, q, iso2, size: sizeNum });
+            setCache(cacheKey, payload, CACHE_TTL);
+            res.setHeader("X-Cache", "MISS");
+            return res.status(200).json(payload);
+        } catch (err) {
+            console.error("[news] Google News RSS fallback failed:", err.message);
+            return res.status(502).json({
+                status: "error",
+                code: "GOOGLE_NEWS_RSS_UPSTREAM_ERROR",
+                message: "Live news is currently unavailable."
+            });
+        }
     }
 
     try {

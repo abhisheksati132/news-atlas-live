@@ -247,17 +247,6 @@ async function fetchGDELTEvents(country) {
       : country?.properties?.name || country?.name || "";
   container.innerHTML = '<div class="text-slate-500 text-xs animate-pulse py-2">Loading intelligence events...</div>';
 
-  const simulated = [
-    { title: "Global trade negotiations enter critical phase amid supply chain concerns", tone: -1.2, domain: "Reuters", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
-    { title: "Central banks coordinate on inflation response strategy", tone: 2.5, domain: "Bloomberg", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
-    { title: "Regional security summit addresses emerging threat vectors", tone: -2.8, domain: "FT", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
-    { title: "Technology export controls reshape global semiconductor landscape", tone: -0.5, domain: "WSJ", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
-    { title: "UN peacekeeping mission reports progress in conflict zones", tone: 3.1, domain: "AP News", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
-    { title: "Energy markets adjust to new geopolitical supply dynamics", tone: -1.8, domain: "CNBC", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
-    { title: "Climate cooperation framework achieves binding commitments", tone: 4.2, domain: "Guardian", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") },
-    { title: "Diplomatic channels reopened after months of tension", tone: 3.8, domain: "BBC", seendate: new Date().toISOString().slice(0, 10).replace(/-/g, "") }
-  ];
-
   function renderRows(articles) {
     container.innerHTML = "";
     articles.forEach((a) => {
@@ -295,9 +284,10 @@ async function fetchGDELTEvents(country) {
     const stamp = document.getElementById("gdelt-timestamp");
     if (stamp) stamp.innerText = `Intel · ${articles.length} events · Live`;
   } catch (e) {
-    renderRows(simulated);
-    const stamp = document.getElementById("gdelt-timestamp");
-    if (stamp) stamp.innerText = `Intel · ${simulated.length} events · Simulated`;
+    container.innerHTML = '<div class="text-amber-400 text-xs py-2">Live GDELT intelligence is unavailable.</div>';
+    const unavailableStamp = document.getElementById("gdelt-timestamp");
+    if (unavailableStamp) unavailableStamp.innerText = "Intel provider unavailable";
+    return;
   }
 }
 window.fetchGDELTEvents = fetchGDELTEvents;

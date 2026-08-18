@@ -49,8 +49,9 @@ export default async function handler(req, res) {
             }
             
             // Fallback to internal registry
-            const fallback = FallbackRegistry[country] || FallbackRegistry["United States"];
-            return res.status(200).json({ states: fallback.states });
+            const fallback = FallbackRegistry[country];
+            if (fallback) return res.status(200).json({ states: fallback.states, source: "local-fallback" });
+            return res.status(502).json({ error: "Regional data provider is unavailable for this country", states: [] });
         }
 
         if (level === "cities") {
@@ -69,19 +70,19 @@ export default async function handler(req, res) {
             }
 
             // Fallback to internal registry
-            const fallback = FallbackRegistry[country] || FallbackRegistry["United States"];
-            const cities = fallback.cities[state] || ["Main Sector Hub", "Regional Center"];
-            return res.status(200).json({ cities: cities });
+            const fallback = FallbackRegistry[country];
+            const cities = fallback?.cities?.[state];
+            if (cities) return res.status(200).json({ cities, source: "local-fallback" });
+            return res.status(502).json({ error: "Regional data provider is unavailable for this location", cities: [] });
         }
 
         return res.status(400).json({ error: "Invalid level request" });
     } catch (err) {
         console.error("[geo]", err.message);
-        const fallback = FallbackRegistry[country] || FallbackRegistry["United States"];
+        const fallback = FallbackRegistry[country];
         if (level === "cities") {
-            const cities = fallback.cities?.[state] || ["Main Sector Hub", "Regional Center"];
-            return res.status(200).json({ cities });
+            return res.status(502).json({ error: "Regional data provider request failed", cities: fallback?.cities?.[state] || [] });
         }
-        return res.status(200).json({ states: fallback.states });
+        return res.status(502).json({ error: "Regional data provider request failed", states: fallback?.states || [] });
     }
 }

@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     if (req.method === "OPTIONS") return res.status(200).end();
 
     const rawKey = process.env.GROQ_API_KEY || process.env.GROQ_KEY;
-    const hasKey = !!rawKey;
+    const hasKey = Boolean(rawKey);
     const isStream = req.query?.stream === "true";
     
     let body = req.body;
@@ -25,34 +25,12 @@ export default async function handler(req, res) {
     const cached = getCache(cacheKey);
     if (cached && !isStream) return res.status(200).json(cached);
 
-    const returnSimulation = () => {
-        const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-        const isJsonReq = promptText.includes("json") || promptText.includes("{");
-
-        if (isJsonReq) {
-            const jsonResp = {
-                gdp_billions: rand(500, 4500),
-                gdp_growth_percent: (rand(1, 8) + rand(0, 9) / 10).toFixed(1),
-                inflation_rate: (rand(2, 12) + rand(0, 9) / 10).toFixed(1),
-                market_sentiment: rand(40, 95),
-                risk_level: rand(10, 60),
-                major_exports: ["Precision Optics", "Energy Relays", "Sector Logistics"],
-                strategic_outlook: "STABLE"
-            };
-            return res.status(200).json({ candidates: [{ content: { parts: [{ text: JSON.stringify(jsonResp) }] } }] });
-        }
-
-        let responseText = `[EXECUTIVE_SUMMARY]\nRating: ${rand(7,9)}/10\nStrategic situational awareness for ${locName} sector is complete. High-priority baselines are nominal. No disruptive anomalies detected in the current mission window.`;
-        responseText += `\n\n[POLITICAL_STABILITY]\nRating: ${rand(5,9)}/10\nInternal governance sectors in ${locName} maintain standard operational stability. Diplomatic channels remain mission-ready with standard throughput.`;
-        responseText += `\n\n[ECONOMY]\nRating: ${rand(5,8)}/10\nMacroeconomic telemetry for ${locName} indicates sustained growth patterns. Fiscal resilience metrics are within primary target bands.`;
-        responseText += `\n\n[SUPPLY_CHAIN]\nRating: ${rand(5,8)}/10\nLogistical channels and supply-side metrics for ${locName} are operating at optimized capacity. No significant bottleneck signatures detected.`;
-
-        const payload = { candidates: [{ content: { parts: [{ text: responseText }] } }] };
-        setCache(cacheKey, payload, 1800); // 30 min cache for simulations
-        return res.status(200).json(payload);
-    };
-
-    if (!hasKey) return returnSimulation();
+    if (!hasKey) {
+        return res.status(503).json({
+            error: "AI briefing is unavailable because GROQ_API_KEY is not configured.",
+            code: "AI_NOT_CONFIGURED"
+        });
+    }
 
     const apiURL = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -83,7 +61,13 @@ export default async function handler(req, res) {
             })
         });
 
-        if (!response.ok) throw new Error("Groq Uplink Lost");
+        if (!response.ok) {
+            return res.status(502).json({
+                error: "Groq could not complete this request.",
+                code: "GROQ_UPSTREAM_ERROR",
+                upstreamStatus: response.status
+            });
+        }
 
         if (isStream) {
             res.setHeader("Content-Type", "text/event-stream");
@@ -105,6 +89,10 @@ export default async function handler(req, res) {
         setCache(cacheKey, finalPayload, 300); // 5 min cache for real AI
         return res.status(200).json(finalPayload);
     } catch (err) {
-        return returnSimulation();
+        console.error("[ai]", err.message);
+        return res.status(502).json({
+            error: "AI briefing service could not be reached.",
+            code: "GROQ_NETWORK_ERROR"
+        });
     }
 }

@@ -722,6 +722,23 @@
   };
 
   initFirebase();
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (const registration of registrations) {
+        registration.update();
+      }
+    });
+  }
+  if ('caches' in window) {
+    caches.keys().then((names) => {
+      for (const name of names) {
+        if (name !== 'newsatlas-v2-live') {
+          caches.delete(name);
+        }
+      }
+    });
+  }
 </script>
 </body>
 </html>

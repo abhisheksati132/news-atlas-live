@@ -14,6 +14,7 @@ async function displayPreciousMetals() {
     const cur = (window.currencyCode || "USD").toUpperCase();
     const res = await fetch(`/api/markets?type=metals&currency=${cur}`);
     const json = await res.json();
+    if (!res.ok) throw new Error(json.error || "Live metals data is unavailable");
     container.innerHTML = "";
     const metalDisplay = { XAU: "Gold (Spot)", XAG: "Silver (Spot)", XPT: "Platinum (Spot)", XPD: "Palladium" };
     Object.entries(json.data || {}).forEach(([sym, data]) => {
@@ -36,8 +37,8 @@ async function displayPreciousMetals() {
                 </div>`;
       container.appendChild(row);
     });
-    if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-[10px] py-6 text-center uppercase font-black">Link Offline</div>';
-  } catch { container.innerHTML = '<div class="text-red-500 text-[10px] py-6 text-center uppercase font-black tracking-widest">Protocol Sync Failure</div>'; }
+    if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-xs py-6 text-center">Live precious metals quotes require a market data provider</div>';
+  } catch { container.innerHTML = '<div class="text-slate-500 text-xs py-6 text-center">Live precious metals quotes require a market data provider</div>'; }
 }
 
 async function displayCountryIndices(countryName) {
@@ -49,6 +50,7 @@ async function displayCountryIndices(countryName) {
   try {
     const res = await fetch(`/api/markets?type=ticker&country=${encodeURIComponent(countryName)}`);
     const json = await res.json();
+    if (!res.ok) throw new Error(json.error || "Live index data is unavailable");
     container.innerHTML = "";
     (json.data || []).forEach((data) => {
       const change = data.change || 0;
@@ -69,8 +71,8 @@ async function displayCountryIndices(countryName) {
                 </div>`;
       container.appendChild(row);
     });
-    if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-[10px] py-6 text-center uppercase font-black">Data Unavailable</div>';
-  } catch { container.innerHTML = '<div class="text-red-500 text-[10px] py-6 text-center uppercase font-black">Sync Failure</div>'; }
+    if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-xs py-6 text-center">Live index data is unavailable</div>';
+  } catch { container.innerHTML = '<div class="text-slate-500 text-xs py-6 text-center">Live index quotes require a market data provider</div>'; }
 }
 window.getIndicesForCountry = () => ({});
 async function displayForex() {
@@ -81,6 +83,7 @@ async function displayForex() {
     const base = (window.currencyCode || "USD").toUpperCase();
     const res = await fetch(`/api/markets?type=forex&currency=${base}`);
     const json = await res.json();
+    if (!res.ok) throw new Error(json.error || "Live FX data is unavailable");
     container.innerHTML = "";
     Object.entries(json.rates || {}).filter(([c]) => c !== base).slice(0, 16).forEach(([pair, rate]) => {
       const row = document.createElement("div");
@@ -103,6 +106,7 @@ async function displayCommodities() {
     const cur = (window.currencyCode || "USD").toUpperCase();
     const res = await fetch(`/api/markets?type=commodities&currency=${cur}`);
     const json = await res.json();
+    if (!res.ok) throw new Error(json.error || "Live commodity data is unavailable");
     container.innerHTML = "";
     Object.entries(json.data || {}).forEach(([name, data]) => {
       const change = data.change || 0;
@@ -123,8 +127,8 @@ async function displayCommodities() {
                 </div>`;
       container.appendChild(row);
     });
-    if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-[10px] py-6 text-center uppercase font-black">Data Offline</div>';
-  } catch { container.innerHTML = '<div class="text-red-500 text-[10px] py-6 text-center uppercase font-black">Pipeline Failure</div>'; }
+    if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-xs py-6 text-center">Live commodity data is unavailable</div>';
+  } catch { container.innerHTML = '<div class="text-slate-500 text-xs py-6 text-center">Live commodity quotes require a market data provider</div>'; }
 }
 function initializeMarkets(countryName) {
   displayPreciousMetals();

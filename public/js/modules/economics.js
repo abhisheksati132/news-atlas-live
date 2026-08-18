@@ -2,76 +2,43 @@ function ecoEl(id) {
   return window.safeEl ? window.safeEl(id) : document.getElementById(id);
 }
 
-const STATIC_ECONOMICS_FALLBACK = {
-  "united states": { gdp_billions: "28,780", gdp_growth_percent: 2.4, gdp_per_capita: 81300, inflation_rate: 3.1, unemployment_rate: 3.8, interest_rate: 5.25, debt_to_gdp: 122, major_exports: ["Machinery", "Aerospace", "Refined Petroleum", "Agricultural Products", "Chemicals"], market_summary: "Robust growth driven by strong consumer spending and job market resilience." },
-  "china": { gdp_billions: "18,530", gdp_growth_percent: 5.0, gdp_per_capita: 13100, inflation_rate: 0.2, unemployment_rate: 5.2, interest_rate: 3.45, debt_to_gdp: 83, major_exports: ["Computers", "Broadcasting Equipment", "Integrated Circuits", "Textiles", "Electric Vehicles"], market_summary: "Transitioning to high-quality growth with strong EV and green-tech exports." },
-  "india": { gdp_billions: "3,940", gdp_growth_percent: 7.2, gdp_per_capita: 2730, inflation_rate: 4.8, unemployment_rate: 7.5, interest_rate: 6.50, debt_to_gdp: 81, major_exports: ["Refined Petroleum", "Software Services", "Pharmaceuticals", "Jewelry", "Machinery"], market_summary: "Fastest-growing major economy backed by robust domestic demand and digital infrastructure." },
-  "japan": { gdp_billions: "4,110", gdp_growth_percent: 1.0, gdp_per_capita: 34300, inflation_rate: 2.5, unemployment_rate: 2.6, interest_rate: 0.1, debt_to_gdp: 263, major_exports: ["Motor Vehicles", "Integrated Circuits", "Machinery", "Iron and Steel", "Chemicals"], market_summary: "Moderate recovery with the Bank of Japan ending negative interest rate policy." },
-  "germany": { gdp_billions: "4,430", gdp_growth_percent: -0.2, gdp_per_capita: 52800, inflation_rate: 2.2, unemployment_rate: 5.9, interest_rate: 4.50, debt_to_gdp: 63, major_exports: ["Motor Vehicles", "Machinery", "Chemicals", "Pharmaceuticals", "Electronic Products"], market_summary: "Struggling with high energy costs and weak global demand for industrial goods." },
-  "united kingdom": { gdp_billions: "3,500", gdp_growth_percent: 0.5, gdp_per_capita: 49100, inflation_rate: 2.3, unemployment_rate: 4.3, interest_rate: 5.25, debt_to_gdp: 97, major_exports: ["Financial Services", "Cars", "Gas Turbines", "Gold", "Crude Petroleum"], market_summary: "Slight growth recovery after technical recession, with inflation nearing targets." },
-  "france": { gdp_billions: "3,130", gdp_growth_percent: 0.8, gdp_per_capita: 46200, inflation_rate: 2.1, unemployment_rate: 7.4, interest_rate: 4.50, debt_to_gdp: 110, major_exports: ["Aircraft", "Spacecraft", "Packaged Medicaments", "Cars", "Wine"], market_summary: "Gradual growth supported by services sector and aerospace exports." },
-  "russia": { gdp_billions: "2,050", gdp_growth_percent: 3.6, gdp_per_capita: 14200, inflation_rate: 7.4, unemployment_rate: 2.9, interest_rate: 16.0, debt_to_gdp: 19, major_exports: ["Crude Petroleum", "Refined Petroleum", "Coal Briquettes", "Wheat", "Gold"], market_summary: "Growth driven by military-industrial demand and trade pivot to Asian markets." },
-  "brazil": { gdp_billions: "2,200", gdp_growth_percent: 2.9, gdp_per_capita: 10400, inflation_rate: 4.5, unemployment_rate: 7.8, interest_rate: 10.75, debt_to_gdp: 74, major_exports: ["Soybeans", "Crude Petroleum", "Iron Ore", "Corn", "Beef"], market_summary: "Positive outlook driven by record agricultural yields and commodity exports." },
-  "australia": { gdp_billions: "1,790", gdp_growth_percent: 1.5, gdp_per_capita: 65100, inflation_rate: 3.6, unemployment_rate: 3.9, interest_rate: 4.35, debt_to_gdp: 37, major_exports: ["Iron Ore", "Coal Briquettes", "Petroleum Gas", "Gold", "Wheat"], market_summary: "Resilient labor market and strong raw material exports supporting GDP." },
-  "canada": { gdp_billions: "2,240", gdp_growth_percent: 1.2, gdp_per_capita: 53200, inflation_rate: 2.8, unemployment_rate: 6.1, interest_rate: 5.00, debt_to_gdp: 107, major_exports: ["Crude Petroleum", "Cars", "Gold", "Gas Turbines", "Sawn Wood"], market_summary: "Economic cooling with Bank of Canada starting policy easing cycle." },
-  "ukraine": { gdp_billions: "174", gdp_growth_percent: 5.3, gdp_per_capita: 4500, inflation_rate: 3.2, unemployment_rate: 15.0, interest_rate: 13.50, debt_to_gdp: 85, major_exports: ["Seed Oils", "Iron Ore", "Corn", "Wheat", "Semi-Finished Iron"], market_summary: "Stronger-than-expected recovery driven by trade corridor re-openings." },
-  "pakistan": { gdp_billions: "341", gdp_growth_percent: 2.0, gdp_per_capita: 1500, inflation_rate: 11.8, unemployment_rate: 6.3, interest_rate: 20.00, debt_to_gdp: 72, major_exports: ["House Linens", "Rice", "Cotton Yarn", "Woven Cotton", "Apparel"], market_summary: "Stabilization efforts continuing under IMF structural adjustment package." }
-};
-
-const getDynamicEconomicEstimate = (countryName) => {
-  const norm = countryName.toLowerCase().trim();
-  if (STATIC_ECONOMICS_FALLBACK[norm]) return STATIC_ECONOMICS_FALLBACK[norm];
-  
-  const hash = countryName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const estGDP = ((hash % 800) + 15).toFixed(0);
-  const estGrowth = (((hash % 60) - 20) / 10).toFixed(1);
-  const estPerCapita = (hash % 45) * 1200 + 1000;
-  const estInflation = ((hash % 100) / 10 + 1.2).toFixed(1);
-  const estUnemp = ((hash % 120) / 10 + 2.5).toFixed(1);
-  const estInterest = ((hash % 80) / 10 + 0.55).toFixed(2);
-  const estDebt = ((hash % 90) + 20).toFixed(0);
-  
-  return {
-    gdp_billions: estGDP,
-    gdp_growth_percent: parseFloat(estGrowth),
-    gdp_per_capita: estPerCapita,
-    inflation_rate: parseFloat(estInflation),
-    unemployment_rate: parseFloat(estUnemp),
-    interest_rate: parseFloat(estInterest),
-    debt_to_gdp: parseInt(estDebt),
-    major_exports: ["Industrial Commodities", "Agricultural Produce", "Services sector"],
-    market_summary: `Stable growth trends in ${countryName} driven by commodity trade and primary industries.`
-  };
-};
-
 window.renderEconomicData = function(eco, country) {
-  if (eco.gdp_billions && ecoEl("eco-gdp"))
-    ecoEl("eco-gdp").innerText = eco.gdp_billions;
-  if (eco.gdp_growth_percent != null && ecoEl("eco-growth"))
-    ecoEl("eco-growth").innerText = (eco.gdp_growth_percent > 0 ? "+" : "") + eco.gdp_growth_percent + "%";
-  if (eco.gdp_per_capita != null && ecoEl("eco-capita"))
-    ecoEl("eco-capita").innerText = "$" + eco.gdp_per_capita.toLocaleString();
-  if (eco.inflation_rate != null && ecoEl("eco-inflation"))
-    ecoEl("eco-inflation").innerText = eco.inflation_rate + "%";
-  if (eco.unemployment_rate != null && ecoEl("eco-unemployment"))
-    ecoEl("eco-unemployment").innerText = eco.unemployment_rate + "%";
-  if (eco.interest_rate != null && ecoEl("eco-interest"))
-    ecoEl("eco-interest").innerText = eco.interest_rate + "%";
-  if (eco.debt_to_gdp != null && ecoEl("eco-debt"))
-    ecoEl("eco-debt").innerText = eco.debt_to_gdp + "%";
-  if (eco.major_exports && Array.isArray(eco.major_exports) && ecoEl("eco-exports")) {
-    ecoEl("eco-exports").innerHTML = eco.major_exports
-      .map(
-        (item) =>
-          `<div class="apple-glass px-3 py-1.5 border border-blue-500/20 flex items-center gap-2 rounded-full">
-             <div class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></div>
-             <span class="text-[10px] text-white font-black uppercase tracking-wider">${item}</span>
-           </div>`,
-      )
-      .join("");
+  if (ecoEl("eco-gdp"))
+    ecoEl("eco-gdp").innerText = eco.gdp_billions != null ? eco.gdp_billions : "--";
+  if (ecoEl("eco-growth"))
+    ecoEl("eco-growth").innerText = eco.gdp_growth_percent != null ? (eco.gdp_growth_percent > 0 ? "+" : "") + eco.gdp_growth_percent + "%" : "--%";
+  if (ecoEl("eco-capita"))
+    ecoEl("eco-capita").innerText = eco.gdp_per_capita != null ? "$" + eco.gdp_per_capita.toLocaleString() : "--";
+  if (ecoEl("eco-inflation"))
+    ecoEl("eco-inflation").innerText = eco.inflation_rate != null ? eco.inflation_rate + "%" : "--%";
+  if (ecoEl("eco-unemployment"))
+    ecoEl("eco-unemployment").innerText = eco.unemployment_rate != null ? eco.unemployment_rate + "%" : "--%";
+  if (ecoEl("eco-interest"))
+    ecoEl("eco-interest").innerText = eco.interest_rate != null ? eco.interest_rate + "%" : "--%";
+  if (ecoEl("eco-debt"))
+    ecoEl("eco-debt").innerText = eco.debt_to_gdp != null ? eco.debt_to_gdp + "%" : "--%";
+  
+  if (ecoEl("eco-exports")) {
+    if (eco.major_exports && Array.isArray(eco.major_exports) && eco.major_exports.length > 0) {
+      ecoEl("eco-exports").innerHTML = eco.major_exports
+        .map(
+          (item) =>
+            `<div class="apple-glass px-3 py-1.5 border border-blue-500/20 flex items-center gap-2 rounded-full">
+               <div class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></div>
+               <span class="text-[10px] text-white font-black uppercase tracking-wider">${item}</span>
+             </div>`,
+        )
+        .join("");
+    } else {
+      const year = eco.updated?.gdp_billions || "";
+      ecoEl("eco-exports").innerHTML = `<div class="text-slate-400 text-xs py-1">Source: World Bank Open Data ${year ? `(${year})` : ""}</div>`;
+    }
   }
-  if (eco.market_summary && ecoEl("eco-market-ticker"))
-    ecoEl("eco-market-ticker").innerText = eco.market_summary.toUpperCase();
+
+  if (ecoEl("eco-market-ticker")) {
+    const summary = eco.market_summary || (eco.updated?.gdp_billions ? `WORLD BANK MACROECONOMIC INDICATORS (OBSERVATION: ${eco.updated.gdp_billions})` : "WORLD BANK OPEN DATA");
+    ecoEl("eco-market-ticker").innerText = summary.toUpperCase();
+  }
 };
 
 async function fetchDetailedEconomics(country) {
@@ -83,38 +50,21 @@ async function fetchDetailedEconomics(country) {
     ecoEl("eco-exports").innerHTML =
       '<div class="h-4 bg-white/10 rounded w-3/4 animate-pulse"></div>';
 
-  let eco = {};
+  let eco = null;
   try {
-    const prompt = `
-            Analyze the economy of ${country}.
-            Return ONLY a valid JSON object with these keys (use 'N/A' if unknown, estimate if necessary based on 2024/2025 data):
-            {
-                "gdp_billions": "number only",
-                "gdp_growth_percent": "number only",
-                "gdp_per_capita": "number only",
-                "inflation_rate": "number only",
-                "unemployment_rate": "number only",
-                "interest_rate": "number only",
-                "debt_to_gdp": "number only",
-                "major_exports": ["item1", "item2", "item3"],
-                "market_summary": "1 short sentence on current market status"
-            }
-            Do not add markdown formatting. Just the raw JSON string.
-        `;
-    const res = await fetch("/api/ai", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt }),
-    });
-    const data = await res.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-    eco = window.extractJSON(text) || {};
+    const iso3 = window._isoAlpha3;
+    if (!iso3) throw new Error("Country ISO code is unavailable");
+    const res = await fetch(`/api/economics?iso3=${encodeURIComponent(iso3)}`);
+    if (!res.ok) throw new Error(`Economics API HTTP ${res.status}`);
+    eco = await res.json();
   } catch (e) {
-    console.warn("AI Economics query failed, using static macro-economics database fallback:", e.message);
+    console.warn("Live economics request failed:", e.message);
   }
 
-  if (!eco || Object.keys(eco).length === 0) {
-    eco = getDynamicEconomicEstimate(country);
+  if (!eco) {
+    if (ecoEl("eco-market-ticker")) ecoEl("eco-market-ticker").innerText = "LIVE MACROECONOMIC DATA UNAVAILABLE";
+    if (ecoEl("eco-exports")) ecoEl("eco-exports").innerHTML = '<div class="text-slate-500 text-xs">No verified export data available.</div>';
+    return;
   }
 
   window.renderEconomicData(eco, country);
@@ -130,7 +80,7 @@ async function drawGDPTrend(country) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const iso = window._isoAlpha3 || "";
   if (!iso) {
-    drawGDPFallback(ctx, canvas, country);
+    drawGDPUnavailable(ctx, canvas);
     return;
   }
   try {
@@ -143,7 +93,7 @@ async function drawGDPTrend(country) {
     const rawInf = (r2[1] || []).filter((d) => d.value !== null).sort((a, b) => a.date - b.date);
 
     if (!rawGDP.length) {
-      drawGDPFallback(ctx, canvas, country);
+      drawGDPUnavailable(ctx, canvas);
       return;
     }
 
@@ -156,17 +106,16 @@ async function drawGDPTrend(country) {
 
     renderDualAxisCanvas(ctx, canvas, gdpValues, infValues, dates);
   } catch (_) {
-    drawGDPFallback(ctx, canvas, country);
+    drawGDPUnavailable(ctx, canvas);
   }
 }
 
-function drawGDPFallback(ctx, canvas, country) {
-  const seed = (country || "X").charCodeAt(0);
-  const gdpValues = Array.from({ length: 5 }, (_, i) => 800 + Math.sin(seed + i) * 300 + i * 120);
-  const infValues = Array.from({ length: 5 }, (_, i) => 2.0 + Math.cos(seed - i) * 1.5 + i * 0.2);
-  const year = new Date().getFullYear();
-  const years = Array.from({ length: 5 }, (_, i) => String(year - 4 + i));
-  renderDualAxisCanvas(ctx, canvas, gdpValues, infValues, years);
+function drawGDPUnavailable(ctx, canvas) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "rgba(148,163,184,0.85)";
+  ctx.font = "bold 12px monospace";
+  ctx.textAlign = "center";
+  ctx.fillText("Historical World Bank data unavailable", canvas.width / 2, canvas.height / 2);
 }
 
 function renderDualAxisCanvas(ctx, canvas, gdpVals, infVals, years) {

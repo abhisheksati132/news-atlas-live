@@ -21,6 +21,7 @@ import gdeltHandler from "./api/gdelt.js";
 import gdeltGeoHandler from "./api/gdelt-geo.js";
 import newsAlertsHandler from "./api/news-alerts.js";
 import stabilityHandler from "./api/stability.js";
+import economicsHandler from "./api/economics.js";
 
 dotenv.config();
 
@@ -94,6 +95,7 @@ apiRouter.get("/gdelt", (req, res) => gdeltHandler(req, res).catch(e => res.stat
 apiRouter.get("/gdelt-geo", (req, res) => gdeltGeoHandler(req, res).catch(e => res.status(500).json({error: e.message})));
 apiRouter.get("/news-alerts", (req, res) => newsAlertsHandler(req, res).catch(e => res.status(500).json({error: e.message})));
 apiRouter.get("/stability", (req, res) => stabilityHandler(req, res).catch(e => res.status(500).json({error: e.message})));
+apiRouter.get("/economics", (req, res) => economicsHandler(req, res).catch(e => res.status(500).json({error: e.message})));
 
 app.use("/api", apiRouter);
 

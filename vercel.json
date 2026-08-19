@@ -3,5 +3,10 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/app", "destination": "/app.html" }
-  ]
+  ],
+  "functions": {
+    "api/*.js": {
+      "includeFiles": "public/data/**"
+    }
+  }
 }

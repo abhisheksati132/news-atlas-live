@@ -32,10 +32,28 @@ export default async function handler(req, res) {
     Object.entries(CORS_HEADERS).forEach(([k, v]) => res.setHeader(k, v));
     if (req.method === 'OPTIONS') return res.status(200).end();
 
-    const { all, name, code } = req.query;
+    const { all, name, code } = req.query || {};
 
     try {
-        const fileContent = readFileSync(COUNTRIES_DB_PATH, 'utf-8');
+        let fileContent = null;
+        const candidatePaths = [
+            COUNTRIES_DB_PATH,
+            resolve(process.cwd(), 'public/data/countries.json'),
+            resolve(process.cwd(), 'dist/data/countries.json'),
+            resolve(__dirname, '../../public/data/countries.json')
+        ];
+
+        for (const p of candidatePaths) {
+            try {
+                fileContent = readFileSync(p, 'utf-8');
+                if (fileContent) break;
+            } catch {}
+        }
+
+        if (!fileContent) {
+            throw new Error("Could not find countries.json database file in deployment paths");
+        }
+
         const countries = JSON.parse(fileContent);
 
         // Return all countries for the global search index

@@ -5,7 +5,9 @@
   "outputDirectory": "dist",
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/app", "destination": "/app.html" }
+    { "source": "/app", "destination": "/app.html" },
+    { "source": "/api/gdelt-geo", "destination": "/api/gdelt?mode=geo" },
+    { "source": "/api/news-alerts", "destination": "/api/news?type=alerts" }
   ],
   "functions": {
     "api/*.js": {

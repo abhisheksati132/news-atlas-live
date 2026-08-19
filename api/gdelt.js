@@ -8,7 +8,15 @@ export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") return res.status(200).end();
 
-  const { query, timespan } = req.query || {};
+  const { query, timespan, mode } = req.query || {};
+
+  if (mode === "geo" || mode === "PointData") {
+    return res.status(503).json({
+      error: "GDELT Geo is unavailable from its upstream provider. Hotspot visualization is disabled.",
+      code: "GDELT_GEO_UNAVAILABLE"
+    });
+  }
+
   if (!query || typeof query !== "string") {
     return res.status(400).json({ error: "Missing query", articles: [] });
   }

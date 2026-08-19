@@ -52,13 +52,19 @@ async function fetchGoogleNews({ category, q, iso2, size }) {
     };
 }
 
+
 export default async function handler(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     if (req.method === "OPTIONS") return res.status(200).end();
 
-    const { category, q, iso2, page = 1, pageSize = 12 } = req.query || {};
+    const { category, q, iso2, page = 1, pageSize = 12, type } = req.query || {};
+
+    if (type === "alerts") {
+        return res.status(204).end();
+    }
+
     const pageNum = Math.min(100, Math.max(1, parseInt(String(page), 10) || 1));
     const sizeNum = Math.min(100, Math.max(1, parseInt(String(pageSize), 10) || 12));
     const apiKey = process.env.NEWS_API_KEY;

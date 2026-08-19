@@ -1,4 +1,4 @@
-import { getCache, setCache } from "./utils/cache.js";
+import { getCache, setCache } from "./_utils/cache.js";
 
 const CACHE_TTL = 5 * 60 * 1000;
 const BASE_URL = "https://newsapi.org/v2";

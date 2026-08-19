@@ -1,4 +1,4 @@
-import { getCache } from "./utils/cache.js";
+import { getCache } from "./_utils/cache.js";
 
 export default async function handler(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*");

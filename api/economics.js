@@ -1,4 +1,4 @@
-import { getCache, setCache } from "./utils/cache.js";
+import { getCache, setCache } from "./_utils/cache.js";
 
 const INDICATORS = {
   gdp_billions: "NY.GDP.MKTP.CD",

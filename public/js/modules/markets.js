@@ -21,9 +21,10 @@ function renderMarketUnavailable(container, label, retryFn) {
 async function displayPreciousMetals() {
   const container = document.getElementById("metals-content");
   if (!container) return;
-  container.innerHTML = '<div class="text-slate-500 text-[10px] py-4 uppercase font-bold tracking-widest text-center animate-pulse">Establishing Metal Exchange Uplink...</div>';
+  container.innerHTML = '<div class="text-slate-500 text-xs py-4 uppercase font-mono font-bold tracking-widest text-center animate-pulse">Establishing Metal Exchange Uplink...</div>';
   try {
-    const cur = (window.currencyCode || "USD").toUpperCase();
+    const curSelect = document.getElementById("market-currency-select");
+    const cur = (curSelect ? curSelect.value : (window.currencyCode || "USD")).toUpperCase();
     const res = await fetch(`/api/markets?type=metals&currency=${cur}`);
     const json = await res.json();
     if (!res.ok) throw new Error(json.error || "Live metals data is unavailable");
@@ -34,19 +35,19 @@ async function displayPreciousMetals() {
       const change = data.change || 0;
       const changeClass = change >= 0 ? "text-emerald-400" : "text-red-400";
       const row = document.createElement("div");
-      row.className = "flex items-center justify-between py-3 px-4 hover:bg-white/[0.02] transition-colors group";
+      row.className = "flex items-center justify-between py-2.5 px-3 hover:bg-[var(--bg-surface-subtle)] transition-colors rounded-lg";
       row.innerHTML = `
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-none border border-white/5 flex items-center justify-center text-lg bg-white/5">${data.icon || "🪙"}</div>
-                  <div class="flex flex-col">
-                    <span class="text-[12px] font-bold text-white uppercase tracking-tight">${name}</span>
-                    <span class="text-[9px] text-slate-500 uppercase font-bold tracking-widest">${sym} / ${cur}</span>
-                  </div>
-                </div>
-                <div class="flex items-center gap-4">
-                  <div class="text-[14px] font-black text-white font-mono">${(data.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                  <div class="${changeClass} text-[10px] font-bold font-mono min-w-[50px] text-right">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
-                </div>`;
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg border border-[var(--border-subtle)] flex items-center justify-center text-sm bg-[var(--bg-surface-subtle)] text-slate-200">${data.icon || "🪙"}</div>
+          <div class="flex flex-col">
+            <span class="text-xs font-bold text-slate-100 uppercase tracking-tight">${name}</span>
+            <span class="text-[9px] text-slate-500 uppercase font-mono font-bold">${sym} · ${cur}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 font-mono">
+          <div class="text-xs font-bold text-slate-100">${(data.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+          <div class="${changeClass} text-[10px] font-bold min-w-[48px] text-right">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
+        </div>`;
       container.appendChild(row);
     });
     if (container.children.length === 0) renderMarketUnavailable(container, "Metals Quotes Unavailable", "window.displayPreciousMetals");
@@ -58,11 +59,12 @@ async function displayPreciousMetals() {
 async function displayCountryIndices(countryName) {
   const container = document.getElementById("indices-content");
   if (!container) return;
+  const targetCountry = countryName || window._currentCountryName || "Global";
   const indicesLabelEl = document.getElementById("indices-country");
-  if (indicesLabelEl) indicesLabelEl.innerText = `${countryName.toUpperCase()} MARKET INDICES`;
-  container.innerHTML = `<div class="text-slate-500 text-[10px] py-4 uppercase font-bold tracking-widest text-center animate-pulse">Scanning ${countryName.toUpperCase()} Sector Indices...</div>`;
+  if (indicesLabelEl) indicesLabelEl.innerText = targetCountry.toUpperCase();
+  container.innerHTML = `<div class="text-slate-500 text-xs py-4 uppercase font-mono font-bold tracking-widest text-center animate-pulse">Scanning ${targetCountry.toUpperCase()} Sector Indices...</div>`;
   try {
-    const res = await fetch(`/api/markets?type=ticker&country=${encodeURIComponent(countryName)}`);
+    const res = await fetch(`/api/markets?type=ticker&country=${encodeURIComponent(targetCountry)}`);
     const json = await res.json();
     if (!res.ok) throw new Error(json.error || "Live index data is unavailable");
     container.innerHTML = "";
@@ -70,58 +72,62 @@ async function displayCountryIndices(countryName) {
       const change = data.change || 0;
       const changeClass = change >= 0 ? "text-emerald-400" : "text-red-400";
       const row = document.createElement("div");
-      row.className = "flex items-center justify-between py-3 px-4 hover:bg-white/[0.02] transition-colors group";
+      row.className = "flex items-center justify-between py-2.5 px-3 hover:bg-[var(--bg-surface-subtle)] transition-colors rounded-lg";
       row.innerHTML = `
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-none border border-white/5 flex items-center justify-center text-sm bg-blue-500/10 text-blue-400 font-bold">IDX</div>
-                  <div class="flex flex-col">
-                    <span class="text-[12px] font-bold text-white uppercase tracking-tight">${data.label}</span>
-                    <span class="text-[9px] text-slate-500 uppercase font-bold tracking-widest">Market Index</span>
-                  </div>
-                </div>
-                <div class="flex items-center gap-4">
-                  <div class="text-[14px] font-black text-white font-mono">${(data.price || 0).toLocaleString(undefined, { maximumFractionDigits: 1 })}</div>
-                  <div class="${changeClass} text-[10px] font-bold font-mono min-w-[50px] text-right">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
-                </div>`;
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg border border-[var(--border-subtle)] flex items-center justify-center text-[10px] bg-[var(--accent-subtle)] text-[var(--accent-primary)] font-mono font-bold">IDX</div>
+          <div class="flex flex-col">
+            <span class="text-xs font-bold text-slate-100 uppercase tracking-tight">${data.label}</span>
+            <span class="text-[9px] text-slate-500 uppercase font-mono">Market Index</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 font-mono">
+          <div class="text-xs font-bold text-slate-100">${(data.price || 0).toLocaleString(undefined, { maximumFractionDigits: 1 })}</div>
+          <div class="${changeClass} text-[10px] font-bold min-w-[48px] text-right">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
+        </div>`;
       container.appendChild(row);
     });
-    if (container.children.length === 0) renderMarketUnavailable(container, "Indices Quotes Unavailable", `() => window.displayCountryIndices('${countryName}')`);
+    if (container.children.length === 0) renderMarketUnavailable(container, "Indices Quotes Unavailable", `() => window.displayCountryIndices('${targetCountry}')`);
   } catch {
-    renderMarketUnavailable(container, "Indices Quotes Unavailable", `() => window.displayCountryIndices('${countryName}')`);
+    renderMarketUnavailable(container, "Indices Quotes Unavailable", `() => window.displayCountryIndices('${targetCountry}')`);
   }
 }
 window.getIndicesForCountry = () => ({});
+
 async function displayForex() {
   const container = document.getElementById("forex-content");
   if (!container) return;
-  container.innerHTML = '<div class="text-slate-500 text-[10px] py-4 uppercase font-bold tracking-widest text-center animate-pulse">Syncing International Exchange Rates...</div>';
+  container.innerHTML = '<div class="text-slate-500 text-xs py-4 uppercase font-mono font-bold tracking-widest text-center animate-pulse">Syncing International FX Rates...</div>';
   try {
-    const base = (window.currencyCode || "USD").toUpperCase();
+    const curSelect = document.getElementById("market-currency-select");
+    const base = (curSelect ? curSelect.value : (window.currencyCode || "USD")).toUpperCase();
     const res = await fetch(`/api/markets?type=forex&currency=${base}`);
     const json = await res.json();
     if (!res.ok) throw new Error(json.error || "Live FX data is unavailable");
     container.innerHTML = "";
-    Object.entries(json.rates || {}).filter(([c]) => c !== base).slice(0, 16).forEach(([pair, rate]) => {
+    Object.entries(json.rates || {}).filter(([c]) => c !== base).slice(0, 14).forEach(([pair, rate]) => {
       const row = document.createElement("div");
-      row.className = "flex items-center justify-between py-2.5 px-4 hover:bg-white/[0.02] transition-all";
+      row.className = "flex items-center justify-between py-2 px-3 hover:bg-[var(--bg-surface-subtle)] transition-colors rounded-lg font-mono";
       row.innerHTML = `
-                <div class="flex flex-col">
-                  <div class="text-[13px] font-bold text-white tracking-tight">${base} <span class="text-cyan-500">/</span> ${pair}</div>
-                  <div class="text-[9px] text-slate-500 uppercase font-black tracking-widest">Pair</div>
-                </div>
-                <div class="text-[15px] font-mono font-black text-cyan-400">${rate.toFixed(4)}</div>`;
+        <div class="flex flex-col">
+          <div class="text-xs font-bold text-slate-200 tracking-tight">${base} <span class="text-indigo-400">/</span> ${pair}</div>
+          <div class="text-[9px] text-slate-500 uppercase">Spot Rate</div>
+        </div>
+        <div class="text-xs font-bold text-indigo-400">${rate.toFixed(4)}</div>`;
       container.appendChild(row);
     });
   } catch {
     renderMarketUnavailable(container, "Forex Feed Offline", "window.displayForex");
   }
 }
+
 async function displayCommodities() {
   const container = document.getElementById("commodities-content");
   if (!container) return;
-  container.innerHTML = '<div class="text-slate-500 text-[10px] py-4 uppercase font-black tracking-widest text-center animate-pulse">Fetching Commodity Pipeline Data...</div>';
+  container.innerHTML = '<div class="text-slate-500 text-xs py-4 uppercase font-mono font-bold tracking-widest text-center animate-pulse">Fetching Commodity Pipeline Data...</div>';
   try {
-    const cur = (window.currencyCode || "USD").toUpperCase();
+    const curSelect = document.getElementById("market-currency-select");
+    const cur = (curSelect ? curSelect.value : (window.currencyCode || "USD")).toUpperCase();
     const res = await fetch(`/api/markets?type=commodities&currency=${cur}`);
     const json = await res.json();
     if (!res.ok) throw new Error(json.error || "Live commodity data is unavailable");
@@ -130,19 +136,19 @@ async function displayCommodities() {
       const change = data.change || 0;
       const changeClass = change >= 0 ? "text-emerald-400" : "text-red-400";
       const row = document.createElement("div");
-      row.className = "flex items-center justify-between py-3 px-4 hover:bg-white/[0.02] transition-colors group";
+      row.className = "flex items-center justify-between py-2.5 px-3 hover:bg-[var(--bg-surface-subtle)] transition-colors rounded-lg";
       row.innerHTML = `
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-none border border-white/5 flex items-center justify-center text-lg bg-orange-500/10">${data.icon || "📦"}</div>
-                  <div class="flex flex-col">
-                    <span class="text-[12px] font-bold text-white uppercase tracking-tight">${name}</span>
-                    <span class="text-[9px] text-slate-500 uppercase font-black tracking-widest">${data.unit || "N/A"}</span>
-                  </div>
-                </div>
-                <div class="flex items-center gap-4">
-                  <div class="text-[14px] font-black text-white font-mono">${(data.price || 0).toFixed(2)} <span class="text-[9px] text-slate-500">${cur}</span></div>
-                  <div class="${changeClass} text-[10px] font-bold font-mono min-w-[50px] text-right">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
-                </div>`;
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg border border-[var(--border-subtle)] flex items-center justify-center text-sm bg-[var(--bg-surface-subtle)]">${data.icon || "📦"}</div>
+          <div class="flex flex-col">
+            <span class="text-xs font-bold text-slate-100 uppercase tracking-tight">${name}</span>
+            <span class="text-[9px] text-slate-500 uppercase font-mono">${data.unit || "Unit"}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 font-mono">
+          <div class="text-xs font-bold text-slate-100">${(data.price || 0).toFixed(2)} <span class="text-[9px] text-slate-500">${cur}</span></div>
+          <div class="${changeClass} text-[10px] font-bold min-w-[48px] text-right">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
+        </div>`;
       container.appendChild(row);
     });
     if (container.children.length === 0) renderMarketUnavailable(container, "Commodity Feed Unavailable", "window.displayCommodities");

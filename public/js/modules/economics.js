@@ -23,15 +23,15 @@ window.renderEconomicData = function(eco, country) {
       ecoEl("eco-exports").innerHTML = eco.major_exports
         .map(
           (item) =>
-            `<div class="apple-glass px-3 py-1.5 border border-blue-500/20 flex items-center gap-2 rounded-full">
-               <div class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></div>
-               <span class="text-[10px] text-white font-black uppercase tracking-wider">${item}</span>
+            `<div class="px-2.5 py-1 rounded-md bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] flex items-center gap-1.5 text-xs font-mono text-slate-200">
+               <span class="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]"></span>
+               <span class="font-medium">${item}</span>
              </div>`,
         )
         .join("");
     } else {
       const year = eco.updated?.gdp_billions || "";
-      ecoEl("eco-exports").innerHTML = `<div class="text-slate-400 text-xs py-1">Source: World Bank Open Data ${year ? `(${year})` : ""}</div>`;
+      ecoEl("eco-exports").innerHTML = `<div class="text-slate-400 text-xs font-mono py-1">Source: World Bank Open Data ${year ? `(${year})` : ""}</div>`;
     }
   }
 

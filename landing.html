@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <script>
     if ('serviceWorker' in navigator) {
@@ -15,742 +15,755 @@
   </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NewsAtlas | Global Intelligence Platform</title>
-  <meta name="description" content="NewsAtlas — Real-time global news intelligence, economic data, and geopolitical analysis in one premium dashboard." />
-  <meta name="theme-color" content="#020617" />
+  <title>NewsAtlas | Global Situational Awareness & Intelligence Platform</title>
+  <meta name="description" content="NewsAtlas — Real-time global geopolitical intelligence, macroeconomic telemetry, live markets, and news monitoring in the Claude.ai design system." />
+  <meta name="theme-color" content="#0B0E1A" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
-      --bg: #020617;
-      --accent: #3b82f6;
-      --accent-bright: #60a5fa;
-      --purple: #8b5cf6;
-      --cyan: #06b6d4;
-      --green: #10b981;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-faint: #475569;
-      --surface: rgba(15, 23, 42, 0.8);
-      --border: rgba(255,255,255,0.08);
+    :root, [data-theme="dark"] {
+      --bg-primary: #0B0E1A;
+      --bg-surface: #141828;
+      --bg-surface-hover: #1B2036;
+      --bg-surface-subtle: #101422;
+      --border-subtle: #2A2F45;
+      --border-subtle-hover: #373E5B;
+      --text-primary: #E8E9F0;
+      --text-secondary: #8B90A8;
+      --text-tertiary: #636882;
+      --accent-primary: #5B6EF5;
+      --accent-primary-hover: #7383F7;
+      --accent-subtle: rgba(91, 110, 245, 0.12);
+      --success: #3DAE7A;
+      --warning: #E08E1A;
+      --danger: #E25350;
+      --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
+      --shadow-lift: 0 10px 30px -4px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #F3F4F8;
+      --bg-surface: #FFFFFF;
+      --bg-surface-hover: #ECEDF3;
+      --bg-surface-subtle: #F8F9FC;
+      --border-subtle: #DCDDE6;
+      --border-subtle-hover: #C8CAD6;
+      --text-primary: #1C1E2A;
+      --text-secondary: #6B6F85;
+      --text-tertiary: #9296AB;
+      --accent-primary: #3D4FC7;
+      --accent-primary-hover: #3242A8;
+      --accent-subtle: rgba(61, 79, 199, 0.08);
+      --success: #2E7D5B;
+      --warning: #B26A00;
+      --danger: #C23B38;
+      --shadow-card: 0 2px 12px rgba(28, 30, 42, 0.06);
+      --shadow-lift: 0 8px 24px -4px rgba(28, 30, 42, 0.08);
     }
 
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
+      line-height: 1.55;
+      transition: background-color 200ms ease, color 200ms ease;
     }
 
-    /* ── BACKGROUND ── */
-    .bg-canvas {
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      background: #020617;
-      overflow: hidden;
-    }
-    .bg-canvas::before {
-      content: '';
-      position: absolute;
-      top: -30%;
-      left: -20%;
-      width: 80vw;
-      height: 80vh;
-      background: radial-gradient(ellipse, rgba(59,130,246,0.18) 0%, transparent 70%);
-      animation: drift1 20s ease-in-out infinite alternate;
-    }
-    .bg-canvas::after {
-      content: '';
-      position: absolute;
-      bottom: -20%;
-      right: -10%;
-      width: 70vw;
-      height: 70vh;
-      background: radial-gradient(ellipse, rgba(139,92,246,0.14) 0%, transparent 70%);
-      animation: drift2 25s ease-in-out infinite alternate;
-    }
-    .bg-orb3 {
-      position: absolute;
-      top: 40%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 60vw;
-      height: 60vh;
-      background: radial-gradient(ellipse, rgba(6,182,212,0.08) 0%, transparent 70%);
-      animation: drift3 18s ease-in-out infinite alternate;
-      pointer-events: none;
-    }
-    @keyframes drift1 { from { transform: translate(0,0) scale(1); } to { transform: translate(8%,12%) scale(1.15); } }
-    @keyframes drift2 { from { transform: translate(0,0) scale(1); } to { transform: translate(-6%,-8%) scale(1.1); } }
-    @keyframes drift3 { from { transform: translate(-50%,-50%) scale(1); } to { transform: translate(-46%,-54%) scale(1.08); } }
-
-    /* Grid overlay */
-    .grid-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      background-image:
-        linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
-      background-size: 60px 60px;
-      pointer-events: none;
-    }
-
-    /* ── NAV ── */
-    nav {
+    /* ── HEADER ── */
+    header {
       position: fixed;
       top: 0; left: 0; right: 0;
       z-index: 100;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 2.5rem;
-      height: 56px;
-      background: rgba(2,6,23,0.7);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 60px;
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background-color 200ms ease, border-color 200ms ease;
     }
-    .nav-logo {
+
+    .logo-wrap {
       display: flex;
       align-items: center;
       gap: 10px;
       text-decoration: none;
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
     }
-    .nav-logo-icon {
-      width: 32px; height: 32px;
-      background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background-color: var(--accent-subtle);
+      border: 1px solid var(--border-subtle);
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
+      color: var(--accent-primary);
       font-size: 14px;
-      color: white;
     }
-    .nav-logo-text {
-      font-size: 15px;
-      font-weight: 700;
-      color: #f8fafc;
-      letter-spacing: -0.3px;
+
+    .logo-wrap span {
+      color: var(--accent-primary);
     }
-    .nav-logo-text span { color: #3b82f6; }
-    .nav-cta {
+
+    .nav-links {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 1.5rem;
     }
-    .btn-ghost {
-      background: none;
-      border: 1px solid rgba(255,255,255,0.12);
-      color: var(--text-muted);
-      padding: 7px 18px;
-      border-radius: 8px;
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
       font-size: 13px;
       font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
+      transition: color 150ms ease;
     }
-    .btn-ghost:hover { border-color: rgba(59,130,246,0.5); color: #f8fafc; }
-    .btn-primary {
-      background: linear-gradient(135deg, #2563eb, #7c3aed);
-      border: none;
-      color: white;
-      padding: 7px 20px;
+
+    .nav-links a:hover {
+      color: var(--text-primary);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-theme {
+      background-color: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 150ms ease;
+    }
+
+    .btn-theme:hover {
+      background-color: var(--bg-surface-hover);
+      color: var(--text-primary);
+      border-color: var(--border-subtle-hover);
+    }
+
+    .btn-terminal {
+      background-color: var(--accent-primary);
+      color: #ffffff !important;
+      border: 1px solid transparent;
+      padding: 0.45rem 1.15rem;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      box-shadow: 0 0 20px rgba(59,130,246,0.3);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 150ms ease;
     }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 0 30px rgba(59,130,246,0.45); }
 
-    /* ── HERO ── */
+    .btn-terminal:hover {
+      background-color: var(--accent-primary-hover);
+    }
+
+    /* ── HERO SECTION ── */
     .hero {
-      min-height: 100vh;
+      min-height: 90vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 80px 2rem 4rem;
-      position: relative;
+      padding: 100px 1.5rem 4rem;
+      max-width: 960px;
+      margin: 0 auto;
     }
-    .hero-badge {
+
+    .badge-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 5px 14px;
-      border-radius: 999px;
-      background: rgba(59,130,246,0.1);
-      border: 1px solid rgba(59,130,246,0.25);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      background-color: var(--accent-subtle);
+      border: 1px solid var(--border-subtle);
       font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: #60a5fa;
-      margin-bottom: 2rem;
+      font-weight: 600;
       font-family: 'JetBrains Mono', monospace;
-    }
-    .hero-badge-dot {
-      width: 6px; height: 6px;
-      background: #60a5fa;
-      border-radius: 50%;
-      animation: pulse-dot 2s ease-in-out infinite;
-    }
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.8); }
-    }
-    .hero h1 {
-      font-size: clamp(2.8rem, 6vw, 5rem);
-      font-weight: 900;
-      line-height: 1.05;
-      letter-spacing: -2px;
+      color: var(--accent-primary);
       margin-bottom: 1.5rem;
-      max-width: 800px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
-    .hero h1 .grad {
-      background: linear-gradient(135deg, #60a5fa, #a78bfa, #22d3ee);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
+
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--accent-primary);
+      animation: pulse 2s infinite;
     }
-    .hero-sub {
-      font-size: 18px;
-      color: var(--text-muted);
-      max-width: 540px;
-      line-height: 1.7;
-      margin-bottom: 2.5rem;
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
     }
-    .hero-actions {
+
+    .hero-title {
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      line-height: 1.15;
+      color: var(--text-primary);
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-secondary);
+      max-width: 680px;
+      margin: 0 auto 2rem;
+      line-height: 1.6;
+    }
+
+    .hero-buttons {
       display: flex;
+      align-items: center;
+      justify-content: center;
       gap: 12px;
       flex-wrap: wrap;
-      justify-content: center;
     }
-    .btn-hero-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 32px;
-      background: linear-gradient(135deg, #2563eb, #7c3aed);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.25s;
-      box-shadow: 0 4px 30px rgba(59,130,246,0.4);
-      font-family: inherit;
-    }
-    .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 40px rgba(59,130,246,0.55); }
-    .btn-hero-secondary {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 28px;
-      background: rgba(255,255,255,0.04);
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      font-size: 15px;
+
+    .btn-primary-large {
+      background-color: var(--accent-primary);
+      color: #ffffff;
+      padding: 0.75rem 1.75rem;
+      border-radius: 10px;
+      font-size: 14px;
       font-weight: 600;
-      cursor: pointer;
       text-decoration: none;
-      transition: all 0.25s;
-      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 150ms ease;
     }
-    .btn-hero-secondary:hover { border-color: rgba(59,130,246,0.4); color: var(--text); background: rgba(59,130,246,0.06); }
 
-    /* stats strip */
-    .stats-strip {
-      display: flex;
-      gap: 2.5rem;
-      margin-top: 4rem;
-      flex-wrap: wrap;
-      justify-content: center;
+    .btn-primary-large:hover {
+      background-color: var(--accent-primary-hover);
     }
-    .stat-item { text-align: center; }
-    .stat-value {
-      font-size: 28px;
-      font-weight: 800;
-      background: linear-gradient(135deg, #60a5fa, #a78bfa);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      display: block;
-    }
-    .stat-label { font-size: 12px; color: var(--text-faint); font-weight: 500; margin-top: 2px; }
 
-    /* ── FEATURES ── */
-    .section {
-      padding: 6rem 2rem;
+    .btn-secondary-large {
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 150ms ease;
+    }
+
+    .btn-secondary-large:hover {
+      background-color: var(--bg-surface-hover);
+      border-color: var(--border-subtle-hover);
+    }
+
+    /* ── TERMINAL PREVIEW ── */
+    .preview-section {
       max-width: 1200px;
-      margin: 0 auto;
+      margin: 0 auto 6rem;
+      padding: 0 1.5rem;
     }
-    .section-label {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.2em;
-      color: #60a5fa;
-      font-family: 'JetBrains Mono', monospace;
-      margin-bottom: 1rem;
-    }
-    .section-title {
-      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-      font-weight: 800;
-      letter-spacing: -1px;
-      margin-bottom: 1rem;
-    }
-    .section-sub {
-      font-size: 16px;
-      color: var(--text-muted);
-      max-width: 500px;
-      line-height: 1.7;
-      margin-bottom: 3.5rem;
-    }
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 1.5rem;
-    }
-    .feature-card {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.75rem;
-      transition: all 0.3s;
-      position: relative;
+
+    .terminal-frame {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      box-shadow: var(--shadow-lift);
       overflow: hidden;
     }
-    .feature-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 16px;
-      opacity: 0;
-      transition: opacity 0.3s;
+
+    .frame-bar {
+      height: 38px;
+      background-color: var(--bg-surface-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-secondary);
     }
-    .feature-card:hover { border-color: rgba(59,130,246,0.3); transform: translateY(-3px); }
-    .feature-card:hover::before { opacity: 1; background: radial-gradient(ellipse at top left, rgba(59,130,246,0.06), transparent 60%); }
-    .feat-icon {
-      width: 44px; height: 44px;
+
+    .frame-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .frame-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--border-subtle);
+    }
+
+    .frame-body {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      min-height: 480px;
+    }
+
+    @media (max-width: 860px) {
+      .frame-body { grid-template-columns: 1fr; }
+    }
+
+    .mock-map {
+      background-color: var(--bg-primary);
+      border-right: 1px solid var(--border-subtle);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .mock-hud-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-primary);
+      width: fit-content;
+    }
+
+    .mock-panel {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      background-color: var(--bg-surface);
+    }
+
+    .mock-card {
+      background-color: var(--bg-surface-subtle);
+      border: 1px solid var(--border-subtle);
       border-radius: 10px;
+      padding: 1rem;
+    }
+
+    /* ── FEATURE PILLARS ── */
+    .features-section {
+      max-width: 1200px;
+      margin: 0 auto 6rem;
+      padding: 0 1.5rem;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .section-title {
+      font-size: 1.85rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+    }
+
+    .section-desc {
+      color: var(--text-secondary);
+      font-size: 15px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .feature-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-card);
+      transition: border-color 150ms ease, transform 150ms ease;
+    }
+
+    .feature-card:hover {
+      border-color: var(--border-subtle-hover);
+      transform: translateY(-2px);
+    }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background-color: var(--accent-subtle);
+      border: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
+      color: var(--accent-primary);
+      font-size: 16px;
       margin-bottom: 1rem;
     }
-    .feat-icon.blue { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.2); }
-    .feat-icon.purple { background: rgba(139,92,246,0.12); color: #a78bfa; border: 1px solid rgba(139,92,246,0.2); }
-    .feat-icon.cyan { background: rgba(6,182,212,0.12); color: #22d3ee; border: 1px solid rgba(6,182,212,0.2); }
-    .feat-icon.green { background: rgba(16,185,129,0.12); color: #34d399; border: 1px solid rgba(16,185,129,0.2); }
-    .feat-icon.orange { background: rgba(251,146,60,0.12); color: #fb923c; border: 1px solid rgba(251,146,60,0.2); }
-    .feat-icon.pink { background: rgba(236,72,153,0.12); color: #f472b6; border: 1px solid rgba(236,72,153,0.2); }
-    .feat-title { font-size: 15px; font-weight: 700; margin-bottom: 0.5rem; }
-    .feat-sub { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
 
-    /* ── LOGIN SECTION ── */
-    .login-section {
-      padding: 5rem 2rem;
-      display: flex;
-      justify-content: center;
-    }
-    .login-card {
-      background: rgba(15,23,42,0.85);
-      border: 1px solid rgba(59,130,246,0.2);
-      border-radius: 24px;
-      padding: 3rem;
-      width: 100%;
-      max-width: 440px;
-      text-align: center;
-      box-shadow: 0 0 60px rgba(59,130,246,0.08);
-      backdrop-filter: blur(20px);
-    }
-    .login-card h2 { font-size: 24px; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
-    .login-card p { font-size: 14px; color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6; }
-    .divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 1.5rem 0;
-      color: var(--text-faint);
-      font-size: 12px;
-    }
-    .divider::before, .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-    .btn-google {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      padding: 13px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      color: var(--text);
-      font-size: 14px;
+    .feature-card h3 {
+      font-size: 1.1rem;
       font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
     }
-    .btn-google:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.18); }
-    .btn-google:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-google img { width: 18px; height: 18px; }
-    .btn-enter-terminal {
-      width: 100%;
-      padding: 13px;
-      background: linear-gradient(135deg, #2563eb, #7c3aed);
-      border: none;
-      border-radius: 12px;
-      color: white;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      text-decoration: none;
-      box-shadow: 0 4px 20px rgba(59,130,246,0.35);
+
+    .feature-card p {
+      color: var(--text-secondary);
+      font-size: 13.5px;
+      line-height: 1.55;
     }
-    .btn-enter-terminal:hover { transform: translateY(-1px); box-shadow: 0 6px 30px rgba(59,130,246,0.5); }
-    .user-greeting {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      background: rgba(59,130,246,0.06);
-      border: 1px solid rgba(59,130,246,0.15);
-      border-radius: 12px;
-      margin-bottom: 1.25rem;
-      text-align: left;
+
+    /* ── METRICS STRIP ── */
+    .metrics-section {
+      border-top: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+      background-color: var(--bg-surface);
+      padding: 3rem 1.5rem;
+      margin-bottom: 6rem;
     }
-    .user-avatar {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      border: 2px solid rgba(59,130,246,0.3);
-      object-fit: cover;
-      flex-shrink: 0;
+
+    .metrics-grid {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+      text-align: center;
     }
-    .user-avatar-fallback {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #2563eb, #7c3aed);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      color: white;
-      font-weight: 700;
-      flex-shrink: 0;
-    }
-    .user-info { flex: 1; min-width: 0; }
-    .user-name-text { font-size: 13px; font-weight: 700; color: #f8fafc; }
-    .user-email-text { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .btn-signout {
-      background: none;
-      border: none;
-      color: var(--text-faint);
-      font-size: 11px;
-      cursor: pointer;
-      font-family: inherit;
-      padding: 2px 0;
-      text-decoration: underline;
-      margin-top: 0.75rem;
-      transition: color 0.2s;
-    }
-    .btn-signout:hover { color: var(--text-muted); }
-    .auth-status {
-      font-size: 12px;
-      color: var(--text-faint);
-      margin-top: 0.75rem;
-      min-height: 18px;
+
+    .metric-number {
+      font-size: 2.2rem;
+      font-weight: 800;
       font-family: 'JetBrains Mono', monospace;
+      color: var(--accent-primary);
+      letter-spacing: -0.03em;
+      margin-bottom: 0.35rem;
     }
-    .auth-status.error { color: #f87171; }
+
+    .metric-label {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
 
     /* ── FOOTER ── */
     footer {
-      border-top: 1px solid var(--border);
-      padding: 2rem;
-      text-align: center;
-      font-size: 13px;
-      color: var(--text-faint);
+      border-top: 1px solid var(--border-subtle);
+      background-color: var(--bg-surface);
+      padding: 3rem 2rem 2rem;
     }
-    footer a { color: var(--text-faint); text-decoration: none; }
-    footer a:hover { color: var(--text-muted); }
 
-    /* scroll fade in */
-    .fade-up {
-      opacity: 0;
-      transform: translateY(24px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
     }
-    .fade-up.visible { opacity: 1; transform: translateY(0); }
 
-    @media (max-width: 600px) {
-      nav { padding: 0 1rem; }
-      .hero h1 { font-size: 2.2rem; letter-spacing: -1px; }
-      .stats-strip { gap: 1.5rem; }
-      .login-card { padding: 2rem 1.5rem; }
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      background-color: rgba(61, 174, 122, 0.1);
+      border: 1px solid rgba(61, 174, 122, 0.2);
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--success);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--success);
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-tertiary);
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .shortcuts-chip {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-secondary);
     }
   </style>
 </head>
 <body>
-
-<div class="bg-canvas"><div class="bg-orb3"></div></div>
-<div class="grid-overlay"></div>
-
-<!-- NAV -->
-<nav>
-  <a href="/" class="nav-logo">
-    <div class="nav-logo-icon" style="color: var(--primary);"><i class="fas fa-satellite-dish"></i></div>
-    <span class="nav-logo-text">News<span>Atlas</span></span>
-  </a>
-  <div class="nav-cta">
-    <a href="/app" class="btn-hero-primary" style="padding: 7px 20px; font-size: 13px; border-radius: 8px; gap: 8px;">
-      <i class="fas fa-terminal" style="font-size:11px;"></i> Open Terminal
+  <!-- HEADER -->
+  <header>
+    <a href="/" class="logo-wrap">
+      <div class="logo-icon">
+        <i class="fas fa-satellite-dish"></i>
+      </div>
+      News<span>Atlas</span>
     </a>
-  </div>
-</nav>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-badge"><div class="hero-badge-dot"></div> Live Intelligence Platform</div>
-  <h1>Global News.<br><span class="grad">Intelligently Mapped.</span></h1>
-  <p class="hero-sub">Real-time news, economic data, and geopolitical analysis from every country on Earth — visualized in one premium interactive terminal.</p>
-  <div class="hero-actions">
-    <a href="/app" class="btn-hero-primary">
-      <i class="fas fa-rocket"></i> Launch Terminal
-    </a>
-    <a href="#features" class="btn-hero-secondary">
-      <i class="fas fa-layer-group"></i> Explore Features
-    </a>
-  </div>
-  <div class="stats-strip">
-    <div class="stat-item"><span class="stat-value">195+</span><span class="stat-label">Countries Tracked</span></div>
-    <div class="stat-item"><span class="stat-value">Live</span><span class="stat-label">News Feeds</span></div>
-    <div class="stat-item"><span class="stat-value">24/7</span><span class="stat-label">Intelligence Updates</span></div>
-    <div class="stat-item"><span class="stat-value">Free</span><span class="stat-label">Open Access</span></div>
-  </div>
-</section>
+    <nav class="nav-links">
+      <a href="#features">Capabilities</a>
+      <a href="#telemetry">Data Architecture</a>
+      <a href="/app" target="_self">Live Terminal</a>
+    </nav>
 
-<!-- ABOUT / MISSION -->
-<section id="about" class="section" style="padding-top: 5rem; padding-bottom: 2rem;">
-  <div style="max-width: 800px; margin: 0 auto; text-align: center;" class="fade-up">
-    <span class="section-label">Operational Overview</span>
-    <h2 class="section-title" style="margin-top: 1rem; margin-bottom: 1.5rem;">Global Situational Awareness</h2>
-    <p class="section-sub" style="font-size: 15px; line-height: 1.7; color: var(--text-muted); max-width: 720px; margin: 0 auto;">
-      NewsAtlas is a next-generation visual intelligence platform designed to synthesize multi-source global data into a single, high-fidelity interactive environment. Mapped directly onto a digital 3D globe, NewsAtlas tracks breaking news sentiment, central bank economic variables, regional weather forecasts, and key geopolitical indices to empower researchers, analysts, and global citizens with immediate regional context.
-    </p>
-  </div>
-</section>
-
-<!-- FEATURES -->
-<section id="features" class="section">
-  <span class="section-label fade-up">Core Modules</span>
-  <h2 class="section-title fade-up">Every Intelligence Layer,<br>In One Terminal.</h2>
-  <p class="section-sub fade-up">Six precision-engineered modules delivering global situational awareness in real time.</p>
-  <div class="features-grid">
-    <div class="feature-card fade-up">
-      <div class="feat-icon blue"><i class="fas fa-map"></i></div>
-      <div class="feat-title">Interactive Globe</div>
-      <div class="feat-sub">Click any country on the 3D globe to instantly load its intelligence dossier — news, economy, weather and geopolitics.</div>
-    </div>
-    <div class="feature-card fade-up">
-      <div class="feat-icon purple"><i class="fas fa-newspaper"></i></div>
-      <div class="feat-title">Strategic News Feed</div>
-      <div class="feat-sub">AI-curated live headlines filtered by country with sentiment scoring and category intelligence tags.</div>
-    </div>
-    <div class="feature-card fade-up">
-      <div class="feat-icon cyan"><i class="fas fa-cloud-sun"></i></div>
-      <div class="feat-title">Weather Intelligence</div>
-      <div class="feat-sub">Tactical weather readouts with 24-hour projections, solar cycle tracking, UV index, and wind telemetry.</div>
-    </div>
-    <div class="feature-card fade-up">
-      <div class="feat-icon green"><i class="fas fa-chart-line"></i></div>
-      <div class="feat-title">Economic Matrix</div>
-      <div class="feat-sub">Live GDP, inflation, interest rates, and trade data from central banks and global economic institutions.</div>
-    </div>
-    <div class="feature-card fade-up">
-      <div class="feat-icon orange"><i class="fas fa-robot"></i></div>
-      <div class="feat-title">AI Briefing Engine</div>
-      <div class="feat-sub">On-demand AI-generated intelligence summaries for any country — geopolitical risk, economic outlook, and key events.</div>
-    </div>
-    <div class="feature-card fade-up">
-      <div class="feat-icon pink"><i class="fas fa-file-alt"></i></div>
-      <div class="feat-title">Dossier Export</div>
-      <div class="feat-sub">Export complete country intelligence reports as formatted documents for offline analysis and sharing.</div>
-    </div>
-  </div>
-</section>
-
-<!-- LOGIN -->
-<section class="login-section" id="login">
-  <div class="login-card fade-up">
-    <h2>Access the Terminal</h2>
-    <p>Sign in with Google to personalize your intelligence dashboard and save your preferences.</p>
-
-    <!-- Logged-out state -->
-    <div id="auth-loggedout">
-      <button class="btn-google" id="google-sign-in-btn" onclick="handleGoogleSignIn()">
-        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
-        Continue with Google
+    <div class="nav-actions">
+      <button type="button" class="btn-theme" onclick="toggleLandingTheme()" title="Toggle appearance">
+        <i class="fas fa-sun" id="landing-theme-icon"></i>
       </button>
-      <div class="divider">or</div>
-      <a href="/app" class="btn-enter-terminal">
-        <i class="fas fa-terminal"></i> Enter as Guest
+      <a href="/app" class="btn-terminal">
+        <span>Launch Terminal</span>
+        <i class="fas fa-arrow-right text-[10px]"></i>
       </a>
-      <div class="auth-status" id="auth-status-msg"></div>
     </div>
+  </header>
 
-    <!-- Logged-in state (hidden by default) -->
-    <div id="auth-loggedin" style="display:none;">
-      <div class="user-greeting">
-        <div id="user-avatar-wrap"><div class="user-avatar-fallback" id="user-avatar-fallback"><i class="fas fa-user"></i></div></div>
-        <div class="user-info">
-          <div class="user-name-text" id="user-display-name">Commander</div>
-          <div class="user-email-text" id="user-display-email"></div>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="badge-pill">
+      <span class="pulse-dot"></span>
+      Global Situational Intelligence v2.5
+    </div>
+    <h1 class="hero-title">
+      Real-time geopolitical intelligence, macroeconomic telemetry & news.
+    </h1>
+    <p class="hero-subtitle">
+      Engineered for policy analysts, researchers, and global operators who demand high-signal situational awareness with zero cognitive clutter.
+    </p>
+    <div class="hero-buttons">
+      <a href="/app" class="btn-primary-large">
+        <i class="fas fa-terminal"></i>
+        <span>Open Intelligence Terminal</span>
+      </a>
+      <a href="#features" class="btn-secondary-large">
+        <span>Explore Capabilities</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- PREVIEW SECTION -->
+  <section class="preview-section" id="terminal">
+    <div class="terminal-frame">
+      <div class="frame-bar">
+        <div class="frame-dots">
+          <div class="frame-dot"></div>
+          <div class="frame-dot"></div>
+          <div class="frame-dot"></div>
+        </div>
+        <div>NEWSATLAS LIVE DASHBOARD · GLOBAL PROJECTION</div>
+        <div class="text-[10px] text-emerald-400 font-bold">● LIVE FEED ACTIVE</div>
+      </div>
+      <div class="frame-body">
+        <div class="mock-map">
+          <div class="mock-hud-badge">
+            <i class="fas fa-globe text-indigo-400"></i>
+            <span>SELECTED: INDIA (IND) · 28.61° N, 77.20° E</span>
+          </div>
+          <div class="flex gap-2">
+            <span class="mock-hud-badge"><i class="fas fa-layer-group text-slate-400"></i> GDP REFERENCE CHOROPLETH</span>
+            <span class="mock-hud-badge text-indigo-400"><i class="fas fa-satellite text-indigo-400"></i> 72H GDELT PULSE</span>
+          </div>
+        </div>
+        <div class="mock-panel">
+          <div class="mock-card">
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-[11px] font-bold text-indigo-400 uppercase font-mono">Macroeconomic Summary</span>
+              <span class="text-[10px] text-emerald-400 font-mono font-bold">+7.2% YoY</span>
+            </div>
+            <div class="text-xl font-bold font-mono text-slate-100">$3,750 Billion</div>
+            <p class="text-[11px] text-slate-400 mt-1">World Bank verified GDP, low inflation band, primary semiconductor & pharma export growth.</p>
+          </div>
+          <div class="mock-card">
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-[11px] font-bold text-slate-400 uppercase font-mono">Latest Breaking Stream</span>
+              <span class="text-[9px] bg-red-500/10 text-red-400 font-mono px-1.5 py-0.5 rounded">CRITICAL</span>
+            </div>
+            <div class="text-xs font-bold text-slate-200">Global Energy Summit reaches maritime corridor accord</div>
+            <p class="text-[10px] text-slate-500 mt-1">Reuters · 12m ago · Sentiment Tone +3.4</p>
+          </div>
+          <div class="mock-card">
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-[11px] font-bold text-slate-400 uppercase font-mono">Atmospheric Telemetry</span>
+              <span class="text-[10px] text-indigo-400 font-mono">24°C · EAQI 42 (Good)</span>
+            </div>
+            <div class="text-xs text-slate-300 font-mono">Wind 14 km/h NW · 1013 hPa · Rain 0.0mm</div>
+          </div>
         </div>
       </div>
-      <a href="/app" class="btn-enter-terminal">
-        <i class="fas fa-rocket"></i> Launch Your Terminal
-      </a>
-      <div><button class="btn-signout" id="sign-out-btn" onclick="handleSignOut()">Sign out</button></div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- FOOTER -->
-<footer>
-  <p>© 2025 NewsAtlas — Built for global situational awareness &nbsp;·&nbsp; <a href="/app">Terminal</a> &nbsp;·&nbsp; <a href="https://github.com" target="_blank">GitHub</a></p>
-</footer>
+  <!-- FEATURES -->
+  <section class="features-section" id="features">
+    <div class="section-header">
+      <h2 class="section-title">High-density intelligence without the noise</h2>
+      <p class="section-desc">Six integrated telemetry streams unified into an ergonomic dual-mode analytical workstation.</p>
+    </div>
 
-<script type="module">
-  // ── Scroll animations ──
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
-  }, { threshold: 0.12 });
-  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+        <h3>Geopolitical & Conflict Tracking</h3>
+        <p>Real-time GDELT Project ingestion tracking global tone, event codes, and stability indexes across 240+ nations.</p>
+      </div>
 
-  // ── Firebase Auth ──
-  import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
-  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
-    from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-newspaper"></i></div>
+        <h3>Live Filtered News Stream</h3>
+        <p>Algorithmic categorization and sentiment classification across politics, business, tech, science, and world defense.</p>
+      </div>
 
-  let auth = null;
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+        <h3>Multi-Asset Global Markets</h3>
+        <p>Precious metals spot rates, benchmark national stock indices, top Forex conversion matrices, and energy commodity pipelines.</p>
+      </div>
 
-  async function initFirebase() {
-    try {
-      const res = await fetch('/api/config');
-      if (!res.ok) return;
-      const data = await res.json();
-      const firebaseConfig = data.firebase || data;
-      if (!firebaseConfig?.projectId && !firebaseConfig?.apiKey) return;
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-cloud-sun"></i></div>
+        <h3>Atmospheric & Radar Telemetry</h3>
+        <p>Open-Meteo hourly projections, European Air Quality Index (EAQI), Doppler weather radar, and solar/lunar ephemeris.</p>
+      </div>
 
-      const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-      auth = getAuth(app);
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-landmark"></i></div>
+        <h3>World Bank Macroeconomics</h3>
+        <p>6-year historical dual-axis GDP growth trends, inflation (CPI), labor unemployment, debt-to-GDP, and policy interest rates.</p>
+      </div>
 
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          showLoggedIn(user);
-        } else {
-          showLoggedOut();
-        }
-      });
-    } catch (e) {
-      console.warn('Firebase init failed:', e);
-    }
-  }
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-brain"></i></div>
+        <h3>AI Tactical Dossier Engine</h3>
+        <p>On-demand synthesized briefs, country situation assessments, and direct query execution with zero fluff.</p>
+      </div>
+    </div>
+  </section>
 
-  function showLoggedIn(user) {
-    document.getElementById('auth-loggedout').style.display = 'none';
-    document.getElementById('auth-loggedin').style.display = 'block';
-    document.getElementById('user-display-name').textContent = user.displayName || 'Commander';
-    document.getElementById('user-display-email').textContent = user.email || '';
-    const avatarWrap = document.getElementById('user-avatar-wrap');
-    if (user.photoURL) {
-      avatarWrap.innerHTML = `<img class="user-avatar" src="${user.photoURL}" alt="Avatar" referrerpolicy="no-referrer">`;
-    } else {
-      const initial = (user.displayName || 'C')[0].toUpperCase();
-      avatarWrap.innerHTML = `<div class="user-avatar-fallback">${initial}</div>`;
-    }
-  }
+  <!-- METRICS -->
+  <section class="metrics-section" id="telemetry">
+    <div class="metrics-grid">
+      <div>
+        <div class="metric-number">240+</div>
+        <div class="metric-label">Countries & Territories</div>
+      </div>
+      <div>
+        <div class="metric-number">72H</div>
+        <div class="metric-label">GDELT Event Pulse</div>
+      </div>
+      <div>
+        <div class="metric-number">100ms</div>
+        <div class="metric-label">Client Render Speed</div>
+      </div>
+      <div>
+        <div class="metric-number">99.9%</div>
+        <div class="metric-label">Data Availability</div>
+      </div>
+    </div>
+  </section>
 
-  function showLoggedOut() {
-    document.getElementById('auth-loggedout').style.display = 'block';
-    document.getElementById('auth-loggedin').style.display = 'none';
-  }
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="logo-wrap">
+          <div class="logo-icon">
+            <i class="fas fa-satellite-dish"></i>
+          </div>
+          News<span>Atlas</span>
+        </div>
+        <div class="status-badge">
+          <span class="status-dot"></span>
+          All Telemetry Services Operational
+        </div>
+      </div>
 
-  window.handleGoogleSignIn = async function() {
-    if (!auth) {
-      document.getElementById('auth-status-msg').textContent = 'Auth not ready. Continuing as guest...';
-      setTimeout(() => { window.location.href = '/app'; }, 1200);
-      return;
-    }
-    const btn = document.getElementById('google-sign-in-btn');
-    btn.disabled = true;
-    const statusEl = document.getElementById('auth-status-msg');
-    statusEl.textContent = 'Opening sign-in...';
-    statusEl.className = 'auth-status';
-    try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      statusEl.textContent = 'Authenticated. Launching terminal...';
-      setTimeout(() => { window.location.href = '/app'; }, 800);
-    } catch (e) {
-      statusEl.textContent = e.code === 'auth/popup-closed-by-user' ? 'Sign-in cancelled.' : 'Sign-in failed. Try again.';
-      statusEl.className = 'auth-status error';
-      btn.disabled = false;
-    }
-  };
+      <div class="footer-bottom">
+        <div>© 2026 NewsAtlas Live. Designed in the Claude.ai Navy/Indigo aesthetic.</div>
+        <div class="shortcuts-chip">
+          Shortcuts: <span class="text-indigo-400">/</span> Search &nbsp;|&nbsp; <span class="text-indigo-400">1-5</span> Tabs &nbsp;|&nbsp; <span class="text-indigo-400">Esc</span> Exit
+        </div>
+      </div>
+    </div>
+  </footer>
 
-  window.handleSignOut = async function() {
-    if (auth) { try { await signOut(auth); } catch(e) {} }
-  };
-
-  initFirebase();
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then((registrations) => {
-      for (const registration of registrations) {
-        registration.update();
+  <script>
+    function toggleLandingTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      localStorage.setItem('terminal-theme', next);
+      const icon = document.getElementById('landing-theme-icon');
+      if (icon) {
+        icon.className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
       }
-    });
-  }
-  if ('caches' in window) {
-    caches.keys().then((names) => {
-      for (const name of names) {
-        if (name !== 'newsatlas-v2-live') {
-          caches.delete(name);
-        }
+    }
+
+    (function initLanding() {
+      const saved = localStorage.getItem('theme') || localStorage.getItem('terminal-theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+      const icon = document.getElementById('landing-theme-icon');
+      if (icon) {
+        icon.className = saved === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
       }
-    });
-  }
-</script>
+    })();
+  </script>
 </body>
 </html>

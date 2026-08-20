@@ -207,20 +207,28 @@ function displayNewsArticles(articles) {
       : "";
 
     const row = document.createElement("div");
-    row.className = `p-4 border-b border-white/5 cursor-pointer hover:bg-white/[0.03] transition-colors news-card-animate whitespace-normal`;
-    row.style.animationDelay = `${i * 30}ms`;
+    row.className = `apple-glass p-3.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--border-subtle-hover)] transition-all news-card-animate whitespace-normal`;
+    row.style.animationDelay = `${i * 20}ms`;
     row.innerHTML = `
       <div class="flex flex-col gap-2">
         <div class="flex items-center gap-2">
           ${faviconHtml}
-          <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">${art.source_id || "UPLINK"}</span>
-          <span class="text-[8px] font-mono text-slate-600">/</span>
-          <span class="text-[8px] font-mono text-slate-600 uppercase">${timeAgo}</span>
-          <span class="text-[8px] font-bold px-1.5 py-0.5 rounded-sm ${sentiment.cls} uppercase ml-auto">${sentiment.label}</span>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">${art.source_id || "UPLINK"}</span>
+          <span class="text-[9px] font-mono text-slate-600">·</span>
+          <span class="text-[9px] font-mono text-slate-500 uppercase">${timeAgo}</span>
+          <span class="text-[8px] font-bold px-2 py-0.5 rounded ${sentiment.cls} uppercase ml-auto font-mono">${sentiment.label}</span>
         </div>
         ${imgHtml}
-        <h3 class="text-base font-bold text-slate-100 leading-tight hover:text-blue-400 transition-colors pt-1" onclick="window.open('${escapeHtml(art.link)}', '_blank')">${escapeHtml(art.title)}</h3>
-        ${art.description ? `<p class="text-[12px] text-slate-400 leading-relaxed font-normal line-clamp-3">${escapeHtml(art.description)}</p>` : ''}
+        <h3 class="text-sm font-bold text-slate-100 leading-snug hover:text-indigo-400 transition-colors pt-0.5 cursor-pointer" onclick="window.open('${escapeHtml(art.link)}', '_blank')">${escapeHtml(art.title)}</h3>
+        ${art.description ? `<p class="text-xs text-slate-400 leading-relaxed font-normal line-clamp-3">${escapeHtml(art.description)}</p>` : ''}
+        <div class="flex items-center justify-between pt-2 mt-1 border-t border-white/5 text-[11px] font-mono">
+          <a href="${escapeHtml(art.link)}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1 font-semibold">
+            Read Source <i class="fas fa-arrow-up-right-from-square text-[9px]"></i>
+          </a>
+          <button type="button" onclick="navigator.clipboard?.writeText('${escapeHtml(art.link)}'); if(window.showToast) window.showToast('Article URL copied to clipboard', 'success');" class="text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1">
+            <i class="far fa-copy text-[10px]"></i> Copy
+          </button>
+        </div>
       </div>
     `;
     container.appendChild(row);

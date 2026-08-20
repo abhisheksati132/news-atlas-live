@@ -849,223 +849,50 @@
   <div id="fact-currency" class="hidden"></div>
   <div id="fact-cap" class="hidden"></div>
   <div id="fact-region" class="hidden"></div>
-  <div id="fact-area" class="hidden"></div>
-  <div id="fact-code" class="hidden"></div>
-  <div id="fact-demonym" class="hidden"></div>
-  <div id="fact-gini" class="hidden"></div>
-  <div id="fact-drive" class="hidden"></div>
-  <!-- Terminal bundles load via /js/app.js in <head> (single entry; do not add duplicate module tags below). -->
 
-  <!-- Removed Redundant About Overlay -->
-
-  <style>
-    #floating-cli {
-      position: fixed;
-      bottom: calc(var(--footer-h) + 1.5rem);
-      left: 1rem;
-      width: 178px;
-      max-width: calc(100vw - 3rem);
-      z-index: 150;
-      display: flex;
-      flex-direction: column;
-      font-family: "JetBrains Mono", monospace;
-      border-radius: 1.25rem;
-      overflow: hidden;
-      background: var(--panel-bg);
-      border: 1px solid var(--widget-border);
-      transition: width 0.2s ease;
-    }
-
-    #floating-cli.cli-expanded {
-      width: 420px;
-    }
-
-    #floating-cli-handle {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 14px;
-      height: 38px;
-      background: var(--glass-light);
-      border-bottom: 1px solid var(--glass-border);
-      cursor: grab;
-      user-select: none;
-    }
-
-    .glass-panel-enhanced {
-      background: var(--glass-deep);
-      color: var(--text);
-      box-shadow: none;
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius);
-      max-height: 85vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    #floating-cli-handle:active {
-      cursor: grabbing;
-    }
-
-    #floating-cli-body {
-      display: none;
-      flex-direction: column;
-      overflow: hidden;
-      max-height: 0;
-      transition: max-height 0.26s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    #floating-cli-body.cli-body-open {
-      max-height: 320px;
-    }
-
-    #floating-cli-output {
-      height: 230px;
-      overflow-y: auto;
-      padding: 10px 14px 6px;
-      font-size: 11px;
-      line-height: 1.75;
-      scrollbar-width: thin;
-      scrollbar-color: var(--widget-border) transparent;
-    }
-
-    .cli-line {
-      margin-bottom: 2px;
-      word-break: break-word;
-    }
-
-    .cli-head {
-      color: #38bdf8;
-      font-weight: 900;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      font-size: 9px;
-    }
-
-    .cli-key {
-      color: #60a5fa;
-      font-weight: 700;
-    }
-
-    .cli-val,
-    .cli-ok {
-      color: #34d399;
-    }
-
-    .cli-err {
-      color: #f87171;
-    }
-
-    .cli-dim {
-      color: var(--text-dim);
-      font-size: 10px;
-    }
-
-    .cli-cmd {
-      color: var(--text);
-    }
-
-    .cli-prompt {
-      color: #38bdf8;
-    }
-
-    .cli-ai {
-      color: #60a5fa;
-      font-weight: 900;
-      font-size: 9px;
-      letter-spacing: 0.1em;
-    }
-
-    .cli-reply {
-      color: var(--text);
-    }
-
-    @keyframes cliDot {
-
-      0%,
-      80%,
-      100% {
-        opacity: 0.2;
-        transform: scale(0.8);
-      }
-
-      40% {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    .cli-dot {
-      display: inline-block;
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--panel-bg);
-      margin: 0 1px;
-      animation: cliDot 1.2s infinite;
-    }
-
-    .cli-dot:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-
-    .cli-dot:nth-child(3) {
-      animation-delay: 0.4s;
-    }
-
-    @media (max-width: 480px) {
-      #floating-cli.cli-expanded {
-        width: calc(100vw - 48px);
-      }
-    }
-
-    .cli-locked {
-      display: none !important;
-    }
-  </style>
-  <div id="floating-cli" class="cli-locked">
-    <div id="floating-cli-handle" class="px-3.5 py-2.5 border-b border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] flex items-center justify-between cursor-default">
-      <div class="flex items-center gap-2">
-        <div class="w-5 h-5 rounded-md bg-[var(--accent-subtle)] flex items-center justify-center text-[var(--accent-primary)] text-xs">
-          <i class="fas fa-brain"></i>
+  <!-- Centered AI Assistant Modal -->
+  <div id="ai-chat-modal" class="fixed inset-0 z-[3000] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onclick="if(event.target === this) window.closeCLI();" style="display: none;">
+    <div class="w-full max-w-xl rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-2xl overflow-hidden flex flex-col" onclick="event.stopPropagation()">
+      <div class="px-5 py-3.5 border-b border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-6 h-6 rounded-lg bg-[var(--accent-subtle)] flex items-center justify-center text-[var(--accent-primary)] text-xs">
+            <i class="fas fa-brain"></i>
+          </div>
+          <span class="text-xs font-bold text-[var(--text-primary)] font-mono uppercase tracking-wider">AI Assistant</span>
         </div>
-        <span class="text-xs font-bold text-slate-200 font-mono tracking-wider">AI INTELLIGENCE COPILOT</span>
+        <button type="button" onclick="window.closeCLI(event)" class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1.5 rounded-lg hover:bg-white/5 transition-colors" title="Close (Esc)">
+          <i class="fas fa-times text-xs"></i>
+        </button>
       </div>
-      <button type="button" onclick="window.closeCLI(event)" class="text-slate-500 hover:text-slate-200 p-1 rounded transition-colors" title="Close AI Copilot (Esc)">
-        <i class="fas fa-times text-xs"></i>
-      </button>
+      <div id="react-ai-assistant"></div>
     </div>
-    <div id="react-ai-assistant"></div>
   </div>
-  <div id="cmd-palette-overlay" class="fixed inset-0 z-[200] hidden items-start justify-center pt-24 px-4"
+
+  <!-- Command Palette Overlay -->
+  <div id="cmd-palette-overlay" class="fixed inset-0 z-[2500] hidden items-start justify-center pt-24 px-4"
     onclick="if (event.target === this) window.closeCommandPalette();"
     style="display: none; background: rgba(2, 6, 23, 0.75)">
-    <div id="cmd-palette-box" class="glass-panel w-full max-w-xl flex flex-col overflow-hidden p-0"
-      style="border-color: rgba(59, 130, 246, 0.25); max-height: 60vh">
-      <div class="flex items-center gap-3 px-4 py-3 border-b border-white/8">
-        <i class="fas fa-terminal text-blue-400 text-sm"></i>
-        <input id="cmd-palette-input" type="text" placeholder="Search Intel, Queries, or Actions..." autocomplete="off"
-          class="flex-1 bg-transparent border-none outline-none text-base font-bold text-white placeholder-slate-700"
-          style="font-family: &quot;JetBrains Mono&quot;, monospace" />
-        <kbd
-          class="text-[11px] font-mono text-slate-600 px-1.5 py-0.5 rounded bg-white/6 border border-white/10">ESC</kbd>
+    <div id="cmd-palette-box" class="glass-panel w-full max-w-xl flex flex-col overflow-hidden p-0 rounded-2xl shadow-2xl"
+      style="border-color: var(--border-subtle); max-height: 60vh">
+      <div class="flex items-center gap-3 px-4 py-3 border-b border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)]">
+        <i class="fas fa-search text-[var(--accent-primary)] text-sm"></i>
+        <input id="cmd-palette-input" type="text" placeholder="Search countries, queries, or actions..." autocomplete="off"
+          class="flex-1 bg-transparent border-none outline-none text-sm font-medium text-[var(--text-primary)] placeholder-[var(--text-tertiary)] font-sans" />
+        <kbd class="text-[11px] font-mono text-[var(--text-tertiary)] px-1.5 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)]">ESC</kbd>
       </div>
       <div id="cmd-palette-list" class="overflow-y-auto" style="max-height: 48vh"></div>
-      <div class="flex items-center gap-4 px-4 py-2 border-t border-white/5 bg-white/[0.01]">
+      <div class="flex items-center gap-4 px-4 py-2 border-t border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)]">
         <div class="flex items-center gap-1.5">
-          <kbd class="text-[9px] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-500">↑↓</kbd>
-          <span class="text-[9px] text-slate-600 font-bold uppercase tracking-wider">Navigate</span>
+          <kbd class="text-[9px] px-1.5 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-tertiary)]">↑↓</kbd>
+          <span class="text-[9px] text-[var(--text-secondary)] font-bold uppercase tracking-wider font-mono">Navigate</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <kbd class="text-[9px] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-500">↵</kbd>
-          <span class="text-[9px] text-slate-600 font-bold uppercase tracking-wider">Execute</span>
+          <kbd class="text-[9px] px-1.5 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-tertiary)]">↵</kbd>
+          <span class="text-[9px] text-[var(--text-secondary)] font-bold uppercase tracking-wider font-mono">Select</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <kbd class="text-[9px] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-500">Ctrl+K</kbd>
-          <span class="text-[9px] text-slate-600 font-bold uppercase tracking-wider">Toggle</span>
+          <kbd class="text-[9px] px-1.5 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-tertiary)]">Ctrl+K</kbd>
+          <span class="text-[9px] text-[var(--text-secondary)] font-bold uppercase tracking-wider font-mono">Toggle</span>
         </div>
       </div>
     </div>

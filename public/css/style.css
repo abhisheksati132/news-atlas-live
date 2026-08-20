@@ -460,28 +460,6 @@ header {
   }
 }
 
-/* Floating AI Copilot */
-#floating-cli {
-  position: fixed;
-  bottom: calc(var(--footer-h) + 1.25rem);
-  left: 1.25rem;
-  width: 380px;
-  max-width: calc(100vw - 2.5rem);
-  z-index: 2500;
-  display: flex;
-  flex-direction: column;
-  border-radius: 12px;
-  border: 1px solid var(--border-subtle);
-  background-color: var(--bg-surface);
-  box-shadow: var(--shadow-lift);
-  overflow: hidden;
-  transition: opacity 150ms ease, transform 150ms ease;
-}
-
-#floating-cli.cli-locked {
-  display: none !important;
-}
-
 /* --------------------------------------------------------------------------
    6. Mapbox Container & Overlay Controls
    -------------------------------------------------------------------------- */

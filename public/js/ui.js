@@ -46,101 +46,67 @@ window.showToast = function (message, type = "info") {
 
 function renderTrending() {
   const resContainer = document.getElementById("search-results");
-  const searchInput = document.getElementById("country-search");
-  if (!resContainer || !searchInput) return;
-  
-  const query = searchInput.value.trim().toLowerCase();
-  
-  if (query && window.globalSearchData) {
-    const countries = window.globalSearchData.filter(c => 
-      c.name.common.toLowerCase().includes(query) || 
-      (c.name.official && c.name.official.toLowerCase().includes(query))
-    ).slice(0, 8);
-    
-    let html = `<div style="padding: 1.25rem 1.5rem 0.75rem; font-size: 11px; font-weight: 900; color: #475569; text-transform: uppercase; letter-spacing: 0.15em; font-family: 'JetBrains Mono', monospace;">Nations Found</div>`;
-    
-    if (countries.length > 0) {
-        html += countries.map(c => {
-            const name = c.name.common;
-            return `<div class="flex items-center gap-5 px-6 py-4 hover:bg-white/[0.03] cursor-pointer transition-all group" onclick="window.selectFromSearch('${name.replace(/'/g, "\\'")}')">
-              <div class="w-10 h-6.5 rounded shadow-sm overflow-hidden border border-white/10 shrink-0"><img src="${c.flags.svg}" class="w-full h-full object-cover"></div>
-              <span class="font-bold text-white text-base tracking-tight group-hover:text-blue-400 transition-colors">${name}</span>
-              <i class="fas fa-chevron-right ml-auto text-[11px] text-slate-700 group-hover:text-blue-400 transition-all group-hover:translate-x-0.5"></i>
-            </div>`;
-        }).join("");
+  if (!resContainer) return;
+  const q = document.getElementById("country-search")?.value.trim();
+
+  if (q) {
+    if (!window.globalSearchData || window.globalSearchData.length === 0) {
+      resContainer.innerHTML = `<div class="p-8 text-center text-xs text-slate-500 font-sans">Searching registry...</div>`;
+      return;
+    }
+    const filtered = window.globalSearchData.filter(
+      (c) => c.name.common.toLowerCase().includes(q.toLowerCase()) ||
+        (c.capital && c.capital[0] && c.capital[0].toLowerCase().includes(q.toLowerCase()))
+    ).slice(0, 10);
+
+    let registryHtml = "";
+    if (filtered.length > 0) {
+      registryHtml = filtered.map((c) => `
+        <div class="flex items-center gap-4 px-5 py-3 hover:bg-[var(--bg-surface-subtle)] cursor-pointer transition-all border-b border-[var(--border-subtle)]" onclick="window.selectFromSearch('${c.name.common.replace(/'/g, "\\'")}')">
+          <div class="w-8 h-5 rounded shadow-sm overflow-hidden border border-[var(--border-subtle)] shrink-0"><img src="${c.flags.svg}" class="w-full h-full object-cover"></div>
+          <div class="flex flex-col flex-1 min-w-0">
+            <span class="font-bold text-[var(--text-primary)] text-sm tracking-tight">${c.name.common}</span>
+            <span class="text-xs text-[var(--text-secondary)] truncate">${c.capital ? c.capital[0] : ""} · ${c.region || ""}</span>
+          </div>
+          <i class="fas fa-arrow-right text-xs text-slate-400"></i>
+        </div>`).join("");
+      resContainer.innerHTML = registryHtml;
     } else {
-        html = `<div class="px-6 py-4 text-slate-500 text-[11px] uppercase font-bold">Searching Global Registry...</div>`;
-    }
-
-    resContainer.innerHTML = html;
-
-    // Background scan for cities/states
-    if (query.length > 2) {
-        clearTimeout(window._searchDebounce);
-        window._searchDebounce = setTimeout(async () => {
-            try {
-                const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-                const json = await res.json();
-                if (json.features && json.features.length > 0) {
-                    const registryHtml = `<div style="padding: 1.25rem 1.5rem 0.75rem; font-size: 11px; font-weight: 900; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.15em; font-family: 'JetBrains Mono', monospace;">Registry Matches (Cities/States)</div>` + 
-                    json.features.map(f => `
-                        <div class="flex items-center gap-5 px-6 py-4 hover:bg-white/[0.03] cursor-pointer transition-all group" onclick="window.selectFromSearch('${f.place_name.replace(/'/g, "\\'")}')">
-                          <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-blue-500/10 border border-blue-500/20 text-blue-400 shrink-0"><i class="fas fa-map-marker-alt"></i></div>
-                          <div class="flex flex-col">
-                            <span class="font-bold text-white text-[13px] tracking-tight group-hover:text-blue-400">${f.text}</span>
-                            <span class="text-[10px] text-slate-500 truncate">${f.place_name}</span>
-                          </div>
-                        </div>`).join("");
-                    resContainer.innerHTML = html + registryHtml;
-                }
-            } catch (e) { console.warn("Geocoding sync failed"); }
-        }, 500);
+      resContainer.innerHTML = `<div class="p-8 text-center text-xs text-slate-500 font-sans">No matching country found for "${q}".</div>`;
     }
     return;
   }
 
-  if (!window.globalSearchData || window.globalSearchData.length === 0) {
-    resContainer.innerHTML = `
-      <div class="col-span-full p-8 text-center">
-        <div class="inline-flex items-center gap-3 px-5 py-3 rounded-sm" style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.3)">
-          <div class="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
-          <span class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">
-            RETRIEVING DATA...
-          </span>
-        </div>
-      </div>`;
-    return;
-  }
+  const headerStyle = `padding: 1rem 1.25rem 0.5rem; font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em; font-family: monospace;`;
   const recent = (typeof window.getRecentCountries === "function" && window.getRecentCountries()) || [];
-  const headerStyle = `padding: 1.25rem 1.5rem 0.75rem; font-size: 11px; font-weight: 900; color: #475569; text-transform: uppercase; letter-spacing: 0.15em; font-family: 'JetBrains Mono', monospace;`;
   let recentHtml = "";
   if (recent.length > 0) {
-    recentHtml = `<div style="${headerStyle}">Recent Operations</div>` +
+    recentHtml = `<div style="${headerStyle}">Recent Searches</div>` +
       recent.map((name) => {
-        const c = window.globalSearchData.find((curr) => curr.name.common === name);
+        const c = window.globalSearchData?.find((curr) => curr.name.common === name);
         if (!c) return "";
-        return `<div class="flex items-center gap-5 px-6 py-4 hover:bg-white/[0.03] cursor-pointer transition-all group" onclick="window.selectFromSearch('${name.replace(/'/g, "\\'")}')">
-          <div class="w-10 h-6.5 rounded shadow-sm overflow-hidden border border-white/10 shrink-0"><img src="${c.flags.svg}" class="w-full h-full object-cover"></div>
-          <span class="font-bold text-white text-base tracking-tight group-hover:text-blue-400 transition-colors">${name}</span>
-          <i class="fas fa-chevron-right ml-auto text-[11px] text-slate-700 group-hover:text-blue-400 transition-all group-hover:translate-x-0.5"></i>
+        return `<div class="flex items-center gap-4 px-5 py-3 hover:bg-[var(--bg-surface-subtle)] cursor-pointer transition-all border-b border-[var(--border-subtle)]" onclick="window.selectFromSearch('${name.replace(/'/g, "\\'")}')">
+          <div class="w-8 h-5 rounded shadow-sm overflow-hidden border border-[var(--border-subtle)] shrink-0"><img src="${c.flags.svg}" class="w-full h-full object-cover"></div>
+          <span class="font-bold text-[var(--text-primary)] text-sm tracking-tight">${name}</span>
+          <i class="fas fa-arrow-right ml-auto text-xs text-slate-400"></i>
         </div>`;
       }).join("") +
-      `<div style="${headerStyle} margin-top: 0.5rem;">High Traffic Sectors</div>`;
+      `<div style="${headerStyle} margin-top: 0.5rem;">Popular Countries</div>`;
   } else {
-    recentHtml = `<div style="${headerStyle}">High Traffic Sectors</div>`;
+    recentHtml = `<div style="${headerStyle}">Popular Countries</div>`;
   }
-  const trending = ["India", "United States", "United Kingdom", "Japan", "Germany", "France", "Russia", "China"];
+
+  const trending = ["India", "United States", "United Kingdom", "Japan", "Germany", "France", "Brazil", "Canada"];
   resContainer.innerHTML = recentHtml + trending.map((name) => {
-    const c = window.globalSearchData.find((curr) =>
+    const c = window.globalSearchData?.find((curr) =>
       curr.name.common === name ||
-      (name === "United States" && curr.name.common === "United States of America") ||
-      (name === "Russia" && curr.name.common.includes("Russian")),
+      (name === "United States" && curr.name.common === "United States of America")
     );
     if (!c) return "";
-    return `<div class="flex items-center gap-5 px-6 py-4 hover:bg-white/[0.03] cursor-pointer transition-all group" onclick="window.selectFromSearch('${name}')">
-      <div class="w-10 h-6.5 rounded shadow-sm overflow-hidden border border-white/10 shrink-0"><img src="${c.flags.svg}" class="w-full h-full object-cover"></div>
-      <span class="font-bold text-white text-base tracking-tight group-hover:text-blue-400 transition-colors">${name}</span>
-      <i class="fas fa-chevron-right ml-auto text-[11px] text-slate-700 group-hover:text-blue-400 transition-all group-hover:translate-x-0.5"></i>
+    return `<div class="flex items-center gap-4 px-5 py-3 hover:bg-[var(--bg-surface-subtle)] cursor-pointer transition-all border-b border-[var(--border-subtle)]" onclick="window.selectFromSearch('${name}')">
+      <div class="w-8 h-5 rounded shadow-sm overflow-hidden border border-[var(--border-subtle)] shrink-0"><img src="${c.flags.svg}" class="w-full h-full object-cover"></div>
+      <span class="font-bold text-[var(--text-primary)] text-sm tracking-tight">${name}</span>
+      <i class="fas fa-arrow-right ml-auto text-xs text-slate-400"></i>
     </div>`;
   }).join("");
 }
@@ -236,30 +202,26 @@ function initDrag() {
   } catch { }
 }
 window.openCLI = function () {
-  const panel = document.getElementById("floating-cli");
-  if (!panel) return;
-  panel.classList.remove("cli-locked", "hidden");
-  panel.style.display = "flex";
-  _cliExpanded = true;
-  panel.classList.add("cli-expanded");
+  const modal = document.getElementById("ai-chat-modal") || document.getElementById("floating-cli");
+  if (!modal) return;
+  modal.classList.remove("hidden", "cli-locked");
+  modal.style.display = "flex";
   if (window.playTacticalSound) window.playTacticalSound("success");
 };
 
 window.closeCLI = function (e) {
   if (e) e.stopPropagation();
-  const panel = document.getElementById("floating-cli");
-  if (!panel) return;
-  _cliExpanded = false;
-  panel.classList.remove("cli-expanded");
-  panel.classList.add("cli-locked");
-  panel.style.display = "none";
+  const modal = document.getElementById("ai-chat-modal") || document.getElementById("floating-cli");
+  if (!modal) return;
+  modal.classList.add("hidden");
+  modal.style.display = "none";
   if (window.playTacticalSound) window.playTacticalSound("click");
 };
 
 window.toggleCLI = function () {
-  const panel = document.getElementById("floating-cli");
-  if (!panel) return;
-  const isHidden = panel.classList.contains("cli-locked") || panel.style.display === "none" || getComputedStyle(panel).display === "none";
+  const modal = document.getElementById("ai-chat-modal") || document.getElementById("floating-cli");
+  if (!modal) return;
+  const isHidden = modal.classList.contains("hidden") || modal.classList.contains("cli-locked") || modal.style.display === "none";
   if (isHidden) {
     window.openCLI();
   } else {

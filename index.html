@@ -418,9 +418,9 @@
             <div id="ai-briefing-box" class="apple-glass rounded-xl p-4 border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2.5 border-b border-white/5 pb-2">
                 <span class="text-[11px] text-indigo-400 uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
-                  <i class="fas fa-brain text-xs"></i>AI Tactical Synthesis
+                  <i class="fas fa-brain text-xs"></i>AI Country Summary & Brief
                 </span>
-                <span class="text-[9px] font-mono text-slate-500">Autonomous Dossier</span>
+                <span class="text-[9px] font-mono text-slate-500">Live Summary</span>
               </div>
               <div id="ai-briefing-text" class="text-slate-300 font-sans text-xs leading-relaxed">
                 Click any sovereign nation or territory on the map to generate a real-time intelligence synthesis.
@@ -1071,93 +1071,55 @@
     </div>
   </div>
 
-  <div id="about-overlay" class="fixed inset-0 hidden z-[3000] flex items-center justify-center p-6 backdrop-blur-md">
-    <div class="absolute inset-0 bg-black/80" onclick="closeAboutOverlay()"></div>
-    <div
-      class="apple-glass max-w-2xl w-full border-blue-500/20 overflow-hidden relative flex flex-col rounded-2xl bg-[#020617]"
-      style="max-height: 85vh;">
-      <div class="px-6 py-4 border-b border-white/5 bg-white/[0.02] flex justify-between items-center">
-        <div class="flex items-center gap-3">
-          <div class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
-          <span class="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] font-mono">Terminal Diagnostics
-            v4.2.0</span>
+  <div id="about-overlay" class="fixed inset-0 hidden z-[3000] flex items-center justify-center p-4 backdrop-blur-md">
+    <div class="absolute inset-0 bg-black/70" onclick="closeAboutOverlay()"></div>
+    <div class="max-w-xl w-full border border-[var(--border-subtle)] overflow-hidden relative flex flex-col rounded-2xl bg-[var(--bg-surface)] shadow-2xl" style="max-height: 85vh;">
+      <div class="px-6 py-4 border-b border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] flex justify-between items-center">
+        <div class="flex items-center gap-2.5">
+          <div class="w-2 h-2 rounded-full bg-[var(--accent-primary)]"></div>
+          <span class="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider font-mono">About NewsAtlas</span>
         </div>
-        <button onclick="closeAboutOverlay()" class="text-slate-500 hover:text-white transition-colors">
+        <button onclick="closeAboutOverlay()" class="text-slate-500 hover:text-[var(--text-primary)] transition-colors p-1">
           <i class="fas fa-times text-sm"></i>
         </button>
       </div>
-      <div class="p-8 overflow-y-auto custom-scrollbar space-y-8">
-        <div class="space-y-3">
-          <h3 class="text-white font-bold text-lg flex items-center gap-2">
-            <i class="fas fa-satellite text-blue-500"></i> Orbital Context
-          </h3>
-          <p class="text-[13px] text-slate-400 leading-relaxed font-medium">
-            NewsAtlas is a next-generation intelligence platform designed for real-time geopolitical monitoring and
-            tactical data visualization.
-            Utilizing orbital-class telemetry and neural-linked data processing, we provide situational awareness across
-            250+ global sectors.
+      <div class="p-6 overflow-y-auto custom-scrollbar space-y-6">
+        <div>
+          <h3 class="text-[var(--text-primary)] font-bold text-base mb-2">Global Situational Intelligence</h3>
+          <p class="text-xs text-[var(--text-secondary)] leading-relaxed font-sans">
+            NewsAtlas is a real-time monitoring and data visualization platform. It unifies live breaking news, World Bank macroeconomic statistics, high-resolution meteorological forecasts, and multi-asset financial market feeds across 240+ countries and territories.
           </p>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
-          <div class="p-4 rounded-xl border border-white/5 bg-white/[0.01]">
-            <div class="text-[9px] text-slate-500 uppercase font-black mb-2 tracking-widest">Active Data Relays</div>
-            <div class="text-white font-bold font-mono">14.2k <span
-                class="text-[8px] text-blue-500 font-black">PPS</span></div>
+        <div class="grid grid-cols-2 gap-3 text-xs font-mono">
+          <div class="p-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)]">
+            <span class="text-[9px] uppercase text-[var(--text-secondary)] block mb-1">Global Coverage</span>
+            <span class="font-bold text-[var(--text-primary)]">240+ Sovereign Nations</span>
           </div>
-          <div class="p-4 rounded-xl border border-white/5 bg-white/[0.01]">
-            <div class="text-[9px] text-slate-500 uppercase font-black mb-2 tracking-widest">Neural Link Latency</div>
-            <div class="text-white font-bold font-mono">24 <span
-                class="text-[8px] text-emerald-500 font-black">MS</span></div>
+          <div class="p-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)]">
+            <span class="text-[9px] uppercase text-[var(--text-secondary)] block mb-1">Verified Data Sources</span>
+            <span class="font-bold text-[var(--text-primary)]">World Bank & Open-Meteo</span>
           </div>
         </div>
 
-        <div class="space-y-4">
-          <h3 class="text-white font-bold text-[11px] uppercase tracking-[0.2em] border-b border-white/5 pb-2">
-            Operational Controls</h3>
-          <div class="grid grid-cols-1 gap-3">
-            <div class="flex justify-between items-center text-[11px] font-mono">
-              <span class="text-slate-500 uppercase">Command Search</span>
-              <span class="text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20 font-black">CTRL +
-                K</span>
+        <div>
+          <h4 class="text-[11px] font-bold text-[var(--text-primary)] uppercase tracking-wider font-mono mb-2.5 border-b border-[var(--border-subtle)] pb-1.5">
+            Keyboard Shortcuts
+          </h4>
+          <div class="space-y-2 text-xs font-mono">
+            <div class="flex justify-between items-center">
+              <span class="text-[var(--text-secondary)]">Search Countries</span>
+              <kbd class="px-2 py-0.5 rounded bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] text-[var(--text-primary)]">Ctrl + K / /</kbd>
             </div>
-            <div class="flex justify-between items-center text-[11px] font-mono">
-              <span class="text-slate-500 uppercase">Orbital Zoom</span>
-              <span
-                class="text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20 font-black">SCROLL</span>
+            <div class="flex justify-between items-center">
+              <span class="text-[var(--text-secondary)]">Toggle AI Assistant</span>
+              <kbd class="px-2 py-0.5 rounded bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] text-[var(--text-primary)]">`</kbd>
             </div>
-            <div class="flex justify-between items-center text-[11px] font-mono">
-              <span class="text-slate-500 uppercase">Quick Navigation</span>
-              <span class="text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20 font-black">KEYS
-                [1-5]</span>
+            <div class="flex justify-between items-center">
+              <span class="text-[var(--text-secondary)]">Switch Data Tabs</span>
+              <kbd class="px-2 py-0.5 rounded bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] text-[var(--text-primary)]">Keys 1 - 5</kbd>
             </div>
           </div>
-        </div>
-
-        <div class="space-y-4 pt-4 border-t border-white/5">
-          <div class="flex items-center gap-2 mb-2">
-            <i class="fas fa-robot text-blue-400"></i>
-            <span class="text-[10px] font-black text-slate-300 uppercase tracking-widest font-mono">AI Substrate</span>
-          </div>
-          <div id="about-ai-response"
-            class="text-[12px] text-slate-400 bg-black/40 p-5 rounded-2xl border border-white/5 min-h-[70px] leading-relaxed font-mono">
-            Awaiting authorization for system-level inquiries...
-          </div>
-          <div class="flex gap-2">
-            <input type="text" id="about-ai-input" placeholder="Query Intelligence..."
-              class="flex-1 bg-transparent border border-white/10 rounded-xl px-5 py-2.5 text-xs text-white focus:border-blue-500 outline-none transition-all font-mono"
-              onkeydown="if(event.key==='Enter')sendAboutAI()" />
-            <button onclick="sendAboutAI()"
-              class="p-2 px-5 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-xl hover:bg-blue-500/20 transition-all">
-              <i class="fas fa-paper-plane"></i>
-            </button>
-          </div>
-        </div>
-
-        <div
-          class="pt-4 border-t border-white/5 text-[9px] text-slate-600 flex justify-between uppercase font-black font-mono">
-          <span>Core Engine: Node-X9</span>
-          <span>© 2025 NewsAtlas Intelligence Terminal</span>
         </div>
       </div>
     </div>

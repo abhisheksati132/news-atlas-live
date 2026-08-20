@@ -29,14 +29,25 @@ export default async function handler(req, res) {
   if (cached) return res.status(200).json(cached);
 
   try {
-    const entries = await Promise.all(Object.entries(INDICATORS).map(async ([key, indicator]) => {
-      const response = await fetch(`https://api.worldbank.org/v2/country/${iso3}/indicator/${indicator}?format=json&mrv=10&per_page=10`);
-      if (!response.ok) throw new Error(`World Bank HTTP ${response.status}`);
+    const indicatorKeys = Object.entries(INDICATORS);
+    const settledResults = await Promise.allSettled(indicatorKeys.map(async ([key, indicator]) => {
+      const response = await fetch(`https://api.worldbank.org/v2/country/${iso3}/indicator/${indicator}?format=json&mrv=10&per_page=10`, {
+        signal: AbortSignal.timeout(4000)
+      });
+      if (!response.ok) return [key, null];
       const [, observations] = await response.json();
       return [key, latestObservation(observations)];
     }));
 
-    const values = Object.fromEntries(entries);
+    const values = {};
+    settledResults.forEach((res, idx) => {
+      const key = indicatorKeys[idx][0];
+      if (res.status === "fulfilled" && Array.isArray(res.value)) {
+        values[res.value[0]] = res.value[1];
+      } else {
+        values[key] = null;
+      }
+    });
     const payload = {
       source: "World Bank Open Data",
       updated: Object.fromEntries(Object.entries(values).map(([key, observation]) => [key, observation?.date || null])),

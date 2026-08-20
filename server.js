@@ -100,6 +100,10 @@ apiRouter.get("/news-alerts", (req, res) => {
 });
 apiRouter.get("/stability", (req, res) => stabilityHandler(req, res).catch(e => res.status(500).json({error: e.message})));
 apiRouter.get("/economics", (req, res) => economicsHandler(req, res).catch(e => res.status(500).json({error: e.message})));
+
+// Mount API router
+app.use("/api", apiRouter);
+
 if (process.env.NODE_ENV === "production") {
   app.use(express.static("dist"));
   app.get("/app", (req, res) => {

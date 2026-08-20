@@ -56,8 +56,8 @@ export default async function handler(req, res) {
 
         const countries = JSON.parse(fileContent);
 
-        // Return all countries for the global search index
-        if (all === 'true') {
+        // Return all countries for the global search index or when no specific filters are requested
+        if (all === 'true' || (!name && !code)) {
             return res.status(200).json(countries);
         }
 

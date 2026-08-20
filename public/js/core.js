@@ -135,25 +135,4 @@ window.downloadDossier = () => {
   URL.revokeObjectURL(url);
 };
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInAnonymously, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-window.firebaseCore = {
-  initializeApp,
-  getAuth,
-  onAuthStateChanged,
-  signInAnonymously,
-  signInWithPopup,
-  GoogleAuthProvider,
-  signOut,
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  deleteDoc,
-  serverTimestamp,
-  collection,
-  onSnapshot
-};
+// Firebase CDN imports removed — using high-speed localStorage

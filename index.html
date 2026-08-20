@@ -176,23 +176,6 @@
       <button type="button" id="theme-toggle-btn" onclick="toggleTheme()" class="header-widget p-2 text-slate-500 hover:text-indigo-500 transition-colors" title="Toggle theme" aria-label="Toggle theme">
         <i class="fas fa-sun" aria-hidden="true"></i>
       </button>
-      <!-- User profile / login widget -->
-      <div id="user-profile-widget" class="flex items-center gap-2 border-l border-white/5 pl-2 relative">
-        <button type="button" id="login-btn" onclick="loginWithGoogle()" class="header-widget flex items-center gap-1.5 px-3 h-8 shadow-sm text-slate-400 hover:text-white" title="Sign In with Google">
-          <i class="fab fa-google text-[10px]"></i>
-          <span class="text-[9px] font-bold uppercase tracking-widest font-mono">Sign In</span>
-        </button>
-        <div id="user-info" class="hidden flex items-center gap-2 cursor-pointer group" onclick="toggleUserMenu()">
-          <img id="user-avatar" src="" class="w-6 h-6 rounded-full border border-white/10 group-hover:border-sky-400/50 transition-all object-cover">
-          <span id="user-name" class="hidden sm:inline text-[9px] font-bold text-slate-400 uppercase tracking-widest font-mono group-hover:text-white transition-colors truncate max-w-[80px]">User</span>
-          <!-- User Dropdown Menu -->
-          <div id="user-dropdown-menu" class="hidden absolute top-9 right-0 w-36 bg-slate-900 border border-white/10 rounded-xl p-1 shadow-xl z-[2100]">
-            <button type="button" onclick="logout()" class="w-full text-left px-3 py-2 text-[10px] font-bold text-red-400 hover:bg-white/5 rounded-lg flex items-center gap-2 uppercase tracking-wider font-mono">
-              <i class="fas fa-sign-out-alt text-xs"></i> Sign Out
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   </header>
   <nav class="nav-tab-strip flex items-center justify-center gap-1.5 px-4 h-11 bg-slate-950/80 border-b border-white/[0.06] backdrop-blur-md z-[950] relative shrink-0">

@@ -366,8 +366,9 @@ header {
   color: var(--accent-primary);
 }
 
+
 /* --------------------------------------------------------------------------
-   5. Main Layout & Dashboard Grid
+   5. Main Layout, Resizer & Dashboard Flexbox
    -------------------------------------------------------------------------- */
 .main-content {
   padding: 0 !important;
@@ -382,14 +383,103 @@ header {
 }
 
 .dashboard-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(360px, 440px);
-  gap: var(--gap);
-  padding: var(--gap);
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+  padding: 0.75rem !important;
+  height: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
   background-color: var(--bg-primary);
+  overflow: hidden !important;
+}
+
+.map-box {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.sidebar-resizer {
+  width: 12px;
+  cursor: col-resize;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 40;
+  user-select: none;
+  touch-action: none;
+  flex-shrink: 0;
+  transition: background-color var(--transition-fast);
+}
+
+.sidebar-resizer:hover,
+.sidebar-resizer.dragging {
+  background-color: var(--accent-subtle);
+}
+
+.sidebar-resizer-handle {
+  width: 3px;
+  height: 32px;
+  border-radius: 9999px;
+  background-color: var(--border-subtle);
+  transition: background-color var(--transition-fast), height var(--transition-fast);
+}
+
+.sidebar-resizer:hover .sidebar-resizer-handle,
+.sidebar-resizer.dragging .sidebar-resizer-handle {
+  background-color: var(--accent-primary);
+  height: 48px;
+}
+
+.intel-sidebar {
+  flex: 0 0 auto !important;
+  width: var(--sidebar-width, 460px) !important;
+  min-width: 320px !important;
+  max-width: 70vw !important;
+  height: 100% !important;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .dashboard-layout {
+    flex-direction: column !important;
+  }
+  .sidebar-resizer {
+    display: none !important;
+  }
+  .intel-sidebar {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Floating AI Copilot */
+#floating-cli {
+  position: fixed;
+  bottom: calc(var(--footer-h) + 1.25rem);
+  left: 1.25rem;
+  width: 380px;
+  max-width: calc(100vw - 2.5rem);
+  z-index: 2500;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface);
+  box-shadow: var(--shadow-lift);
+  overflow: hidden;
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+#floating-cli.cli-locked {
+  display: none !important;
 }
 
 /* --------------------------------------------------------------------------

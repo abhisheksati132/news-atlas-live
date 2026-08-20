@@ -115,6 +115,7 @@ async function runBootSequence() {
   const savedTheme = localStorage.getItem('theme') || localStorage.getItem('terminal-theme');
   const initialTheme = savedTheme || 'dark';
   applyTheme(initialTheme);
+  initSidebarResizer();
 
   const savedPerf = localStorage.getItem('terminal-low-fx');
   if (savedPerf === 'true') {
@@ -1012,17 +1013,26 @@ window.activateMapInteraction = () => {
 };
 
 window.loginWithGoogle = async function() {
-  if (!window.authInstance) {
-    if (window.showToast) window.showToast("Auth services offline.", "error");
+  if (!window.authInstance || !window.firebaseCore) {
+    if (window.showToast) window.showToast("Firebase authentication is initializing or offline.", "error");
     return;
   }
   try {
     const provider = new window.firebaseCore.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
     await window.firebaseCore.signInWithPopup(window.authInstance, provider);
     if (window.showToast) window.showToast("Google authorization successful.", "success");
   } catch (e) {
     console.error("Google login failed:", e);
-    if (window.showToast) window.showToast("Sign in aborted or failed.", "error");
+    if (e.code === "auth/unauthorized-domain") {
+      if (window.showToast) window.showToast("Add this domain to Firebase Console > Authentication > Settings > Authorized Domains", "error");
+    } else if (e.code === "auth/popup-blocked") {
+      if (window.showToast) window.showToast("Sign-in popup blocked by browser. Please allow popups.", "warning");
+    } else if (e.code === "auth/popup-closed-by-user") {
+      if (window.showToast) window.showToast("Sign-in cancelled.", "info");
+    } else {
+      if (window.showToast) window.showToast(`Sign in error: ${e.message || e.code}`, "error");
+    }
   }
 };
 
@@ -1558,3 +1568,65 @@ function startNewsAlertsStream() {
 }
 
 setTimeout(startNewsAlertsStream, 15000);
+
+
+function initSidebarResizer() {
+  const resizer = document.getElementById("sidebar-resizer");
+  const sidebar = document.getElementById("sidebar");
+  if (!resizer || !sidebar) return;
+
+  const savedWidth = localStorage.getItem("newsatlas_sidebar_width");
+  if (savedWidth) {
+    const w = parseInt(savedWidth, 10);
+    if (w >= 320 && w <= window.innerWidth * 0.7) {
+      document.documentElement.style.setProperty("--sidebar-width", `${w}px`);
+      sidebar.style.width = `${w}px`;
+    }
+  }
+
+  let isDragging = false;
+  let startX = 0;
+  let startWidth = 0;
+
+  resizer.addEventListener("mousedown", (e) => {
+    isDragging = true;
+    startX = e.clientX;
+    startWidth = sidebar.getBoundingClientRect().width;
+    resizer.classList.add("dragging");
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    e.preventDefault();
+  });
+
+  window.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+    const delta = startX - e.clientX; // dragging left increases sidebar width
+    let newWidth = startWidth + delta;
+    const minWidth = 320;
+    const maxWidth = Math.min(850, window.innerWidth * 0.7);
+
+    if (newWidth < minWidth) newWidth = minWidth;
+    if (newWidth > maxWidth) newWidth = maxWidth;
+
+    document.documentElement.style.setProperty("--sidebar-width", `${newWidth}px`);
+    sidebar.style.width = `${newWidth}px`;
+
+    if (window.mapEngine && window.mapEngine.map) {
+      window.mapEngine.map.resize();
+    }
+  });
+
+  window.addEventListener("mouseup", () => {
+    if (isDragging) {
+      isDragging = false;
+      resizer.classList.remove("dragging");
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      const currentWidth = sidebar.getBoundingClientRect().width;
+      localStorage.setItem("newsatlas_sidebar_width", currentWidth);
+      if (window.mapEngine && window.mapEngine.map) {
+        window.mapEngine.map.resize();
+      }
+    }
+  });
+}

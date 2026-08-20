@@ -237,60 +237,33 @@ function initDrag() {
 }
 window.openCLI = function () {
   const panel = document.getElementById("floating-cli");
-  const body = document.getElementById("floating-cli-body");
-  const chev = document.getElementById("floating-cli-chevron");
-  if (!panel || !body) return;
-  panel.classList.remove("cli-locked");
+  if (!panel) return;
+  panel.classList.remove("cli-locked", "hidden");
+  panel.style.display = "flex";
   _cliExpanded = true;
   panel.classList.add("cli-expanded");
-  body.style.display = "flex";
-  body.style.flexDirection = "column";
-  requestAnimationFrame(() => { body.classList.add("cli-body-open"); });
-  if (chev) chev.style.transform = "rotate(180deg)";
-  setTimeout(() => document.getElementById("floating-cli-input")?.focus(), 200);
   if (window.playTacticalSound) window.playTacticalSound("success");
-  const output = document.getElementById("floating-cli-output");
-  if (output && !output.dataset.welcomed) {
-    output.dataset.welcomed = "1";
-    cliPrint([
-      `<span class="cli-head">NEWSATLAS ASSISTANT</span>`,
-      `<span class="cli-dim">Type <span class="cli-key">help</span> for available commands  ·  AI-powered</span>`,
-      `<span class="cli-dim"></span>`,
-    ]);
-  }
 };
+
 window.closeCLI = function (e) {
   if (e) e.stopPropagation();
   const panel = document.getElementById("floating-cli");
-  const body = document.getElementById("floating-cli-body");
-  const chev = document.getElementById("floating-cli-chevron");
-  if (!panel || !body) return;
+  if (!panel) return;
   _cliExpanded = false;
-  body.classList.remove("cli-body-open");
   panel.classList.remove("cli-expanded");
-  if (chev) chev.style.transform = "rotate(0deg)";
+  panel.classList.add("cli-locked");
+  panel.style.display = "none";
   if (window.playTacticalSound) window.playTacticalSound("click");
-  setTimeout(() => { body.style.display = "none"; panel.classList.add("cli-locked"); }, 260);
 };
+
 window.toggleCLI = function () {
   const panel = document.getElementById("floating-cli");
   if (!panel) return;
-  if (panel.classList.contains("cli-locked")) { window.openCLI(); return; }
-  _cliExpanded = !_cliExpanded;
-  const body = document.getElementById("floating-cli-body");
-  const chev = document.getElementById("floating-cli-chevron");
-  if (_cliExpanded) {
-    panel.classList.add("cli-expanded");
-    body.style.display = "flex";
-    body.style.flexDirection = "column";
-    requestAnimationFrame(() => { body.classList.add("cli-body-open"); });
-    if (chev) chev.style.transform = "rotate(180deg)";
-    setTimeout(() => document.getElementById("floating-cli-input")?.focus(), 200);
+  const isHidden = panel.classList.contains("cli-locked") || panel.style.display === "none" || getComputedStyle(panel).display === "none";
+  if (isHidden) {
+    window.openCLI();
   } else {
-    body.classList.remove("cli-body-open");
-    panel.classList.remove("cli-expanded");
-    if (chev) chev.style.transform = "rotate(0deg)";
-    setTimeout(() => { body.style.display = "none"; }, 260);
+    window.closeCLI();
   }
 };
 function cliPrint(lines) {

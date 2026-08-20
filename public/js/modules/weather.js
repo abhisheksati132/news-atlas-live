@@ -372,6 +372,12 @@ async function fetchWeather(lat, lon) {
     } catch (err) { }
   } catch (e) {
     console.error("Atmosphere Error:", e);
+    const atmoCondition = document.getElementById("atmo-condition");
+    if (atmoCondition) atmoCondition.innerText = "TELEMETRY OFFLINE";
+    const atmoTemp = document.getElementById("atmo-temp");
+    if (atmoTemp) atmoTemp.innerText = "--°";
+    const analysisEl = document.getElementById("weather-ai-analysis");
+    if (analysisEl) analysisEl.innerHTML = '<div class="apple-glass p-5 text-amber-400 font-mono text-xs"><i class="fas fa-exclamation-triangle mr-1.5"></i>Meteorological data feed temporarily unreachable.</div>';
   }
 }
 async function generateWeatherAnalysis(weatherData, cityName) {

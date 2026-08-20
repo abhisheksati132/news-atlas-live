@@ -297,24 +297,6 @@
             if (window.playTacticalSound) window.playTacticalSound("success");
           };
         </script>
-
-        <div id="chronos-slider-container"
-          class="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-3/4 max-w-2xl px-6 py-3 rounded-2xl glass-panel z-10 flex flex-col gap-2 transition-all opacity-90 hover:opacity-100"
-          style="
-              background: rgba(2, 6, 23, 0.95);
-              border: 1px solid rgba(59, 130, 246, 0.2);
-            ">
-          <div class="flex justify-between items-center w-full">
-            <span class="text-sm font-black text-blue-400 uppercase tracking-widest font-mono">Chronos Engine</span>
-            <span id="chronos-display" class="text-sm font-bold text-amber-300 tracking-widest font-mono">HISTORICAL DATA UNAVAILABLE</span>
-          </div>
-          <input type="range" id="chronos-slider" min="-72" max="0" value="0" step="1" disabled aria-disabled="true"
-            class="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400"
-            style="outline: none" oninput="updateChronos(this.value)" />
-          <div class="flex justify-between w-full text-[8px] text-slate-500 font-mono font-bold">
-            <span>Requires a historical event-data provider</span>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -1577,12 +1559,17 @@
       const q = input.value.trim();
       response.innerHTML = '<i class="fas fa-circle-notch fa-spin text-blue-400"></i> Thinking...';
       input.value = '';
+      try {
         const res = await fetch('/api/ai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: q })
         });
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          response.innerHTML = `<span style="color:#ef4444">${data.error || 'Intelligence service unavailable.'}</span>`;
+          return;
+        }
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text || data.response || 'No response.';
         response.innerText = text.replace(/\*\*/g, '').trim();
       } catch (e) {
@@ -1618,24 +1605,6 @@
     </button>
   </nav>
   <link rel="manifest" href="/manifest.json">
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').then((reg) => {
-          reg.update();
-        }).catch((err) => console.log('SW registration failed', err));
-      });
-    }
-    if ('caches' in window) {
-      caches.keys().then((names) => {
-        for (const name of names) {
-          if (name !== 'newsatlas-v2-live') {
-            caches.delete(name);
-          }
-        }
-      });
-    }
-  </script>
 </body>
 
 </html>

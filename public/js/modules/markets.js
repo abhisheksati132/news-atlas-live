@@ -6,6 +6,18 @@ window.toggleMarketCategory = (category) => {
   chevron.classList.toggle("fa-chevron-down");
   chevron.classList.toggle("fa-chevron-up");
 };
+function renderMarketUnavailable(container, label, retryFn) {
+  if (!container) return;
+  container.innerHTML = `
+    <div class="p-6 text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[10px] font-mono font-bold uppercase tracking-wider mb-2">
+        <i class="fas fa-exclamation-triangle text-amber-400"></i> ${label}
+      </div>
+      <p class="text-slate-500 text-[11px] font-mono mb-3">Live exchange link offline or rate-limited</p>
+      ${retryFn ? `<button type="button" onclick="${retryFn}()" class="px-4 py-1 rounded border border-blue-500/30 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 text-[10px] font-mono font-bold uppercase tracking-wider transition-colors">Re-link</button>` : ''}
+    </div>`;
+}
+
 async function displayPreciousMetals() {
   const container = document.getElementById("metals-content");
   if (!container) return;
@@ -37,8 +49,10 @@ async function displayPreciousMetals() {
                 </div>`;
       container.appendChild(row);
     });
-    if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-xs py-6 text-center">Live precious metals quotes require a market data provider</div>';
-  } catch { container.innerHTML = '<div class="text-slate-500 text-xs py-6 text-center">Live precious metals quotes require a market data provider</div>'; }
+    if (container.children.length === 0) renderMarketUnavailable(container, "Metals Quotes Unavailable", "window.displayPreciousMetals");
+  } catch {
+    renderMarketUnavailable(container, "Metals Quotes Unavailable", "window.displayPreciousMetals");
+  }
 }
 
 async function displayCountryIndices(countryName) {
@@ -71,8 +85,10 @@ async function displayCountryIndices(countryName) {
                 </div>`;
       container.appendChild(row);
     });
-    if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-xs py-6 text-center">Live index data is unavailable</div>';
-  } catch { container.innerHTML = '<div class="text-slate-500 text-xs py-6 text-center">Live index quotes require a market data provider</div>'; }
+    if (container.children.length === 0) renderMarketUnavailable(container, "Indices Quotes Unavailable", `() => window.displayCountryIndices('${countryName}')`);
+  } catch {
+    renderMarketUnavailable(container, "Indices Quotes Unavailable", `() => window.displayCountryIndices('${countryName}')`);
+  }
 }
 window.getIndicesForCountry = () => ({});
 async function displayForex() {
@@ -96,7 +112,9 @@ async function displayForex() {
                 <div class="text-[15px] font-mono font-black text-cyan-400">${rate.toFixed(4)}</div>`;
       container.appendChild(row);
     });
-  } catch { container.innerHTML = '<div class="text-slate-500 text-[10px] py-6 text-center uppercase font-black">Exchange Offline</div>'; }
+  } catch {
+    renderMarketUnavailable(container, "Forex Feed Offline", "window.displayForex");
+  }
 }
 async function displayCommodities() {
   const container = document.getElementById("commodities-content");
@@ -127,8 +145,10 @@ async function displayCommodities() {
                 </div>`;
       container.appendChild(row);
     });
-    if (container.children.length === 0) container.innerHTML = '<div class="text-slate-500 text-xs py-6 text-center">Live commodity data is unavailable</div>';
-  } catch { container.innerHTML = '<div class="text-slate-500 text-xs py-6 text-center">Live commodity quotes require a market data provider</div>'; }
+    if (container.children.length === 0) renderMarketUnavailable(container, "Commodity Feed Unavailable", "window.displayCommodities");
+  } catch {
+    renderMarketUnavailable(container, "Commodity Feed Unavailable", "window.displayCommodities");
+  }
 }
 function initializeMarkets(countryName) {
   displayPreciousMetals();

@@ -18,8 +18,6 @@ import searchHandler from "./api/search.js";
 import countriesHandler from "./api/countries.js";
 import geoHandler from "./api/geo.js";
 import gdeltHandler from "./api/gdelt.js";
-import gdeltGeoHandler from "./api/gdelt-geo.js";
-import newsAlertsHandler from "./api/news-alerts.js";
 import stabilityHandler from "./api/stability.js";
 import economicsHandler from "./api/economics.js";
 
@@ -33,8 +31,6 @@ const io = new Server(server, {
   cors: { origin: "*" }
 });
 const port = process.env.PORT || 3000;
-
-// Intelligence caching relies on dedicated api/utils/cache module.
 
 // Professional Middleware Stack
 app.use(helmet({
@@ -92,17 +88,18 @@ apiRouter.get("/ai", (req, res) => aiHandler(req, res).catch(e => res.status(500
 apiRouter.get("/countries", (req, res) => countriesHandler(req, res).catch(e => res.status(500).json({error: e.message})));
 apiRouter.get("/geo", (req, res) => geoHandler(req, res).catch(e => res.status(500).json({error: e.message})));
 apiRouter.get("/gdelt", (req, res) => gdeltHandler(req, res).catch(e => res.status(500).json({error: e.message})));
-apiRouter.get("/gdelt-geo", (req, res) => gdeltGeoHandler(req, res).catch(e => res.status(500).json({error: e.message})));
-apiRouter.get("/news-alerts", (req, res) => newsAlertsHandler(req, res).catch(e => res.status(500).json({error: e.message})));
+apiRouter.get("/gdelt-geo", (req, res) => {
+  req.query = req.query || {};
+  req.query.mode = "geo";
+  return gdeltHandler(req, res).catch(e => res.status(500).json({error: e.message}));
+});
+apiRouter.get("/news-alerts", (req, res) => {
+  req.query = req.query || {};
+  req.query.type = "alerts";
+  return newsHandler(req, res).catch(e => res.status(500).json({error: e.message}));
+});
 apiRouter.get("/stability", (req, res) => stabilityHandler(req, res).catch(e => res.status(500).json({error: e.message})));
 apiRouter.get("/economics", (req, res) => economicsHandler(req, res).catch(e => res.status(500).json({error: e.message})));
-
-app.use("/api", apiRouter);
-
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
-});
-
 if (process.env.NODE_ENV === "production") {
   app.use(express.static("dist"));
   app.get("/app", (req, res) => {

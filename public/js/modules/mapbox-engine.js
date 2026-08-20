@@ -633,7 +633,15 @@ class MapboxEngine {
 
         try {
             const res = await fetch("/api/gdelt-geo?query=war&timespan=24h");
+            if (!res.ok) {
+                console.warn(`[mapbox] GDELT Hotspots service unavailable (${res.status})`);
+                return;
+            }
             const geojson = await res.json();
+            if (!geojson || geojson.type !== "FeatureCollection" || !Array.isArray(geojson.features)) {
+                console.warn("[mapbox] GDELT Hotspots returned non-FeatureCollection payload");
+                return;
+            }
 
             if (this.map.getLayer("gdelt-beacons")) this.map.removeLayer("gdelt-beacons");
             if (this.map.getSource("gdelt-hotspots")) this.map.removeSource("gdelt-hotspots");

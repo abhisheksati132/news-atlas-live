@@ -86,14 +86,14 @@ const AIAssistant = () => {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const errText = data.error || data.message || res.statusText || 'Request failed';
-        setMessages(prev => [...prev, { role: 'assistant', content: `Request failed: ${errText}` }]);
+        const errText = data.error || data.message || `Provider returned status ${res.status}`;
+        setMessages(prev => [...prev, { role: 'assistant', isError: true, content: `Intelligence Provider Unavailable: ${errText}` }]);
         return;
       }
       const content = data.candidates?.[0]?.content?.parts?.[0]?.text || data.response || "No response — try again.";
       setMessages(prev => [...prev, { role: 'assistant', content: content.replace(/\*\*/g, '') }]);
     } catch (e) {
-      setMessages(prev => [...prev, { role: 'assistant', content: "Couldn’t reach the server. Check your connection and try again." }]);
+      setMessages(prev => [...prev, { role: 'assistant', isError: true, content: "Neural uplink unreachable. Check connection." }]);
     } finally {
       setLoading(false);
     }
@@ -106,7 +106,9 @@ const AIAssistant = () => {
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[88%] px-3.5 py-2.5 rounded-xl text-[13px] leading-relaxed ${m.role === 'user'
               ? 'bg-gradient-to-b from-sky-500 to-sky-600 text-white shadow-md shadow-sky-900/20'
-              : 'bg-white/[0.05] text-slate-200 border border-white/[0.08]'
+              : m.isError
+                ? 'bg-amber-500/10 text-amber-200 border border-amber-500/30'
+                : 'bg-white/[0.05] text-slate-200 border border-white/[0.08]'
               }`}>
               {m.content}
             </div>

@@ -77,16 +77,52 @@ function runWhenIdle(callback, timeout = 2000) {
     setTimeout(callback, timeout);
   }
 }
+function applyTheme(theme) {
+  const isLight = theme === 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+  document.body.setAttribute('data-theme', theme);
+  if (isLight) {
+    document.body.classList.add('light-theme');
+    document.body.classList.remove('night-theme');
+  } else {
+    document.body.classList.remove('light-theme');
+    document.body.classList.add('night-theme');
+  }
+  localStorage.setItem('terminal-theme', theme);
+  localStorage.setItem('theme', theme);
+
+  const themeBtn = document.getElementById('theme-toggle-btn') || document.querySelector('[onclick="toggleTheme()"]');
+  if (themeBtn) {
+    themeBtn.innerHTML = isLight ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+    themeBtn.title = isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode';
+  }
+
+  if (window.mapEngine && window.mapEngine.map) {
+    const isMapboxToken = !!mapboxgl.accessToken && !mapboxgl.accessToken.startsWith('pk.eyJ1IjoiZ3Vlc3Qi');
+    const newStyle = isMapboxToken
+      ? (isLight ? 'mapbox://styles/mapbox/light-v11' : 'mapbox://styles/mapbox/dark-v11')
+      : (isLight
+          ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
+          : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json');
+    try {
+      window.mapEngine.setStyle(newStyle);
+    } catch (e) {}
+  }
+}
+window.applyTheme = applyTheme;
+
 async function runBootSequence() {
-  const savedTheme = localStorage.getItem('terminal-theme');
-  if (savedTheme === 'light') document.body.classList.add('light-theme');
+  const savedTheme = localStorage.getItem('theme') || localStorage.getItem('terminal-theme');
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+  applyTheme(initialTheme);
 
   const savedPerf = localStorage.getItem('terminal-low-fx');
   if (savedPerf === 'true') {
     document.body.classList.add('low-fx');
     const btn = document.getElementById('perf-toggle');
     if (btn) {
-      btn.classList.add('text-sky-400');
+      btn.classList.add('text-indigo-500');
       btn.classList.remove('text-slate-500');
       btn.title = "Performance Mode Active (Low FX)";
     }
@@ -515,8 +551,9 @@ window.resetToGlobalCenter = () => {
   if (window.updateNotesAndBookmarksUI) window.updateNotesAndBookmarksUI();
 };
 window.toggleTheme = function() {
-  const isLight = document.body.classList.toggle('light-theme');
-  localStorage.setItem('terminal-theme', isLight ? 'light' : 'dark');
+  const current = document.documentElement.getAttribute('data-theme') || (document.body.classList.contains('light-theme') ? 'light' : 'dark');
+  const next = current === 'light' ? 'dark' : 'light';
+  applyTheme(next);
 };
 
 window.togglePerformanceMode = function() {

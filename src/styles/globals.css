@@ -3,24 +3,31 @@
 @import "tailwindcss/utilities";
 
 :root {
-  --bg-deep: #070b14;
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-bg: rgba(255, 255, 255, 0.04);
-  --accent-ice: #7dd3fc;
+  --bg-primary: #F3F4F8;
+  --bg-surface: #FFFFFF;
+  --border-subtle: #DCDDE6;
+  --accent-primary: #3D4FC7;
 }
 
-
+:root[data-theme="dark"],
+body.night-theme {
+  --bg-primary: #0B0E1A;
+  --bg-surface: #141828;
+  --border-subtle: #2A2F45;
+  --accent-primary: #5B6EF5;
+}
 
 ::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border-subtle);
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--border-subtle-hover, #B5B8C9);
 }

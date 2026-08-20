@@ -74,16 +74,8 @@
   </script>
 </head>
 
-<body class="flex flex-col night-theme view-state-map">
-
-
-  <div class="terminal-grain"></div>
-  <div class="aurora-container">
-    <div class="aurora-glow aurora-1"></div>
-    <div class="aurora-glow aurora-2"></div>
-    <div class="aurora-glow aurora-3"></div>
-  </div>
-  <div id="map-tooltip" class="fixed hidden text-white rounded-sm border-l-2 border-l-blue-500 overflow-hidden" style="
+<body class="flex flex-col night-theme view-state-map" data-theme="dark">
+  <div id="map-tooltip" class="fixed hidden text-white rounded-sm overflow-hidden" style="
         background: #0f172a;
         border: 1px solid rgba(255, 255, 255, 0.1);
         min-width: 140px;
@@ -177,8 +169,8 @@
       <button type="button" onclick="goToIndiaHome()" class="header-widget p-2 text-slate-500 hover:text-sky-400/90 transition-colors" title="Home">
         <i class="fas fa-home"></i>
       </button>
-      <button type="button" onclick="toggleTheme()" class="header-widget p-2 text-slate-500 hover:text-sky-400/90 transition-colors" title="Light or dark appearance" aria-label="Toggle theme">
-        <i class="fas fa-adjust" aria-hidden="true"></i>
+      <button type="button" id="theme-toggle-btn" onclick="toggleTheme()" class="header-widget p-2 text-slate-500 hover:text-indigo-500 transition-colors" title="Toggle theme" aria-label="Toggle theme">
+        <i class="fas fa-sun" aria-hidden="true"></i>
       </button>
       <!-- User profile / login widget -->
       <div id="user-profile-widget" class="flex items-center gap-2 border-l border-white/5 pl-2 relative">

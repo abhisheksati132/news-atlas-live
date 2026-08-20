@@ -100,15 +100,15 @@ const AIAssistant = () => {
   };
 
   return (
-    <div className="flex flex-col h-[400px] rounded-xl overflow-hidden border border-white/[0.08] bg-[rgba(12,18,34,0.45)] backdrop-blur-md shadow-[0_20px_50px_-24px_rgba(0,0,0,0.6)]">
+    <div className="flex flex-col h-[400px] rounded-[12px] overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-[var(--shadow-subtle)] transition-colors">
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[88%] px-3.5 py-2.5 rounded-xl text-[13px] leading-relaxed ${m.role === 'user'
-              ? 'bg-gradient-to-b from-sky-500 to-sky-600 text-white shadow-md shadow-sky-900/20'
+            <div className={`max-w-[88%] px-3.5 py-2.5 rounded-[10px] text-[13px] leading-relaxed transition-colors ${m.role === 'user'
+              ? 'bg-[var(--accent-primary)] text-white shadow-sm font-medium'
               : m.isError
-                ? 'bg-amber-500/10 text-amber-200 border border-amber-500/30'
-                : 'bg-white/[0.05] text-slate-200 border border-white/[0.08]'
+                ? 'bg-[var(--danger-bg)] text-[var(--danger)] border border-[var(--danger)]/25 font-mono text-[12px]'
+                : 'bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] border border-[var(--border-subtle)]'
               }`}>
               {m.content}
             </div>
@@ -116,18 +116,18 @@ const AIAssistant = () => {
         ))}
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-white/[0.04] px-3 py-2.5 rounded-xl border border-white/[0.06] flex gap-1.5 items-center">
-              <span className="w-1.5 h-1.5 bg-sky-400/90 rounded-full animate-bounce"></span>
-              <span className="w-1.5 h-1.5 bg-sky-400/90 rounded-full animate-bounce [animation-delay:75ms]"></span>
-              <span className="w-1.5 h-1.5 bg-sky-400/90 rounded-full animate-bounce [animation-delay:150ms]"></span>
+            <div className="bg-[var(--bg-surface-subtle)] px-3 py-2 rounded-[10px] border border-[var(--border-subtle)] flex gap-1.5 items-center">
+              <span className="w-1.5 h-1.5 bg-[var(--accent-primary)] rounded-full animate-bounce"></span>
+              <span className="w-1.5 h-1.5 bg-[var(--accent-primary)] rounded-full animate-bounce [animation-delay:75ms]"></span>
+              <span className="w-1.5 h-1.5 bg-[var(--accent-primary)] rounded-full animate-bounce [animation-delay:150ms]"></span>
             </div>
           </div>
         )}
       </div>
-      <div className="p-3.5 border-t border-white/[0.06] bg-black/25 flex gap-2 items-center">
+      <div className="p-3 border-t border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] flex gap-2 items-center transition-colors">
         <input
-          className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 outline-none text-slate-100 text-xs font-sans placeholder:text-slate-600 focus:border-sky-500/40 focus:ring-1 focus:ring-sky-500/20"
-          placeholder="Message…"
+          className="flex-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-[8px] px-3 py-2 outline-none text-[var(--text-primary)] text-xs font-sans placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent-primary)] focus:ring-2 focus:ring-[var(--accent-focus-ring)] transition-all"
+          placeholder="Ask intelligence..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
@@ -137,8 +137,8 @@ const AIAssistant = () => {
             }
           }}
         />
-        <button type="button" onClick={handleSend} className="shrink-0 w-9 h-9 rounded-lg border border-white/[0.1] bg-sky-500/15 text-sky-300 hover:bg-sky-500/25 hover:text-white transition-colors flex items-center justify-center" aria-label="Send">
-          <i className="fas fa-paper-plane text-xs"></i>
+        <button type="button" onClick={handleSend} className="shrink-0 w-8 h-8 rounded-[8px] bg-[var(--accent-primary)] text-white hover:bg-[var(--accent-primary-hover)] transition-colors flex items-center justify-center shadow-sm" aria-label="Send query">
+          <i className="fas fa-paper-plane text-[11px]"></i>
         </button>
       </div>
     </div>

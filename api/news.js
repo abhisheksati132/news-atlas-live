@@ -1,57 +1,83 @@
 import { getCache, setCache } from "./_utils/cache.js";
 
-const CACHE_TTL = 5 * 60 * 1000;
 const BASE_URL = "https://newsapi.org/v2";
+const CACHE_TTL = 300; // 5 minutes
 
-function decodeXml(value = "") {
-    return value
-        .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
-        .replace(/&amp;/g, "&")
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'")
-        .replace(/&lt;/g, "<")
-        .replace(/&gt;/g, ">");
-}
+async function fetchGoogleNews({ category, q, iso2, size = 12 }) {
+    let queryTerm = q || "";
+    if (!queryTerm && iso2) {
+        queryTerm = iso2;
+    }
+    if (!queryTerm && category && category !== "general" && category !== "top") {
+        queryTerm = category;
+    }
+    if (!queryTerm) {
+        queryTerm = "world";
+    }
 
-function tagValue(xml, tag) {
-    return decodeXml((xml.match(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, "i")) || [])[1] || "").trim();
-}
+    const encodedQuery = encodeURIComponent(queryTerm);
+    const rssUrl = `https://news.google.com/rss/search?q=${encodedQuery}&hl=en-US&gl=US&ceid=US:en`;
 
-async function fetchGoogleNews({ category, q, iso2, size }) {
-    const searchTerm = q?.trim() || (category && category !== "top" ? `${category} news` : "world news");
-    const countryHint = iso2 ? ` ${iso2}` : "";
-    const feedUrl = `https://news.google.com/rss/search?${new URLSearchParams({ q: `${searchTerm}${countryHint}`, hl: "en-US", gl: "US", ceid: "US:en" })}`;
-    const response = await fetch(feedUrl, { headers: { "User-Agent": "NewsAtlas/1.0" } });
-    if (!response.ok) throw new Error(`Google News RSS HTTP ${response.status}`);
+    const res = await fetch(rssUrl, {
+        headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        },
+        signal: AbortSignal.timeout(4000)
+    });
 
-    const xml = await response.text();
-    const results = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)].map((match) => {
-        const item = match[1];
-        const sourceMatch = item.match(/<source(?:\s+url="([^"]*)")?>([\s\S]*?)<\/source>/i);
-        return {
-            title: tagValue(item, "title"),
-            link: tagValue(item, "link"),
-            pubDate: tagValue(item, "pubDate") || null,
-            source: decodeXml(sourceMatch?.[2] || "Google News"),
-            source_id: "google-news-rss",
-            source_url: decodeXml(sourceMatch?.[1] || ""),
+    if (!res.ok) {
+        throw new Error(`Google News RSS HTTP ${res.status}`);
+    }
+
+    const xml = await res.text();
+    const results = [];
+    const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
+    let match;
+
+    while ((match = itemRegex.exec(xml)) !== null && results.length < size) {
+        const itemContent = match[1];
+        const titleMatch = itemContent.match(/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/i) || itemContent.match(/<title>([\s\S]*?)<\/title>/i);
+        const linkMatch = itemContent.match(/<link>([\s\S]*?)<\/link>/i);
+        const pubDateMatch = itemContent.match(/<pubDate>([\s\S]*?)<\/pubDate>/i);
+        const sourceMatch = itemContent.match(/<source[^>]*>([\s\S]*?)<\/source>/i);
+        const descMatch = itemContent.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/i) || itemContent.match(/<description>([\s\S]*?)<\/description>/i);
+
+        let cleanTitle = titleMatch ? titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "").trim() : "Intelligence Dispatch";
+        const cleanLink = linkMatch ? linkMatch[1].trim() : "#";
+        const cleanPubDate = pubDateMatch ? pubDateMatch[1].trim() : new Date().toISOString();
+        const sourceName = sourceMatch ? sourceMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "").trim() : "Google News";
+
+        let cleanDesc = "";
+        if (descMatch) {
+            cleanDesc = descMatch[1].replace(/<[^>]*>?/gm, "").replace(/<!\[CDATA\[|\]\]>/g, "").trim();
+        }
+
+        const sourceSplit = cleanTitle.split(" - ");
+        if (sourceSplit.length > 1) {
+            cleanTitle = sourceSplit.slice(0, -1).join(" - ");
+        }
+
+        results.push({
+            title: cleanTitle,
+            link: cleanLink,
+            pubDate: cleanPubDate,
+            source: sourceName,
+            source_id: sourceName.toLowerCase().replace(/[^a-z0-9]/g, ""),
+            source_url: cleanLink,
             category: category || "general",
-            description: tagValue(item, "description"),
+            description: cleanDesc || "Live verified intelligence dispatch.",
             image: null,
             image_url: null,
-            author: null,
-        };
-    }).filter((article) => article.title && article.link).slice(0, size);
+            author: null
+        });
+    }
 
     return {
         status: "success",
         totalResults: results.length,
-        results,
-        source: "Google News RSS",
-        freshness: "provider-managed",
+        results
     };
 }
-
 
 export default async function handler(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -75,97 +101,78 @@ export default async function handler(req, res) {
         return res.status(200).json(cached);
     }
 
-    if (!apiKey) {
+    // Try NewsAPI if key exists
+    if (apiKey) {
         try {
-            const payload = await fetchGoogleNews({ category, q, iso2, size: sizeNum });
-            setCache(cacheKey, payload, CACHE_TTL);
-            res.setHeader("X-Cache", "MISS");
-            return res.status(200).json(payload);
-        } catch (err) {
-            console.error("[news] Google News RSS fallback failed:", err.message);
-            return res.status(502).json({
-                status: "error",
-                code: "GOOGLE_NEWS_RSS_UPSTREAM_ERROR",
-                message: "Live news is currently unavailable."
+            const params = new URLSearchParams({
+                apiKey,
+                language: "en",
+                pageSize: String(sizeNum),
+                page: String(pageNum),
             });
+
+            let endpoint;
+            if (q) {
+                params.set("q", q);
+                endpoint = `${BASE_URL}/everything?${params.toString()}`;
+            } else {
+                const supportedCountries = ['ae','ar','at','au','be','bg','br','ca','ch','cn','co','cu','cz','de','eg','fr','gb','gr','hk','hu','id','ie','il','in','it','jp','kr','lt','lv','ma','mx','my','ng','nl','no','nz','ph','pl','pt','ro','rs','ru','sa','se','sg','si','sk','th','tr','tw','ua','us','ve','za'];
+                if (iso2 && supportedCountries.includes(iso2.toLowerCase())) params.set("country", iso2.toLowerCase());
+                
+                const validCats = ['business','entertainment','general','health','science','sports','technology'];
+                let targetCat = (category || 'general').toLowerCase();
+                if (targetCat === 'top' || !validCats.includes(targetCat)) targetCat = 'general';
+                params.set("category", targetCat);
+                endpoint = `${BASE_URL}/top-headlines?${params.toString()}`;
+            }
+
+            const response = await fetch(endpoint, { signal: AbortSignal.timeout(3500) });
+            const data = await response.json();
+
+            if (data.status !== "error" && data.articles && data.articles.length > 0) {
+                const results = data.articles
+                    .filter(a => a.title && a.title !== '[Removed]')
+                    .map(a => ({
+                        title: a.title,
+                        link: a.url,
+                        pubDate: a.publishedAt,
+                        source: a.source?.name || "Global News",
+                        source_id: a.source?.id || "newsapi",
+                        source_url: a.url,
+                        category: category || "general",
+                        description: a.description || "",
+                        image: a.urlToImage || null,
+                        image_url: a.urlToImage || null,
+                        author: a.author || null,
+                    }));
+
+                const payload = {
+                    status: "success",
+                    totalResults: data.totalResults || results.length,
+                    results: results.slice(0, sizeNum),
+                };
+
+                setCache(cacheKey, payload, CACHE_TTL);
+                res.setHeader("X-Cache", "MISS-NEWSAPI");
+                return res.status(200).json(payload);
+            }
+        } catch (err) {
+            console.warn("[news] NewsAPI attempt failed, falling back to Google News:", err.message);
         }
     }
 
+    // Resilient fallback to Google News RSS
     try {
-        const params = new URLSearchParams({
-            apiKey,
-            language: "en",
-            pageSize: String(sizeNum),
-            page: String(pageNum),
-        });
-
-        let endpoint;
-        if (q) {
-            params.set("q", q);
-            endpoint = `${BASE_URL}/everything?${params.toString()}`;
-        } else {
-            const supportedCountries = ['ae','ar','at','au','be','bg','br','ca','ch','cn','co','cu','cz','de','eg','fr','gb','gr','hk','hu','id','ie','il','in','it','jp','kr','lt','lv','ma','mx','my','ng','nl','no','nz','ph','pl','pt','ro','rs','ru','sa','se','sg','si','sk','th','tr','tw','ua','us','ve','za'];
-            if (iso2 && supportedCountries.includes(iso2.toLowerCase())) params.set("country", iso2.toLowerCase());
-            
-            const validCats = ['business','entertainment','general','health','science','sports','technology'];
-            let targetCat = (category || 'general').toLowerCase();
-            if (targetCat === 'top' || !validCats.includes(targetCat)) targetCat = 'general';
-            params.set("category", targetCat);
-            endpoint = `${BASE_URL}/top-headlines?${params.toString()}`;
-        }
-
-        const response = await fetch(endpoint);
-        const data = await response.json();
-
-        if (data.status === "error") {
-            return res.status(502).json({ status: "error", message: data.message || "NewsAPI.org error" });
-        }
-
-        // If top-headlines returned 0 results for a country, try /everything with iso2 as keyword
-        if ((!data.articles || data.articles.length === 0) && !q && iso2) {
-            console.warn(`[news] No headlines for ${iso2}, falling back to Everything search...`);
-            const fallbackParams = new URLSearchParams({
-                apiKey,
-                language: "en",
-                pageSize: 40,
-                q: iso2, // Search for the country ID as a keyword
-                sortBy: "relevance"
-            });
-            const fallbackRes = await fetch(`${BASE_URL}/everything?${fallbackParams}`);
-            const fallbackData = await fallbackRes.json();
-            if (fallbackData.status !== 'error') {
-                data.articles = (data.articles || []).concat(fallbackData.articles || []);
-                data.totalResults = (data.totalResults || 0) + (fallbackData.totalResults || 0);
-            }
-        }
-
-        const results = (data.articles || [])
-            .filter(a => a.title && a.title !== '[Removed]')
-            .map(a => ({
-                title: a.title,
-                link: a.url,
-                pubDate: a.publishedAt,
-                source: a.source?.name || "Global News",
-                source_id: a.source?.id || "newsapi",
-                source_url: a.url,
-                category: category || "general",
-                description: a.description || "",
-                image: a.urlToImage || null,
-                image_url: a.urlToImage || null,
-                author: a.author || null,
-            }));
-
-        const payload = {
-            status: "success",
-            totalResults: data.totalResults || results.length,
-            results: results.slice(0, sizeNum),
-        };
-
+        const payload = await fetchGoogleNews({ category, q, iso2, size: sizeNum });
         setCache(cacheKey, payload, CACHE_TTL);
-        res.setHeader("X-Cache", "MISS");
+        res.setHeader("X-Cache", "MISS-GOOGLE");
         return res.status(200).json(payload);
-
     } catch (err) {
-        return res.status(500).json({ status: "error", message: err.message });
+        console.error("[news] Google News fallback failed:", err.message);
+        return res.status(502).json({
+            status: "error",
+            code: "NEWS_FEED_UNAVAILABLE",
+            message: "Live news feed temporarily unavailable."
+        });
     }
 }

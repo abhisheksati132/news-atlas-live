@@ -122,7 +122,7 @@ export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") return res.status(200).end();
 
-  const type = String(req.query?.type || "").toLowerCase();
+  const type = String(req.query?.type || "forex").toLowerCase();
   const currency = String(req.query?.currency || "USD").toUpperCase();
   const country = String(req.query?.country || "").trim().toLowerCase();
 

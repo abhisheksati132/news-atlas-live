@@ -363,7 +363,6 @@ async function fetchAllData(countryName) {
     let lat = 0, lon = 0;
     if (c.latlng && c.latlng.length === 2) [lat, lon] = c.latlng;
     else if (c.capitalInfo && c.capitalInfo.latlng) [lat, lon] = c.capitalInfo.latlng;
-    const capitalName = c.capital ? c.capital[0] : c.name.common;
     window._currentWeatherLocation = `${capitalName}, ${c.name.common}`;
 
     setText("fact-pop-2", formatPopulationM(c.population));

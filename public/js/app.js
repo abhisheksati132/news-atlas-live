@@ -666,6 +666,28 @@ window.zoomMap = function(factor) {
     window.mapEngine.map.zoomTo(factor > 1 ? current + 1 : current - 1);
   }
 };
+
+window.toggleAutoRotate = function() {
+  if (!window.mapEngine) return;
+  const isRotating = window.mapEngine.toggleAutoRotate();
+  const btn = document.getElementById('autorotate-btn');
+  if (btn) {
+    btn.classList.toggle('text-indigo-400', isRotating);
+    btn.classList.toggle('opacity-100', isRotating);
+  }
+  if (window.showToast) window.showToast(isRotating ? "Auto-rotate enabled" : "Auto-rotate disabled", "info");
+};
+
+window.toggleDayNightTerminator = function() {
+  if (!window.mapEngine) return;
+  const isActive = window.mapEngine.toggleNightLayer();
+  const btn = document.getElementById('terminator-btn');
+  if (btn) {
+    btn.classList.toggle('text-amber-400', isActive);
+    btn.classList.toggle('opacity-100', isActive);
+  }
+  if (window.showToast) window.showToast(isActive ? "Day/Night shadow enabled" : "Day/Night shadow disabled", "info");
+};
 function setupEventListeners() {
   window.addEventListener("keydown", (e) => {
     // Esc handling

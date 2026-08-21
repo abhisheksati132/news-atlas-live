@@ -399,6 +399,12 @@ class MapboxEngine {
 
             let hoveredId = null;
             let hoverUpdateRequested = false;
+            const tooltipEl = document.getElementById('map-tooltip');
+            const tooltipName = document.getElementById('tooltip-name');
+            const tooltipFlag = document.getElementById('tooltip-flag');
+            const tooltipCapital = document.getElementById('tooltip-capital');
+            const tooltipPop = document.getElementById('tooltip-pop');
+
             this.map.on('mousemove', 'country-fills', (e) => {
                 if (hoverUpdateRequested) return;
                 hoverUpdateRequested = true;
@@ -406,14 +412,48 @@ class MapboxEngine {
                 requestAnimationFrame(() => {
                     if (!e.features.length) {
                         hoverUpdateRequested = false;
+                        if (tooltipEl) tooltipEl.classList.add('hidden');
                         return;
                     }
-                    this.map.getCanvas().style.cursor = 'crosshair';
+                    this.map.getCanvas().style.cursor = 'pointer';
+                    const feat = e.features[0];
                     if (hoveredId !== null) {
                         this.map.setFeatureState({ source: 'countries', id: hoveredId }, { hover: false });
                     }
-                    hoveredId = e.features[0].id;
+                    hoveredId = feat.id;
                     this.map.setFeatureState({ source: 'countries', id: hoveredId }, { hover: true });
+
+                    if (tooltipEl) {
+                        const rawName = feat.properties?.name || '';
+                        const match = window.globalSearchData ? window.globalSearchData.find(c => 
+                            c.name?.common?.toLowerCase() === rawName.toLowerCase() ||
+                            rawName.toLowerCase().includes(c.name?.common?.toLowerCase()) ||
+                            c.name?.common?.toLowerCase().includes(rawName.toLowerCase())
+                        ) : null;
+
+                        if (tooltipName) tooltipName.innerText = match ? match.name.common : rawName;
+                        if (tooltipCapital) tooltipCapital.innerText = match?.capital ? match.capital[0] : '--';
+                        if (tooltipPop) {
+                            const pop = match?.population;
+                            tooltipPop.innerText = pop ? (pop >= 1e9 ? (pop / 1e9).toFixed(2) + 'B' : (pop / 1e6).toFixed(1) + 'M') : '--';
+                        }
+                        if (tooltipFlag) {
+                            const flagUrl = match?.flags?.svg || match?.flags?.png || (match?.cca2 ? `https://flagcdn.com/w80/${match.cca2.toLowerCase()}.png` : '');
+                            if (flagUrl) {
+                                tooltipFlag.src = flagUrl;
+                                tooltipFlag.classList.remove('hidden');
+                            } else {
+                                tooltipFlag.classList.add('hidden');
+                            }
+                        }
+
+                        const x = Math.min(window.innerWidth - 200, Math.max(12, e.originalEvent.clientX + 16));
+                        const y = Math.min(window.innerHeight - 150, Math.max(12, e.originalEvent.clientY + 16));
+                        tooltipEl.style.left = `${x}px`;
+                        tooltipEl.style.top = `${y}px`;
+                        tooltipEl.classList.remove('hidden');
+                    }
+
                     hoverUpdateRequested = false;
                 });
             });
@@ -424,6 +464,7 @@ class MapboxEngine {
                     this.map.setFeatureState({ source: 'countries', id: hoveredId }, { hover: false });
                 }
                 hoveredId = null;
+                if (tooltipEl) tooltipEl.classList.add('hidden');
             });
 
             this.map.on('click', 'country-fills', (e) => {

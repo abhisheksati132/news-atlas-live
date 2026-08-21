@@ -174,10 +174,10 @@
     </div>
   </header>
     <nav class="nav-tab-strip flex items-center justify-center gap-1.5 px-4 h-11 bg-slate-950/80 border-b border-white/[0.06] backdrop-blur-md z-[950] relative shrink-0">
-    <button type="button" class="nav-tab active px-4 py-1.5 rounded-full text-[10px] font-extrabold tracking-wider uppercase transition-all" id="tab-btn-map" onclick="switchTab('map')">
+    <button type="button" class="nav-tab px-4 py-1.5 rounded-full text-[10px] font-extrabold tracking-wider uppercase transition-all" id="tab-btn-map" onclick="switchTab('map')">
       <i class="fas fa-map mr-1.5 text-sky-400"></i>Map
     </button>
-    <button type="button" class="nav-tab px-4 py-1.5 rounded-full text-[10px] font-extrabold tracking-wider uppercase transition-all" id="tab-btn-intel" aria-controls="tab-intel" onclick="switchTab('intel')">
+    <button type="button" class="nav-tab active px-4 py-1.5 rounded-full text-[10px] font-extrabold tracking-wider uppercase transition-all" id="tab-btn-intel" aria-controls="tab-intel" onclick="switchTab('intel')">
       <i class="fas fa-chart-pie mr-1.5 text-sky-400"></i>Summary
     </button>
     <button type="button" class="nav-tab px-4 py-1.5 rounded-full text-[10px] font-extrabold tracking-wider uppercase transition-all" id="tab-btn-news" aria-controls="tab-news" onclick="switchTab('news')">
@@ -242,7 +242,7 @@
         <div id="layer-legend" class="hidden mt-1 flex flex-wrap gap-2 layer-legend justify-center px-2"></div>
       </div>
       <div class="flex-1 relative w-full h-full overflow-hidden group">
-        <div id="map-container" class="absolute inset-0 w-full h-full map-locked transition-all duration-1000"
+        <div id="map-container" class="absolute inset-0 w-full h-full transition-all duration-1000"
           role="img"
           aria-label="Interactive world map. Click a country for intelligence data. Supports 2D and 3D view."></div>
         <div id="map-legend" class="hidden absolute bottom-4 left-4 z-30 rounded-xl px-4 py-3 text-left" style="
@@ -250,34 +250,6 @@
               border: 1px solid rgba(255, 255, 255, 0.08);
               min-width: 180px;
             "></div>
-
-
-        <div id="map-interaction-overlay"
-          class="map-interaction-overlay flex items-center justify-center pointer-events-none">
-          <div id="map-interact-content"
-            class="map-scan-card cursor-pointer pointer-events-auto hover:border-sky-400/25 transition-colors"
-            role="button"
-            tabindex="0"
-            onclick="activateMapInteraction()"
-            onkeydown="if(event.key==='Enter'||event.key===' ')activateMapInteraction()">
-            <div id="map-hint-click" class="hidden"></div>
-            <div class="map-scan-icon">
-              <i id="map-interact-icon" class="fas fa-map-marked-alt text-lg"></i>
-            </div>
-            <p class="text-[11px] font-semibold text-slate-200 tracking-wide">Enable map interaction</p>
-            <p class="text-[11px] text-slate-500 mt-1.5 leading-snug">Click to pan, zoom, and select countries. Keyboard shortcuts stay active.</p>
-          </div>
-        </div>
-
-        <script>
-          window.activateMapInteraction = function () {
-            const overlay = document.getElementById("map-interaction-overlay");
-            if (!overlay) return;
-        overlay.classList.add("hidden");
-            if (window.mapEngine) window.mapEngine.enableInteractions();
-            if (window.playTacticalSound) window.playTacticalSound("success");
-          };
-        </script>
       </div>
     </div>
 

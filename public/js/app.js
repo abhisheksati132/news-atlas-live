@@ -726,27 +726,25 @@ function updateSystemTime() {
 
 window.switchTab = (id) => {
   if (typeof window.playTacticalSound === "function") window.playTacticalSound("tab");
+  const normId = (id || "intel").toLowerCase().replace("tab-", "").replace("btn-", "");
+  
   const tabs = document.querySelectorAll(".nav-tab");
   const contents = document.querySelectorAll(".tab-content");
 
-  let targetTab = document.getElementById(`tab-btn-${id}`) || 
-                  Array.from(tabs).find(t => t.id === id || t.getAttribute("data-target") === id);
+  let targetTab = document.getElementById(`tab-btn-${normId}`) || 
+                  Array.from(tabs).find(t => t.id === `tab-btn-${normId}` || t.id === normId || t.getAttribute("data-target") === normId);
 
   if (!targetTab) {
     tabs.forEach(tab => {
         const txt = tab.innerText.trim().toLowerCase();
-        if (txt.includes(id.toLowerCase())) {
+        if (txt.includes(normId)) {
             targetTab = tab;
         }
     });
   }
 
-  if (!targetTab) {
-    console.warn("Sector Uplink Lost: Tab not found for", id);
-    return;
-  }
-
-  if (id === "map") {
+  // Handle mobile view state vs desktop
+  if (normId === "map") {
     document.body.classList.remove("view-state-analytics");
     document.body.classList.add("view-state-map");
     if (window.mapEngine && window.mapEngine.map) {
@@ -761,36 +759,38 @@ window.switchTab = (id) => {
     t.classList.remove("active");
     t.setAttribute("aria-selected", "false");
   });
-  contents.forEach((c) => c.classList.remove("active"));
 
-  targetTab.classList.add("active");
-  targetTab.setAttribute("aria-selected", "true");
-
-  const targetContentId = targetTab.getAttribute("aria-controls") || 
-                          targetTab.getAttribute("data-target") || 
-                          (targetTab.id ? targetTab.id.replace('tab-btn-', '').replace('btn-', '') : null);
-  
-  if (targetContentId && id !== "map") {
-    window._currentTab = targetContentId;
-    const targetContent = document.getElementById(targetContentId);
-    if (targetContent) {
-      targetContent.classList.add("active");
-    }
-
-    const countryName = window.selectedCountry?.properties?.name || window._currentCountryName || "";
-    if (targetContentId === "tab-intel" && window.fetchGDELTEvents) {
-      window.fetchGDELTEvents(countryName);
-    }
-    if (targetContentId === "tab-economic" && window.fetchECBRates) {
-      window.fetchECBRates();
-    }
-    if (targetContentId === "tab-markets" && window.initializeMarkets) {
-      window.initializeMarkets(countryName || "Global");
-    }
-    window.dispatchEvent(new Event("resize"));
+  if (targetTab) {
+    targetTab.classList.add("active");
+    targetTab.setAttribute("aria-selected", "true");
   }
 
-  syncMobileBottomNav(id);
+  const targetContentId = normId === "map" 
+    ? (window._currentTab || "tab-intel")
+    : (normId === "eco" ? "tab-economic" : normId === "atmo" ? "tab-atmosphere" : `tab-${normId}`);
+
+  window._currentTab = targetContentId;
+
+  contents.forEach((c) => {
+    c.classList.toggle("active", c.id === targetContentId);
+  });
+
+  const countryName = window.selectedCountry?.properties?.name || window._currentCountryName || "India";
+  if (targetContentId === "tab-intel" && window.fetchGDELTEvents) {
+    window.fetchGDELTEvents(countryName);
+  }
+  if (targetContentId === "tab-news" && window.fetchNews) {
+    window.fetchNews(countryName);
+  }
+  if (targetContentId === "tab-economic" && window.fetchDetailedEconomics) {
+    window.fetchDetailedEconomics(countryName);
+  }
+  if (targetContentId === "tab-markets" && window.initializeMarkets) {
+    window.initializeMarkets(countryName || "Global");
+  }
+  window.dispatchEvent(new Event("resize"));
+
+  syncMobileBottomNav(normId);
 };
 
 function syncMobileBottomNav(tabId) {
@@ -1013,13 +1013,32 @@ function initCommandPalette() {
   input.addEventListener("input", (e) => search(e.target.value));
 }
 
-window.mapEngine = new MapboxEngine('map-container');
-window.mapEngine.init();
-initTerminal();
-setupEventListeners();
-initMobileBottomNav();
-initCommandPalette();
-setInterval(updateSystemTime, 1000);
+async function startApp() {
+  await fetchGlobalSearchData();
+  await initTerminal();
+  setupEventListeners();
+  initMobileBottomNav();
+  initCommandPalette();
+  setInterval(updateSystemTime, 1000);
+
+  window.mapEngine = new MapboxEngine('map-container');
+  await window.mapEngine.init();
+
+  if (window.activateMapInteraction) window.activateMapInteraction();
+
+  const defaultCountry = "India";
+  if (window.handleCountryClickByName) {
+    window.handleCountryClickByName(defaultCountry);
+  } else if (window.fetchAllData) {
+    window.fetchAllData(defaultCountry);
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startApp);
+} else {
+  startApp();
+}
 window.toggleShortcuts = () => {
     if (window.showToast) window.showToast("Shortcuts: Esc=Close, Ctrl+K=Search, ?=Help", "info");
 };

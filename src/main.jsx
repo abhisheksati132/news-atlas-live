@@ -5,21 +5,42 @@ import './styles/globals.css';
 const AIAssistant = () => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Hello! I am your NewsAtlas AI Assistant. Ask any question about global news, macroeconomic data, weather, or country profiles.' }
+    {
+      role: 'assistant',
+      content: 'Hello! I am your NewsAtlas Geopolitical & Economic Analyst. Ask any question about country profiles, macroeconomic stability, trade, real-time news, or weather forecasts.'
+    }
   ]);
   const [loading, setLoading] = useState(false);
+  const [copiedIdx, setCopiedIdx] = useState(null);
   const scrollRef = useRef(null);
 
+  const currentCountry = window._currentCountryName || 'Global';
+
+  const promptChips = [
+    { label: '📈 Macroeconomic Outlook', prompt: `Summarize key macroeconomic indicators, GDP, inflation, and growth drivers for ${currentCountry}.` },
+    { label: '⚡ Geopolitical Risk', prompt: `What are the primary geopolitical, regional security, and trade risks for ${currentCountry}?` },
+    { label: '🌦️ Climate & Weather', prompt: `Provide an environmental and meteorological summary for ${currentCountry}.` },
+    { label: '💱 Currency & Forex', prompt: `Analyze currency stability and central bank policy dynamics for ${currentCountry}.` },
+  ];
+
   useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages]);
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, loading]);
 
-  const handleSend = async () => {
-    if (!input.trim() || loading) return;
+  const copyMessage = (text, idx) => {
+    navigator.clipboard.writeText(text);
+    setCopiedIdx(idx);
+    setTimeout(() => setCopiedIdx(null), 1800);
+  };
 
-    const userMsg = input.trim();
+  const handleSendPrompt = async (textToSend) => {
+    const userMsg = (textToSend || input).trim();
+    if (!userMsg || loading) return;
+
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
-    setInput('');
+    if (!textToSend) setInput('');
 
     if (userMsg.startsWith("/")) {
       const parts = userMsg.split(" ");
@@ -86,11 +107,11 @@ const AIAssistant = () => {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const errText = data.error || data.message || "Service unavailable";
+        const errText = data.error || data.message || "Service temporarily unavailable";
         setMessages(prev => [...prev, { role: 'assistant', isError: true, content: `Error: ${errText}` }]);
         return;
       }
-      const content = data.candidates?.[0]?.content?.parts?.[0]?.text || data.response || "No response generated. Please try again.";
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text || data.response || "No analysis generated. Please refine your query.";
       setMessages(prev => [...prev, { role: 'assistant', content: content.replace(/\*\*/g, '') }]);
     } catch (e) {
       setMessages(prev => [...prev, { role: 'assistant', isError: true, content: "Unable to reach AI service. Please check your connection." }]);
@@ -99,46 +120,111 @@ const AIAssistant = () => {
     }
   };
 
+  const handleResetChat = () => {
+    setMessages([
+      {
+        role: 'assistant',
+        content: `Conversation reset. Focused on ${currentCountry}. Ask any geopolitical, market, or macroeconomic question.`
+      }
+    ]);
+  };
+
   return (
-    <div className="flex flex-col h-[460px] max-h-[75vh] overflow-hidden bg-[var(--bg-surface)] transition-colors">
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
+    <div className="flex flex-col h-[520px] max-h-[80vh] overflow-hidden bg-[var(--bg-surface)] transition-colors">
+      {/* Context & Action Bar */}
+      <div className="px-4 py-2 bg-[var(--bg-surface-subtle)] border-b border-[var(--border-subtle)] flex items-center justify-between text-[11px] font-mono">
+        <div className="flex items-center gap-2">
+          <span className="text-slate-500 uppercase font-semibold">Active Sector:</span>
+          <span className="px-2 py-0.5 rounded-full bg-[var(--accent-subtle)] text-[var(--accent-primary)] font-bold">
+            {currentCountry}
+          </span>
+        </div>
+        <button
+          onClick={handleResetChat}
+          className="text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-1 text-[10px] uppercase tracking-wider font-semibold"
+          title="Reset conversation"
+        >
+          <i className="fas fa-redo-alt text-[9px]"></i>
+          <span>Clear</span>
+        </button>
+      </div>
+
+      {/* Messages Scroll Area */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3.5 custom-scrollbar">
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] px-4 py-2.5 rounded-xl text-xs leading-relaxed transition-colors ${m.role === 'user'
-              ? 'bg-[var(--accent-primary)] text-white shadow-sm font-medium'
-              : m.isError
-                ? 'bg-red-500/10 text-red-500 border border-red-500/20 font-mono text-[11px]'
-                : 'bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-sans'
-              }`}>
+          <div key={i} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
+            <div className={`relative group max-w-[90%] px-4 py-3 rounded-2xl text-xs leading-relaxed transition-all ${
+              m.role === 'user'
+                ? 'bg-[var(--accent-primary)] text-white shadow-sm font-medium rounded-tr-sm'
+                : m.isError
+                  ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20 font-mono text-[11px] rounded-tl-sm'
+                  : 'bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-tl-sm whitespace-pre-line font-sans'
+            }`}>
               {m.content}
+
+              {/* Copy message button */}
+              {m.role === 'assistant' && !m.isError && (
+                <button
+                  onClick={() => copyMessage(m.content, i)}
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-white/10 text-slate-400 hover:text-slate-200 text-[10px]"
+                  title="Copy analysis"
+                >
+                  <i className={`fas ${copiedIdx === i ? 'fa-check text-emerald-400' : 'fa-copy'}`}></i>
+                </button>
+              )}
             </div>
           </div>
         ))}
+
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-[var(--bg-surface-subtle)] px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] flex gap-1.5 items-center">
-              <span className="w-1.5 h-1.5 bg-[var(--accent-primary)] rounded-full animate-bounce"></span>
-              <span className="w-1.5 h-1.5 bg-[var(--accent-primary)] rounded-full animate-bounce [animation-delay:75ms]"></span>
-              <span className="w-1.5 h-1.5 bg-[var(--accent-primary)] rounded-full animate-bounce [animation-delay:150ms]"></span>
+            <div className="bg-[var(--bg-surface-subtle)] px-4 py-3 rounded-2xl rounded-tl-sm border border-[var(--border-subtle)] flex items-center gap-2">
+              <span className="w-2 h-2 bg-[var(--accent-primary)] rounded-full animate-bounce"></span>
+              <span className="w-2 h-2 bg-[var(--accent-primary)] rounded-full animate-bounce [animation-delay:100ms]"></span>
+              <span className="w-2 h-2 bg-[var(--accent-primary)] rounded-full animate-bounce [animation-delay:200ms]"></span>
+              <span className="text-[11px] font-mono text-slate-400 ml-1">Analyzing telemetry...</span>
             </div>
           </div>
         )}
       </div>
+
+      {/* Suggested Prompt Chips */}
+      {messages.length <= 2 && !loading && (
+        <div className="px-4 pb-2 pt-1 flex flex-wrap gap-1.5 border-t border-[var(--border-subtle)] bg-[var(--bg-surface)]">
+          {promptChips.map((chip, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleSendPrompt(chip.prompt)}
+              className="text-[11px] px-2.5 py-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] hover:border-[var(--accent-primary)] text-slate-300 hover:text-white transition-all font-sans font-medium text-left"
+            >
+              {chip.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Input Composer */}
       <div className="p-3 border-t border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] flex gap-2 items-center transition-colors">
         <input
-          className="flex-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg px-3.5 py-2 outline-none text-[var(--text-primary)] text-xs font-sans placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent-primary)] transition-all"
-          placeholder="Ask about countries, macroeconomics, weather, or news..."
+          className="flex-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl px-3.5 py-2.5 outline-none text-[var(--text-primary)] text-xs font-sans placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent-primary)] transition-all"
+          placeholder={`Ask anything about ${currentCountry}... (or type /compare, /weather, /layer)`}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
-              handleSend();
+              handleSendPrompt();
             }
           }}
         />
-        <button type="button" onClick={handleSend} className="shrink-0 w-8 h-8 rounded-lg bg-[var(--accent-primary)] text-white hover:bg-[var(--accent-primary-hover)] transition-colors flex items-center justify-center shadow-sm" aria-label="Send message">
-          <i className="fas fa-paper-plane text-[11px]"></i>
+        <button
+          type="button"
+          onClick={() => handleSendPrompt()}
+          disabled={loading || !input.trim()}
+          className="shrink-0 w-9 h-9 rounded-xl bg-[var(--accent-primary)] text-white hover:bg-[var(--accent-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center shadow-sm"
+          aria-label="Send query"
+        >
+          <i className="fas fa-paper-plane text-xs"></i>
         </button>
       </div>
     </div>

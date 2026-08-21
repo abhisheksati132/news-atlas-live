@@ -317,23 +317,26 @@ async function fetchAllData(countryName) {
     window.iso2Code = iso2Code;
     window.currencyCode = currencyCode;
     setText("selected-country-name", c.name?.common || countryName);
-    const nativeOfficial = c.name?.official || (c.name?.nativeName ? Object.values(c.name.nativeName)[0]?.common : c.name?.common);
-    setText("dossier-native-name", nativeOfficial || "--");
+    const capitalName = c.capital ? c.capital[0] : "N/A";
+    setText("selected-country-capital", `Capital: ${capitalName} · ${(c.subregion || c.region || "").toUpperCase()}`);
     setText("selected-country-code-badge", (c.cca3 || c.cca2 || "ISO").toUpperCase());
 
     const currObj = c.currencies ? Object.values(c.currencies)[0] : null;
     setText("fact-currency", currObj ? `${currencyCode} (${currObj.symbol || ""})` : currencyCode);
     setText("fact-pop", formatPopulationM(c.population));
-    setText("fact-cap", c.capital ? c.capital[0] : "N/A");
     setText("fact-region", c.subregion || c.region || "--");
     setText("fact-area", c.area ? c.area.toLocaleString() : "--");
     setText("fact-code", c.idd ? (c.idd.root || "") + (c.idd.suffixes ? c.idd.suffixes[0] : "") : "--");
-    setText("fact-demonym", c.demonyms?.eng?.m || "--");
-    setText("fact-gini", c.gini ? Object.values(c.gini)[0] : "N/A");
     setText("fact-drive", c.car?.side ? c.car.side.toUpperCase() : "--");
 
     const flagUrl = c.flags?.svg || c.flags?.png || (c.cca2 ? `https://flagcdn.com/w80/${c.cca2.toLowerCase()}.png` : "");
-    setSrc("dossier-flag", flagUrl);
+    const detailFlag = document.getElementById("detail-flag");
+    const detailFlagPlaceholder = document.getElementById("detail-flag-placeholder");
+    if (detailFlag && flagUrl) {
+      detailFlag.src = flagUrl;
+      detailFlag.classList.remove("hidden");
+      if (detailFlagPlaceholder) detailFlagPlaceholder.classList.add("hidden");
+    }
 
     const flagEl = safeEl("sector-flag");
     const nameEl = safeEl("sector-name");

@@ -173,7 +173,7 @@
       </button>
     </div>
   </header>
-    <nav class="nav-tab-strip flex items-center justify-center gap-1.5 px-4 h-11 bg-slate-950/80 border-b border-white/[0.06] backdrop-blur-md z-[950] relative shrink-0">
+    <nav class="nav-tab-strip flex items-center justify-center gap-1.5 px-4 h-11 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] backdrop-blur-md z-[950] relative shrink-0">
     <button type="button" class="nav-tab px-4 py-1.5 rounded-full text-[10px] font-extrabold tracking-wider uppercase transition-all" id="tab-btn-map" onclick="switchTab('map')">
       <i class="fas fa-map mr-1.5 text-sky-400"></i>Map
     </button>
@@ -781,7 +781,7 @@
   
 
   <!-- Centered AI Assistant Modal -->
-  <div id="ai-chat-modal" class="fixed inset-0 z-[3000] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onclick="if(event.target === this) window.closeCLI();" style="display: none;">
+  <div id="ai-chat-modal" class="fixed inset-0 z-[3000] hidden items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onclick="if(event.target === this) window.closeCLI();" style="display: none;">
     <div class="w-full max-w-xl rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-2xl overflow-hidden flex flex-col" onclick="event.stopPropagation()">
       <div class="px-5 py-3.5 border-b border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] flex items-center justify-between">
         <div class="flex items-center gap-2.5">

@@ -1,6 +1,6 @@
 /* ==========================================================================
-   NewsAtlas Live — Claude.ai Design Language
-   Navy / Indigo Palette (Dual-Mode: Paper Light + Deep Navy Dark)
+   NewsAtlas Live — Midnight Operations Design Language
+   Navy & Solar Amber Palette (Dual-Mode: Coastal Day Light + Oceanic Midnight Dark)
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -10,49 +10,54 @@
 :root[data-theme="light"],
 body.light-theme,
 [data-theme="light"] {
-  /* Surfaces: warm, paper-like off-white with cool blue-grey cast */
-  --bg-primary: #F3F4F8;
+  /* Surfaces: Crisp coastal sky tint with pure white cards */
+  --bg-primary: #F0F4F9;
   --bg-surface: #FFFFFF;
-  --bg-surface-hover: #ECEDF3;
-  --bg-surface-active: #E2E4ED;
-  --bg-surface-subtle: #F8F9FC;
+  --bg-surface-hover: #F1F5FA;
+  --bg-surface-active: #E4ECF5;
+  --bg-surface-subtle: #F6F9FC;
   --bg-elevated: #FFFFFF;
 
-  /* Borders: soft warm-grey with subtle blue tint */
-  --border-subtle: #DCDDE6;
-  --border-subtle-hover: #C8CAD6;
-  --border-subtle-active: #B4B7C7;
-  --border-bright: #D0D2DE;
+  /* Borders: Crisp steel with slight sky cast */
+  --border-subtle: #D2DCE8;
+  --border-subtle-hover: #BACADF;
+  --border-subtle-active: #A2B7D3;
+  --border-bright: #CBD7E6;
 
-  /* Typography */
-  --text-primary: #1C1E2A;
-  --text-secondary: #6B6F85;
-  --text-tertiary: #9296AB;
-  --text-faint: #B5B8C9;
+  /* Typography: Deep navy ink */
+  --text-primary: #0A1124;
+  --text-secondary: #48556E;
+  --text-tertiary: #71829E;
+  --text-faint: #9EADC3;
   --text-inverse: #FFFFFF;
 
-  /* Single Accent: Rich Indigo / Royal Blue */
-  --accent-primary: #3D4FC7;
-  --accent-primary-hover: #3242A8;
-  --accent-primary-active: #273487;
-  --accent-subtle: rgba(61, 79, 199, 0.08);
-  --accent-subtle-hover: rgba(61, 79, 199, 0.14);
+  /* Accent: Deep Marine Cobalt with Amber accents */
+  --accent-primary: #1D4ED8;
+  --accent-primary-hover: #1E40AF;
+  --accent-primary-active: #172554;
+  --accent-subtle: rgba(29, 78, 216, 0.08);
+  --accent-subtle-hover: rgba(29, 78, 216, 0.14);
   --accent-text: #FFFFFF;
-  --accent-focus-ring: rgba(61, 79, 199, 0.35);
+  --accent-focus-ring: rgba(29, 78, 216, 0.35);
 
-  /* Status Colors (Desaturated, calm) */
-  --success: #2E7D5B;
-  --success-bg: rgba(46, 125, 91, 0.1);
-  --warning: #B26A00;
-  --warning-bg: rgba(178, 106, 0, 0.1);
-  --danger: #C23B38;
-  --danger-bg: rgba(194, 59, 56, 0.1);
+  /* Tactical Secondary Accent */
+  --accent-cyan: #0284C7;
+  --accent-cyan-subtle: rgba(2, 132, 199, 0.08);
+  --accent-amber: #D97706;
 
-  /* Shadows (Subtle, paper-like depth) */
-  --shadow-subtle: 0 1px 2px rgba(28, 30, 42, 0.04), 0 1px 1px rgba(28, 30, 42, 0.02);
-  --shadow-card: 0 2px 8px rgba(28, 30, 42, 0.05), 0 1px 2px rgba(28, 30, 42, 0.03);
-  --shadow-lift: 0 8px 24px -4px rgba(28, 30, 42, 0.08), 0 2px 6px -1px rgba(28, 30, 42, 0.04);
-  --shadow-dropdown: 0 12px 32px -4px rgba(28, 30, 42, 0.12), 0 2px 8px rgba(28, 30, 42, 0.04);
+  /* Status Colors */
+  --success: #059669;
+  --success-bg: rgba(5, 150, 105, 0.1);
+  --warning: #D97706;
+  --warning-bg: rgba(217, 119, 6, 0.1);
+  --danger: #DC2626;
+  --danger-bg: rgba(220, 38, 38, 0.1);
+
+  /* Shadows */
+  --shadow-subtle: 0 1px 2px rgba(10, 17, 36, 0.04), 0 1px 1px rgba(10, 17, 36, 0.02);
+  --shadow-card: 0 2px 8px rgba(10, 17, 36, 0.06), 0 1px 2px rgba(10, 17, 36, 0.03);
+  --shadow-lift: 0 8px 24px -4px rgba(10, 17, 36, 0.1), 0 2px 6px -1px rgba(10, 17, 36, 0.04);
+  --shadow-dropdown: 0 12px 32px -4px rgba(10, 17, 36, 0.14), 0 2px 8px rgba(10, 17, 36, 0.05);
 
   /* Radii */
   --radius-sm: 8px;
@@ -79,49 +84,54 @@ body.light-theme,
 body.night-theme,
 body:not(.light-theme),
 [data-theme="dark"] {
-  /* Surfaces: deep, rich navy/indigo — never pure black */
-  --bg-primary: #0B0E1A;
-  --bg-surface: #141828;
-  --bg-surface-hover: #1B2036;
-  --bg-surface-active: #222944;
-  --bg-surface-subtle: #101422;
-  --bg-elevated: #181D30;
+  /* Surfaces: Deep ocean midnight navy */
+  --bg-primary: #060B14;
+  --bg-surface: #0B1324;
+  --bg-surface-hover: #101B33;
+  --bg-surface-active: #172442;
+  --bg-surface-subtle: #080E1C;
+  --bg-elevated: #0E182D;
 
-  /* Borders: low-contrast navy-grey */
-  --border-subtle: #2A2F45;
-  --border-subtle-hover: #373E5B;
-  --border-subtle-active: #475075;
-  --border-bright: #323854;
+  /* Borders: Low-contrast atmospheric steel-indigo */
+  --border-subtle: #1C2942;
+  --border-subtle-hover: #293B5E;
+  --border-subtle-active: #38507F;
+  --border-bright: #263859;
 
-  /* Typography */
-  --text-primary: #E8E9F0;
-  --text-secondary: #8B90A8;
-  --text-tertiary: #636882;
-  --text-faint: #474B61;
-  --text-inverse: #0B0E1A;
+  /* Typography: High-clarity polar white and luminous slate */
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-tertiary: #64748B;
+  --text-faint: #475569;
+  --text-inverse: #060B14;
 
-  /* Single Accent Family: Tuned brighter for dark contrast */
-  --accent-primary: #5B6EF5;
-  --accent-primary-hover: #7383F7;
-  --accent-primary-active: #4859DE;
-  --accent-subtle: rgba(91, 110, 245, 0.12);
-  --accent-subtle-hover: rgba(91, 110, 245, 0.18);
-  --accent-text: #FFFFFF;
-  --accent-focus-ring: rgba(91, 110, 245, 0.4);
+  /* Accent: Solar Amber & Mission Cyan */
+  --accent-primary: #F59E0B;
+  --accent-primary-hover: #FBBF24;
+  --accent-primary-active: #D97706;
+  --accent-subtle: rgba(245, 158, 11, 0.12);
+  --accent-subtle-hover: rgba(245, 158, 11, 0.2);
+  --accent-text: #060B14;
+  --accent-focus-ring: rgba(245, 158, 11, 0.4);
 
-  /* Status Colors (Desaturated, calm) */
-  --success: #3DAE7A;
-  --success-bg: rgba(61, 174, 122, 0.12);
-  --warning: #E08E1A;
-  --warning-bg: rgba(224, 142, 26, 0.12);
-  --danger: #E25350;
-  --danger-bg: rgba(226, 83, 80, 0.12);
+  /* Tactical Secondary Accent */
+  --accent-cyan: #38BDF8;
+  --accent-cyan-subtle: rgba(56, 189, 248, 0.12);
+  --accent-amber: #F59E0B;
 
-  /* Shadows (Depth for dark navy layers) */
-  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.25);
-  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.35);
-  --shadow-lift: 0 10px 30px -4px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-dropdown: 0 14px 40px -6px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4);
+  /* Status Colors */
+  --success: #10B981;
+  --success-bg: rgba(16, 185, 129, 0.12);
+  --warning: #F59E0B;
+  --warning-bg: rgba(245, 158, 11, 0.12);
+  --danger: #EF4444;
+  --danger-bg: rgba(239, 68, 68, 0.12);
+
+  /* Shadows (Atmospheric depth) */
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-lift: 0 10px 30px -4px rgba(0, 0, 0, 0.7), 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-dropdown: 0 14px 40px -6px rgba(0, 0, 0, 0.8), 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 /* --------------------------------------------------------------------------
@@ -352,7 +362,8 @@ header {
 .nav-tab.active {
   color: var(--accent-primary) !important;
   background-color: var(--accent-subtle) !important;
-  border-color: transparent !important;
+  border-color: var(--border-subtle-hover) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   font-weight: 600;
 }
 

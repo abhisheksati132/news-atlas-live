@@ -115,9 +115,13 @@
     <div class="flex items-center gap-3 shrink-0">
       <div class="flex items-center gap-2.5 cursor-pointer" onclick="resetToGlobalCenter(true)">
         <div class="brand-mark shrink-0">
-          <i class="fas fa-satellite-dish text-sm text-sky-400"></i>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="8" cy="8" r="6.6" stroke="#fafafa" stroke-width="1.1"/>
+            <ellipse cx="8" cy="8" rx="2.9" ry="6.6" stroke="#71717a" stroke-width="0.9"/>
+            <path d="M1.4 8h13.2" stroke="#71717a" stroke-width="0.9"/>
+          </svg>
         </div>
-        <h1 class="brand-wordmark text-white leading-none">News<span class="text-sky-400/95">Atlas</span></h1>
+        <h1 class="brand-wordmark text-white leading-none">News<span>Atlas</span></h1>
       </div>
     </div>
 
@@ -128,13 +132,13 @@
         <i id="sector-globe-icon" class="fas fa-globe text-[10px] text-sky-400/90"></i>
         <img id="sector-flag" src="" class="hidden w-full h-full object-cover">
       </div>
-      <span id="sector-name" class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest font-mono truncate min-w-0">Global Sector</span>
-      <!-- Sector Pin / Bookmark Button -->
-      <button type="button" id="sector-pin-btn" onclick="togglePinCountry()" class="text-slate-500 hover:text-yellow-400 transition-colors ml-1.5 focus:outline-none hidden" title="Pin / Bookmark Sector">
+      <span id="sector-name" class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest font-mono truncate min-w-0">Global</span>
+      <!-- Pin button -->
+      <button type="button" id="sector-pin-btn" onclick="togglePinCountry()" class="text-slate-500 hover:text-slate-200 transition-colors ml-1.5 focus:outline-none hidden" title="Pin this country">
         <i class="far fa-star text-[10px]"></i>
       </button>
-      <!-- Sector Compare Button -->
-      <button type="button" id="sector-compare-btn" onclick="toggleCompareMode()" class="text-slate-500 hover:text-indigo-400 transition-colors ml-1.5 focus:outline-none hidden" title="Compare with another country">
+      <!-- Compare button -->
+      <button type="button" id="sector-compare-btn" onclick="toggleCompareMode()" class="text-slate-500 hover:text-slate-200 transition-colors ml-1.5 focus:outline-none hidden" title="Compare with another country">
         <i class="fas fa-columns text-[10px]"></i>
       </button>
     </div>
@@ -152,9 +156,9 @@
     </div>
 
     <div class="flex items-center gap-2 shrink-0">
-      <button type="button" id="header-ai-btn" onclick="window.toggleCLI()" class="header-widget flex items-center gap-1.5 px-3 h-8 shadow-sm text-indigo-400 hover:text-indigo-300 font-mono text-[10px] font-bold uppercase tracking-wider transition-colors" title="Toggle AI Copilot (`)">
+      <button type="button" id="header-ai-btn" onclick="window.toggleCLI()" class="header-widget flex items-center gap-1.5 px-3 h-8 shadow-sm hover:text-slate-100 font-medium text-xs transition-colors" title="Open assistant (`)">
         <i class="fas fa-brain text-xs"></i>
-        <span>AI Copilot</span>
+        <span>Assistant</span>
       </button>
       <button type="button" id="perf-toggle" onclick="togglePerformanceMode()" class="header-widget p-2 text-slate-500 hover:text-sky-400/90 transition-colors" title="Toggle performance mode (Low FX)">
         <i class="fas fa-bolt"></i>
@@ -233,9 +237,9 @@
             </button>
             <div class="w-px h-4 bg-[var(--border-subtle)] mx-1"></div>
             <select id="map-layer-select" onchange="changeMapLayer(this.value)" class="bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] rounded-lg px-2 py-1 text-[10px] text-slate-200 hover:text-white focus:outline-none font-mono font-bold tracking-wider cursor-pointer">
-              <option value="default">LAYER: STANDARD</option>
-              <option value="gdp">LAYER: GDP RANKINGS</option>
-              <option value="growth">LAYER: GDP GROWTH</option>
+              <option value="default">Standard</option>
+              <option value="gdp">GDP size</option>
+              <option value="growth">GDP growth</option>
             </select>
           </div>
         </div>
@@ -275,7 +279,7 @@
                   </div>
                   <div>
                     <h2 id="selected-country-name" class="text-base font-bold text-slate-100 leading-tight">Worldwide</h2>
-                    <p id="selected-country-capital" class="text-xs text-slate-400 font-medium">Select a sovereign country or region</p>
+                    <p id="selected-country-capital" class="text-xs text-slate-400 font-medium">Search or click a country</p>
                   </div>
                 </div>
                 <div id="country-status-badge" class="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold uppercase tracking-wider shrink-0 flex items-center gap-1">
@@ -312,32 +316,32 @@
               </div>
             </div>
 
-            <!-- Watched / Quick Teleport Sectors -->
+            <!-- Pinned countries -->
             <div id="pinned-sectors-card" class="apple-glass p-3.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2">
-                <span class="text-[11px] text-amber-400 uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
-                  <i class="fas fa-star text-xs text-amber-400"></i>Watched Sectors
+                <span class="text-[11px] text-slate-300 uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
+                  <i class="fas fa-star text-xs text-slate-500"></i>Pinned countries
                 </span>
-                <span class="text-[9px] text-slate-500 font-mono">Quick Access</span>
+                <span class="text-[9px] text-slate-500 font-mono">Quick access</span>
               </div>
               <div id="pinned-sectors-list" class="flex flex-wrap gap-1.5 pt-0.5">
-                <button type="button" onclick="handleCountryClickByName('India')" class="px-2.5 py-1 rounded-md bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] hover:border-indigo-500 text-xs font-mono text-slate-300 hover:text-white transition-all flex items-center gap-1.5">
-                  <span>🇮🇳</span> India
+                <button type="button" onclick="handleCountryClickByName('India')" class="px-2.5 py-1 rounded-md bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] hover:border-white/25 text-xs font-medium text-slate-300 hover:text-white transition-all">
+                  India
                 </button>
-                <button type="button" onclick="handleCountryClickByName('United States')" class="px-2.5 py-1 rounded-md bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] hover:border-indigo-500 text-xs font-mono text-slate-300 hover:text-white transition-all flex items-center gap-1.5">
-                  <span>🇺🇸</span> United States
+                <button type="button" onclick="handleCountryClickByName('United States')" class="px-2.5 py-1 rounded-md bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] hover:border-white/25 text-xs font-medium text-slate-300 hover:text-white transition-all">
+                  United States
                 </button>
-                <button type="button" onclick="handleCountryClickByName('United Kingdom')" class="px-2.5 py-1 rounded-md bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] hover:border-indigo-500 text-xs font-mono text-slate-300 hover:text-white transition-all flex items-center gap-1.5">
-                  <span>🇬🇧</span> United Kingdom
+                <button type="button" onclick="handleCountryClickByName('United Kingdom')" class="px-2.5 py-1 rounded-md bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] hover:border-white/25 text-xs font-medium text-slate-300 hover:text-white transition-all">
+                  United Kingdom
                 </button>
-                <button type="button" onclick="handleCountryClickByName('Germany')" class="px-2.5 py-1 rounded-md bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] hover:border-indigo-500 text-xs font-mono text-slate-300 hover:text-white transition-all flex items-center gap-1.5">
-                  <span>🇩🇪</span> Germany
+                <button type="button" onclick="handleCountryClickByName('Germany')" class="px-2.5 py-1 rounded-md bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] hover:border-white/25 text-xs font-medium text-slate-300 hover:text-white transition-all">
+                  Germany
                 </button>
-                <button type="button" onclick="handleCountryClickByName('Japan')" class="px-2.5 py-1 rounded-md bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] hover:border-indigo-500 text-xs font-mono text-slate-300 hover:text-white transition-all flex items-center gap-1.5">
-                  <span>🇯🇵</span> Japan
+                <button type="button" onclick="handleCountryClickByName('Japan')" class="px-2.5 py-1 rounded-md bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] hover:border-white/25 text-xs font-medium text-slate-300 hover:text-white transition-all">
+                  Japan
                 </button>
-                <button type="button" onclick="handleCountryClickByName('Brazil')" class="px-2.5 py-1 rounded-md bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] hover:border-indigo-500 text-xs font-mono text-slate-300 hover:text-white transition-all flex items-center gap-1.5">
-                  <span>🇧🇷</span> Brazil
+                <button type="button" onclick="handleCountryClickByName('Brazil')" class="px-2.5 py-1 rounded-md bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] hover:border-white/25 text-xs font-medium text-slate-300 hover:text-white transition-all">
+                  Brazil
                 </button>
               </div>
             </div>
@@ -345,23 +349,23 @@
             <!-- AI Intelligence Briefing Card -->
             <div id="ai-briefing-box" class="apple-glass rounded-xl p-4 border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2.5 border-b border-white/5 pb-2">
-                <span class="text-[11px] text-indigo-400 uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
-                  <i class="fas fa-brain text-xs"></i>AI Country Briefing
+                <span class="text-[11px] text-slate-200 uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
+                  <i class="fas fa-brain text-xs text-slate-500"></i>Country briefing
                 </span>
-                <span class="text-[9px] font-mono text-slate-500">Live Synthesis</span>
+                <span class="text-[9px] font-mono text-slate-500">AI generated</span>
               </div>
               <div id="ai-briefing-text" class="text-slate-300 font-sans text-xs leading-relaxed">
-                Click any sovereign nation or territory on the map to generate a real-time intelligence synthesis.
+                Click any country on the map to generate a summary.
               </div>
               <div class="flex flex-wrap gap-1.5 mt-3 pt-2.5 border-t border-white/5">
-                <button type="button" onclick="window.sendAboutAI('Summarize the current geopolitical security risks for ' + (window._currentCountryName || 'this region'))" class="px-2.5 py-1 rounded bg-[var(--accent-subtle)] text-[10px] font-medium text-[var(--accent-primary)] hover:bg-[var(--accent-subtle-hover)] transition-colors">
-                  ⚡ Security Risks
+                <button type="button" onclick="window.sendAboutAI('Summarize the current geopolitical security risks for ' + (window._currentCountryName || 'this region'))" class="px-2.5 py-1 rounded bg-[var(--accent-subtle)] text-[10px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--accent-subtle-hover)] transition-colors">
+                  Security risks
                 </button>
-                <button type="button" onclick="window.sendAboutAI('What are the key economic growth drivers for ' + (window._currentCountryName || 'this country') + '?')" class="px-2.5 py-1 rounded bg-[var(--accent-subtle)] text-[10px] font-medium text-[var(--accent-primary)] hover:bg-[var(--accent-subtle-hover)] transition-colors">
-                  📈 Economic Drivers
+                <button type="button" onclick="window.sendAboutAI('What are the key economic growth drivers for ' + (window._currentCountryName || 'this country') + '?')" class="px-2.5 py-1 rounded bg-[var(--accent-subtle)] text-[10px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--accent-subtle-hover)] transition-colors">
+                  Economy
                 </button>
-                <button type="button" onclick="window.sendAboutAI('Provide an environmental and meteorological summary for ' + (window._currentCountryName || 'this region'))" class="px-2.5 py-1 rounded bg-[var(--accent-subtle)] text-[10px] font-medium text-[var(--accent-primary)] hover:bg-[var(--accent-subtle-hover)] transition-colors">
-                  🌦️ Climate Outlook
+                <button type="button" onclick="window.sendAboutAI('Provide an environmental and meteorological summary for ' + (window._currentCountryName || 'this region'))" class="px-2.5 py-1 rounded bg-[var(--accent-subtle)] text-[10px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--accent-subtle-hover)] transition-colors">
+                  Climate
                 </button>
               </div>
             </div>
@@ -369,10 +373,10 @@
             <!-- Sentiment & Instability Trends Chart -->
             <div id="geopolitical-trends-card" class="apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2.5">
-                <span class="text-[11px] text-indigo-400 uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
-                  <i class="fas fa-chart-area text-xs"></i>Geopolitical Tone & Event Index
+                <span class="text-[11px] text-slate-200 uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
+                  <i class="fas fa-chart-area text-xs text-slate-500"></i>Trend index
                 </span>
-                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest font-mono">10-Day Volume</span>
+                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest font-mono">10 days</span>
               </div>
               <canvas id="trends-line-chart" class="w-full h-24 rounded-lg bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]"></canvas>
             </div>
@@ -381,11 +385,11 @@
             <div id="classified-notes-card" class="apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2">
                 <span class="text-[11px] text-slate-400 uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
-                  <i class="fas fa-pen-nib text-xs"></i>Analyst Research Notes
+                  <i class="fas fa-pen-nib text-xs text-slate-500"></i>Notes
                 </span>
-                <span id="notes-save-status" class="text-[9px] font-bold text-emerald-400 uppercase tracking-widest font-mono">Saved Locally</span>
+                <span id="notes-save-status" class="text-[9px] font-bold text-emerald-400 uppercase tracking-widest font-mono">Saved</span>
               </div>
-              <textarea id="classified-notes-input" placeholder="Type tactical notes, diplomatic observations, or policy assessments for this nation..." 
+              <textarea id="classified-notes-input" placeholder="Write your notes for this country..."
                 class="w-full h-28 bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] rounded-lg p-3 text-xs text-slate-100 placeholder:text-slate-500 focus:border-[var(--accent-primary)] focus:outline-none transition-colors resize-none font-mono leading-relaxed"
                 oninput="onNotesInput()"></textarea>
             </div>
@@ -402,17 +406,17 @@
               <div class="flex justify-between items-center mb-2.5">
                 <div class="flex items-center gap-2">
                   <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <span class="text-[11px] font-bold text-slate-100 uppercase tracking-wider font-mono">Live Dispatches Stream</span>
+                  <span class="text-[11px] font-bold text-slate-100 uppercase tracking-wider font-mono">Top stories</span>
                 </div>
-                <span class="text-[10px] text-slate-400 font-mono"><span id="news-count" class="font-bold text-indigo-400">0</span> Dispatches</span>
+                <span class="text-[10px] text-slate-400 font-mono"><span id="news-count" class="font-bold text-slate-100">0</span> articles</span>
               </div>
 
               <!-- Instant Filter Bar -->
               <div class="flex gap-2 items-center mb-3">
                 <div class="relative flex-1">
                   <i class="fas fa-search absolute left-3 top-2.5 text-xs text-slate-400"></i>
-                  <input type="text" id="news-search" placeholder="Filter by keyword, topic, leader..."
-                    class="w-full pl-8 pr-3 py-1.5 text-xs bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] rounded-lg text-slate-100 placeholder:text-slate-500 focus:border-[var(--accent-primary)] focus:outline-none transition-all font-sans"
+                  <input type="text" id="news-search" placeholder="Filter stories by keyword..."
+                    class="w-full pl-8 pr-3 py-1.5 text-xs bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] rounded-lg text-slate-100 placeholder:text-slate-500 focus:border-[var(--border-bright)] focus:outline-none transition-all font-sans"
                     oninput="filterNews(this.value)" />
                 </div>
                 <button onclick="clearNewsSearch()"
@@ -435,18 +439,18 @@
             <!-- GDELT Global Events Card -->
             <div id="gdelt-events-card" class="apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2 border-b border-white/5 pb-2">
-                <span class="text-[11px] text-indigo-400 font-bold uppercase tracking-wider font-mono flex items-center gap-1.5">
-                  <i class="fas fa-satellite text-xs"></i>GDELT Geopolitical Pulse
+                <span class="text-[11px] text-slate-200 font-bold uppercase tracking-wider font-mono flex items-center gap-1.5">
+                  <i class="fas fa-satellite text-xs text-slate-500"></i>Global events
                 </span>
-                <span id="gdelt-timestamp" class="text-[9px] font-mono text-slate-500">Live 72H Feed</span>
+                <span id="gdelt-timestamp" class="text-[9px] font-mono text-slate-500">Last 72 hours</span>
               </div>
               <div id="gdelt-events-content" class="divide-y divide-white/5 space-y-1">
-                <div class="text-slate-500 text-xs py-2 font-mono animate-pulse">Syncing GDELT international telemetry...</div>
+                <div class="text-slate-500 text-xs py-2 font-mono animate-pulse">Loading events...</div>
               </div>
             </div>
 
             <div class="flex items-center justify-between px-1">
-              <span class="text-[10px] font-mono uppercase text-slate-500 tracking-wider">Verified Sources Feed</span>
+              <span class="text-[10px] font-mono uppercase text-slate-500 tracking-wider">Sources</span>
               <span id="news-last-updated" class="text-[9px] font-mono text-slate-500">Updated just now</span>
             </div>
 
@@ -464,7 +468,7 @@
               <div class="flex justify-between items-center">
                 <div class="flex items-center gap-2">
                   <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                  <span class="text-xs font-bold text-slate-100 uppercase font-mono tracking-wider">Market Telemetry Matrix</span>
+                  <span class="text-xs font-bold text-slate-100 uppercase font-mono tracking-wider">Markets</span>
                 </div>
                 <div class="flex items-center gap-2">
                   <span class="text-[10px] text-slate-400 font-mono">Currency:</span>
@@ -485,8 +489,8 @@
             <!-- PRECIOUS METALS -->
             <div class="apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2 border-b border-white/5 pb-2 cursor-pointer" onclick="toggleMarketCategory('metals')">
-                <span class="text-[11px] text-indigo-400 uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
-                  <i class="fas fa-coins text-xs"></i>Precious Metals Spot
+                <span class="text-[11px] text-slate-200 uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
+                  <i class="fas fa-coins text-xs text-slate-500"></i>Metals
                 </span>
                 <i class="fas fa-chevron-up text-slate-400 text-xs" id="metals-chevron"></i>
               </div>
@@ -496,8 +500,8 @@
             <!-- STOCK INDICES -->
             <div class="apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2 border-b border-white/5 pb-2 cursor-pointer" onclick="toggleMarketCategory('indices')">
-                <span class="text-[11px] text-indigo-400 uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
-                  <i class="fas fa-chart-line text-xs"></i><span id="indices-country">GLOBAL</span> Benchmark Indices
+                <span class="text-[11px] text-slate-200 uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
+                  <i class="fas fa-chart-line text-xs text-slate-500"></i><span id="indices-country">GLOBAL</span> indices
                 </span>
                 <i class="fas fa-chevron-up text-slate-400 text-xs" id="indices-chevron"></i>
               </div>
@@ -507,8 +511,8 @@
             <!-- FOREX MATRIX -->
             <div class="apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2 border-b border-white/5 pb-2 cursor-pointer" onclick="toggleMarketCategory('forex')">
-                <span class="text-[11px] text-indigo-400 uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
-                  <i class="fas fa-exchange-alt text-xs"></i>Foreign Exchange Matrix
+                <span class="text-[11px] text-slate-200 uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
+                  <i class="fas fa-exchange-alt text-xs text-slate-500"></i>Exchange rates
                 </span>
                 <i class="fas fa-chevron-up text-slate-400 text-xs" id="forex-chevron"></i>
               </div>
@@ -518,8 +522,8 @@
             <!-- COMMODITIES PIPELINE -->
             <div class="apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2 border-b border-white/5 pb-2 cursor-pointer" onclick="toggleMarketCategory('commodities')">
-                <span class="text-[11px] text-indigo-400 uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
-                  <i class="fas fa-oil-can text-xs"></i>Energy & Commodities Pipeline
+                <span class="text-[11px] text-slate-200 uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
+                  <i class="fas fa-oil-can text-xs text-slate-500"></i>Commodities
                 </span>
                 <i class="fas fa-chevron-up text-slate-400 text-xs" id="commodities-chevron"></i>
               </div>
@@ -536,24 +540,24 @@
             <!-- City Search & Doppler Toggle -->
             <div class="apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2">
-                <span class="text-[11px] text-indigo-400 uppercase font-bold tracking-wider font-mono">
-                  <i class="fas fa-cloud-sun mr-1.5"></i>Meteorological Stations & Radar
+                <span class="text-[11px] text-slate-200 uppercase font-bold tracking-wider font-mono">
+                  <i class="fas fa-cloud-sun mr-1.5 text-slate-500"></i>Weather search
                 </span>
                 <span id="atmo-location-label" class="text-[10px] font-mono text-slate-400 hidden"></span>
               </div>
               <div class="flex items-center gap-2">
-                <input type="text" id="atmosphere-city-search" placeholder="Search city or meteorological zone..."
-                  class="flex-1 bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:border-[var(--accent-primary)] focus:outline-none transition-all font-sans"
+                <input type="text" id="atmosphere-city-search" placeholder="Search any city..."
+                  class="flex-1 bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:border-[var(--border-bright)] focus:outline-none transition-all font-sans"
                   onkeydown="if (event.key === 'Enter') searchCityForTab('atmosphere');" autocomplete="off" />
                 <button onclick="searchCityForTab('atmosphere')"
-                  class="px-3.5 py-1.5 text-xs bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-white font-semibold rounded-lg transition-colors shadow-sm font-mono">
-                  Scan
+                  class="px-3.5 py-1.5 text-xs bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-white font-semibold rounded-lg transition-colors shadow-sm">
+                  Search
                 </button>
               </div>
               <div class="flex items-center gap-2 mt-3 pt-2.5 border-t border-white/5">
-                <input type="checkbox" id="toggle-weather-radar" onchange="toggleWeatherRadar(this.checked)" class="w-3.5 h-3.5 rounded border-white/10 text-indigo-500 focus:ring-0 cursor-pointer" />
-                <label for="toggle-weather-radar" class="text-[10px] font-mono font-medium text-slate-300 cursor-pointer select-none">
-                  Live Precipitation Doppler Radar (RainViewer)
+                <input type="checkbox" id="toggle-weather-radar" onchange="toggleWeatherRadar(this.checked)" class="w-3.5 h-3.5 rounded border-white/10 focus:ring-0 cursor-pointer" />
+                <label for="toggle-weather-radar" class="text-[10px] font-medium text-slate-400 cursor-pointer select-none">
+                  Show precipitation radar
                 </label>
               </div>
             </div>
@@ -564,7 +568,7 @@
                 <div>
                   <div class="flex items-center gap-2 mb-1">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span id="atmo-condition" class="text-xs font-bold text-indigo-400 uppercase font-mono tracking-wider">Scanning Atmosphere...</span>
+                    <span id="atmo-condition" class="text-xs font-bold text-slate-300 uppercase font-mono tracking-wider">Loading...</span>
                   </div>
                   <div id="atmo-temp" class="text-5xl font-extrabold text-slate-100 font-mono tracking-tight leading-none my-1">--°</div>
                   <div class="flex items-center gap-4 text-xs font-mono text-slate-400 mt-2">
@@ -581,7 +585,7 @@
             <!-- 8-Metric Atmospheric Telemetry Matrix -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
               <div class="p-2.5 rounded-lg bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]">
-                <span class="text-[9px] uppercase tracking-wider text-slate-500 block mb-1 font-semibold">Wind Telemetry</span>
+                <span class="text-[9px] uppercase tracking-wider text-slate-500 block mb-1 font-semibold">Wind</span>
                 <div class="flex items-center justify-between">
                   <span id="atmo-wind-speed" class="text-base font-bold text-slate-100">--</span>
                   <span class="text-[10px] text-slate-500">KM/H</span>
@@ -661,13 +665,13 @@
 
             <!-- 24-Hour Forecast Hourly Strip -->
             <div class="apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
-              <div class="text-[11px] font-bold text-slate-200 uppercase font-mono tracking-wider mb-2.5">24-Hour Forecast Curve</div>
+              <div class="text-[11px] font-bold text-slate-200 uppercase font-mono tracking-wider mb-2.5">Next 24 hours</div>
               <div id="atmo-hourly-container" class="flex overflow-x-auto p-1 gap-3 no-scrollbar"></div>
             </div>
 
             <!-- 7-Day Extended Forecast -->
             <div class="apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
-              <div class="text-[11px] font-bold text-slate-200 uppercase font-mono tracking-wider mb-2.5">7-Day Extended Forecast</div>
+              <div class="text-[11px] font-bold text-slate-200 uppercase font-mono tracking-wider mb-2.5">7-day forecast</div>
               <div id="atmo-daily-container" class="divide-y divide-white/5"></div>
             </div>
 
@@ -681,17 +685,17 @@
             <!-- Macro Search Header -->
             <div class="apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2.5">
-                <span class="text-[11px] text-indigo-400 uppercase font-bold tracking-wider font-mono">
-                  <i class="fas fa-landmark mr-1.5"></i>World Bank Macroeconomic Indicators
+                <span class="text-[11px] text-slate-200 uppercase font-bold tracking-wider font-mono">
+                  <i class="fas fa-landmark mr-1.5 text-slate-500"></i>World Bank indicators
                 </span>
                 <span class="text-[9px] font-mono text-slate-500">Verified Series</span>
               </div>
               <div class="flex items-center gap-2">
-                <input type="text" id="economic-city-search" placeholder="Scan sovereign macroeconomic indicators..."
-                  class="flex-1 bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:border-[var(--accent-primary)] focus:outline-none transition-all font-sans"
+                <input type="text" id="economic-city-search" placeholder="Search any country..."
+                  class="flex-1 bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:border-[var(--border-bright)] focus:outline-none transition-all font-sans"
                   onkeydown="if (event.key === 'Enter') searchCityForTab('economic');" autocomplete="off" />
                 <button onclick="searchCityForTab('economic')"
-                  class="px-3.5 py-1.5 text-xs bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-white font-semibold rounded-lg transition-colors shadow-sm font-mono">
+                  class="px-3.5 py-1.5 text-xs bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-white font-semibold rounded-lg transition-colors shadow-sm">
                   Search
                 </button>
               </div>
@@ -747,8 +751,8 @@
             <!-- 5-Year World Bank Historical Trend Canvas Chart -->
             <div class="apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2.5">
-                <span class="text-[11px] text-indigo-400 uppercase font-bold tracking-wider font-mono">
-                  <i class="fas fa-chart-line mr-1.5"></i>Historical Macroeconomic Trends
+                <span class="text-[11px] text-slate-200 uppercase font-bold tracking-wider font-mono">
+                  <i class="fas fa-chart-line mr-1.5 text-slate-500"></i>GDP &amp; inflation history
                 </span>
                 <span class="text-[9px] font-mono text-slate-500">World Bank Open Data</span>
               </div>
@@ -758,10 +762,10 @@
             <!-- Major Exports & Drivers -->
             <div class="apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="text-[11px] text-slate-300 uppercase font-bold tracking-wider font-mono mb-2">
-                <i class="fas fa-box-open mr-1.5 text-indigo-400"></i>Primary Export Sectors & Commodities
+                <i class="fas fa-box-open mr-1.5 text-slate-500"></i>Main exports
               </div>
               <div id="eco-exports" class="flex flex-wrap gap-1.5 pt-1">
-                <div class="text-slate-500 text-xs font-mono">Select a sovereign country to load verified export categories.</div>
+                <div class="text-slate-500 text-xs font-mono">Select a country to load export data.</div>
               </div>
             </div>
 
@@ -842,9 +846,9 @@
       </div>
       <div class="p-6 overflow-y-auto custom-scrollbar space-y-6">
         <div>
-          <h3 class="text-[var(--text-primary)] font-bold text-base mb-2">Global Situational Intelligence</h3>
+          <h3 class="text-[var(--text-primary)] font-bold text-base mb-2">Real-time global monitoring</h3>
           <p class="text-xs text-[var(--text-secondary)] leading-relaxed font-sans">
-            NewsAtlas is a real-time monitoring and data visualization platform. It unifies live breaking news, World Bank macroeconomic statistics, high-resolution meteorological forecasts, and multi-asset financial market feeds across 240+ countries and territories.
+            NewsAtlas is a real-time dashboard that puts live news, financial markets, World Bank economic data, and weather forecasts on an interactive globe — covering 240+ countries and territories.
           </p>
         </div>
 

@@ -13,34 +13,21 @@ window.restoreFromURL = function () {
     const country = params.get("country");
     const tab = params.get("tab");
     if (tab && window.switchTab) window.switchTab(tab);
-    if (country) {
-        const tryRestore = (attempts) => {
-            if (attempts <= 0) return;
-            if (window.globalSearchData && window.globalSearchData.length > 0) {
-                const match = window.globalSearchData.find(
-                    (c) => c.name.common.toLowerCase() === country.toLowerCase()
-                );
-                if (match && window.handleCountryClick) {
-                    window.handleCountryClick(null, { properties: { name: match.name.common, iso_a2: match.cca2 } });
-                }
-            } else {
-                setTimeout(() => tryRestore(attempts - 1), 500);
+    if (!country) return;
+    const tryRestore = (attempts) => {
+        if (attempts <= 0) return;
+        if (window.globalSearchData && window.globalSearchData.length > 0) {
+            const match = window.globalSearchData.find(
+                (c) => c.name.common.toLowerCase() === country.toLowerCase()
+            );
+            if (match && window.handleCountryClick) {
+                window.handleCountryClick(null, { properties: { name: match.name.common, iso_a2: match.cca2 } });
             }
-        };
-        setTimeout(() => tryRestore(8), 800);
-    } else {
-        const tryDefault = (attempts) => {
-            if (attempts <= 0) return;
-            if (window.globalSearchData && window.globalSearchData.length > 0) {
-                if (window.handleCountryClickByName) {
-                    window.handleCountryClickByName("United States");
-                }
-            } else {
-                setTimeout(() => tryDefault(attempts - 1), 500);
-            }
-        };
-        setTimeout(() => tryDefault(8), 1200);
-    }
+        } else {
+            setTimeout(() => tryRestore(attempts - 1), 500);
+        }
+    };
+    setTimeout(() => tryRestore(8), 800);
 };
 document.addEventListener("DOMContentLoaded", () => {
     const _origSwitchTab = window.switchTab;
@@ -102,7 +89,7 @@ window.updateHeadlineTicker = function (articles) {
             a.title?.toLowerCase().match(/\b(record|deal|growth|summit)\b/) ? "text-emerald-400" : "text-slate-400";
         return `<span class="headline-ticker-item ${sent}">
       <i class="fas fa-circle text-[4px] mr-2 text-slate-700"></i>
-      ${a.title || ""}
+      ${window.escapeHtml ? window.escapeHtml(a.title || "") : ""}
     </span>`;
     }).join("");
     wrap.innerHTML = items;

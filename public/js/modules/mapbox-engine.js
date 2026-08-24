@@ -116,12 +116,12 @@ class MapboxEngine {
     _applyAtmosphere() {
         try {
             this.map.setFog({
-                'color': 'rgb(13, 17, 23)',
-                'high-color': 'rgb(9, 12, 18)',
-                'horizon-blend': 0.03,
-                'space-color': 'rgb(3, 5, 10)',
-                'star-intensity': 0.8,
-                'range': [0.5, 10]
+                'color': 'rgba(22, 22, 26, 0.6)',
+                'high-color': 'rgba(12, 12, 16, 0.5)',
+                'horizon-blend': 0.02,
+                'space-color': '#050505',
+                'star-intensity': 0.55,
+                'range': [0.4, 8]
             });
         } catch (e) {
             console.warn('Fog API not available:', e.message);
@@ -199,11 +199,11 @@ class MapboxEngine {
         
         if (this._isNightActive) {
             this.map.setFog({
-              'color': 'rgb(4, 10, 20)',
-              'high-color': 'rgb(2, 6, 18)',
+              'color': 'rgba(8, 10, 16, 0.7)',
+              'high-color': 'rgba(4, 5, 10, 0.6)',
               'horizon-blend': 0.02,
-              'space-color': 'rgb(0, 1, 5)',
-              'star-intensity': 0
+              'space-color': '#030303',
+              'star-intensity': 0.9
             });
         } else {
             this._applyAtmosphere();
@@ -322,13 +322,21 @@ class MapboxEngine {
 
     async initMapboxLayers() {
         try {
+            const isLightTheme =
+                document.body.classList.contains('light-theme') ||
+                document.documentElement.getAttribute('data-theme') === 'light';
+            const fillColor = isLightTheme ? '#18181b' : '#ffffff';
+            const borderColor = isLightTheme ? 'rgba(0, 0, 0, 0.35)' : 'rgba(255, 255, 255, 0.16)';
+            const hoverColor = isLightTheme ? 'rgba(0, 0, 0, 0.55)' : 'rgba(255, 255, 255, 0.5)';
+            const selectedColor = isLightTheme ? '#18181b' : '#ffffff';
             const res = await fetch('https://unpkg.com/world-atlas@2.0.2/countries-110m.json');
             const data = await res.json();
             const features = topojson.feature(data, data.objects.countries);
 
-            ['country-fills', 'country-borders-base', 'country-borders-glow', 'country-borders-selected']
+            ['country-fills', 'country-borders-base', 'country-borders-hover', 'country-borders-selected', 'gdelt-beacons']
                 .forEach(id => { if (this.map.getLayer(id)) this.map.removeLayer(id); });
             if (this.map.getSource('countries')) this.map.removeSource('countries');
+            if (this.map.getSource('gdelt-hotspots')) this.map.removeSource('gdelt-hotspots');
 
             this.map.addSource('countries', {
                 type: 'geojson',
@@ -341,12 +349,12 @@ class MapboxEngine {
                 type: 'fill',
                 source: 'countries',
                 paint: {
-                    'fill-color': '#3b82f6',
+                    'fill-color': fillColor,
                     'fill-opacity': [
                         'case',
-                        ['boolean', ['feature-state', 'selected'], false], 0.18,
-                        ['boolean', ['feature-state', 'hover'], false], 0.06,
-                        0
+                        ['boolean', ['feature-state', 'selected'], false], 0.12,
+                        ['boolean', ['feature-state', 'hover'], false], 0.045,
+                        0.02
                     ]
                 }
             });
@@ -356,8 +364,8 @@ class MapboxEngine {
                 type: 'line',
                 source: 'countries',
                 paint: {
-                    'line-color': 'rgba(255, 255, 255, 0.1)',
-                    'line-width': 0.5
+                    'line-color': borderColor,
+                    'line-width': 0.6
                 }
             });
 
@@ -368,7 +376,7 @@ class MapboxEngine {
                 paint: {
                     'line-color': [
                         'case',
-                        ['boolean', ['feature-state', 'hover'], false], 'rgba(255, 255, 255, 0.5)',
+                        ['boolean', ['feature-state', 'hover'], false], hoverColor,
                         'transparent'
                     ],
                     'line-width': [
@@ -386,12 +394,12 @@ class MapboxEngine {
                 paint: {
                     'line-color': [
                         'case',
-                        ['boolean', ['feature-state', 'selected'], false], '#60a5fa',
+                        ['boolean', ['feature-state', 'selected'], false], selectedColor,
                         'transparent'
                     ],
                     'line-width': [
                         'case',
-                        ['boolean', ['feature-state', 'selected'], false], 1.5,
+                        ['boolean', ['feature-state', 'selected'], false], 1.4,
                         0
                     ]
                 }
@@ -548,11 +556,11 @@ class MapboxEngine {
     setAtmosphericFX(weatherCode, isDay = true) {
         if (!this.map) return;
         this.map.setFog({
-            'range': [0.5, 10],
-            'color': isDay ? 'rgba(255, 255, 255, 0.5)' : 'rgba(2, 6, 23, 0.9)',
-            'high-color': isDay ? 'rgba(200, 230, 255, 0.7)' : 'rgba(10, 20, 40, 0.8)',
-            'space-color': 'rgba(2, 6, 23, 1)',
-            'star-intensity': isDay ? 0 : 0.4
+            'range': [0.4, 8],
+            'color': isDay ? 'rgba(255, 255, 255, 0.35)' : 'rgba(10, 10, 14, 0.85)',
+            'high-color': isDay ? 'rgba(200, 205, 215, 0.5)' : 'rgba(16, 16, 22, 0.75)',
+            'space-color': '#050505',
+            'star-intensity': isDay ? 0 : 0.55
         });
     }
 
@@ -603,10 +611,10 @@ class MapboxEngine {
             id: 'news-pulses',
             data: pulses,
             getPosition: d => d.coordinates,
-            getFillColor: [59, 130, 246, 180],
+            getFillColor: [255, 255, 255, 140],
             getRadius: d => d.radius || 40000,
-            radiusMinPixels: 4,
-            radiusMaxPixels: 12,
+            radiusMinPixels: 3,
+            radiusMaxPixels: 10,
             pickable: true
         });
 
@@ -740,13 +748,18 @@ class MapboxEngine {
     setMapDataLayer(type) {
         if (!this.map || !this.map.getLayer('country-fills')) return;
 
+        const isLightTheme =
+            document.body.classList.contains('light-theme') ||
+            document.documentElement.getAttribute('data-theme') === 'light';
+        const baseColor = isLightTheme ? '#18181b' : '#ffffff';
+
         if (type === 'default' || !type) {
-            this.map.setPaintProperty('country-fills', 'fill-color', '#3b82f6');
+            this.map.setPaintProperty('country-fills', 'fill-color', baseColor);
             this.map.setPaintProperty('country-fills', 'fill-opacity', [
                 'case',
-                ['boolean', ['feature-state', 'selected'], false], 0.18,
-                ['boolean', ['feature-state', 'hover'], false], 0.06,
-                0
+                ['boolean', ['feature-state', 'selected'], false], 0.12,
+                ['boolean', ['feature-state', 'hover'], false], 0.045,
+                0.02
             ]);
             return;
         }

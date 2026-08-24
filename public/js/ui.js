@@ -62,7 +62,7 @@ function renderTrending() {
     let registryHtml = "";
     if (filtered.length > 0) {
       registryHtml = filtered.map((c) => `
-        <div class="flex items-center gap-4 px-5 py-3 hover:bg-[var(--bg-surface-subtle)] cursor-pointer transition-all border-b border-[var(--border-subtle)]" onclick="window.selectFromSearch('${c.name.common.replace(/'/g, "\\'")}')">
+        <div class="flex items-center gap-4 px-5 py-3 hover:bg-[var(--bg-surface-subtle)] cursor-pointer transition-all border-b border-[var(--border-subtle)]" data-country="${escapeAttr(c.name.common)}">
           <div class="w-8 h-5 rounded shadow-sm overflow-hidden border border-[var(--border-subtle)] shrink-0"><img src="${c.flags.svg}" class="w-full h-full object-cover"></div>
           <div class="flex flex-col flex-1 min-w-0">
             <span class="font-bold text-[var(--text-primary)] text-sm tracking-tight">${c.name.common}</span>
@@ -85,7 +85,7 @@ function renderTrending() {
       recent.map((name) => {
         const c = window.globalSearchData?.find((curr) => curr.name.common === name);
         if (!c) return "";
-        return `<div class="flex items-center gap-4 px-5 py-3 hover:bg-[var(--bg-surface-subtle)] cursor-pointer transition-all border-b border-[var(--border-subtle)]" onclick="window.selectFromSearch('${name.replace(/'/g, "\\'")}')">
+        return `<div class="flex items-center gap-4 px-5 py-3 hover:bg-[var(--bg-surface-subtle)] cursor-pointer transition-all border-b border-[var(--border-subtle)]" data-country="${escapeAttr(name)}">
           <div class="w-8 h-5 rounded shadow-sm overflow-hidden border border-[var(--border-subtle)] shrink-0"><img src="${c.flags.svg}" class="w-full h-full object-cover"></div>
           <span class="font-bold text-[var(--text-primary)] text-sm tracking-tight">${name}</span>
           <i class="fas fa-arrow-right ml-auto text-xs text-slate-400"></i>
@@ -103,12 +103,19 @@ function renderTrending() {
       (name === "United States" && curr.name.common === "United States of America")
     );
     if (!c) return "";
-    return `<div class="flex items-center gap-4 px-5 py-3 hover:bg-[var(--bg-surface-subtle)] cursor-pointer transition-all border-b border-[var(--border-subtle)]" onclick="window.selectFromSearch('${name}')">
+    return `<div class="flex items-center gap-4 px-5 py-3 hover:bg-[var(--bg-surface-subtle)] cursor-pointer transition-all border-b border-[var(--border-subtle)]" data-country="${escapeAttr(name)}">
       <div class="w-8 h-5 rounded shadow-sm overflow-hidden border border-[var(--border-subtle)] shrink-0"><img src="${c.flags.svg}" class="w-full h-full object-cover"></div>
       <span class="font-bold text-[var(--text-primary)] text-sm tracking-tight">${name}</span>
       <i class="fas fa-arrow-right ml-auto text-xs text-slate-400"></i>
     </div>`;
   }).join("");
+
+  resContainer.querySelectorAll("[data-country]").forEach(row => {
+    row.addEventListener("click", () => window.selectFromSearch(row.dataset.country));
+  });
+}
+function escapeAttr(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 window.toggleSearch = () => {
   window.playTacticalSound?.("click");
@@ -335,6 +342,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("keydown", (e) => {
     if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
     if (e.key === "`") { e.preventDefault(); window.toggleCLI(); }
+    else if (e.key === "/") { e.preventDefault(); window.toggleSearch(); }
   });
 });
 

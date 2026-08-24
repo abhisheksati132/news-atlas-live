@@ -275,7 +275,7 @@ Keep each section to 2-3 sentences. Be specific with numbers where possible.`;
       body: JSON.stringify({ prompt }),
     });
     const result = await res.json();
-    const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text || result.result || "";
+    const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text || result.response || "";
     if (responseText && textEl) {
       renderMarketCards(responseText, textEl);
       const goldMatch = responseText.match(/gold[^0-9]*([0-9,]{4,}\.?[0-9]*)/i);
@@ -375,7 +375,7 @@ async function fetchECBRates() {
         } catch (_) { value = "—"; }
       }
       const current = parseFloat(value);
-      const change = prev ? ((current - prev) / prev) * 100 : null;
+      const change = prev !== null && Number.isFinite(current) ? ((current - prev) / prev) * 100 : null;
       const changeClass = change === null ? "text-slate-500" : change >= 0 ? "text-emerald-400" : "text-red-400";
       const row = document.createElement("div");
       row.className = "flex items-center justify-between py-1.5 border-b border-white/5";

@@ -97,7 +97,7 @@ function applyTheme(theme) {
     themeBtn.title = isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode';
   }
 
-  if (window.mapEngine && window.mapEngine.map) {
+  if (window.mapEngine && window.mapEngine.map && typeof mapboxgl !== 'undefined') {
     const isMapboxToken = !!mapboxgl.accessToken && !mapboxgl.accessToken.startsWith('pk.eyJ1IjoiZ3Vlc3Qi');
     const newStyle = isMapboxToken
       ? (isLight ? 'mapbox://styles/mapbox/light-v11' : 'mapbox://styles/mapbox/dark-v11')
@@ -144,92 +144,20 @@ function showBackendRequiredBanner() {
 }
 async function initTerminal() {
   runBootSequence();
-  let config = {};
   try {
     const res = await fetch("/api/config");
     if (res.status === 404) showBackendRequiredBanner();
-      if (res.ok) {
-        const data = await res.json();
-        config = data.firebase || {};
-        window.runtimeConfig = data;
-        if (data.realtime?.enabled) initIntelligenceLink();
+    if (res.ok) {
+      const data = await res.json();
+      window.runtimeConfig = data;
+      if (data.realtime?.enabled) initIntelligenceLink();
     }
   } catch (e) {
     console.warn("Config fetch failed:", e);
     showBackendRequiredBanner();
     if (window.showToast) window.showToast("Config unavailable. Running in local mode.", "info");
   }
-  const hasFirebaseConfig = config && config.apiKey && config.projectId;
-  if (hasFirebaseConfig && window.firebaseCore) {
-    try {
-      const firebaseApp = window.firebaseCore.initializeApp(config);
-      const auth = window.firebaseCore.getAuth(firebaseApp);
-      const db = window.firebaseCore.getFirestore(firebaseApp);
-      window.authInstance = auth;
-      window.dbInstance = db;
-
-      let unsubscribeBookmarks = null;
-
-      window.firebaseCore.onAuthStateChanged(auth, (u) => {
-        window.currentUser = u;
-        const loginBtn = document.getElementById("login-btn");
-        const userInfo = document.getElementById("user-info");
-        const userAvatar = document.getElementById("user-avatar");
-        const userName = document.getElementById("user-name");
-        const idEl = safeEl("neural-id");
-
-        if (unsubscribeBookmarks) {
-          unsubscribeBookmarks();
-          unsubscribeBookmarks = null;
-        }
-
-        if (u) {
-          if (loginBtn) loginBtn.classList.add("hidden");
-          if (userInfo) userInfo.classList.remove("hidden");
-          if (userAvatar) userAvatar.src = u.photoURL || "https://www.gravatar.com/avatar/?d=mp";
-          if (userName) userName.innerText = u.displayName || u.email || "AUTHORIZED USER";
-
-          if (idEl) {
-            idEl.innerText = `SESSION: ${(u.displayName || u.email || u.uid).toUpperCase()}`;
-            idEl.classList.add("text-emerald-500");
-          }
-
-          try {
-            const userRef = window.firebaseCore.doc(db, "visitors", u.uid);
-            window.firebaseCore.setDoc(userRef, { last_login: window.firebaseCore.serverTimestamp(), device: navigator.userAgent, email: u.email }, { merge: true });
-          } catch (e) { }
-
-          // Sync bookmarks in real-time
-          const userDocRef = window.firebaseCore.doc(db, "users", u.uid);
-          unsubscribeBookmarks = window.firebaseCore.onSnapshot(userDocRef, (docSnap) => {
-            if (docSnap.exists()) {
-              window.userBookmarks = docSnap.data().bookmarks || [];
-            } else {
-              window.userBookmarks = [];
-            }
-            window.renderPinnedSectors();
-            window.updateNotesAndBookmarksUI();
-          });
-
-        } else {
-          if (loginBtn) loginBtn.classList.remove("hidden");
-          if (userInfo) userInfo.classList.add("hidden");
-          if (idEl) {
-            idEl.innerText = "GUEST SESSION";
-            idEl.classList.remove("text-emerald-500");
-          }
-          window.userBookmarks = [];
-          window.renderPinnedSectors();
-          window.updateNotesAndBookmarksUI();
-        }
-      });
-    } catch (e) {
-      console.warn("Auth initialization failed:", e);
-      setText("neural-id", "GUEST SESSION");
-    }
-  } else {
-    setText("neural-id", "GUEST SESSION");
-  }
+  setText("neural-id", "GUEST SESSION");
   try {
     const res = await fetch("/data/countries.json");
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -548,6 +476,10 @@ window.resetToGlobalCenter = () => {
   selectedCountry = null;
   window.selectedCountry = null;
   window._currentCountryName = null;
+  window.iso2Code = "";
+  iso2Code = "";
+  window.currencyCode = "USD";
+  currencyCode = "USD";
   setText("selected-country-name", "Worldwide");
   
   // Reset Sector HUD
@@ -718,9 +650,12 @@ function setupEventListeners() {
 }
 function updateSystemTime() {
   const now = new Date();
-  const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Kolkata' };
-  const timeStr = now.toLocaleTimeString('en-US', options);
-  setText("ist-time", `${timeStr} IST`);
+  const offsetMin = -now.getTimezoneOffset();
+  const sign = offsetMin >= 0 ? "+" : "-";
+  const hh = String(Math.floor(Math.abs(offsetMin) / 60)).padStart(2, "0");
+  const mm = String(Math.abs(offsetMin) % 60).padStart(2, "0");
+  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  setText("ist-time", `${timeStr} UTC${sign}${hh}:${mm}`);
 }
 
 window.switchTab = (id) => {
@@ -845,10 +780,15 @@ window.renderTrendingHeader = () => {
   container.innerHTML = trending.map(name => {
     const c = window.globalSearchData.find(x => x.name.common === name || (name === "United States" && x.name.common === "United States of America"));
     if (!c) return "";
-    return `<button onclick="window.handleCountryClick(null, {properties:{name:'${c.name.common.replace(/'/g, "\\'")}',iso_a2:'${c.cca2}'}})" class="w-7 h-4.5 rounded-sm overflow-hidden border border-white/10 hover:border-blue-400 hover:scale-110 transition-all shadow-sm">
+    return `<button type="button" data-country="${escapeHtml(c.name.common)}" data-iso="${escapeHtml(c.cca2 || "")}" class="w-7 h-4.5 rounded-sm overflow-hidden border border-white/10 hover:border-blue-400 hover:scale-110 transition-all shadow-sm">
                <img src="${c.flags.svg}" class="w-full h-full object-cover">
              </button>`;
   }).join("");
+  container.querySelectorAll("button[data-country]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      window.handleCountryClick(null, { properties: { name: btn.dataset.country, iso_a2: btn.dataset.iso } });
+    });
+  });
 };
 window.searchCityForTab = async (tabId) => {
   const inputEl = document.getElementById(`${tabId}-city-search`);
@@ -924,7 +864,7 @@ function initIntelligenceLink() {
   socket.on("breaking_news", (data) => {
     if (window.showToast) window.showToast(`🚨 BREAKING: ${data.title}`, "info");
     // Refresh news if it's the current tab
-    if (window.currentTab === "tab-news") window.fetchNews(window._currentCountryName);
+    if (window._currentTab === "tab-news") window.fetchNews(window._currentCountryName);
   });
 
   socket.on("disconnect", () => {
@@ -934,90 +874,13 @@ function initIntelligenceLink() {
   });
 }
 
-// Command Palette Engine
-function initCommandPalette() {
-  const overlay = document.getElementById("cmd-palette-overlay");
-  const input = document.getElementById("cmd-palette-input");
-  const list = document.getElementById("cmd-palette-list");
-  if (!overlay || !input || !list) return;
-
-  const commands = [
-    { id: "intel", title: "View Intel Dashboard", icon: "fa-satellite", action: () => window.switchTab("intel") },
-    { id: "news", title: "Global News Feed", icon: "fa-newspaper", action: () => window.switchTab("news") },
-    { id: "markets", title: "Financial Markets", icon: "fa-chart-line", action: () => window.switchTab("markets") },
-    { id: "theme", title: "Toggle Terminal Theme", icon: "fa-adjust", action: () => window.toggleTheme() },
-    { id: "refresh", title: "Refresh Intelligence", icon: "fa-sync", action: () => window.generateAIBriefing(window._currentCountryName || "Global") },
-    { id: "global", title: "Reset to Global Overview", icon: "fa-globe", action: () => window.resetToGlobalCenter() }
-  ];
-
-  function search(q) {
-    const query = q.toLowerCase();
-    const results = commands.filter(c => c.title.toLowerCase().includes(query));
-    
-    // Also search countries
-    if (window.globalSearchData) {
-      const countries = window.globalSearchData
-        .filter(c => c.name.common.toLowerCase().includes(query))
-        .slice(0, 5)
-        .map(c => ({
-          title: `Navigate to ${c.name.common}`,
-          icon: "fa-map-marker-alt",
-          action: () => window.handleCountryClick(null, { properties: { name: c.name.common, iso_a2: c.cca2 } })
-        }));
-      results.push(...countries);
-    }
-
-    render(results);
-  }
-
-  function render(results) {
-    list.innerHTML = results.map((c, i) => `
-      <div class="cmd-item flex items-center justify-between px-4 py-3 hover:bg-blue-600/10 cursor-pointer group" data-idx="${i}">
-        <div class="flex items-center gap-3">
-          <i class="fas ${c.icon} text-slate-500 group-hover:text-blue-400 text-xs"></i>
-          <span class="text-sm font-bold text-slate-300 group-hover:text-white">${c.title}</span>
-        </div>
-        <kbd class="text-[9px] text-slate-600 group-hover:text-blue-400">ENTER</kbd>
-      </div>
-    `).join("");
-
-    const items = list.querySelectorAll(".cmd-item");
-    items.forEach((item, idx) => {
-      item.addEventListener("click", () => {
-        results[idx].action();
-        close();
-      });
-    });
-  }
-
-  function open() {
-    overlay.style.display = "flex";
-    input.value = "";
-    input.focus();
-    search("");
-  }
-
-  function close() {
-    overlay.style.display = "none";
-  }
-
-  window.addEventListener("keydown", (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === "k") {
-      e.preventDefault();
-      open();
-    }
-    if (e.key === "Escape") close();
-  });
-
-  input.addEventListener("input", (e) => search(e.target.value));
-}
+// Command Palette is implemented in ui.js (Ctrl+K)
 
 async function startApp() {
   await fetchGlobalSearchData();
   await initTerminal();
   setupEventListeners();
   initMobileBottomNav();
-  initCommandPalette();
   setInterval(updateSystemTime, 1000);
 
   window.mapEngine = new MapboxEngine('map-container');
@@ -1501,8 +1364,8 @@ function startNewsAlertsStream() {
   setInterval(async () => {
     try {
       const res = await fetch("/api/news-alerts");
-      if (!res.ok) return;
-      const alert = await res.json();
+      if (!res.ok || res.status === 204) return;
+      const alert = await res.json().catch(() => null);
       if (alert && alert.title && window.showToast) {
         window.showToast(alert.title, alert.type || "info");
         if (window.playTacticalSound) {
@@ -1523,14 +1386,10 @@ function initSidebarResizer() {
   const sidebar = document.getElementById("sidebar");
   if (!resizer || !sidebar) return;
 
-  const savedWidth = localStorage.getItem("newsatlas_sidebar_width");
-  if (savedWidth) {
-    const w = parseInt(savedWidth, 10);
-    if (w >= 320 && w <= window.innerWidth * 0.7) {
-      document.documentElement.style.setProperty("--sidebar-width", `${w}px`);
-      sidebar.style.width = `${w}px`;
-    }
-  }
+  // Legacy saved widths from the old resizable layout break the fixed
+  // floating panel — clear them and always use the CSS-defined width.
+  localStorage.removeItem("newsatlas_sidebar_width");
+  sidebar.style.width = "";
 
   let isDragging = false;
   let startX = 0;

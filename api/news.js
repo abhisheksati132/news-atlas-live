@@ -85,7 +85,8 @@ export default async function handler(req, res) {
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     if (req.method === "OPTIONS") return res.status(200).end();
 
-    const { category, q, iso2, page = 1, pageSize = 12, type } = req.query || {};
+    const { category, q, iso2: rawIso2, page = 1, pageSize = 12, type } = req.query || {};
+    const iso2 = rawIso2 ? String(rawIso2).toLowerCase() : undefined;
 
     if (type === "alerts") {
         return res.status(204).end();

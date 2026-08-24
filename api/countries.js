@@ -28,6 +28,29 @@ const NAME_MAPPINGS = {
     'korea': 'South Korea'
 };
 
+let countriesCache = null;
+
+function loadCountries() {
+    if (countriesCache) return countriesCache;
+    const candidatePaths = [
+        COUNTRIES_DB_PATH,
+        resolve(process.cwd(), 'public/data/countries.json'),
+        resolve(process.cwd(), 'dist/data/countries.json'),
+        resolve(__dirname, '../../public/data/countries.json')
+    ];
+
+    for (const p of candidatePaths) {
+        try {
+            const fileContent = readFileSync(p, 'utf-8');
+            if (fileContent) {
+                countriesCache = JSON.parse(fileContent);
+                return countriesCache;
+            }
+        } catch {}
+    }
+    throw new Error("Could not find countries.json database file in deployment paths");
+}
+
 export default async function handler(req, res) {
     Object.entries(CORS_HEADERS).forEach(([k, v]) => res.setHeader(k, v));
     if (req.method === 'OPTIONS') return res.status(200).end();
@@ -35,26 +58,7 @@ export default async function handler(req, res) {
     const { all, name, code } = req.query || {};
 
     try {
-        let fileContent = null;
-        const candidatePaths = [
-            COUNTRIES_DB_PATH,
-            resolve(process.cwd(), 'public/data/countries.json'),
-            resolve(process.cwd(), 'dist/data/countries.json'),
-            resolve(__dirname, '../../public/data/countries.json')
-        ];
-
-        for (const p of candidatePaths) {
-            try {
-                fileContent = readFileSync(p, 'utf-8');
-                if (fileContent) break;
-            } catch {}
-        }
-
-        if (!fileContent) {
-            throw new Error("Could not find countries.json database file in deployment paths");
-        }
-
-        const countries = JSON.parse(fileContent);
+        const countries = loadCountries();
 
         // Return all countries for the global search index or when no specific filters are requested
         if (all === 'true' || (!name && !code)) {

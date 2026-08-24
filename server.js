@@ -2,6 +2,7 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import path from "path";
+import { existsSync } from "fs";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import compression from "compression";
@@ -106,11 +107,13 @@ app.use("/api", apiRouter);
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static("dist"));
+  const appHtmlPath = path.resolve(__dirname, "dist", "app.html");
+  const indexHtmlPath = path.resolve(__dirname, "dist", "index.html");
   app.get("/app", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "dist", "app.html"));
+    res.sendFile(existsSync(appHtmlPath) ? appHtmlPath : indexHtmlPath);
   });
   app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "dist", "index.html"));
+    res.sendFile(indexHtmlPath);
   });
 }
 

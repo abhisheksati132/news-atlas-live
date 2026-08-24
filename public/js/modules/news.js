@@ -267,7 +267,7 @@ async function fetchGDELTEvents(country) {
       row.innerHTML = `
         <div class="flex items-start gap-2 mb-1">
           <span class="${toneClass} text-[8px] font-mono font-bold tracking-widest px-1.5 py-0.5 rounded shrink-0" style="background:rgba(255,255,255,0.04)">${toneLabel}</span>
-          <span class="text-[10px] font-bold text-slate-200 leading-tight line-clamp-2">${a.title || "Untitled"}</span>
+          <span class="text-[10px] font-bold text-slate-200 leading-tight line-clamp-2">${escapeHtml(a.title || "Untitled")}</span>
         </div>
         <div class="flex items-center gap-3 mt-1">
           <span class="text-[8px] font-mono text-slate-600">${domain}</span>

@@ -551,17 +551,17 @@ class MapboxEngine {
         let statHTML = '';
         if (stats) {
             Object.entries(stats).forEach(([k, v]) => {
-                statHTML += `<div class=\"hud-stat\">${k} <span>${v}</span></div>`;
+                statHTML += `<div class="hud-stat">${k} <span>${v}</span></div>`;
             });
         }
 
         const el = document.createElement('div');
         el.className = 'holo-hud-marker';
         el.innerHTML = `
-            <div class=\"hud-title\">${title}</div>
+            <div class="hud-title">${title}</div>
             ${statHTML}
-            <div class=\"holo-hud-line\"></div>
-            <div class=\"holo-hud-base\"></div>
+            <div class="holo-hud-line"></div>
+            <div class="holo-hud-base"></div>
         `;
 
         this._hudMarker = new mapboxgl.Marker({

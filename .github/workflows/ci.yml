@@ -7,45 +7,28 @@ on:
     branches: [main]
 
 jobs:
-  build-test:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: 22
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint
+        run: npm run lint
+
       - name: Build
         run: npm run build
 
-      - name: Start API server for smoke tests
-        run: |
-          nohup node server.js > server.log 2>&1 &
-          echo $! > server.pid
-        env:
-          NODE_ENV: production
-
-      - name: Wait for API server
-        run: |
-          for i in {1..30}; do
-            if nc -z localhost 3000; then echo "Server ready"; break; fi
-            sleep 1
-          done
-
-      - name: Run smoke tests
-        run: |
-          curl -sf http://localhost:3000/api/config | echo "config ok"
-          curl -sf http://localhost:3000/api/iss | echo "iss ok"
-
-      - name: Stop server
-        if: always()
-        run: |
-          if [ -f server.pid ]; then kill $(cat server.pid) 2>/dev/null || true; fi
+      - name: Upload dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7

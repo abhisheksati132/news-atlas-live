@@ -59,7 +59,7 @@ function renderTrending() {
         (c.capital && c.capital[0] && c.capital[0].toLowerCase().includes(q.toLowerCase()))
     ).slice(0, 10);
 
-    let registryHtml = "";
+    let registryHtml;
     if (filtered.length > 0) {
       registryHtml = filtered.map((c) => `
         <div class="flex items-center gap-4 px-5 py-3 hover:bg-[var(--bg-surface-subtle)] cursor-pointer transition-all border-b border-[var(--border-subtle)]" data-country="${escapeAttr(c.name.common)}">
@@ -79,7 +79,7 @@ function renderTrending() {
 
   const headerStyle = `padding: 1rem 1.25rem 0.5rem; font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em; font-family: monospace;`;
   const recent = (typeof window.getRecentCountries === "function" && window.getRecentCountries()) || [];
-  let recentHtml = "";
+  let recentHtml;
   if (recent.length > 0) {
     recentHtml = `<div style="${headerStyle}">Recent Searches</div>` +
       recent.map((name) => {

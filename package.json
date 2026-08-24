@@ -11,6 +11,7 @@
     "dev": "concurrently \"npm run api\" \"npm run frontend\"",
     "build": "vite build && node scripts/postbuild.js",
     "preview": "vite preview",
+    "lint": "eslint .",
     "deploy": "vercel --prod"
   },
   "dependencies": {
@@ -26,10 +27,13 @@
     "socket.io": "^4.8.3"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.2.0",
     "autoprefixer": "^10.4.17",
+    "eslint": "^10.9.0",
+    "globals": "^17.11.0",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
     "vite": "^5.4.21"

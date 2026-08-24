@@ -82,6 +82,7 @@ async function displayPreciousMetals() {
         </div>`;
       container.appendChild(row);
       drawSpark(row.querySelector(".spark"), data.spark, change >= 0);
+      animatePrice(row.querySelector(".mk-price"), (data.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
     });
     if (container.children.length === 0) renderMarketUnavailable(container, "Metals Quotes Unavailable", "window.displayPreciousMetals");
   } catch {
@@ -121,6 +122,7 @@ async function displayCountryIndices(countryName) {
         </div>`;
       container.appendChild(row);
       drawSpark(row.querySelector(".spark"), data.spark, change >= 0);
+      animatePrice(row.querySelector(".mk-price"), (data.price || 0).toLocaleString(undefined, { maximumFractionDigits: 1 }));
     });
     if (container.children.length === 0) renderMarketUnavailable(container, "Indices Quotes Unavailable", `() => window.displayCountryIndices('${targetCountry}')`);
   } catch {
@@ -182,11 +184,12 @@ async function displayCommodities() {
         </div>
         <div class="flex items-center gap-3 font-mono">
           <canvas class="spark" width="64" height="20"></canvas>
-          <div class="text-xs font-bold text-slate-100 mk-price">${(data.price || 0).toFixed(2)} <span class="text-[9px] text-slate-500">${cur}</span></div>
+          <div class="text-xs font-bold text-slate-100"><span class="mk-price">${(data.price || 0).toFixed(2)}</span> <span class="text-[9px] text-slate-500">${cur}</span></div>
           <div class="${changeClass} text-[10px] font-bold min-w-[48px] text-right">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
         </div>`;
       container.appendChild(row);
       drawSpark(row.querySelector(".spark"), data.spark, change >= 0);
+      animatePrice(row.querySelector(".mk-price"), (data.price || 0).toFixed(2));
     });
     if (container.children.length === 0) renderMarketUnavailable(container, "Commodity Feed Unavailable", "window.displayCommodities");
   } catch {

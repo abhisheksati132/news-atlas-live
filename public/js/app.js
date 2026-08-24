@@ -6,6 +6,7 @@ import './modules/weather.js';
 import './modules/markets.js';
 import './modules/economics.js';
 import './modules/geography.js';
+import './modules/map-toolbar.js';
 import './global-fx.js';
 import './enhancements.js';
 let selectedCountry = null;
@@ -158,17 +159,9 @@ async function initTerminal() {
     if (window.showToast) window.showToast("Config unavailable. Running in local mode.", "info");
   }
   setText("neural-id", "GUEST SESSION");
-  try {
-    const res = await fetch("/data/countries.json");
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    globalSearchData = await res.json();
-    window.globalSearchData = globalSearchData;
-    if (window.renderTrendingHeader) window.renderTrendingHeader();
-    if (window.initAutocompleteSearch) window.initAutocompleteSearch();
-  } catch (e) { 
-    console.error("Search data load failed:", e); 
-    window.globalSearchData = [];
-  }
+  // Registry is already loaded by fetchGlobalSearchData in startApp — reuse it
+  if (window.renderTrendingHeader) window.renderTrendingHeader();
+  if (window.initAutocompleteSearch) window.initAutocompleteSearch();
   try {
     window.fetchNews();
     startStockTicker();
@@ -725,7 +718,62 @@ window.switchTab = (id) => {
   window.dispatchEvent(new Event("resize"));
 
   syncMobileBottomNav(normId);
+  positionTabIndicator(targetTab);
 };
+
+function positionTabIndicator(targetTab) {
+  const strip = document.querySelector(".nav-tab-strip");
+  if (!strip) return;
+  let indicator = strip.querySelector(".tab-indicator");
+  if (!indicator) {
+    indicator = document.createElement("div");
+    indicator.className = "tab-indicator";
+    strip.appendChild(indicator);
+  }
+  const active = (targetTab && targetTab.classList && targetTab.classList.contains("nav-tab"))
+    ? targetTab
+    : strip.querySelector(".nav-tab.active");
+  if (!active || active.closest(".nav-tab-strip") !== strip) {
+    indicator.style.width = "0px";
+    return;
+  }
+  const stripRect = strip.getBoundingClientRect();
+  const rect = active.getBoundingClientRect();
+  indicator.style.left = `${rect.left - stripRect.left + 14}px`;
+  indicator.style.width = `${rect.width - 28}px`;
+}
+window.positionTabIndicator = positionTabIndicator;
+window.addEventListener("resize", () => positionTabIndicator());
+
+function initCoachCard() {
+  if (localStorage.getItem("newsatlas_coach_done")) return;
+  const host = document.querySelector(".main-content");
+  if (!host || document.getElementById("coach-card")) return;
+  const card = document.createElement("div");
+  card.id = "coach-card";
+  card.innerHTML = `
+    <h4>Quick start</h4>
+    <ol>
+      <li>Click any country on the globe to open its profile</li>
+      <li>Use the tabs above to browse news, markets, weather and economy</li>
+      <li>Press <kbd>Ctrl</kbd>+<kbd>K</kbd> to search, <kbd>\`</kbd> for the assistant</li>
+    </ol>
+    <div class="coach-actions">
+      <button type="button" data-coach="skip">Skip</button>
+      <button type="button" class="coach-done" data-coach="done">Got it</button>
+    </div>
+  `;
+  host.appendChild(card);
+  const dismiss = () => {
+    localStorage.setItem("newsatlas_coach_done", "true");
+    card.style.transition = "opacity 200ms ease, transform 200ms ease";
+    card.style.opacity = "0";
+    card.style.transform = "translateY(8px)";
+    setTimeout(() => card.remove(), 220);
+  };
+  card.querySelectorAll("[data-coach]").forEach(btn => btn.addEventListener("click", dismiss));
+  setTimeout(() => { if (document.getElementById("coach-card")) dismiss(); }, 25000);
+}
 
 function syncMobileBottomNav(tabId) {
   const nav = document.getElementById("mobile-bottom-nav");
@@ -840,9 +888,24 @@ window.searchCityForTab = async (tabId) => {
     console.error("Tab search city failure:", e);
   }
 };
-// Intelligence Link - WebSocket connection
-function initIntelligenceLink() {
-  if (typeof io === 'undefined') {
+// Intelligence Link - WebSocket connection (socket.io lazy-loaded on demand)
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error(`Failed to load ${src}`));
+    document.head.appendChild(s);
+  });
+}
+
+async function initIntelligenceLink() {
+  if (window.intelSocket) return;
+  try {
+    if (typeof io === "undefined") {
+      await loadScript("https://cdn.socket.io/4.7.2/socket.io.min.js");
+    }
+  } catch (e) {
     console.warn("Socket.io not found. Real-time link disabled.");
     return;
   }
@@ -887,6 +950,9 @@ async function startApp() {
   await window.mapEngine.init();
 
   if (window.activateMapInteraction) window.activateMapInteraction();
+  if (window.initMapToolbar) window.initMapToolbar();
+  initCoachCard();
+  positionTabIndicator();
 
   const defaultCountry = "India";
   if (window.handleCountryClickByName) {

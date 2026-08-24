@@ -25,14 +25,16 @@
   <link rel="prefetch" href="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg" />
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.css" rel="stylesheet" />
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.js"></script>
-  <script src="https://unpkg.com/deck.gl@8.9.0/dist.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
     rel="stylesheet" />
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <meta name="description" content="NewsAtlas: Real-time Global News and Market Dashboard." />
+  <meta property="og:title" content="NewsAtlas — The whole world, on one map" />
+  <meta property="og:description" content="Live news, markets, macroeconomics and weather on an interactive 3D globe. Real-time, for every country on earth." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
   <meta name="theme-color" content="#1e293b" />
   <link rel="icon"
     href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%233b82f6' d='M352 256c0 22.2-1.2 43.6-3.3 64H163.3c-2.2-20.4-3.3-41.8-3.3-64s1.2-43.6 3.3-64h185.4c2.2 20.4 3.3 41.8 3.3 64zm28.8-64h74.7c-9.1-37.4-28.7-71.1-55.4-97.7-18.1 19.3-33.1 41.9-44 67.2 9.6 9.4 18.2 20 24.7 30.5zM182.2 94.3c-18.1 19.3-33.1 41.9-44 67.2 9.6 9.4 18.2 20 24.7 30.5h74.7c-9.1-37.4-28.7-71.1-55.4-97.7zM163.3 320h185.4c-2.1 20.4-3.3 41.8-3.3 64s1.2 43.6 3.3 64H163.3c2.1-20.4 3.3-41.8 3.3-64s-1.2-43.6-3.3-64z'/%3E%3C/svg%3E"
@@ -200,51 +202,42 @@
   <main class="main-content">
     <div class="dashboard-layout">
     <div id="map-box-id" class="map-box dashboard-map">
-      <div class="map-toolbar-bar px-3 py-1.5 flex items-center justify-between gap-2 flex-shrink-0">
-        <div class="flex gap-2 items-center w-full xl:w-auto overflow-x-auto pb-1 custom-scrollbar shrink-0 justify-center">
-          <div class="flex gap-2 items-center justify-center w-full">
-            <button id="style-toggle-btn" onclick="toggleMapStyle()"
-              class="map-ctrl-btn text-slate-400 opacity-70 hover:opacity-100 transition-all p-1.5 rounded-lg hover:bg-white/5" title="Switch Map Style (Satellite / Dark / Light)">
-              <i class="fas fa-layer-group text-sm"></i>
-            </button>
-            <button id="projection-toggle-btn" onclick="toggleMapProjection()"
-              class="map-ctrl-btn text-slate-400 opacity-70 hover:opacity-100 transition-all p-1.5 rounded-lg hover:bg-white/5"
-              title="Toggle 3D Globe / 2D Mercator">
-              <i class="fas fa-globe text-sm"></i>
-            </button>
-            <button id="autorotate-btn" onclick="toggleAutoRotate()"
-              class="map-ctrl-btn text-slate-400 opacity-70 hover:opacity-100 transition-all p-1.5 rounded-lg hover:bg-white/5"
-              title="Toggle Auto-Rotation">
-              <i class="fas fa-sync-alt text-sm"></i>
-            </button>
-            <button id="terminator-btn" onclick="toggleDayNightTerminator()"
-              class="map-ctrl-btn text-slate-400 opacity-70 hover:opacity-100 transition-all p-1.5 rounded-lg hover:bg-white/5"
-              title="Toggle Day/Night Shadow">
-              <i class="fas fa-adjust text-sm"></i>
-            </button>
-            <div class="w-px h-4 bg-[var(--border-subtle)] mx-1"></div>
-            <button onclick="zoomMap(1.6)"
-              class="map-ctrl-btn text-slate-400 opacity-70 hover:opacity-100 transition-all p-1.5 rounded-lg hover:bg-white/5" title="Zoom In">
-              <i class="fas fa-plus text-xs"></i>
-            </button>
-            <button onclick="zoomMap(0.6)"
-              class="map-ctrl-btn text-slate-400 opacity-70 hover:opacity-100 transition-all p-1.5 rounded-lg hover:bg-white/5" title="Zoom Out">
-              <i class="fas fa-minus text-xs"></i>
-            </button>
-            <button onclick="resetToGlobalCenter()"
-              class="map-ctrl-btn text-indigo-400 hover:text-indigo-300 transition-all p-1.5 rounded-lg hover:bg-white/5" title="Reset Global View">
-              <i class="fas fa-compress-arrows-alt text-xs"></i>
-            </button>
-            <div class="w-px h-4 bg-[var(--border-subtle)] mx-1"></div>
-            <select id="map-layer-select" onchange="changeMapLayer(this.value)" class="bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] rounded-lg px-2 py-1 text-[10px] text-slate-200 hover:text-white focus:outline-none font-mono font-bold tracking-wider cursor-pointer">
-              <option value="default">Standard</option>
-              <option value="gdp">GDP size</option>
-              <option value="growth">GDP growth</option>
-            </select>
-          </div>
+      <div class="map-toolbar-bar" id="map-toolbar" role="toolbar" aria-label="Map controls">
+        <div class="mtb-group">
+          <button type="button" id="mtb-zoom-in" class="mtb-btn" title="Zoom in"><i class="fas fa-plus"></i></button>
+          <button type="button" id="mtb-zoom-out" class="mtb-btn" title="Zoom out"><i class="fas fa-minus"></i></button>
+          <button type="button" id="mtb-compass" class="mtb-btn" title="Reset north"><i class="fas fa-location-arrow"></i></button>
+          <button type="button" id="mtb-tilt" class="mtb-btn" title="Toggle 45 degree tilt"><i class="fas fa-ruler-combined"></i></button>
         </div>
-        <div id="layer-legend" class="hidden mt-1 flex flex-wrap gap-2 layer-legend justify-center px-2"></div>
+        <div class="mtb-sep"></div>
+        <div class="mtb-group">
+          <div class="mtb-menu-wrap" id="mtb-style-wrap">
+            <button type="button" id="mtb-style-btn" class="mtb-btn" title="Basemap style"><i class="fas fa-layer-group"></i></button>
+            <div class="mtb-menu" id="mtb-style-menu" role="menu"></div>
+          </div>
+          <button type="button" id="mtb-projection" class="mtb-btn" title="Toggle globe / flat map"><i class="fas fa-globe"></i></button>
+          <button type="button" id="mtb-terrain" class="mtb-btn" title="3D terrain" hidden><i class="fas fa-mountain-sun"></i></button>
+          <button type="button" id="mtb-buildings" class="mtb-btn" title="3D buildings" hidden><i class="fas fa-city"></i></button>
+        </div>
+        <div class="mtb-sep"></div>
+        <div class="mtb-group">
+          <div class="mtb-menu-wrap" id="mtb-layers-wrap">
+            <button type="button" id="mtb-layers-btn" class="mtb-btn" title="Data layer"><i class="fas fa-database"></i></button>
+            <div class="mtb-menu" id="mtb-layers-menu" role="menu"></div>
+          </div>
+          <button type="button" id="mtb-terminator" class="mtb-btn" title="Day / night shadow"><i class="fas fa-adjust"></i></button>
+          <button type="button" id="mtb-radar" class="mtb-btn" title="Precipitation radar"><i class="fas fa-cloud-rain"></i></button>
+        </div>
+        <div class="mtb-sep"></div>
+        <div class="mtb-group">
+          <button type="button" id="mtb-rotate" class="mtb-btn" title="Auto-rotate globe"><i class="fas fa-sync-alt"></i></button>
+          <button type="button" id="mtb-locate" class="mtb-btn" title="Fly to my location"><i class="fas fa-location-crosshairs"></i></button>
+          <button type="button" id="mtb-screenshot" class="mtb-btn" title="Save map as image"><i class="fas fa-camera"></i></button>
+          <button type="button" id="mtb-fullscreen" class="mtb-btn" title="Fullscreen"><i class="fas fa-expand"></i></button>
+          <button type="button" id="mtb-reset" class="mtb-btn" title="Reset to world view"><i class="fas fa-compress-arrows-alt"></i></button>
+        </div>
       </div>
+
       <div class="flex-1 relative w-full h-full overflow-hidden group">
         <div id="map-container" class="absolute inset-0 w-full h-full transition-all duration-1000"
           role="img"
@@ -254,6 +247,7 @@
               border: 1px solid rgba(255, 255, 255, 0.08);
               min-width: 180px;
             "></div>
+        <div id="cursor-coords"></div>
       </div>
     </div>
 

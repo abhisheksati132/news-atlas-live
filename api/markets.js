@@ -90,7 +90,11 @@ async function fetchYahooQuote(symbol) {
     const price = meta.regularMarketPrice ?? meta.previousClose ?? 0;
     const prevClose = meta.chartPreviousClose ?? meta.previousClose ?? price;
     const change = prevClose > 0 ? ((price - prevClose) / prevClose) * 100 : 0;
-    return { price, prevClose, change };
+    const closes = json.chart?.result?.[0]?.indicators?.quote?.[0]?.close;
+    const spark = Array.isArray(closes)
+      ? closes.filter((v) => typeof v === "number" && Number.isFinite(v)).slice(-24)
+      : [];
+    return { price, prevClose, change, spark };
   } catch (err) {
     return null;
   }
@@ -177,6 +181,7 @@ export default async function handler(req, res) {
             results[m.code] = {
               price: q.price * fxRate,
               change: q.change,
+              spark: q.spark,
               icon: m.icon,
               name: m.name
             };
@@ -222,7 +227,8 @@ export default async function handler(req, res) {
               symbol: item.symbol,
               label: item.label,
               price: q.price,
-              change: q.change
+              change: q.change,
+              spark: q.spark
             });
           }
         })
@@ -281,6 +287,7 @@ export default async function handler(req, res) {
             results[item.name] = {
               price: q.price * fxRate,
               change: q.change,
+              spark: q.spark,
               unit: currency === "USD" ? item.unit : `${currency} equivalent`,
               icon: item.icon
             };

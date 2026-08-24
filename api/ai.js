@@ -1,5 +1,18 @@
 import { getCache, setCache } from "./_utils/cache.js";
 
+// Per-instance rate limit (protects the AI keys on serverless too)
+const aiHits = new Map();
+const AI_RATE_WINDOW = 60000;
+const AI_RATE_MAX = 20;
+setInterval(() => aiHits.clear(), AI_RATE_WINDOW).unref();
+
+function rateLimited(req) {
+  const key = req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "unknown";
+  const count = (aiHits.get(key) || 0) + 1;
+  aiHits.set(key, count);
+  return count > AI_RATE_MAX;
+}
+
 function generateGroundTruthBriefing(prompt, locName) {
   const isSecurity = /security|risk|threat|conflict|war|military|stability/i.test(prompt);
   const isEconomic = /econom|growth|gdp|driver|inflation|trade|market|finance/i.test(prompt);
@@ -36,6 +49,10 @@ export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   if (req.method === "OPTIONS") return res.status(200).end();
+
+  if (rateLimited(req)) {
+    return res.status(429).json({ error: "Too many requests. Please wait a moment.", code: "RATE_LIMITED" });
+  }
 
   let body = req.body;
   if (typeof body === "string" && body.length > 0) {

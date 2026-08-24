@@ -185,9 +185,10 @@ function displayNewsArticles(articles) {
   if (!articles || articles.length === 0) {
     container.innerHTML = `
       <div class="col-span-full p-10 text-center">
-        <p class="text-[12px] text-slate-500 font-black uppercase tracking-widest mb-3">No intelligence feeds found.</p>
-        <p class="text-[11px] text-slate-600 mb-4">Try a different category or clear filters.</p>
-        <button type="button" onclick="window.clearNewsSearch(); window.fetchNews();" class="px-4 py-2 border border-white/20 text-slate-400 text-xs font-mono hover:bg-white/5 transition-all">Clear & Refresh</button>
+        <i class="fas fa-globe text-2xl text-slate-700 mb-4" aria-hidden="true"></i>
+        <p class="text-[12px] text-slate-500 font-bold uppercase tracking-widest mb-2">No stories found</p>
+        <p class="text-[11px] text-slate-600 mb-4">Try a different topic or clear the filter.</p>
+        <button type="button" onclick="window.clearNewsSearch(); window.fetchNews();" class="px-4 py-2 border border-white/20 text-slate-400 text-xs font-mono hover:bg-white/5 transition-all">Clear &amp; refresh</button>
       </div>`;
     return;
   }

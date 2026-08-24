@@ -27,6 +27,7 @@ class MapboxEngine {
         } catch (err) {
             console.warn('⚠️ Config fetch warning:', err.message);
         }
+        this.hasToken = hasToken;
 
         const container = document.getElementById(this.containerId);
         if (!container) return false;
@@ -81,9 +82,24 @@ class MapboxEngine {
                 this._addTerrain();
             }
             this.initMapboxLayers();
-            this._startDeckAnimation();
             this.ready = true;
             this.onReady();
+
+            // One-time intro: globe settles from a slight tilt into place
+            if (!this._introPlayed && !isLowFx) {
+                this._introPlayed = true;
+                try {
+                    this.map.setBearing(-22);
+                    this.map.setPitch(28);
+                    this.map.easeTo({
+                        bearing: 0,
+                        pitch: 0,
+                        duration: 2200,
+                        easing: (t) => 1 - Math.pow(1 - t, 3)
+                    });
+                } catch (e) { }
+            }
+            this._initCursorCoords();
         });
 
         this.map.on('zoom', () => {
@@ -234,8 +250,25 @@ class MapboxEngine {
     _toggle3DBuildings() {
         const zoom = this.map.getZoom();
         if (zoom >= 14 && !this._buildingsAdded) {
-            this._buildingsAdded = true;
+            if (this.toggleBuildings(true) === null) return;
+        } else if (zoom < 14 && this._buildingsAdded) {
+            this.toggleBuildings(false);
+        }
+    }
 
+    /**
+     * Adds or removes the 3D buildings layer.
+     * @returns {boolean|null} true = now visible, false = removed, null = unsupported style
+     */
+    toggleBuildings(forceAdd = null) {
+        if (!this.map) return false;
+        if (this.map.getLayer('3d-buildings') && forceAdd !== true) {
+            this.map.removeLayer('3d-buildings');
+            this._buildingsAdded = false;
+            return false;
+        }
+        try {
+            if (this.map.getLayer('3d-buildings')) return true;
             const layers = this.map.getStyle().layers;
             let labelLayerId;
             for (const layer of layers) {
@@ -244,30 +277,29 @@ class MapboxEngine {
                     break;
                 }
             }
-            if (!this.map.getLayer('3d-buildings')) {
-                this.map.addLayer({
-                    id: '3d-buildings',
-                    source: 'composite',
-                    'source-layer': 'building',
-                    filter: ['==', 'extrude', 'true'],
-                    type: 'fill-extrusion',
-                    minzoom: 14,
-                    paint: {
-                        'fill-extrusion-color': [
-                            'interpolate', ['linear'], ['get', 'height'],
-                            0, '#0a1628',
-                            50, '#0d1f3c',
-                            200, '#162d54'
-                        ],
-                        'fill-extrusion-height': ['get', 'height'],
-                        'fill-extrusion-base': ['get', 'min_height'],
-                        'fill-extrusion-opacity': 0.75
-                    }
-                }, labelLayerId);
-            }
-        } else if (zoom < 14 && this._buildingsAdded) {
-            this._buildingsAdded = false;
-            if (this.map.getLayer('3d-buildings')) this.map.removeLayer('3d-buildings');
+            this.map.addLayer({
+                id: '3d-buildings',
+                source: 'composite',
+                'source-layer': 'building',
+                filter: ['==', 'extrude', 'true'],
+                type: 'fill-extrusion',
+                minzoom: 13,
+                paint: {
+                    'fill-extrusion-color': [
+                        'interpolate', ['linear'], ['get', 'height'],
+                        0, '#1a1a1a',
+                        50, '#2a2a30',
+                        200, '#3d3d46'
+                    ],
+                    'fill-extrusion-height': ['get', 'height'],
+                    'fill-extrusion-base': ['get', 'min_height'],
+                    'fill-extrusion-opacity': 0.85
+                }
+            }, labelLayerId);
+            this._buildingsAdded = true;
+            return true;
+        } catch (e) {
+            return null;
         }
     }
 
@@ -320,6 +352,21 @@ class MapboxEngine {
         window.mapEngine = this;
     }
 
+    _initCursorCoords() {
+        const el = document.getElementById('cursor-coords');
+        if (!el) return;
+        let raf = null;
+        this.map.on('mousemove', (e) => {
+            if (raf) return;
+            raf = requestAnimationFrame(() => {
+                raf = null;
+                el.textContent = `${Math.abs(e.lngLat.lat).toFixed(2)}° ${e.lngLat.lat >= 0 ? 'N' : 'S'}, ${Math.abs(e.lngLat.lng).toFixed(2)}° ${e.lngLat.lng >= 0 ? 'E' : 'W'}`;
+                el.classList.add('visible');
+            });
+        });
+        this.map.on('mouseout', () => el.classList.remove('visible'));
+    }
+
     async initMapboxLayers() {
         try {
             const isLightTheme =
@@ -333,10 +380,11 @@ class MapboxEngine {
             const data = await res.json();
             const features = topojson.feature(data, data.objects.countries);
 
-            ['country-fills', 'country-borders-base', 'country-borders-hover', 'country-borders-selected', 'gdelt-beacons']
+            ['country-fills', 'country-borders-base', 'country-borders-hover', 'country-borders-selected', 'gdelt-beacons', 'gdelt-beacon-halo', 'news-pulses-layer']
                 .forEach(id => { if (this.map.getLayer(id)) this.map.removeLayer(id); });
             if (this.map.getSource('countries')) this.map.removeSource('countries');
             if (this.map.getSource('gdelt-hotspots')) this.map.removeSource('gdelt-hotspots');
+            if (this.map.getSource('news-pulses')) this.map.removeSource('news-pulses');
 
             this.map.addSource('countries', {
                 type: 'geojson',
@@ -532,27 +580,6 @@ class MapboxEngine {
         }
     }
 
-    setStabilityHeatmap(reports) {
-        if (!this.deckOverlay) return;
-
-        this._heatmapLayer = new deck.HeatmapLayer({
-            id: 'stability-heatmap',
-            data: reports,
-            getPosition: d => d.coordinates,
-            getWeight: d => d.score || 0.5,
-            radiusPixels: 80,
-            intensity: 1.5,
-            threshold: 0.1,
-            colorRange: [
-                [0, 255, 0, 50],    // Stable
-                [255, 255, 0, 150], // Volatile
-                [255, 0, 0, 200]    // Conflict
-            ]
-        });
-
-        this._updateDeckLayers();
-    }
-
     setAtmosphericFX(weatherCode, isDay = true) {
         if (!this.map) return;
         this.map.setFog({
@@ -564,92 +591,37 @@ class MapboxEngine {
         });
     }
 
-    setVesselFlow(routes) {
-        if (!this.deckOverlay) return;
-        this._vesselLayer = new deck.ArcLayer({
-            id: 'vessel-routes',
-            data: routes,
-            getSourcePosition: d => d.from,
-            getTargetPosition: d => d.to,
-            getSourceColor: [125, 211, 252, 100],
-            getTargetColor: [59, 130, 246, 100],
-            getWidth: 1.5,
-            pickable: true
-        });
-        this._updateDeckLayers();
-    }
-
-    setEnergyHubs(hubs) {
-        if (!this.deckOverlay) return;
-        this._energyLayer = new deck.ScatterplotLayer({
-            id: 'energy-hubs',
-            data: hubs,
-            getPosition: d => d.coordinates,
-            getFillColor: [245, 158, 11, 200],
-            getRadius: 60000,
-            radiusMinPixels: 6,
-            pickable: true
-        });
-        this._updateDeckLayers();
-    }
-
-    _updateDeckLayers() {
-        if (!this.deckOverlay) return;
-        const layers = [];
-        if (this._heatmapLayer) layers.push(this._heatmapLayer);
-        if (this._vesselLayer) layers.push(this._vesselLayer);
-        if (this._energyLayer) layers.push(this._energyLayer);
-        if (this._flightLayer) layers.push(this._flightLayer);
-        if (this._newsPulseLayer) layers.push(this._newsPulseLayer);
-        this.deckOverlay.setProps({ layers });
-    }
-
     setNewsPulses(pulses) {
-        if (!this.deckOverlay) return;
-        
-        this._newsPulseLayer = new deck.ScatterplotLayer({
-            id: 'news-pulses',
-            data: pulses,
-            getPosition: d => d.coordinates,
-            getFillColor: [255, 255, 255, 140],
-            getRadius: d => d.radius || 40000,
-            radiusMinPixels: 3,
-            radiusMaxPixels: 10,
-            pickable: true
+        if (!this.map) return;
+
+        if (this.map.getLayer('news-pulses-layer')) this.map.removeLayer('news-pulses-layer');
+        if (this.map.getSource('news-pulses')) this.map.removeSource('news-pulses');
+        if (!pulses || !pulses.length) return;
+
+        this.map.addSource('news-pulses', {
+            type: 'geojson',
+            data: {
+                type: 'FeatureCollection',
+                features: pulses.map((p) => ({
+                    type: 'Feature',
+                    geometry: { type: 'Point', coordinates: p.coordinates },
+                    properties: { radius: p.radius || 40000 }
+                }))
+            }
         });
-
-        this._updateDeckLayers();
-    }
-
-    setFlightRadar(flights) {
-        if (!this.deckOverlay) return;
-
-        this._flightLayer = new deck.IconLayer({
-            id: 'flights',
-            data: flights,
-            pickable: true,
-            iconAtlas: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.png',
-            iconMapping: {
-                airplane: { x: 0, y: 0, width: 128, height: 128, anchorY: 64, mask: true }
-            },
-            getIcon: d => 'airplane',
-            sizeScale: 15,
-            getPosition: d => d.coordinates,
-            getSize: d => 2,
-            getColor: [255, 255, 255, 200],
-            getAngle: d => -d.heading || 0
+        this.map.addLayer({
+            id: 'news-pulses-layer',
+            type: 'circle',
+            source: 'news-pulses',
+            paint: {
+                'circle-radius': 6,
+                'circle-color': '#ffffff',
+                'circle-opacity': 0.35,
+                'circle-blur': 0.4,
+                'circle-stroke-width': 1,
+                'circle-stroke-color': 'rgba(255,255,255,0.4)'
+            }
         });
-
-        this._updateDeckLayers();
-    }
-
-    _startDeckAnimation() {
-        if (typeof deck === 'undefined') return;
-        this.deckOverlay = new deck.MapboxOverlay({
-            interleaved: true,
-            layers: []
-        });
-        this.map.addControl(this.deckOverlay);
     }
 
     clearSelection() {
@@ -716,6 +688,32 @@ class MapboxEngine {
                     "circle-stroke-color": "#ffffff"
                 }
             });
+
+            // Sonar pulse halo — expanding ring per frame
+            this.map.addLayer({
+                id: "gdelt-beacon-halo",
+                type: "circle",
+                source: "gdelt-hotspots",
+                paint: {
+                    "circle-radius": 5,
+                    "circle-color": "#ef4444",
+                    "circle-opacity": 0.3,
+                    "circle-blur": 0.4
+                }
+            });
+            const animatePulse = (ts) => {
+                if (!this.map.getLayer("gdelt-beacon-halo")) return;
+                if (!document.hidden) {
+                    const t = (ts % 2400) / 2400;
+                    try {
+                        this.map.setPaintProperty("gdelt-beacon-halo", "circle-radius", 5 + t * 15);
+                        this.map.setPaintProperty("gdelt-beacon-halo", "circle-opacity", 0.32 * (1 - t));
+                    } catch (e) { }
+                }
+                this._pulseRaf = requestAnimationFrame(animatePulse);
+            };
+            if (this._pulseRaf) cancelAnimationFrame(this._pulseRaf);
+            this._pulseRaf = requestAnimationFrame(animatePulse);
 
             this.map.on('click', 'gdelt-beacons', (e) => {
                 const props = e.features[0].properties;

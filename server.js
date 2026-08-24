@@ -39,8 +39,9 @@ app.use(helmet({
 }));
 app.use(compression());
 app.use(express.json());
+const corsOrigin = process.env.CORS_ORIGIN || "*";
 app.use(cors({
-  origin: '*',
+  origin: corsOrigin,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -58,6 +59,24 @@ app.use((req, res, next) => {
   });
   next();
 });
+
+// Simple in-memory rate limiter (per IP, per bucket)
+function rateLimit({ windowMs = 60000, max = 60, name = "global" } = {}) {
+  const hits = new Map();
+  setInterval(() => hits.clear(), windowMs).unref();
+  return (req, res, next) => {
+    const key = `${name}:${req.ip || req.socket.remoteAddress}`;
+    const count = (hits.get(key) || 0) + 1;
+    hits.set(key, count);
+    if (count > max) {
+      return res.status(429).json({ error: "Too many requests. Slow down.", code: "RATE_LIMITED" });
+    }
+    next();
+  };
+}
+
+app.use("/api", rateLimit({ windowMs: 60000, max: 120, name: "api" }));
+app.use("/api/ai", rateLimit({ windowMs: 60000, max: 20, name: "ai" }));
 
 // WebSocket orchestration
 io.on("connection", (socket) => {

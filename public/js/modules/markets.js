@@ -18,6 +18,37 @@ function renderMarketUnavailable(container, label, retryFn) {
     </div>`;
 }
 
+function drawSpark(canvas, values, up) {
+  if (!canvas) return;
+  if (!values || values.length < 2) {
+    canvas.style.display = "none";
+    return;
+  }
+  const w = 64, h = 20;
+  canvas.width = w;
+  canvas.height = h;
+  canvas.style.display = "";
+  const ctx = canvas.getContext("2d");
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  ctx.beginPath();
+  values.forEach((v, i) => {
+    const x = (i / (values.length - 1)) * (w - 2) + 1;
+    const y = h - 2.5 - ((v - min) / range) * (h - 5);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = up ? "#34d399" : "#fb7185";
+  ctx.lineWidth = 1.4;
+  ctx.lineJoin = "round";
+  ctx.stroke();
+}
+
+function animatePrice(el, formatted) {
+  if (el && window.animateNumber) window.animateNumber(el, formatted, 500);
+}
+
 async function displayPreciousMetals() {
   const container = document.getElementById("metals-content");
   if (!container) return;
@@ -45,10 +76,12 @@ async function displayPreciousMetals() {
           </div>
         </div>
         <div class="flex items-center gap-3 font-mono">
-          <div class="text-xs font-bold text-slate-100">${(data.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+          <canvas class="spark" width="64" height="20"></canvas>
+          <div class="text-xs font-bold text-slate-100 mk-price">${(data.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
           <div class="${changeClass} text-[10px] font-bold min-w-[48px] text-right">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
         </div>`;
       container.appendChild(row);
+      drawSpark(row.querySelector(".spark"), data.spark, change >= 0);
     });
     if (container.children.length === 0) renderMarketUnavailable(container, "Metals Quotes Unavailable", "window.displayPreciousMetals");
   } catch {
@@ -82,10 +115,12 @@ async function displayCountryIndices(countryName) {
           </div>
         </div>
         <div class="flex items-center gap-3 font-mono">
-          <div class="text-xs font-bold text-slate-100">${(data.price || 0).toLocaleString(undefined, { maximumFractionDigits: 1 })}</div>
+          <canvas class="spark" width="64" height="20"></canvas>
+          <div class="text-xs font-bold text-slate-100 mk-price">${(data.price || 0).toLocaleString(undefined, { maximumFractionDigits: 1 })}</div>
           <div class="${changeClass} text-[10px] font-bold min-w-[48px] text-right">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
         </div>`;
       container.appendChild(row);
+      drawSpark(row.querySelector(".spark"), data.spark, change >= 0);
     });
     if (container.children.length === 0) renderMarketUnavailable(container, "Indices Quotes Unavailable", `() => window.displayCountryIndices('${targetCountry}')`);
   } catch {
@@ -146,10 +181,12 @@ async function displayCommodities() {
           </div>
         </div>
         <div class="flex items-center gap-3 font-mono">
-          <div class="text-xs font-bold text-slate-100">${(data.price || 0).toFixed(2)} <span class="text-[9px] text-slate-500">${cur}</span></div>
+          <canvas class="spark" width="64" height="20"></canvas>
+          <div class="text-xs font-bold text-slate-100 mk-price">${(data.price || 0).toFixed(2)} <span class="text-[9px] text-slate-500">${cur}</span></div>
           <div class="${changeClass} text-[10px] font-bold min-w-[48px] text-right">${change >= 0 ? "+" : ""}${change.toFixed(2)}%</div>
         </div>`;
       container.appendChild(row);
+      drawSpark(row.querySelector(".spark"), data.spark, change >= 0);
     });
     if (container.children.length === 0) renderMarketUnavailable(container, "Commodity Feed Unavailable", "window.displayCommodities");
   } catch {

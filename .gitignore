@@ -57,3 +57,7 @@ temp/
 .vercel
 .env*
 *.pdf
+
+# Playwright
+test-results/
+playwright-report/

@@ -365,9 +365,10 @@ async function fetchWeather(lat, lon) {
       };
       generateWeatherAnalysis(
         weatherSummary,
-        window.selectedCountry
-          ? window.selectedCountry.properties.name
-          : "this location",
+        (window.store && window.store.get("country")) ||
+          (window.selectedCountry && window.selectedCountry.properties
+            ? window.selectedCountry.properties.name
+            : "this location"),
       );
     } catch (err) { }
   } catch (e) {

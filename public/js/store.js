@@ -2,6 +2,7 @@ const state = {
   tab: "tab-intel",
   country: null,
   iso2: "",
+  iso3: "",
   currency: "USD"
 };
 

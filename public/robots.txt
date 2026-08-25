@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://news-atlas-live.vercel.app/sitemap.xml

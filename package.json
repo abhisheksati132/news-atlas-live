@@ -9,9 +9,10 @@
     "api": "node server.js",
     "frontend": "vite",
     "dev": "concurrently \"npm run api\" \"npm run frontend\"",
-    "build": "vite build && node scripts/postbuild.js",
+    "build": "node scripts/build-country-pages.js && vite build && node scripts/postbuild.js",
     "preview": "vite preview",
     "lint": "eslint .",
+    "test:e2e": "playwright test",
     "deploy": "vercel --prod"
   },
   "dependencies": {
@@ -34,6 +35,7 @@
     "autoprefixer": "^10.4.17",
     "eslint": "^10.9.0",
     "globals": "^17.11.0",
+    "playwright": "^1.62.1",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
     "vite": "^5.4.21"

@@ -52,7 +52,7 @@ async function fetchDetailedEconomics(country) {
 
   let eco = null;
   try {
-    const iso3 = window._isoAlpha3;
+    const iso3 = (window.store ? window.store.get("iso3") : null) || window._isoAlpha3;
     if (!iso3) throw new Error("Country ISO code is unavailable");
     const res = await fetch(`/api/economics?iso3=${encodeURIComponent(iso3)}`);
     if (!res.ok) throw new Error(`Economics API HTTP ${res.status}`);
@@ -78,7 +78,7 @@ async function drawGDPTrend(country) {
   canvas.width = Math.max(300, canvas.parentElement?.offsetWidth || 600);
   canvas.height = 150;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const iso = window._isoAlpha3 || "";
+  const iso = (window.store ? window.store.get("iso3") : "") || window._isoAlpha3 || "";
   if (!iso) {
     drawGDPUnavailable(ctx, canvas);
     return;
@@ -213,20 +213,21 @@ async function fetchCurrency() {
   const el = document.getElementById("fact-currency");
   const elCode = document.getElementById("eco-currency-code");
   const elRate = document.getElementById("eco-rate");
-  if (!window.currencyCode || window.currencyCode === "USD") {
+  const currency = window.store ? window.store.get("currency") : window.currencyCode;
+  if (!currency || currency === "USD") {
     if (el) el.innerText = "1.00 USD";
     if (elCode) elCode.innerText = "USD";
     if (elRate) elRate.innerText = "1.00";
     return;
   }
-  if (elCode) elCode.innerText = window.currencyCode;
+  if (elCode) elCode.innerText = currency;
   if (elRate) elRate.innerText = "Scanning...";
   try {
     const res = await fetch(`https://open.er-api.com/v6/latest/USD`);
     const data = await res.json();
-    if (data && data.rates && data.rates[window.currencyCode]) {
-      const rate = data.rates[window.currencyCode];
-      if (el) el.innerText = `${rate.toFixed(2)} ${window.currencyCode}`;
+    if (data && data.rates && data.rates[currency]) {
+      const rate = data.rates[currency];
+      if (el) el.innerText = `${rate.toFixed(2)} ${currency}`;
       if (elRate) elRate.innerText = rate.toFixed(2);
     } else {
       if (el) el.innerText = "Data Unavailable";

@@ -68,7 +68,7 @@ async function fetchNews(overrideQ) {
   const previousNews = allNews.length > 0 ? [...allNews] : null;
   try {
     const q = overrideQ !== undefined ? overrideQ : newsSearchQuery;
-    const iso2 = window.iso2Code || "";
+    const iso2 = (window.store ? window.store.get("iso2") : window.iso2Code) || "";
     let url;
     if (q && q.trim()) {
       url = `/api/news?category=${window.currentCategory || "top"}&q=${encodeURIComponent(q.trim())}${iso2 ? "&iso2=" + iso2 : ""}`;

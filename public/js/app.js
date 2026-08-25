@@ -241,6 +241,7 @@ async function fetchAllData(countryName) {
     if (window.store) {
       window.store.set("country", window._currentCountryName);
       window.store.set("iso2", iso2Code);
+      window.store.set("iso3", c.cca3 || "");
       window.store.set("currency", currencyCode);
     }
     setText("selected-country-name", c.name?.common || countryName);
@@ -485,6 +486,7 @@ window.resetToGlobalCenter = () => {
   if (window.store) {
     window.store.set("country", null);
     window.store.set("iso2", "");
+    window.store.set("iso3", "");
     window.store.set("currency", "USD");
   }
   setText("selected-country-name", "Worldwide");
@@ -970,10 +972,10 @@ async function startApp() {
   positionTabIndicator();
 
   const defaultCountry = "India";
-  if (window.handleCountryClickByName) {
-    window.handleCountryClickByName(defaultCountry);
-  } else if (window.fetchAllData) {
+  if (window.fetchAllData) {
     window.fetchAllData(defaultCountry);
+  } else if (window.handleCountryClickByName) {
+    window.handleCountryClickByName(defaultCountry);
   }
 }
 

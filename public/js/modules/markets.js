@@ -211,7 +211,8 @@ let _marketsRefreshTimer = null;
 function startMarketsAutoRefresh() {
     if (_marketsRefreshTimer) clearInterval(_marketsRefreshTimer);
     _marketsRefreshTimer = setInterval(() => {
-        if (document.visibilityState === 'visible' && window._currentTab === 'tab-markets') {
+        const activeTab = window.store ? window.store.get("tab") : window._currentTab;
+        if (document.visibilityState === 'visible' && activeTab === 'tab-markets') {
             initializeMarkets(window._currentCountryName || "Global");
         }
     }, 60 * 1000);

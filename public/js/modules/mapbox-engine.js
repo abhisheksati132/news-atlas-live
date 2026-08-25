@@ -11,6 +11,8 @@ class MapboxEngine {
         this._isNightActive = false;
         this._isRotating = false;
         this._rotateAnimId = null;
+        this._wbData = null;
+        this._neFeatures = null;
     }
 
     async init() {
@@ -379,6 +381,7 @@ class MapboxEngine {
             const res = await fetch('https://unpkg.com/world-atlas@2.0.2/countries-110m.json');
             const data = await res.json();
             const features = topojson.feature(data, data.objects.countries);
+            this._neFeatures = features.features || [];
 
             ['country-fills', 'country-borders-base', 'country-borders-hover', 'country-borders-selected', 'gdelt-beacons', 'gdelt-beacon-halo', 'news-pulses-layer']
                 .forEach(id => { if (this.map.getLayer(id)) this.map.removeLayer(id); });
@@ -540,6 +543,7 @@ class MapboxEngine {
 
             this._applyAtmosphere();
             this.loadGDELTHotspots();
+            this.loadDataLayers();
         } catch (err) {
             console.error('Failed to load map geometry:', err);
         }
@@ -743,15 +747,159 @@ class MapboxEngine {
         }
     }
 
-    setMapDataLayer(type) {
-        if (!this.map || !this.map.getLayer('country-fills')) return;
+    async loadDataLayers() {
+        try {
+            const cached = localStorage.getItem('newsatlas_wb_v1');
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                if (parsed && parsed.gdp_pc && Date.now() - parsed.ts < 7 * 24 * 3600 * 1000) {
+                    this._wbData = parsed;
+                    return;
+                }
+            }
+            const pick = (payload) => {
+                const rows = Array.isArray(payload) ? payload[1] || [] : [];
+                const out = {};
+                rows.forEach((r) => {
+                    if (r.value != null && r.countryiso3code) out[r.countryiso3code] = r.value;
+                });
+                return out;
+            };
+            const [gdpPayload, growthPayload] = await Promise.all([
+                fetch('https://api.worldbank.org/v2/country/all/indicator/NY.GDP.PCAP.CD?format=json&mrv=1&per_page=400').then((r) => r.json()),
+                fetch('https://api.worldbank.org/v2/country/all/indicator/NY.GDP.MKTP.KD.ZG?format=json&mrv=1&per_page=400').then((r) => r.json())
+            ]);
+            this._wbData = { ts: Date.now(), gdp_pc: pick(gdpPayload), growth: pick(growthPayload) };
+            localStorage.setItem('newsatlas_wb_v1', JSON.stringify(this._wbData));
+        } catch (e) {
+            console.warn('[mapbox] World Bank indicator layers unavailable:', e.message);
+        }
+    }
 
+    _norm(s) {
+        return String(s || '').toLowerCase().replace(/[^a-zà-ÿ]/g, '');
+    }
+
+    _matchRegistryName(neName, index) {
+        const key = this._norm(neName);
+        const aliases = {
+            unitedstatesofamerica: 'unitedstates',
+            russianfederation: 'russia',
+            demrepcongo: 'democraticrepublicofthecongo',
+            congodemocraticrepublicofthe: 'democraticrepublicofthecongo',
+            centralafricanrep: 'centralafricanrepublic',
+            ssudan: 'southsudan',
+            dominicanrep: 'dominicanrepublic',
+            eqguinea: 'equatorialguinea',
+            bosniaandherz: 'bosniaandherzegovina',
+            republicofkorea: 'southkorea',
+            koreademocratspeoplesrepublicof: 'northkorea',
+            northkorea: 'northkorea',
+            turkiye: 'turkey',
+            czechia: 'czechrepublic',
+            eswatini: 'swaziland',
+            myanmar: 'myanmar'
+        };
+        const target = aliases[key] || key;
+        if (index.has(target)) return index.get(target);
+        for (const [k, v] of index) {
+            if (k.length >= 5 && (k.includes(target) || target.includes(k))) return v;
+        }
+        return null;
+    }
+
+    _bucketColors(type) {
         const isLightTheme =
             document.body.classList.contains('light-theme') ||
             document.documentElement.getAttribute('data-theme') === 'light';
-        const baseColor = isLightTheme ? '#18181b' : '#ffffff';
+        if (type === 'gdp') {
+            return isLightTheme
+                ? ['#ececec', '#d4d4d8', '#b6b6bf', '#8b8b95', '#606069']
+                : ['#232326', '#333338', '#45454c', '#5e5e66', '#7f7f89'];
+        }
+        return ['#ef4444', '#a1a1aa', '#71717a', '#4ade80', '#10b981'];
+    }
+
+    _buildDataExpression(type) {
+        const registry = Array.isArray(window.globalSearchData) ? window.globalSearchData : [];
+        if (!registry.length || !this._neFeatures || !this._wbData) return null;
+        const data = type === 'gdp' ? this._wbData.gdp_pc : this._wbData.growth;
+
+        const index = new Map();
+        registry.forEach((c) => index.set(this._norm(c.name?.common), c));
+
+        const joined = [];
+        const seen = new Set();
+        for (const f of this._neFeatures) {
+            const neName = f.properties?.name;
+            if (!neName || seen.has(neName)) continue;
+            const c = this._matchRegistryName(neName, index);
+            const value = c?.cca3 ? data[c.cca3] : undefined;
+            if (value != null) {
+                joined.push({ name: neName, value });
+                seen.add(neName);
+            }
+        }
+        if (joined.length < 10) return null;
+
+        const values = joined.map((j) => j.value).sort((a, b) => a - b);
+        const q = (p) => values[Math.floor(p * (values.length - 1))];
+        let thresholds, labels;
+        if (type === 'gdp') {
+            thresholds = [q(0.2), q(0.4), q(0.6), q(0.8)];
+            const fmt = (v) => (v >= 1000 ? `$${(v / 1000).toFixed(0)}k` : `$${Math.round(v)}`);
+            labels = [
+                `< ${fmt(thresholds[0])}`,
+                `${fmt(thresholds[0])} – ${fmt(thresholds[1])}`,
+                `${fmt(thresholds[1])} – ${fmt(thresholds[2])}`,
+                `${fmt(thresholds[2])} – ${fmt(thresholds[3])}`,
+                `> ${fmt(thresholds[3])}`
+            ];
+        } else {
+            thresholds = [0, 2, 4.5, 7];
+            labels = ['< 0%', '0 – 2%', '2 – 4.5%', '4.5 – 7%', '> 7%'];
+        }
+
+        const colors = this._bucketColors(type);
+        const colorFor = (v) => {
+            let i = 0;
+            while (i < thresholds.length && v >= thresholds[i]) i++;
+            return colors[Math.min(i, colors.length - 1)];
+        };
+
+        const expression = ['match', ['get', 'name']];
+        for (const j of joined) expression.push(j.name, colorFor(j.value));
+        expression.push(colors[0]);
+        return { expression, colors, labels };
+    }
+
+    _renderLegend(type, legendData) {
+        const el = document.getElementById('map-legend');
+        if (!el) return;
+        if (!legendData) {
+            el.classList.add('hidden');
+            return;
+        }
+        const title = type === 'gdp' ? 'GDP per capita' : 'GDP growth (annual %)';
+        const rows = legendData.colors
+            .map(
+                (c, i) =>
+                    `<div style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:${c};border:1px solid var(--border-subtle)"></span><span style="font-size:11px;color:var(--text-secondary)">${legendData.labels[i]}</span></div>`
+            )
+            .join('');
+        el.innerHTML = `<div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:11px;font-weight:600;color:var(--text-primary);margin-bottom:2px">${title}</div>${rows}<div style="font-size:9px;color:var(--text-faint);margin-top:4px">World Bank Open Data</div></div>`;
+        el.classList.remove('hidden');
+    }
+
+    setMapDataLayer(type) {
+        if (!this.map || !this.map.getLayer('country-fills')) return;
 
         if (type === 'default' || !type) {
+            const baseColor =
+                document.body.classList.contains('light-theme') ||
+                document.documentElement.getAttribute('data-theme') === 'light'
+                    ? '#18181b'
+                    : '#ffffff';
             this.map.setPaintProperty('country-fills', 'fill-color', baseColor);
             this.map.setPaintProperty('country-fills', 'fill-opacity', [
                 'case',
@@ -759,40 +907,29 @@ class MapboxEngine {
                 ['boolean', ['feature-state', 'hover'], false], 0.045,
                 0.02
             ]);
+            this._renderLegend(type, null);
             return;
         }
 
-        const expression = ['match', ['get', 'name']];
-        
-        if (type === 'gdp') {
-            expression.push('United States of America', '#ffffff');
-            expression.push('China', '#cbd5e1');
-            expression.push('Japan', '#94a3b8');
-            expression.push('Germany', '#94a3b8');
-            expression.push('India', '#94a3b8');
-            expression.push('United Kingdom', '#64748b');
-            expression.push('France', '#64748b');
-            expression.push('Brazil', '#475569');
-            expression.push('Russian Federation', '#475569');
-            expression.push('Canada', '#475569');
-            expression.push('Australia', '#334155');
-            expression.push('rgba(255, 255, 255, 0.04)'); 
-            
-            this.map.setPaintProperty('country-fills', 'fill-color', expression);
-            this.map.setPaintProperty('country-fills', 'fill-opacity', 0.65);
-        } else if (type === 'growth') {
-            expression.push('India', '#10b981');
-            expression.push('China', '#10b981');
-            expression.push('Ukraine', '#10b981');
-            expression.push('Russian Federation', '#f59e0b');
-            expression.push('Brazil', '#f59e0b');
-            expression.push('United States of America', '#f59e0b');
-            expression.push('Germany', '#ef4444');
-            expression.push('rgba(255, 255, 255, 0.06)');
-            
-            this.map.setPaintProperty('country-fills', 'fill-color', expression);
-            this.map.setPaintProperty('country-fills', 'fill-opacity', 0.6);
+        if (!this._wbData) {
+            if (window.showToast) window.showToast('Indicator data still loading — try again in a moment.', 'info');
+            return;
         }
+
+        const result = this._buildDataExpression(type);
+        if (!result) {
+            if (window.showToast) window.showToast('Indicator layer unavailable.', 'error');
+            return;
+        }
+
+        this.map.setPaintProperty('country-fills', 'fill-color', result.expression);
+        this.map.setPaintProperty('country-fills', 'fill-opacity', [
+            'case',
+            ['boolean', ['feature-state', 'selected'], false], 0.85,
+            ['boolean', ['feature-state', 'hover'], false], 0.75,
+            0.65
+        ]);
+        this._renderLegend(type, { colors: result.colors, labels: result.labels });
     }
 }
 

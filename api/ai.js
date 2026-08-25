@@ -13,37 +13,6 @@ function rateLimited(req) {
   return count > AI_RATE_MAX;
 }
 
-function generateGroundTruthBriefing(prompt, locName) {
-  const isSecurity = /security|risk|threat|conflict|war|military|stability/i.test(prompt);
-  const isEconomic = /econom|growth|gdp|driver|inflation|trade|market|finance/i.test(prompt);
-  const isClimate = /climate|weather|environment|atmosphere|storm|rain/i.test(prompt);
-
-  const loc = locName && locName !== "Global Sector" ? locName : "Global Sector";
-
-  if (isSecurity) {
-    return `[SECURITY_ASSESSMENT] Tactical intelligence scan for ${loc}. Regional security posture remains active with coordinated monitoring along strategic corridors.
-[RISK_ANALYSIS] Geopolitical instability indicators reflect standard variance across border security, trade maritime zones, and domestic infrastructure.
-[STRATEGIC_OUTLOOK] Diplomatic communication channels remain open with bilateral and multilateral partners to mitigate sudden escalations.`;
-  }
-
-  if (isEconomic) {
-    return `[EXECUTIVE_SUMMARY] Macroeconomic trajectory for ${loc} reflects active integration with global supply chains and trade corridors.
-[ECONOMIC_DRIVERS] Primary economic momentum is anchored in diversified industrial manufacturing, digital technology exports, and strategic commodities.
-[POLICY_OUTLOOK] Central monetary policy targets inflation stability while fostering sustainable capital expenditure and sovereign reserves.`;
-  }
-
-  if (isClimate) {
-    return `[CLIMATE_ASSESSMENT] Environmental telemetry for ${loc} demonstrates stable atmospheric conditions across major metropolitan and agricultural sectors.
-[METEOROLOGICAL_TREND] Air quality index (AQI) and barometric pressure patterns align with seasonal baselines.
-[RESOURCE_OUTLOOK] Renewable transition initiatives and water management protocols continue to support long-term ecological resilience.`;
-  }
-
-  return `[EXECUTIVE_SUMMARY] Sovereign profile synthesis for ${loc}. High-density monitoring active across geopolitical stability, macroeconomic growth, and international news telemetry.
-[POLITICAL_STABILITY] Institutional continuity and bilateral diplomatic ties remain aligned with regional security frameworks.
-[MACROECONOMIC_TELEMETRY] World Bank macroeconomic indicators reflect steady trade balances, calibrated interest rate policy, and sustained consumer demand.
-[STRATEGIC_OBSERVATION] Global intelligence feed indicates no severe disruption to energy, maritime, or digital infrastructure.`;
-}
-
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
@@ -183,14 +152,10 @@ export default async function handler(req, res) {
     } catch (e) {}
   }
 
-  // 4. Guaranteed Ground-Truth Synthesis Fallback
-  const fallbackText = generateGroundTruthBriefing(userPrompt, locName);
-  const payload = {
-    candidates: [{ content: { parts: [{ text: fallbackText }] } }],
-    response: fallbackText,
-    provider: "ground-truth-telemetry",
-    freshness: "live"
-  };
-  setCache(cacheKey, payload, 300);
-  return res.status(200).json(payload);
+  // No provider keys configured or all providers failed — fail honestly.
+  console.error("[ai] All providers unavailable");
+  return res.status(503).json({
+    error: "AI service temporarily unavailable.",
+    code: "AI_UNAVAILABLE"
+  });
 }

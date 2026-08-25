@@ -1,4 +1,5 @@
 import './core.js';
+import './store.js';
 import './ui.js';
 import './modules/mapbox-engine.js';
 import './modules/news.js';
@@ -237,6 +238,11 @@ async function fetchAllData(countryName) {
     window._isoAlpha3 = c.cca3 || "";
     window.iso2Code = iso2Code;
     window.currencyCode = currencyCode;
+    if (window.store) {
+      window.store.set("country", window._currentCountryName);
+      window.store.set("iso2", iso2Code);
+      window.store.set("currency", currencyCode);
+    }
     setText("selected-country-name", c.name?.common || countryName);
     const capitalName = c.capital ? c.capital[0] : "N/A";
     setText("selected-country-capital", `Capital: ${capitalName} · ${(c.subregion || c.region || "").toUpperCase()}`);
@@ -360,11 +366,12 @@ window.sendAboutAI = async function(customPrompt) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt: customPrompt, location: window._currentCountryName || 'Global' })
     });
+    if (!res.ok) throw new Error(`AI HTTP ${res.status}`);
     const data = await res.json();
     const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || data.response || "No data received.";
     renderBriefingCards(rawText);
   } catch (e) {
-    if (text) text.innerHTML = `<p class="text-xs text-slate-400 py-2">Intelligence briefing temporarily calibrated to baseline telemetry.</p>`;
+    if (text) text.innerHTML = `<p class="text-xs text-slate-500 py-2">AI briefing temporarily unavailable.</p>`;
   }
 };
 
@@ -394,18 +401,20 @@ async function generateAIBriefing(loc) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt: briefingPrompt, location: targetLoc })
     });
-    
+
+    if (!res.ok) throw new Error(`AI HTTP ${res.status}`);
     const data = await res.json();
     const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || data.response || "No data received.";
-    
+
     if (loading) loading.classList.add("hidden");
     if (actions) actions.classList.remove("hidden");
-    
+
     renderBriefingCards(rawText);
   } catch (e) {
     if (loading) loading.classList.add("hidden");
+    if (actions) actions.classList.add("hidden");
     if (text) {
-      renderBriefingCards(`[EXECUTIVE_SUMMARY] Real-time situational profile for ${targetLoc}. Integrated telemetry monitoring active across sovereign borders, capital markets, and international news corridors.\n[STRATEGIC_OBSERVATION] Global intelligence feed reflects stable baseline operational metrics.`);
+      text.innerHTML = `<p class="text-xs text-slate-500 py-2">AI briefing temporarily unavailable. Live market, news and weather data are unaffected.</p>`;
     }
   }
 }
@@ -473,6 +482,11 @@ window.resetToGlobalCenter = () => {
   iso2Code = "";
   window.currencyCode = "USD";
   currencyCode = "USD";
+  if (window.store) {
+    window.store.set("country", null);
+    window.store.set("iso2", "");
+    window.store.set("currency", "USD");
+  }
   setText("selected-country-name", "Worldwide");
   
   // Reset Sector HUD
@@ -697,6 +711,7 @@ window.switchTab = (id) => {
     : (normId === "eco" ? "tab-economic" : normId === "atmo" ? "tab-atmosphere" : `tab-${normId}`);
 
   window._currentTab = targetContentId;
+  if (window.store) window.store.set("tab", targetContentId);
 
   contents.forEach((c) => {
     c.classList.toggle("active", c.id === targetContentId);
@@ -926,8 +941,8 @@ async function initIntelligenceLink() {
 
   socket.on("breaking_news", (data) => {
     if (window.showToast) window.showToast(`🚨 BREAKING: ${data.title}`, "info");
-    // Refresh news if it's the current tab
-    if (window._currentTab === "tab-news") window.fetchNews(window._currentCountryName);
+    const activeTab = window.store ? window.store.get("tab") : window._currentTab;
+    if (activeTab === "tab-news") window.fetchNews(window._currentCountryName);
   });
 
   socket.on("disconnect", () => {

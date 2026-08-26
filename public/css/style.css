@@ -531,54 +531,6 @@ body.view-state-map .intel-sidebar.glass-panel.dashboard-panel {
   pointer-events: none;
 }
 
-/* Solar system — decorative bodies drifting in the space around the globe */
-#space-decor {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
-  overflow: hidden;
-}
-.space-body {
-  position: absolute;
-  border-radius: 50%;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-  animation-direction: alternate;
-  will-change: transform;
-  box-shadow: 0 0 24px rgba(255, 255, 255, 0.06);
-}
-.space-ring {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 190%;
-  height: 56%;
-  transform: translate(-50%, -50%) rotate(-18deg);
-  border-radius: 50%;
-  border: 2px solid rgba(201, 168, 106, 0.45);
-  border-top-color: transparent;
-}
-@keyframes space-drift-a {
-  from { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(26px, -18px) scale(1.05); }
-  to { transform: translate(-14px, 12px) scale(0.97); }
-}
-@keyframes space-drift-b {
-  from { transform: translate(0, 0) rotate(0deg); }
-  to { transform: translate(-30px, 20px) rotate(8deg); }
-}
-@keyframes space-drift-c {
-  from { transform: translate(0, 0); }
-  50% { transform: translate(18px, 22px); }
-  to { transform: translate(-20px, -10px); }
-}
-#space-decor.hidden-flat { display: none; }
-body.low-fx #space-decor { display: none; }
-@media (max-width: 900px) {
-  #space-decor { display: none; }
-}
-
 /* Cursor coordinate readout */
 #cursor-coords {  position: absolute;
   left: 16px;

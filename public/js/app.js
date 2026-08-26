@@ -8,7 +8,6 @@ import './modules/markets.js';
 import './modules/economics.js';
 import './modules/geography.js';
 import './modules/map-toolbar.js';
-import './modules/space.js';
 import './global-fx.js';
 import './enhancements.js';
 let selectedCountry = null;
@@ -974,7 +973,6 @@ async function startApp() {
 
   if (window.activateMapInteraction) window.activateMapInteraction();
   if (window.initMapToolbar) window.initMapToolbar();
-  if (window.initSpaceDecor) window.initSpaceDecor();
   initCoachCard();
   positionTabIndicator();
 

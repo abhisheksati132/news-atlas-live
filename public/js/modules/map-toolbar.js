@@ -143,6 +143,8 @@ function bindActions() {
     const next = e.getProjection() === "globe" ? "mercator" : "globe";
     e.setProjection(next);
     setActive("mtb-projection", next === "mercator");
+    document.body.classList.toggle("flat-map", next === "mercator");
+    if (window.syncSpaceDecor) window.syncSpaceDecor();
     toast(next === "globe" ? "Globe view" : "Flat map view");
   });
 

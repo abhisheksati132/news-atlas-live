@@ -37,7 +37,7 @@ class MapboxEngine {
 
         const isLight = document.body.classList.contains('light-theme');
         const defaultStyle = hasToken
-            ? (isLight ? 'mapbox://styles/mapbox/light-v11' : 'mapbox://styles/mapbox/dark-v11')
+            ? 'mapbox://styles/mapbox/satellite-streets-v12'
             : (isLight
                 ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
                 : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json');
@@ -79,9 +79,9 @@ class MapboxEngine {
         this.map.on('style.load', () => {
             this.map.resize();
             const isLowFx = document.body.classList.contains('low-fx');
-            if (!isLowFx && hasToken) {
+            if (!isLowFx) {
                 this._applyAtmosphere();
-                this._addTerrain();
+                if (hasToken) this._addTerrain();
             }
             this.initMapboxLayers();
             this.ready = true;
@@ -138,7 +138,7 @@ class MapboxEngine {
                 'high-color': 'rgba(12, 12, 16, 0.5)',
                 'horizon-blend': 0.02,
                 'space-color': '#050505',
-                'star-intensity': 0.55,
+                'star-intensity': 0.8,
                 'range': [0.4, 8]
             });
         } catch (e) {
@@ -591,7 +591,7 @@ class MapboxEngine {
             'color': isDay ? 'rgba(255, 255, 255, 0.35)' : 'rgba(10, 10, 14, 0.85)',
             'high-color': isDay ? 'rgba(200, 205, 215, 0.5)' : 'rgba(16, 16, 22, 0.75)',
             'space-color': '#050505',
-            'star-intensity': isDay ? 0 : 0.55
+            'star-intensity': isDay ? 0.35 : 0.8
         });
     }
 

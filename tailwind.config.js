@@ -1,7 +1,9 @@
 export default {
   content: [
     "./index.html",
+    "./landing.html",
     "./src/**/*.{js,jsx,ts,tsx}",
+    "./public/js/**/*.js"
   ],
   theme: {
     extend: {

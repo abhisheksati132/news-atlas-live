@@ -36,9 +36,9 @@ class MapboxEngine {
         container.innerHTML = '';
 
         const isLight = document.body.classList.contains('light-theme');
-        const defaultStyle = hasToken 
-            ? 'mapbox://styles/mapbox/satellite-streets-v12'
-            : (isLight 
+        const defaultStyle = hasToken
+            ? (isLight ? 'mapbox://styles/mapbox/light-v11' : 'mapbox://styles/mapbox/dark-v11')
+            : (isLight
                 ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
                 : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json');
 

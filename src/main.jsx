@@ -155,7 +155,7 @@ const AIAssistant = () => {
           <div key={i} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
             <div className={`relative group max-w-[90%] px-4 py-3 rounded-2xl text-xs leading-relaxed transition-all ${
               m.role === 'user'
-                ? 'bg-[var(--accent-primary)] text-white shadow-sm font-medium rounded-tr-sm'
+                ? 'bg-[var(--accent-primary)] text-[var(--accent-text,#09090b)] shadow-sm font-medium rounded-tr-sm'
                 : m.isError
                   ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20 font-mono text-[11px] rounded-tl-sm'
                   : 'bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-tl-sm whitespace-pre-line font-sans'

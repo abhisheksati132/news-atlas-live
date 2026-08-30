@@ -2,6 +2,41 @@ import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 import './styles/globals.css';
 
+import * as Sentry from "@sentry/browser";
+import { browserTracingIntegration, replayIntegration } from "@sentry/browser";
+
+const DSN = import.meta.env.VITE_SENTRY_DSN;
+
+if (DSN) {
+  Sentry.init({
+    dsn: DSN,
+    environment: import.meta.env.MODE,
+    integrations: [
+      Sentry.browserTracingIntegration(),
+      Sentry.replayIntegration({
+        maskAllText: true,
+        blockAllMedia: true,
+      }),
+    ],
+    tracesSampleRate: 0.1,
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
+    ignoreErrors: [
+      "Non-Error promise rejection captured",
+      "ResizeObserver loop limit exceeded",
+      "NetworkError",
+    ],
+    beforeSend(event) {
+      if (event.exception) {
+        for (const ex of event.exception.values || []) {
+          if (ex.value?.includes("ResizeObserver loop limit exceeded")) return null;
+        }
+      }
+      return event;
+    },
+  });
+}
+
 const AIAssistant = () => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([

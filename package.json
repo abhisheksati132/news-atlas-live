@@ -16,6 +16,7 @@
     "deploy": "vercel --prod"
   },
   "dependencies": {
+    "@sentry/browser": "^10.72.0",
     "compression": "^1.8.1",
     "concurrently": "^8.2.0",
     "cors": "^2.8.6",

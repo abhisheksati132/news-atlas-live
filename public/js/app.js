@@ -476,13 +476,16 @@ window.handleCountryClick = async function (event, d) {
   if (window.updateNotesAndBookmarksUI) window.updateNotesAndBookmarksUI();
 };
 window.resetToGlobalCenter = () => {
-  selectedCountry = null;
+selectedCountry = null;
   window.selectedCountry = null;
   window._currentCountryName = null;
   window.iso2Code = "";
   iso2Code = "";
+  window.iso3Code = "";
   window.currencyCode = "USD";
   currencyCode = "USD";
+  window.currentCategory = "top";
+  currentCategory = "top";
   if (window.store) {
     window.store.set("country", null);
     window.store.set("iso2", "");
@@ -1029,7 +1032,9 @@ window.onNotesInput = function() {
   clearTimeout(notesSaveTimeout);
   notesSaveTimeout = setTimeout(() => {
     try {
-      localStorage.setItem("newsatlas_notes_" + countryName, content);
+      const notes = JSON.parse(localStorage.getItem("newsatlas_notes") || "{}");
+      notes[countryName] = content;
+      localStorage.setItem("newsatlas_notes", JSON.stringify(notes));
       if (saveStatus) saveStatus.innerText = "Saved Locally";
     } catch (e) {
       console.warn("Notes save failed:", e);
@@ -1042,38 +1047,27 @@ window.togglePinCountry = function() {
   if (!window.selectedCountry || !window.selectedCountry.properties) return;
 
   const countryName = window.selectedCountry.properties.name;
-  if (!window.userBookmarks) {
-    try {
-      window.userBookmarks = JSON.parse(localStorage.getItem("newsatlas_bookmarks") || "[]");
-    } catch {
-      window.userBookmarks = [];
-    }
-  }
+  const isPinned = window.store?.get("pinnedCountries")?.includes(countryName) ?? false;
 
-  const idx = window.userBookmarks.indexOf(countryName);
-  let isPinned = false;
-  if (idx > -1) {
-    window.userBookmarks.splice(idx, 1);
+  let pins = window.store?.get("pinnedCountries") ?? [];
+  if (isPinned) {
+    pins = pins.filter(c => c !== countryName);
   } else {
-    window.userBookmarks.push(countryName);
-    isPinned = true;
+    pins.push(countryName);
   }
+  window.store?.set("pinnedCountries", pins);
 
   const pinBtn = document.getElementById("sector-pin-btn");
   if (pinBtn) {
-    pinBtn.innerHTML = isPinned ? '<i class="fas fa-star text-[10px] text-yellow-400"></i>' : '<i class="far fa-star text-[10px]"></i>';
-    pinBtn.title = isPinned ? "Unpin Sector" : "Pin Sector";
+    pinBtn.innerHTML = isPinned ? '<i class="far fa-star text-[10px]"></i>' : '<i class="fas fa-star text-[10px] text-yellow-400"></i>';
+    pinBtn.title = isPinned ? "Pin Sector" : "Unpin Sector";
   }
 
-  try {
-    localStorage.setItem("newsatlas_bookmarks", JSON.stringify(window.userBookmarks));
-    if (window.showToast) {
-      window.showToast(isPinned ? `Pinned ${countryName}.` : `Unpinned ${countryName}.`, "success");
-    }
-    if (window.renderPinnedSectors) window.renderPinnedSectors();
-  } catch (e) {
-    console.warn("Bookmark save error:", e);
+  if (window.showToast) {
+    window.showToast(isPinned ? `Unpinned ${countryName}.` : `Pinned ${countryName}.`, "success");
   }
+  if (window.renderPinnedSectors) window.renderPinnedSectors();
+  if (window.updateNotesAndBookmarksUI) window.updateNotesAndBookmarksUI();
 };
 
 window.updateNotesAndBookmarksUI = async function() {
@@ -1086,7 +1080,8 @@ window.updateNotesAndBookmarksUI = async function() {
   if (notesInput) {
     notesInput.disabled = false;
     try {
-      notesInput.value = localStorage.getItem("newsatlas_notes_" + countryName) || "";
+      const notes = JSON.parse(localStorage.getItem("newsatlas_notes") || "{}");
+      notesInput.value = notes[countryName] || "";
     } catch {
       notesInput.value = "";
     }
@@ -1094,14 +1089,8 @@ window.updateNotesAndBookmarksUI = async function() {
   }
 
   if (pinBtn) {
-    if (!window.userBookmarks) {
-      try {
-        window.userBookmarks = JSON.parse(localStorage.getItem("newsatlas_bookmarks") || "[]");
-      } catch {
-        window.userBookmarks = [];
-      }
-    }
-    const isPinned = window.userBookmarks && window.userBookmarks.includes(countryName);
+    const pins = window.store?.get("pinnedCountries") ?? [];
+    const isPinned = pins.includes(countryName);
     pinBtn.innerHTML = isPinned ? '<i class="fas fa-star text-[10px] text-yellow-400"></i>' : '<i class="far fa-star text-[10px]"></i>';
     pinBtn.title = isPinned ? "Unpin Sector" : "Pin Sector";
   }

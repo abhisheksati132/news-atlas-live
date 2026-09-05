@@ -133,6 +133,7 @@ const AIAssistant = () => {
     }
 
     setLoading(true);
+    if (typeof window.trackEvent === 'function') window.trackEvent('ai-query');
 
     try {
       const res = await fetch('/api/ai', {

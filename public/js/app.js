@@ -1,5 +1,6 @@
 import './core.js';
 import './store.js';
+import './modules/analytics.js';
 import './ui.js';
 import './modules/mapbox-engine.js';
 import './modules/news.js';

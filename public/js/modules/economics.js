@@ -290,7 +290,7 @@ Keep each section to 2-3 sentences. Be specific with numbers where possible.`;
     }
     window.playTacticalSound("success");
   } catch (e) {
-    if (textEl) textEl.innerHTML = '<div class="apple-glass p-5 text-red-400 font-mono text-sm">Financial uplink failed.</div>';
+    if (textEl) textEl.innerHTML = '<div class="apple-glass p-5 text-red-400 font-mono text-sm">Could not load market analysis.</div>';
   }
 }
 function renderMarketCards(rawText, container) {

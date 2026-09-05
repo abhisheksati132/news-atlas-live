@@ -44,6 +44,14 @@ window.showToast = function (message, type = "info") {
 
 // Geocoding is now handled via secure backend proxy
 
+function highlightMatch(text, query) {
+  const safe = window.escapeHtml ? window.escapeHtml(text) : text;
+  if (!query) return safe;
+  const idx = safe.toLowerCase().indexOf(query.toLowerCase());
+  if (idx < 0) return safe;
+  return safe.slice(0, idx) + '<mark class="search-hit">' + safe.slice(idx, idx + query.length) + '</mark>' + safe.slice(idx + query.length);
+}
+
 function renderTrending() {
   const resContainer = document.getElementById("search-results");
   if (!resContainer) return;
@@ -65,8 +73,8 @@ function renderTrending() {
         <div class="flex items-center gap-4 px-5 py-3 hover:bg-[var(--bg-surface-subtle)] cursor-pointer transition-all border-b border-[var(--border-subtle)]" data-country="${escapeAttr(c.name.common)}">
           <div class="w-8 h-5 rounded shadow-sm overflow-hidden border border-[var(--border-subtle)] shrink-0"><img src="${c.flags.svg}" class="w-full h-full object-cover"></div>
           <div class="flex flex-col flex-1 min-w-0">
-            <span class="font-bold text-[var(--text-primary)] text-sm tracking-tight">${c.name.common}</span>
-            <span class="text-xs text-[var(--text-secondary)] truncate">${c.capital ? c.capital[0] : ""} · ${c.region || ""}</span>
+            <span class="font-bold text-[var(--text-primary)] text-sm tracking-tight">${highlightMatch(c.name.common, q)}</span>
+            <span class="text-xs text-[var(--text-secondary)] truncate">${c.capital ? highlightMatch(c.capital[0], q) : ""} · ${c.region || ""}</span>
           </div>
           <i class="fas fa-arrow-right text-xs text-slate-400"></i>
         </div>`).join("");

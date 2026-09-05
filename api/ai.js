@@ -32,7 +32,7 @@ export default async function handler(req, res) {
 
   const isStream = req.query?.stream === "true";
   const userPrompt = String(body.prompt || body.message || "Strategic situation briefing").trim();
-  const locName = userPrompt.match(/Location: ([^.]+)/)?.[1]?.trim() || "Global Sector";
+  const locName = userPrompt.match(/Location: ([^.]+)/)?.[1]?.trim() || "Global";
 
   const cacheKey = `ai_intel_${locName.replace(/\s+/g, '_')}_${userPrompt.slice(0, 30).replace(/[^a-zA-Z0-9]/g, '')}`;
   const cached = getCache(cacheKey);

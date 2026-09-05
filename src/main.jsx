@@ -170,7 +170,7 @@ const AIAssistant = () => {
       {/* Context & Action Bar */}
       <div className="px-4 py-2 bg-[var(--bg-surface-subtle)] border-b border-[var(--border-subtle)] flex items-center justify-between text-[11px] font-mono">
         <div className="flex items-center gap-2">
-          <span className="text-slate-500 uppercase font-semibold">Active Sector:</span>
+          <span className="text-slate-500 uppercase font-semibold">Context:</span>
           <span className="px-2 py-0.5 rounded-full bg-[var(--accent-subtle)] text-[var(--accent-primary)] font-bold">
             {currentCountry}
           </span>
@@ -218,7 +218,7 @@ const AIAssistant = () => {
               <span className="w-2 h-2 bg-[var(--accent-primary)] rounded-full animate-bounce"></span>
               <span className="w-2 h-2 bg-[var(--accent-primary)] rounded-full animate-bounce [animation-delay:100ms]"></span>
               <span className="w-2 h-2 bg-[var(--accent-primary)] rounded-full animate-bounce [animation-delay:200ms]"></span>
-              <span className="text-[11px] font-mono text-slate-400 ml-1">Analyzing telemetry...</span>
+              <span className="text-[11px] font-mono text-slate-400 ml-1">Thinking...</span>
             </div>
           </div>
         )}

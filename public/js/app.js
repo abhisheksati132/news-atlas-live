@@ -501,7 +501,7 @@ selectedCountry = null;
   const sectorName = document.getElementById("sector-name");
   if (globeIcon) globeIcon.classList.remove("hidden");
   if (flagImg) flagImg.classList.add("hidden");
-  if (sectorName) sectorName.innerText = "Global Sector";
+  if (sectorName) sectorName.innerText = "Global";
 
   // Reset Compare Mode
   window.compareModeActive = false;
@@ -947,7 +947,7 @@ async function initIntelligenceLink() {
 
   socket.on("intelligence_link", (data) => {
     console.log("[DATA] System Signal:", data);
-    if (window.showToast) window.showToast(`Uplink: ${data.node} ${data.status}`, "success");
+    if (window.showToast) window.showToast("Connected", "success");
   });
 
   socket.on("breaking_news", (data) => {
@@ -1061,7 +1061,7 @@ window.togglePinCountry = function() {
   const pinBtn = document.getElementById("sector-pin-btn");
   if (pinBtn) {
     pinBtn.innerHTML = isPinned ? '<i class="far fa-star text-[10px]"></i>' : '<i class="fas fa-star text-[10px] text-yellow-400"></i>';
-    pinBtn.title = isPinned ? "Pin Sector" : "Unpin Sector";
+    pinBtn.title = isPinned ? "Pin country" : "Unpin country";
   }
 
   if (window.showToast) {
@@ -1093,7 +1093,7 @@ window.updateNotesAndBookmarksUI = async function() {
     const pins = window.store?.get("pinnedCountries") ?? [];
     const isPinned = pins.includes(countryName);
     pinBtn.innerHTML = isPinned ? '<i class="fas fa-star text-[10px] text-yellow-400"></i>' : '<i class="far fa-star text-[10px]"></i>';
-    pinBtn.title = isPinned ? "Unpin Sector" : "Pin Sector";
+    pinBtn.title = isPinned ? "Unpin country" : "Pin country";
   }
 };
 
@@ -1157,10 +1157,15 @@ window.initAutocompleteSearch = function() {
       dropdown.innerHTML = currentResults.map((c, idx) => {
         const flagUrl = c.cca2 ? `https://flagcdn.com/w20/${c.cca2.toLowerCase()}.png` : '';
         const flagTag = flagUrl ? `<img src="${flagUrl}" class="w-4 h-2.5 object-cover rounded-sm">` : `<i class="fas fa-globe text-slate-500 text-[10px]"></i>`;
+        const name = escapeHtml(c.name.common);
+        const hit = name.toLowerCase().indexOf(q);
+        const nameHtml = hit >= 0
+          ? name.slice(0, hit) + '<mark class="search-hit">' + name.slice(hit, hit + q.length) + '</mark>' + name.slice(hit + q.length)
+          : name;
         return `
           <div class="autocomplete-item px-3.5 py-2 hover:bg-white/5 rounded-lg cursor-pointer flex items-center gap-2.5 text-[10px] text-slate-400 hover:text-white font-mono transition-colors uppercase tracking-wider" data-index="${idx}">
             ${flagTag}
-            <span>${c.name.common}</span>
+            <span>${nameHtml}</span>
           </div>
         `;
       }).join("");
@@ -1429,7 +1434,7 @@ window.toggleWeatherRadar = async function(checked) {
       }
     });
 
-    if (window.showToast) window.showToast("Radar uplink active. Satellite overlays merged.", "success");
+    if (window.showToast) window.showToast("Radar layer on.", "success");
   } catch(e) {
     console.error("RainViewer loading failed:", e);
     if (window.showToast) window.showToast("Radar Link Offline: " + e.message, "error");

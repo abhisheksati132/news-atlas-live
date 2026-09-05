@@ -406,7 +406,8 @@ class MapboxEngine {
                         ['boolean', ['feature-state', 'selected'], false], 0.12,
                         ['boolean', ['feature-state', 'hover'], false], 0.045,
                         0.02
-                    ]
+                    ],
+                    'fill-opacity-transition': { duration: 300, delay: 0 }
                 }
             });
 

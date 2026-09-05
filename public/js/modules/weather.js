@@ -305,6 +305,8 @@ async function fetchWeather(lat, lon) {
     const dailyContainer = document.getElementById("atmo-daily-container");
     if (dailyContainer && data.daily) {
       dailyContainer.innerHTML = "";
+      const VISIBLE_DAYS = 3;
+      let hiddenCount = 0;
       for (let i = 1; i < 7; i++) {
         if (!data.daily.time[i]) break;
         const dateObj = new Date(data.daily.time[i]);
@@ -331,7 +333,24 @@ async function fetchWeather(lat, lon) {
                         <div class="font-mono text-sm font-bold text-white"><span class="text-slate-500">${dMin}°</span> / ${dMax}°</div>
                     </div>
                 `;
+        if (i > VISIBLE_DAYS) {
+          dRow.classList.add("hidden", "daily-extra");
+          hiddenCount++;
+        }
         dailyContainer.appendChild(dRow);
+      }
+      if (hiddenCount > 0) {
+        const toggleRow = document.createElement("button");
+        toggleRow.type = "button";
+        toggleRow.className = "w-full px-6 py-2.5 text-[11px] font-mono font-bold text-slate-500 hover:text-slate-200 uppercase tracking-wider transition-colors";
+        toggleRow.innerText = `Show ${hiddenCount} more days`;
+        toggleRow.addEventListener("click", () => {
+          const showing = toggleRow.dataset.open === "1";
+          dailyContainer.querySelectorAll(".daily-extra").forEach((r) => r.classList.toggle("hidden", showing));
+          toggleRow.dataset.open = showing ? "0" : "1";
+          toggleRow.innerText = showing ? `Show ${hiddenCount} more days` : "Show fewer days";
+        });
+        dailyContainer.appendChild(toggleRow);
       }
     }
     window.playTacticalSound("success");

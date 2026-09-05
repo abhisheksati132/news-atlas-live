@@ -226,8 +226,8 @@ function displayNewsArticles(articles) {
           <a href="${escapeHtml(art.link)}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1 font-semibold">
             Read Source <i class="fas fa-arrow-up-right-from-square text-[9px]"></i>
           </a>
-          <button type="button" onclick="navigator.clipboard?.writeText('${escapeHtml(art.link)}'); if(window.showToast) window.showToast('Article URL copied to clipboard', 'success');" class="text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1">
-            <i class="far fa-copy text-[10px]"></i> Copy
+          <button type="button" onclick="window.copyArticleLink('${escapeHtml(art.link)}', this)" class="text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1">
+            <i class="far fa-copy text-[10px]"></i> <span>Copy</span>
           </button>
         </div>
       </div>
@@ -235,6 +235,24 @@ function displayNewsArticles(articles) {
     container.appendChild(row);
   });
 }
+window.copyArticleLink = (url, btn) => {
+  try {
+    navigator.clipboard?.writeText(url);
+  } catch (e) { /* clipboard unavailable — no-op */ }
+  if (btn) {
+    const label = btn.querySelector("span");
+    const icon = btn.querySelector("i");
+    const origLabel = label ? label.innerText : "Copy";
+    if (label) label.innerText = "Copied";
+    btn.classList.add("copy-done");
+    if (icon) icon.className = "fas fa-check text-[10px]";
+    setTimeout(() => {
+      if (label) label.innerText = origLabel;
+      btn.classList.remove("copy-done");
+      if (icon) icon.className = "far fa-copy text-[10px]";
+    }, 1500);
+  }
+};
 window.loadMoreNews = () => {
   displayedNewsCount += 21;
   displayFilteredNews();

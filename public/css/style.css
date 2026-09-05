@@ -1086,3 +1086,61 @@ html[data-theme='light'] .skeleton { background: #f4f4f5 !important; }
 html[data-theme='light'] .skeleton::after {
   background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.05), transparent);
 }
+
+/* --------------------------------------------------------------------------
+   Interaction feedback — pressed states, tactile buttons
+   -------------------------------------------------------------------------- */
+button:active:not(:disabled) {
+  transform: scale(0.96);
+}
+.mtb-btn:active:not(:disabled),
+.nav-tab:active:not(:disabled),
+.mobile-nav-item:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+/* Stable loading heights — prevents layout jumps when data lands */
+#ai-briefing-text:empty { min-height: 72px; }
+#articles-container:empty { min-height: 280px; }
+#metals-content:empty,
+#indices-content:empty,
+#forex-content:empty,
+#commodities-content:empty { min-height: 120px; }
+#atmo-hourly-container:empty,
+#atmo-daily-container:empty { min-height: 96px; }
+#gdelt-events-content:empty { min-height: 96px; }
+#eco-exports:empty { min-height: 48px; }
+
+/* Copy confirmation state */
+.copy-done {
+  color: var(--success) !important;
+}
+
+/* Search match highlight */
+mark.search-hit {
+  background: transparent;
+  color: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+  text-decoration-color: var(--text-tertiary);
+  text-underline-offset: 2px;
+}
+
+/* Visible keyboard focus */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+html[data-theme='light'] button:focus-visible,
+html[data-theme='light'] a:focus-visible,
+html[data-theme='light'] input:focus-visible,
+html[data-theme='light'] select:focus-visible,
+html[data-theme='light'] textarea:focus-visible {
+  outline-color: #18181b;
+}

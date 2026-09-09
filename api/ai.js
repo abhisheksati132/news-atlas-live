@@ -1,4 +1,5 @@
 import { getCache, setCache } from "./_utils/cache.js";
+import { captureError } from "./_utils/monitor.js";
 
 // Per-instance rate limit (protects the AI keys on serverless too)
 const aiHits = new Map();
@@ -153,7 +154,7 @@ export default async function handler(req, res) {
   }
 
   // No provider keys configured or all providers failed — fail honestly.
-  console.error("[ai] All providers unavailable");
+  captureError(new Error("All AI providers unavailable"), { handler: "ai" });
   return res.status(503).json({
     error: "AI service temporarily unavailable.",
     code: "AI_UNAVAILABLE"

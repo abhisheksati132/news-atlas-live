@@ -1,4 +1,5 @@
 import { getCache, setCache } from "./_utils/cache.js";
+import { captureError } from "./_utils/monitor.js";
 
 const FX_QUOTES = ["EUR", "GBP", "JPY", "CHF", "CAD", "AUD", "INR", "CNY", "SGD", "HKD", "BRL"];
 
@@ -156,7 +157,7 @@ export default async function handler(req, res) {
       setCache(cacheKey, payload, 3600);
       return res.status(200).json(payload);
     } catch (error) {
-      console.error("[markets:forex]", error.message);
+        captureError(error, { handler: "markets", type: "forex" });
       return res.status(502).json({
         error: "Foreign-exchange reference rates are currently unavailable.",
         code: "FOREX_UPSTREAM_ERROR"
@@ -201,7 +202,7 @@ export default async function handler(req, res) {
       setCache(cacheKey, payload, 60);
       return res.status(200).json(payload);
     } catch (err) {
-      console.error("[markets:metals]", err.message);
+        captureError(err, { handler: "markets", type: "metals" });
       return res.status(502).json({
         error: "Metals quotes currently unavailable.",
         code: "METALS_UPSTREAM_ERROR"
@@ -262,7 +263,7 @@ export default async function handler(req, res) {
       setCache(cacheKey, payload, 60);
       return res.status(200).json(payload);
     } catch (err) {
-      console.error("[markets:indices]", err.message);
+        captureError(err, { handler: "markets", type: "indices" });
       return res.status(502).json({
         error: "Indices quotes currently unavailable.",
         code: "INDICES_UPSTREAM_ERROR"
@@ -307,7 +308,7 @@ export default async function handler(req, res) {
       setCache(cacheKey, payload, 60);
       return res.status(200).json(payload);
     } catch (err) {
-      console.error("[markets:commodities]", err.message);
+        captureError(err, { handler: "markets", type: "commodities" });
       return res.status(502).json({
         error: "Commodity pipeline currently unavailable.",
         code: "COMMODITIES_UPSTREAM_ERROR"

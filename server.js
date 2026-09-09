@@ -21,8 +21,10 @@ import geoHandler from "./api/geo.js";
 import gdeltHandler from "./api/gdelt.js";
 import stabilityHandler from "./api/stability.js";
 import economicsHandler from "./api/economics.js";
+import { initMonitoring, captureError } from "./api/_utils/monitor.js";
 
 dotenv.config();
+initMonitoring();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -138,10 +140,12 @@ if (process.env.NODE_ENV === "production") {
 
 process.on("unhandledRejection", (reason, promise) => {
   console.error("\x1b[31m[SYS] Unhandled Rejection at:\x1b[0m", promise, "reason:", reason);
+  captureError(reason instanceof Error ? reason : new Error(String(reason)), { handler: "unhandledRejection" });
 });
 
 process.on("uncaughtException", (err) => {
   console.error("\x1b[31m[SYS] Uncaught Exception:\x1b[0m", err);
+  captureError(err instanceof Error ? err : new Error(String(err)), { handler: "uncaughtException" });
 });
 
 server.listen(port, () => {

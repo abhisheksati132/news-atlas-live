@@ -1,3 +1,5 @@
+import { captureError } from './_utils/monitor.js';
+
 export default async function handler(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
@@ -52,7 +54,7 @@ export default async function handler(req, res) {
 
         return res.status(200).json({ type: "FeatureCollection", features });
     } catch (err) {
-        console.error("[search] Nominatim fallback error:", err.message);
+        captureError(err, { handler: "search" });
         return res.status(200).json({ type: "FeatureCollection", features: [] });
     }
 }

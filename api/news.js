@@ -1,4 +1,5 @@
 import { getCache, setCache } from "./_utils/cache.js";
+import { captureError } from "./_utils/monitor.js";
 
 const BASE_URL = "https://newsapi.org/v2";
 const CACHE_TTL = 300; // 5 minutes
@@ -169,7 +170,7 @@ export default async function handler(req, res) {
         res.setHeader("X-Cache", "MISS-GOOGLE");
         return res.status(200).json(payload);
     } catch (err) {
-        console.error("[news] Google News fallback failed:", err.message);
+        captureError(err, { handler: "news" });
         return res.status(502).json({
             status: "error",
             code: "NEWS_FEED_UNAVAILABLE",

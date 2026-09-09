@@ -1,4 +1,5 @@
 import { getCache, setCache } from "./_utils/cache.js";
+import { captureError } from "./_utils/monitor.js";
 
 const INDICATORS = {
   gdp_billions: "NY.GDP.MKTP.CD",
@@ -64,7 +65,7 @@ export default async function handler(req, res) {
     setCache(cacheKey, payload, 24 * 60 * 60);
     return res.status(200).json(payload);
   } catch (error) {
-    console.error("[economics] World Bank request failed:", error.message);
+    captureError(error, { handler: "economics" });
     return res.status(502).json({ error: "Live macroeconomic data is currently unavailable.", code: "WORLD_BANK_UPSTREAM_ERROR" });
   }
 }

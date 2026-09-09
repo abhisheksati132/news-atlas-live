@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { captureError } from './_utils/monitor.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const COUNTRIES_DB_PATH = resolve(__dirname, '../public/data/countries.json');
@@ -99,7 +100,7 @@ export default async function handler(req, res) {
 
         return res.status(404).json({ error: 'Country not found in local registry' });
     } catch (err) {
-        console.error('[countries] handler error:', err.message);
+        captureError(err, { handler: 'countries' });
         return res.status(500).json({ error: 'Failed to query country registry' });
     }
 }

@@ -22,9 +22,6 @@
         "errors-in-console": "off",
         "valid-source-maps": "off"
       }
-    },
-    "upload": {
-      "target": "temporary-public-storage"
     }
   }
 }

@@ -50,7 +50,7 @@ function page(c, url) {
 <meta name="twitter:card" content="summary" />
 <link rel="icon" href="${SITE}/favicon.ico" />
 <style>
-:root{--bg:#0a0a0a;--surface:#111;--border:rgba(255,255,255,.08);--t1:#fafafa;--t2:#a1a1aa;--t3:#71717a}
+:root{--bg:#0a0a0a;--surface:#111;--border:rgba(255,255,255,.08);--t1:#fafafa;--t2:#a1a1aa;--t3:#8a8a93}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--t1);font-family:Inter,-apple-system,BlinkMacSystemFont,sans-serif;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;line-height:1.6}
 a{color:inherit;text-decoration:none}
@@ -76,7 +76,7 @@ footer{border-top:1px solid var(--border);padding:24px 0;font-size:12.5px;color:
 </head>
 <body>
 <nav><div class="wrap" style="display:flex;justify-content:space-between;align-items:center;height:100%"><a class="logo" href="/">News<span>Atlas</span></a><a class="btn" href="${SITE}/app">Open app</a></div></nav>
-<div class="wrap">
+<main><div class="wrap">
 <img class="flag" src="${esc(c.flags?.svg || c.flags?.png || '')}" alt="Flag of ${esc(c.name.common)}" />
 <h1>${esc(c.name.common)}</h1>
 <p class="sub">${esc(c.name.official && c.name.official !== c.name.common ? c.name.official + '. ' : '')}Explore ${esc(c.name.common)} with live news, market data, macroeconomic indicators and weather — all on an interactive 3D globe.</p>
@@ -95,6 +95,7 @@ footer{border-top:1px solid var(--border);padding:24px 0;font-size:12.5px;color:
 <a class="btn" href="${SITE}/app">Explore ${esc(c.name.common)} on the globe →</a>
 </div>
 </div>
+</main>
 <footer><div class="wrap">Part of <a href="${SITE}" style="text-decoration:underline">NewsAtlas</a> — the whole world, on one map.</div></footer>
 </body>
 </html>`;

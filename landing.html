@@ -27,7 +27,7 @@
       --text: #fafafa;
       --text-2: #a1a1aa;
       --text-3: #71717a;
-      --text-faint: #52525b;
+      --text-faint: #8a8a93;
       --success: #34d399;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -270,7 +270,8 @@
     </div>
   </nav>
 
-  <header class="hero wrap">
+  <main>
+  <div class="hero wrap">
     <div class="hero-kicker mono"><em>●</em> Live data · updated continuously</div>
     <h1>The whole world,<br /><span>on one map.</span></h1>
     <p>NewsAtlas turns an interactive globe into a real-time dashboard — news, stock indices, exchange rates, macroeconomic indicators and weather for every country, one click away.</p>
@@ -278,7 +279,7 @@
       <a href="/app" class="btn-primary">Open the app<i aria-hidden="true">→</i></a>
       <a href="#features" class="btn-secondary">See what's inside</a>
     </div>
-  </header>
+  </div>
 
   <div class="wrap">
     <div class="stats reveal">
@@ -288,7 +289,7 @@
     </div>
   </div>
 
-  <section id="features" class="section wrap reveal">
+  <section id="features" class="section wrap reveal" aria-label="Features">
     <div class="section-label mono">What you get</div>
     <h2>Every signal that matters.<br /><span>Nothing that doesn't.</span></h2>
     <div class="grid-3">
@@ -325,7 +326,7 @@
     </div>
   </section>
 
-  <section id="sources" class="wrap">
+  <section id="sources" class="wrap" aria-label="Data sources">
     <div class="sources reveal">
       <div class="sources-inner">
         <small>Data from sources you can trust</small>
@@ -341,7 +342,7 @@
     </div>
   </section>
 
-  <section id="how" class="section wrap reveal" style="padding-top:0">
+  <section id="how" class="section wrap reveal" style="padding-top:0" aria-label="How it works">
     <div class="section-label mono">How it works</div>
     <h2>Three steps.<br /><span>No signup, no setup.</span></h2>
     <div class="grid-3" style="grid-template-columns:repeat(3,1fr)">
@@ -363,10 +364,11 @@
     </div>
   </section>
 
-  <section class="cta wrap reveal">
+  <section class="cta wrap reveal" aria-label="Get started">
     <h2>Start exploring.<br /><span>It's free.</span></h2>
     <a href="/app" class="btn-primary">Open NewsAtlas<i aria-hidden="true">→</i></a>
   </section>
+  </main>
 
   <footer>
     <div class="wrap">

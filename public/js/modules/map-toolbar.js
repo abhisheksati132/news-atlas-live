@@ -194,6 +194,14 @@ function bindActions() {
     }
   });
 
+  on("mtb-arcs", () => {
+    const e = engine();
+    if (!e) return;
+    const isActive = e.toggleTelemetryArcs();
+    setActive("mtb-arcs", isActive);
+    toast(isActive ? "3D Telemetry Arcs on" : "3D Telemetry Arcs off");
+  });
+
   on("mtb-rotate", () => {
     const e = engine();
     if (!e) return;
@@ -283,6 +291,7 @@ function syncAfterStyleChange() {
   setActive("mtb-terrain", false);
   const buildingsOn = e.map.getLayer && e.map.getLayer("3d-buildings");
   setActive("mtb-buildings", !!buildingsOn);
+  setActive("mtb-arcs", !!e._telemetryArcsActive);
 }
 
 export function initMapToolbar() {

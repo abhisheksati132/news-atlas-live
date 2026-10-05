@@ -39,4 +39,26 @@ test.describe("NewsAtlas smoke", () => {
     await expect(page.locator("h1")).toContainText("India");
     await expect(page.locator(".facts")).toBeVisible();
   });
+
+  test("landing page interactive 3D Earth mounts and switches hubs", async ({ page }) => {
+    await page.goto("/landing.html");
+    await expect(page.locator("#landing-globe-3d canvas")).toBeAttached({ timeout: 15000 });
+    await expect(page.locator("#preview-country-name")).toBeVisible();
+
+    // Click Tokyo capital hub pill
+    const tokyoBtn = page.locator('button[data-3d-hub="jp"]');
+    if (await tokyoBtn.isVisible()) {
+      await tokyoBtn.click();
+      await expect(page.locator("#preview-country-name")).toContainText("Japan", { timeout: 5000 });
+    }
+  });
+
+  test("terminal app 3D telemetry arcs toggle is functional", async ({ page }) => {
+    await page.goto("/");
+    const arcsBtn = page.locator("#mtb-arcs");
+    await expect(arcsBtn).toBeAttached();
+    await arcsBtn.click();
+    await expect(arcsBtn).toHaveClass(/active/);
+  });
 });
+

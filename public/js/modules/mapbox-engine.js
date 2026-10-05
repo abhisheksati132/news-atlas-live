@@ -13,6 +13,10 @@ class MapboxEngine {
         this._rotateAnimId = null;
         this._wbData = null;
         this._neFeatures = null;
+        this._telemetryArcsActive = false;
+        this._telemetryAnimId = null;
+        this._telemetryPhotons = [];
+        this._telemetryRoutes = [];
     }
 
     async init() {
@@ -84,6 +88,9 @@ class MapboxEngine {
                 if (hasToken) this._addTerrain();
             }
             this.initMapboxLayers();
+            if (this._telemetryArcsActive) {
+                this._initTelemetryNetwork();
+            }
             this.ready = true;
             this.onReady();
 
@@ -247,6 +254,269 @@ class MapboxEngine {
             cancelAnimationFrame(this._rotateAnimId);
         }
         return this._isRotating;
+    }
+
+    _interpolateGreatCircle(p1, p2, numPoints = 64) {
+        const toRad = Math.PI / 180;
+        const toDeg = 180 / Math.PI;
+        const lon1 = p1[0] * toRad, lat1 = p1[1] * toRad;
+        const lon2 = p2[0] * toRad, lat2 = p2[1] * toRad;
+
+        const d = 2 * Math.asin(Math.sqrt(
+            Math.sin((lat1 - lat2) / 2) ** 2 +
+            Math.cos(lat1) * Math.cos(lat2) * Math.sin((lon1 - lon2) / 2) ** 2
+        ));
+
+        if (d < 1e-6) return [p1, p2];
+
+        const coords = [];
+        for (let i = 0; i <= numPoints; i++) {
+            const f = i / numPoints;
+            const A = Math.sin((1 - f) * d) / Math.sin(d);
+            const B = Math.sin(f * d) / Math.sin(d);
+            const x = A * Math.cos(lat1) * Math.cos(lon1) + B * Math.cos(lat2) * Math.cos(lon2);
+            const y = A * Math.cos(lat1) * Math.sin(lon1) + B * Math.cos(lat2) * Math.sin(lon2);
+            const z = A * Math.sin(lat1) + B * Math.sin(lat2);
+            const lat = Math.atan2(z, Math.sqrt(x * x + y * y));
+            const lon = Math.atan2(y, x);
+            coords.push([lon * toDeg, lat * toDeg]);
+        }
+        for (let i = 1; i < coords.length; i++) {
+            while (coords[i][0] - coords[i - 1][0] > 180) coords[i][0] -= 360;
+            while (coords[i][0] - coords[i - 1][0] < -180) coords[i][0] += 360;
+        }
+        return coords;
+    }
+
+    _initTelemetryNetwork() {
+        if (!this.map) return;
+        this._removeTelemetryNetwork();
+
+        const hubs = [
+            { id: 'DEL', name: 'New Delhi', coords: [77.2090, 28.6139] },
+            { id: 'WDC', name: 'Washington, D.C.', coords: [-77.0369, 38.9072] },
+            { id: 'TYO', name: 'Tokyo', coords: [139.6503, 35.6762] },
+            { id: 'LON', name: 'London', coords: [-0.1278, 51.5074] },
+            { id: 'SIN', name: 'Singapore', coords: [103.8198, 1.3521] },
+            { id: 'DXB', name: 'Dubai', coords: [55.2708, 25.2048] },
+            { id: 'FRA', name: 'Frankfurt', coords: [8.6821, 50.1109] },
+            { id: 'SYD', name: 'Sydney', coords: [151.2093, -33.8688] },
+            { id: 'SFO', name: 'San Francisco', coords: [-122.4194, 37.7749] },
+            { id: 'SAO', name: 'São Paulo', coords: [-46.6333, -23.5505] }
+        ];
+
+        const links = [
+            ['DEL', 'SIN'],
+            ['DEL', 'DXB'],
+            ['DEL', 'LON'],
+            ['DEL', 'TYO'],
+            ['LON', 'FRA'],
+            ['LON', 'WDC'],
+            ['WDC', 'SFO'],
+            ['SFO', 'TYO'],
+            ['TYO', 'SIN'],
+            ['SIN', 'SYD'],
+            ['DXB', 'FRA'],
+            ['WDC', 'SAO']
+        ];
+
+        const hubMap = new Map(hubs.map(h => [h.id, h]));
+        this._telemetryRoutes = [];
+        const lineFeatures = [];
+
+        links.forEach(([fromId, toId]) => {
+            const from = hubMap.get(fromId);
+            const to = hubMap.get(toId);
+            if (!from || !to) return;
+            const coords = this._interpolateGreatCircle(from.coords, to.coords, 64);
+            this._telemetryRoutes.push(coords);
+            lineFeatures.push({
+                type: 'Feature',
+                geometry: {
+                    type: 'LineString',
+                    coordinates: coords
+                },
+                properties: { from: fromId, to: toId }
+            });
+        });
+
+        const hubFeatures = hubs.map(h => ({
+            type: 'Feature',
+            geometry: {
+                type: 'Point',
+                coordinates: h.coords
+            },
+            properties: { id: h.id, name: h.name }
+        }));
+
+        this.map.addSource('telemetry-arcs-source', {
+            type: 'geojson',
+            data: {
+                type: 'FeatureCollection',
+                features: lineFeatures
+            }
+        });
+
+        this.map.addSource('telemetry-hubs-source', {
+            type: 'geojson',
+            data: {
+                type: 'FeatureCollection',
+                features: hubFeatures
+            }
+        });
+
+        this.map.addSource('telemetry-photons-source', {
+            type: 'geojson',
+            data: {
+                type: 'FeatureCollection',
+                features: []
+            }
+        });
+
+        // 1. Arcs outer amber glow
+        this.map.addLayer({
+            id: 'telemetry-arcs-glow',
+            type: 'line',
+            source: 'telemetry-arcs-source',
+            paint: {
+                'line-color': '#F59E0B',
+                'line-width': 3.5,
+                'line-opacity': 0.4,
+                'line-blur': 2.5
+            }
+        });
+
+        // 2. Arcs inner cyan laser core
+        this.map.addLayer({
+            id: 'telemetry-arcs-core',
+            type: 'line',
+            source: 'telemetry-arcs-source',
+            paint: {
+                'line-color': '#38BDF8',
+                'line-width': 1.6,
+                'line-opacity': 0.85
+            }
+        });
+
+        // 3. Hubs outer halo
+        this.map.addLayer({
+            id: 'telemetry-hubs-halo',
+            type: 'circle',
+            source: 'telemetry-hubs-source',
+            paint: {
+                'circle-radius': 14,
+                'circle-color': '#38BDF8',
+                'circle-opacity': 0.25,
+                'circle-blur': 0.8
+            }
+        });
+
+        // 4. Hubs core marker
+        this.map.addLayer({
+            id: 'telemetry-hubs-core',
+            type: 'circle',
+            source: 'telemetry-hubs-source',
+            paint: {
+                'circle-radius': 4.5,
+                'circle-color': '#F59E0B',
+                'circle-stroke-width': 1.5,
+                'circle-stroke-color': '#ffffff'
+            }
+        });
+
+        // 5. Traveling photon packets
+        this.map.addLayer({
+            id: 'telemetry-photons',
+            type: 'circle',
+            source: 'telemetry-photons-source',
+            paint: {
+                'circle-radius': 4,
+                'circle-color': '#ffffff',
+                'circle-stroke-width': 2,
+                'circle-stroke-color': '#38BDF8'
+            }
+        });
+
+        // Seed traveling photons
+        this._telemetryPhotons = [];
+        this._telemetryRoutes.forEach((_, routeIndex) => {
+            this._telemetryPhotons.push({
+                routeIndex,
+                progress: Math.random(),
+                speed: 0.0035 + Math.random() * 0.003
+            });
+            this._telemetryPhotons.push({
+                routeIndex,
+                progress: (Math.random() + 0.5) % 1,
+                speed: 0.0035 + Math.random() * 0.003
+            });
+        });
+
+        this._animateTelemetry();
+    }
+
+    _animateTelemetry() {
+        if (!this._telemetryArcsActive || !this.map) return;
+
+        const photonFeatures = [];
+        for (const p of this._telemetryPhotons) {
+            p.progress = (p.progress + p.speed) % 1;
+            const routeCoords = this._telemetryRoutes[p.routeIndex];
+            if (routeCoords && routeCoords.length > 1) {
+                const idxFloat = p.progress * (routeCoords.length - 1);
+                const idx = Math.floor(idxFloat);
+                const rem = idxFloat - idx;
+                const c1 = routeCoords[idx];
+                const c2 = routeCoords[Math.min(idx + 1, routeCoords.length - 1)];
+                const lng = c1[0] + (c2[0] - c1[0]) * rem;
+                const lat = c1[1] + (c2[1] - c1[1]) * rem;
+                photonFeatures.push({
+                    type: 'Feature',
+                    geometry: { type: 'Point', coordinates: [lng, lat] },
+                    properties: {}
+                });
+            }
+        }
+
+        const src = this.map.getSource('telemetry-photons-source');
+        if (src) {
+            src.setData({
+                type: 'FeatureCollection',
+                features: photonFeatures
+            });
+        }
+
+        this._telemetryAnimId = requestAnimationFrame(() => this._animateTelemetry());
+    }
+
+    _removeTelemetryNetwork() {
+        if (this._telemetryAnimId) {
+            cancelAnimationFrame(this._telemetryAnimId);
+            this._telemetryAnimId = null;
+        }
+        const layers = ['telemetry-photons', 'telemetry-hubs-core', 'telemetry-hubs-halo', 'telemetry-arcs-core', 'telemetry-arcs-glow'];
+        layers.forEach(id => {
+            if (this.map && this.map.getLayer(id)) this.map.removeLayer(id);
+        });
+        const sources = ['telemetry-photons-source', 'telemetry-hubs-source', 'telemetry-arcs-source'];
+        sources.forEach(id => {
+            if (this.map && this.map.getSource(id)) this.map.removeSource(id);
+        });
+    }
+
+    toggleTelemetryArcs(force = null) {
+        if (!this.map) return false;
+        this._telemetryArcsActive = force !== null ? force : !this._telemetryArcsActive;
+
+        if (this._telemetryArcsActive) {
+            this._initTelemetryNetwork();
+            if (this.map.getPitch() < 10) {
+                this.map.easeTo({ pitch: 42, duration: 1200 });
+            }
+        } else {
+            this._removeTelemetryNetwork();
+        }
+        return this._telemetryArcsActive;
     }
 
     _toggle3DBuildings() {

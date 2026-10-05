@@ -13,8 +13,11 @@
   <script defer data-domain="news-atlas-live.vercel.app" src="https://plausible.io/js/script.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+  <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  </noscript>
   <link rel="icon"
     href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23f59e0b' d='M352 256c0 22.2-1.2 43.6-3.3 64H163.3c-2.2-20.4-3.3-41.8-3.3-64s1.2-43.6 3.3-64h185.4c2.2 20.4 3.3 41.8 3.3 64zm28.8-64h74.7c-9.1-37.4-28.7-71.1-55.4-97.7-18.1 19.3-33.1 41.9-44 67.2 9.6 9.4 18.2 20 24.7 30.5zM182.2 94.3c-18.1 19.3-33.1 41.9-44 67.2 9.6 9.4 18.2 20 24.7 30.5h74.7c-9.1-37.4-28.7-71.1-55.4-97.7zM163.3 320h185.4c-2.1 20.4-3.3 41.8-3.3 64s1.2 43.6 3.3 64H163.3c2.1-20.4 3.3-41.8 3.3-64s-1.2-43.6-3.3-64z'/%3E%3C/svg%3E"
     type="image/svg+xml" />
@@ -27,10 +30,10 @@
       --border: #1C2942;
       --border-strong: #2A3C5E;
       --border-accent: rgba(245, 158, 11, 0.3);
-      --text: #F1F5F9;
-      --text-2: #94A3B8;
-      --text-3: #64748B;
-      --text-faint: #475569;
+      --text: #F8FAFC;
+      --text-2: #CBD5E1;
+      --text-3: #94A3B8;
+      --text-faint: #94A3B8;
       --accent: #F59E0B;
       --accent-hover: #FBBF24;
       --accent-subtle: rgba(245, 158, 11, 0.12);
@@ -400,7 +403,7 @@
   <nav>
     <div class="wrap nav-inner">
       <a href="/" class="logo">
-        <div class="logo-badge"><i class="fas fa-satellite"></i></div>
+        <div class="logo-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M4.93 4.93a10 10 0 0 1 14.14 0"/><path d="M7.76 7.76a6 6 0 0 1 8.48 0"/></svg></div>
         News<span>Atlas</span>
       </a>
       <div class="nav-links">
@@ -427,10 +430,10 @@
       <div class="hero-actions">
         <a href="/app" class="btn-primary">
           <span>Launch Mission Control</span>
-          <i class="fas fa-arrow-right text-xs" aria-hidden="true"></i>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
         </a>
         <a href="#features" class="btn-secondary">
-          <i class="fas fa-layer-group text-xs text-slate-400"></i>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
           <span>Inspect Architecture</span>
         </a>
       </div>
@@ -440,13 +443,13 @@
         <div class="preview-header">
           <div class="preview-dots"><span></span><span></span><span></span></div>
           <span>NEWSATLAS // LIVE MISSION RADAR [SECTOR: 10.42° N, 107.12° E]</span>
-          <span style="color:var(--success)"><i class="fas fa-circle" style="font-size:7px;margin-right:4px;"></i>ACTIVE</span>
+          <span style="color:var(--success);display:inline-flex;align-items:center;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;" aria-hidden="true"></span>ACTIVE</span>
         </div>
         <div class="preview-grid">
           <div class="preview-globe-stage">
             <div>
               <div class="preview-chip">
-                <i class="fas fa-shield-alt text-[10px]"></i>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
                 <span>SECTOR PROFILE: INDIA [IN / IND]</span>
               </div>
               <div class="preview-country-title">Republic of India</div>
@@ -473,11 +476,11 @@
           </div>
           <div class="preview-sidebar">
             <div class="preview-card">
-              <div class="preview-card-title"><i class="fas fa-newspaper mr-1"></i>Live Dispatch Wire</div>
+              <div class="preview-card-title" style="display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>Live Dispatch Wire</div>
               <div class="preview-card-text">Reserve Bank leaves policy repo rate steady; capital infrastructure expenditure expands 11.1%.</div>
             </div>
             <div class="preview-card">
-              <div class="preview-card-title"><i class="fas fa-brain mr-1"></i>AI Strategic Synthesis</div>
+              <div class="preview-card-title" style="display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04Z"/></svg>AI Strategic Synthesis</div>
               <div class="preview-card-text">Stable external balances and robust domestic private consumption support elevated macro growth corridor.</div>
             </div>
           </div>
@@ -516,7 +519,7 @@
         <!-- Tile 1: 3D Globe (Span 2) -->
         <div class="bento-card bento-span-2">
           <div>
-            <div class="bento-icon-pill"><i class="fas fa-globe-americas"></i></div>
+            <div class="bento-icon-pill"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></div>
             <h3>Interactive 3D Planetary Engine</h3>
             <p>
               Navigate sovereign borders on a responsive 3D globe powered by Mapbox and Deck.gl. Toggle daytime satellite imagery, night city light terminators, and choropleth GDP overlays without leaving your active viewport.
@@ -541,7 +544,7 @@
         <!-- Tile 2: Live News (Span 1) -->
         <div class="bento-card">
           <div>
-            <div class="bento-icon-pill" style="color:var(--cyan);"><i class="fas fa-satellite-dish"></i></div>
+            <div class="bento-icon-pill" style="color:var(--cyan);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10a7.31 7.31 0 0 0 10 10Z"></path><path d="m9 15 3-3"></path><path d="M17 13a6 6 0 0 0-6-6"></path><path d="M21 13A10 10 0 0 0 11 3"></path></svg></div>
             <h3>Live Wire &amp; GDELT Dispatches</h3>
             <p>
               Continuous event intelligence filtered by country, categorized across politics, markets, technology, and health with instant keyword filtering.
@@ -562,7 +565,7 @@
         <!-- Tile 3: Financial Markets (Span 1) -->
         <div class="bento-card">
           <div>
-            <div class="bento-icon-pill"><i class="fas fa-chart-line"></i></div>
+            <div class="bento-icon-pill"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
             <h3>Financial Markets Matrix</h3>
             <p>
               Live benchmark equity indices, spot gold/silver prices, Brent crude commodities, and dynamic foreign exchange matrices across major reserve currencies.
@@ -583,7 +586,7 @@
         <!-- Tile 4: World Bank & Weather (Span 2) -->
         <div class="bento-card bento-span-2">
           <div>
-            <div class="bento-icon-pill" style="color:var(--success);"><i class="fas fa-cloud-sun-rain"></i></div>
+            <div class="bento-icon-pill" style="color:var(--success);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path></svg></div>
             <h3>Macroeconomics &amp; Doppler Atmosphere</h3>
             <p>
               Direct World Bank Open Data indicators — GDP per capita, CPI inflation, debt-to-GDP, and policy interest rates — coupled with Open-Meteo Doppler precipitation radar, AQI, and UV indexes for every territory.
@@ -625,7 +628,7 @@
         <p>Access live situational profiles, geopolitical feeds, and economic telemetry across every nation on earth in your browser.</p>
         <a href="/app" class="btn-primary">
           <span>Launch Web Terminal</span>
-          <i class="fas fa-external-link-alt text-xs" aria-hidden="true"></i>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
         </a>
       </section>
     </div>
@@ -667,17 +670,24 @@
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       let stars = [];
-      const seed = () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        const count = Math.min(140, Math.floor((canvas.width * canvas.height) / 10000));
+      const init = () => {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        canvas.width = w;
+        canvas.height = h;
+        const count = Math.min(100, Math.floor((w * h) / 12000));
         stars = Array.from({ length: count }, () => ({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
+          x: Math.random() * w,
+          y: Math.random() * h,
           r: Math.random() * 1.0 + 0.3,
           p: Math.random() * Math.PI * 2,
           s: 0.0005 + Math.random() * 0.001
         }));
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          render(0);
+        } else {
+          requestAnimationFrame(loop);
+        }
       };
       const render = (ts) => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -689,14 +699,23 @@
           ctx.fill();
         }
       };
-      const loop = (ts) => { render(ts); requestAnimationFrame(loop); };
-      seed();
-      window.addEventListener('resize', seed);
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        render(0);
-        return;
+      const loop = (ts) => {
+        render(ts);
+        requestAnimationFrame(loop);
+      };
+      if (document.readyState === 'complete') {
+        setTimeout(init, 50);
+      } else {
+        window.addEventListener('load', () => setTimeout(init, 50), { once: true });
       }
-      requestAnimationFrame(loop);
+      let resizeTimer;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+        }, 200);
+      }, { passive: true });
     })();
   </script>
 </body>

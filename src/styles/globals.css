@@ -3,33 +3,64 @@
 @import "tailwindcss/utilities";
 
 :root {
-  --bg-primary: #0a0a0a;
-  --bg-surface: #111111;
-  --bg-surface-subtle: #0d0d0d;
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-subtle-hover: rgba(255, 255, 255, 0.16);
-  --accent-primary: #fafafa;
-  --accent-primary-hover: #e4e4e7;
-  --accent-subtle: rgba(255, 255, 255, 0.06);
-  --accent-subtle-hover: rgba(255, 255, 255, 0.11);
-  --text-primary: #fafafa;
-  --text-secondary: #a1a1aa;
-  --text-tertiary: #71717a;
+  --bg-primary: #060B14;
+  --bg-surface: #0B1324;
+  --bg-surface-subtle: #0F1A30;
+  --bg-surface-hover: #142240;
+  --border-subtle: #1C2942;
+  --border-subtle-hover: #2A3C5E;
+  --border-accent: rgba(245, 158, 11, 0.35);
+  --accent-primary: #F59E0B;
+  --accent-primary-hover: #FBBF24;
+  --accent-subtle: rgba(245, 158, 11, 0.12);
+  --accent-subtle-hover: rgba(245, 158, 11, 0.22);
+  --accent-text: #060B14;
+  --cyan: #38BDF8;
+  --cyan-subtle: rgba(56, 189, 248, 0.12);
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-tertiary: #94A3B8;
 }
 
 :root[data-theme="dark"],
 body.night-theme {
-  --bg-primary: #0a0a0a;
-  --bg-surface: #111111;
-  --bg-surface-subtle: #0d0d0d;
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-subtle-hover: rgba(255, 255, 255, 0.16);
-  --accent-primary: #fafafa;
-  --accent-primary-hover: #e4e4e7;
-  --accent-subtle: rgba(255, 255, 255, 0.06);
-  --text-primary: #fafafa;
-  --text-secondary: #a1a1aa;
-  --text-tertiary: #71717a;
+  --bg-primary: #060B14;
+  --bg-surface: #0B1324;
+  --bg-surface-subtle: #0F1A30;
+  --bg-surface-hover: #142240;
+  --border-subtle: #1C2942;
+  --border-subtle-hover: #2A3C5E;
+  --border-accent: rgba(245, 158, 11, 0.35);
+  --accent-primary: #F59E0B;
+  --accent-primary-hover: #FBBF24;
+  --accent-subtle: rgba(245, 158, 11, 0.12);
+  --accent-text: #060B14;
+  --cyan: #38BDF8;
+  --cyan-subtle: rgba(56, 189, 248, 0.12);
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-tertiary: #94A3B8;
+}
+
+:root[data-theme="light"],
+body[data-theme="light"] {
+  --bg-primary: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-surface-subtle: #F1F5F9;
+  --bg-surface-hover: #E2E8F0;
+  --border-subtle: #E2E8F0;
+  --border-subtle-hover: #CBD5E1;
+  --border-accent: rgba(217, 119, 6, 0.35);
+  --accent-primary: #D97706;
+  --accent-primary-hover: #B45309;
+  --accent-subtle: rgba(217, 119, 6, 0.1);
+  --accent-subtle-hover: rgba(217, 119, 6, 0.18);
+  --accent-text: #FFFFFF;
+  --cyan: #0284C7;
+  --cyan-subtle: rgba(2, 132, 199, 0.1);
+  --text-primary: #0F172A;
+  --text-secondary: #334155;
+  --text-tertiary: #64748B;
 }
 
 ::-webkit-scrollbar {

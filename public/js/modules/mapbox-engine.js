@@ -134,10 +134,10 @@ class MapboxEngine {
     _applyAtmosphere() {
         try {
             this.map.setFog({
-                'color': 'rgba(22, 22, 26, 0.6)',
-                'high-color': 'rgba(12, 12, 16, 0.5)',
+                'color': 'rgba(11, 19, 36, 0.6)',
+                'high-color': 'rgba(6, 11, 20, 0.5)',
                 'horizon-blend': 0.02,
-                'space-color': '#050505',
+                'space-color': '#060B14',
                 'star-intensity': 0.8,
                 'range': [0.4, 8]
             });
@@ -220,7 +220,7 @@ class MapboxEngine {
               'color': 'rgba(8, 10, 16, 0.7)',
               'high-color': 'rgba(4, 5, 10, 0.6)',
               'horizon-blend': 0.02,
-              'space-color': '#030303',
+              'space-color': '#060B14',
               'star-intensity': 0.9
             });
         } else {
@@ -591,7 +591,7 @@ class MapboxEngine {
             'range': [0.4, 8],
             'color': isDay ? 'rgba(255, 255, 255, 0.35)' : 'rgba(10, 10, 14, 0.85)',
             'high-color': isDay ? 'rgba(200, 205, 215, 0.5)' : 'rgba(16, 16, 22, 0.75)',
-            'space-color': '#050505',
+            'space-color': '#060B14',
             'star-intensity': isDay ? 0.35 : 0.8
         });
     }
@@ -723,7 +723,7 @@ class MapboxEngine {
             this.map.on('click', 'gdelt-beacons', (e) => {
                 const props = e.features[0].properties;
                 const html = `
-                    <div style="background:#0e1017; color:#f8fafc; border:1px solid rgba(255,255,255,0.08); padding:8px 12px; border-radius:8px; font-family:monospace; font-size:10px; max-width:200px;">
+                    <div style="background:#0B1324; color:#F8FAFC; border:1px solid #1C2942; padding:8px 12px; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:10px; max-width:200px; box-shadow:0 12px 36px rgba(0,0,0,0.6);">
                         <div style="color:#ef4444; font-weight:bold; margin-bottom:4px; text-transform:uppercase; letter-spacing:1px;"><i class="fas fa-exclamation-triangle mr-1"></i>Hotspot Alert</div>
                         <div style="font-weight:bold; margin-bottom:6px; color:#ffffff;">${props.html || "Incident details detected"}</div>
                         <div style="color:rgba(255,255,255,0.4); font-size:8px;">GDELT TELEMETRY</div>

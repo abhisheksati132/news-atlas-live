@@ -191,7 +191,7 @@ const AIAssistant = () => {
           <div key={i} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
             <div className={`relative group max-w-[90%] px-4 py-3 rounded-2xl text-xs leading-relaxed transition-all ${
               m.role === 'user'
-                ? 'bg-[var(--accent-primary)] text-[var(--accent-text,#09090b)] shadow-sm font-medium rounded-tr-sm'
+                ? 'bg-[var(--accent-primary)] text-[var(--accent-text)] shadow-sm font-semibold rounded-tr-sm'
                 : m.isError
                   ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20 font-mono text-[11px] rounded-tl-sm'
                   : 'bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-tl-sm whitespace-pre-line font-sans'
@@ -229,7 +229,7 @@ const AIAssistant = () => {
             <button
               key={idx}
               onClick={() => handleSendPrompt(chip.prompt)}
-              className="text-[11px] px-2.5 py-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] hover:border-[var(--accent-primary)] text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] active:scale-[0.98] transition-all font-sans font-medium text-left"
+              className="text-[11px] px-2.5 py-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] hover:border-[var(--border-accent)] hover:text-[var(--accent-primary)] text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] active:scale-[0.98] transition-all font-sans font-medium text-left"
             >
               {chip.label}
             </button>
@@ -255,7 +255,7 @@ const AIAssistant = () => {
           type="button"
           onClick={() => handleSendPrompt()}
           disabled={loading || !input.trim()}
-          className="shrink-0 w-9 h-9 rounded-xl bg-[var(--accent-primary)] text-white hover:bg-[var(--accent-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center shadow-sm"
+          className="shrink-0 w-9 h-9 rounded-xl bg-[var(--accent-primary)] text-[var(--accent-text)] font-bold hover:bg-[var(--accent-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center shadow-sm"
           aria-label="Send query"
         >
           <i className="fas fa-paper-plane text-xs"></i>

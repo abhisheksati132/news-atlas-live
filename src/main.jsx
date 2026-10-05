@@ -170,14 +170,14 @@ const AIAssistant = () => {
       {/* Context & Action Bar */}
       <div className="px-4 py-2 bg-[var(--bg-surface-subtle)] border-b border-[var(--border-subtle)] flex items-center justify-between text-[11px] font-mono">
         <div className="flex items-center gap-2">
-          <span className="text-slate-500 uppercase font-semibold">Context:</span>
-          <span className="px-2 py-0.5 rounded-full bg-[var(--accent-subtle)] text-[var(--accent-primary)] font-bold">
+          <span className="text-[var(--text-tertiary)] uppercase font-semibold text-[10px] tracking-wider">ACTIVE SECTOR:</span>
+          <span className="px-2.5 py-0.5 rounded-md bg-[var(--accent-subtle)] border border-[var(--border-subtle)] text-[var(--accent-primary)] font-bold text-[11px] font-mono">
             {currentCountry}
           </span>
         </div>
         <button
           onClick={handleResetChat}
-          className="text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-1 text-[10px] uppercase tracking-wider font-semibold"
+          className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold px-2 py-1 rounded hover:bg-white/5 active:scale-95"
           title="Reset conversation"
         >
           <i className="fas fa-redo-alt text-[9px]"></i>
@@ -202,7 +202,7 @@ const AIAssistant = () => {
               {m.role === 'assistant' && !m.isError && (
                 <button
                   onClick={() => copyMessage(m.content, i)}
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-white/10 text-slate-400 hover:text-slate-200 text-[10px]"
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-white/10 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] text-[10px]"
                   title="Copy analysis"
                 >
                   <i className={`fas ${copiedIdx === i ? 'fa-check text-emerald-400' : 'fa-copy'}`}></i>
@@ -214,11 +214,9 @@ const AIAssistant = () => {
 
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-[var(--bg-surface-subtle)] px-4 py-3 rounded-2xl rounded-tl-sm border border-[var(--border-subtle)] flex items-center gap-2">
-              <span className="w-2 h-2 bg-[var(--accent-primary)] rounded-full animate-bounce"></span>
-              <span className="w-2 h-2 bg-[var(--accent-primary)] rounded-full animate-bounce [animation-delay:100ms]"></span>
-              <span className="w-2 h-2 bg-[var(--accent-primary)] rounded-full animate-bounce [animation-delay:200ms]"></span>
-              <span className="text-[11px] font-mono text-slate-400 ml-1">Thinking...</span>
+            <div className="bg-[var(--bg-surface-subtle)] px-4 py-3 rounded-2xl rounded-tl-sm border border-[var(--border-subtle)] flex items-center gap-2.5 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-[var(--accent-primary)] animate-pulse"></span>
+              <span className="text-[11px] font-mono text-[var(--text-secondary)]">Synthesizing intelligence telemetry...</span>
             </div>
           </div>
         )}
@@ -226,12 +224,12 @@ const AIAssistant = () => {
 
       {/* Suggested Prompt Chips */}
       {messages.length <= 2 && !loading && (
-        <div className="px-4 pb-2 pt-1 flex flex-wrap gap-1.5 border-t border-[var(--border-subtle)] bg-[var(--bg-surface)]">
+        <div className="px-4 pb-2.5 pt-2 flex flex-wrap gap-1.5 border-t border-[var(--border-subtle)] bg-[var(--bg-surface)]">
           {promptChips.map((chip, idx) => (
             <button
               key={idx}
               onClick={() => handleSendPrompt(chip.prompt)}
-              className="text-[11px] px-2.5 py-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] hover:border-[var(--accent-primary)] text-slate-300 hover:text-white transition-all font-sans font-medium text-left"
+              className="text-[11px] px-2.5 py-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] hover:border-[var(--accent-primary)] text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] active:scale-[0.98] transition-all font-sans font-medium text-left"
             >
               {chip.label}
             </button>

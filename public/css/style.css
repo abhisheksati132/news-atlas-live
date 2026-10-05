@@ -1144,3 +1144,77 @@ html[data-theme='light'] select:focus-visible,
 html[data-theme='light'] textarea:focus-visible {
   outline-color: #18181b;
 }
+
+/* ==========================================================================
+   taste-skill: Anti-Slop Frontend Precision & Tactility
+   ========================================================================== */
+
+/* 1. Universal Tabular Figures for All Telemetry & Financial Quotes */
+.font-mono,
+[class*="font-mono"],
+.tabular-nums,
+#ist-time,
+#atmo-temp,
+#eco-gdp,
+.stat-val,
+.preview-metric-val,
+[id^="fact-"],
+[id^="eco-"],
+[id^="atmo-"],
+[id^="price-"],
+[id^="rate-"],
+[id^="stock-"],
+[id^="metal-"],
+[id^="comm-"],
+.tab-content .font-mono,
+.bento-val {
+  font-variant-numeric: tabular-nums lining-nums !important;
+}
+
+/* 2. Tactile Physical Feedback on Interactive Controls */
+button:active:not(:disabled),
+.header-widget:active,
+.map-ctrl-btn:active,
+.btn-primary:active,
+.btn-secondary:active,
+.btn-nav:active {
+  transform: translateY(1px) scale(0.985) !important;
+  transition: transform 50ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* 3. Text Wrapping Balance & Descender Clearance */
+h1, h2, h3, .preview-country-title {
+  text-wrap: balance;
+}
+p {
+  text-wrap: pretty;
+}
+
+/* 4. Subtle Border Illumination on Card Hover */
+.apple-glass,
+.glass-panel,
+.dossier-card {
+  transition: border-color var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast) !important;
+}
+.apple-glass:hover,
+.glass-panel:hover,
+.dossier-card:hover {
+  border-color: var(--border-subtle-hover) !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* 5. Clean Tactile Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-subtle-hover);
+}

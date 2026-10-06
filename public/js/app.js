@@ -84,31 +84,25 @@ function runWhenIdle(callback, timeout = 2000) {
     setTimeout(callback, timeout);
   }
 }
-function applyTheme(theme) {
-  const isLight = theme === 'light';
-  document.documentElement.setAttribute('data-theme', theme);
-  document.body.setAttribute('data-theme', theme);
-  if (isLight) {
-    document.body.classList.add('light-theme');
-    document.body.classList.remove('night-theme');
-  } else {
-    document.body.classList.remove('light-theme');
-    document.body.classList.add('night-theme');
-  }
-  localStorage.setItem('terminal-theme', theme);
-  localStorage.setItem('theme', theme);
+function applyTheme(_theme) {
+  // Permanently enforce dark theme across all components
+  document.documentElement.setAttribute('data-theme', 'dark');
+  document.body.setAttribute('data-theme', 'dark');
+  document.body.classList.remove('light-theme');
+  document.body.classList.add('night-theme');
+  localStorage.setItem('terminal-theme', 'dark');
+  localStorage.setItem('theme', 'dark');
 
   const themeBtn = document.getElementById('theme-toggle-btn') || document.querySelector('[onclick="toggleTheme()"]');
   if (themeBtn) {
-    themeBtn.innerHTML = isLight ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
-    themeBtn.title = isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode';
+    themeBtn.classList.add('hidden');
   }
 
   if (window.mapEngine && window.mapEngine.map && typeof mapboxgl !== 'undefined') {
     const isMapboxToken = !!mapboxgl.accessToken && !mapboxgl.accessToken.startsWith('pk.eyJ1IjoiZ3Vlc3Qi');
     const targetStyle = isMapboxToken
-      ? (isLight ? 'mapbox://styles/mapbox/light-v11' : 'mapbox://styles/mapbox/dark-v11')
-      : (isLight ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json' : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json');
+      ? 'mapbox://styles/mapbox/dark-v11'
+      : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
     try {
       window.mapEngine.setStyle(targetStyle);
     } catch (_e) {}
@@ -471,7 +465,7 @@ window.handleCountryClick = async function (event, d) {
     const iso = d.properties.iso_a2 || d.properties.ISO_A2 || d.properties.iso_a3 || d.properties.ISO_A3;
     const kickerIso = document.getElementById("kicker-iso");
     if (kickerIso) {
-      kickerIso.innerText = `LOC-${(iso || "GLOBAL").toUpperCase()}`;
+      kickerIso.innerText = (iso || "GLOBAL").toUpperCase();
     }
     if (iso && flagEl) {
       flagEl.src = `https://flagcdn.com/w40/${iso.toLowerCase().substring(0, 2)}.png`;
@@ -561,9 +555,7 @@ selectedCountry = null;
   if (window.updateNotesAndBookmarksUI) window.updateNotesAndBookmarksUI();
 };
 window.toggleTheme = function() {
-  const current = document.documentElement.getAttribute('data-theme') || (document.body.classList.contains('light-theme') ? 'light' : 'dark');
-  const next = current === 'light' ? 'dark' : 'light';
-  applyTheme(next);
+  applyTheme('dark');
 };
 
 window.togglePerformanceMode = function() {

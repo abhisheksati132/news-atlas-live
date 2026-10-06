@@ -42,9 +42,9 @@ export class CommandPaletteEngine {
             e.preventDefault();
             this._cycleViewPreset();
             break;
-          case 't':
+          case 'p':
             e.preventDefault();
-            if (window.toggleTheme) window.toggleTheme();
+            if (window.togglePerformanceMode) window.togglePerformanceMode();
             break;
           case 'm':
             e.preventDefault();
@@ -152,7 +152,7 @@ export class CommandPaletteEngine {
       { id: 'tab-econ', group: 'Telemetry Tabs', title: 'Switch to World Bank Macroeconomics Tab (Key 5)', icon: 'fa-coins', action: () => window.switchTab?.('economic') },
 
       // System Controls
-      { id: 'sys-theme', group: 'System Controls', title: 'Toggle Interface Theme (Day / Night)', icon: 'fa-sun', action: () => window.toggleTheme?.() },
+      { id: 'sys-perf', group: 'System Controls', title: 'Toggle Performance Mode (Low FX)', icon: 'fa-bolt', action: () => window.togglePerformanceMode?.() },
       { id: 'sys-audio', group: 'System Controls', title: 'Toggle Tactical Audio & Drone Feedback', icon: 'fa-volume-high', action: () => window.toggleAudioHaptics?.() },
       { id: 'sys-locate', group: 'System Controls', title: 'Fly to My Current Geolocation', icon: 'fa-location-crosshairs', action: () => document.getElementById('mtb-locate')?.click() },
       { id: 'sys-reset', group: 'System Controls', title: 'Reset Map to Global Coordinates', icon: 'fa-compress-arrows-alt', action: () => window.resetToGlobalCenter?.(true) }
@@ -352,7 +352,7 @@ export class CommandPaletteEngine {
               <div class="flex justify-between items-center"><span class="text-[var(--text-secondary)]">ISS & Satellites</span><kbd class="px-2 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)]">S</kbd></div>
               <div class="flex justify-between items-center"><span class="text-[var(--text-secondary)]">Aviation Corridors</span><kbd class="px-2 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)]">F</kbd></div>
               <div class="flex justify-between items-center"><span class="text-[var(--text-secondary)]">USGS Seismic Pulses</span><kbd class="px-2 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)]">E</kbd></div>
-              <div class="flex justify-between items-center"><span class="text-[var(--text-secondary)]">Day / Night Theme</span><kbd class="px-2 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)]">T</kbd></div>
+              <div class="flex justify-between items-center"><span class="text-[var(--text-secondary)]">Performance Mode</span><kbd class="px-2 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)]">P</kbd></div>
             </div>
 
             <div class="p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] space-y-2 sm:col-span-2">

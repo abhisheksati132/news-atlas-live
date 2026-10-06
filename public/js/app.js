@@ -103,17 +103,16 @@ function applyTheme(theme) {
 
   if (window.mapEngine && window.mapEngine.map && typeof mapboxgl !== 'undefined') {
     const isMapboxToken = !!mapboxgl.accessToken && !mapboxgl.accessToken.startsWith('pk.eyJ1IjoiZ3Vlc3Qi');
-    if (isMapboxToken) {
-      if (window.mapEngine.updateTheme) {
-        window.mapEngine.updateTheme(isLight);
-      }
-    } else {
-      const targetStyle = isLight
-        ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
-        : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
-      try {
-        window.mapEngine.setStyle(targetStyle);
-      } catch (_e) {}
+    const targetStyle = isMapboxToken
+      ? (isLight ? 'mapbox://styles/mapbox/light-v11' : 'mapbox://styles/mapbox/dark-v11')
+      : (isLight ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json' : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json');
+    try {
+      window.mapEngine.setStyle(targetStyle);
+    } catch (_e) {}
+    if (window.mapEngine._applyAtmosphere) {
+      setTimeout(() => {
+        try { window.mapEngine._applyAtmosphere(); } catch (_e) {}
+      }, 300);
     }
   }
 }

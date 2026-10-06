@@ -157,12 +157,12 @@ class MapboxEngine {
                         document.documentElement.getAttribute('data-theme') === 'light';
         try {
             this.map.setFog({
-                'color': isLight ? 'rgba(235, 240, 248, 0.45)' : 'rgba(11, 19, 36, 0.6)',
-                'high-color': isLight ? 'rgba(215, 225, 240, 0.35)' : 'rgba(6, 11, 20, 0.5)',
-                'horizon-blend': 0.02,
-                'space-color': isLight ? '#f4f6f8' : '#060B14',
-                'star-intensity': isLight ? 0.0 : 0.8,
-                'range': [0.4, 8]
+                'color': isLight ? 'rgb(241, 245, 249)' : 'rgba(11, 19, 36, 0.7)',
+                'high-color': isLight ? 'rgb(226, 232, 240)' : 'rgba(6, 11, 20, 0.65)',
+                'horizon-blend': isLight ? 0.04 : 0.02,
+                'space-color': isLight ? '#f1f5f9' : '#060B14',
+                'star-intensity': isLight ? 0.0 : 0.85,
+                'range': isLight ? [0.6, 8] : [0.4, 8]
             });
         } catch (e) {
             console.warn('Fog API not available:', e.message);

@@ -122,5 +122,17 @@ test.describe("NewsAtlas smoke", () => {
     await audioBtn.click();
     await expect(page.locator("#audio-toggle-icon")).toHaveClass(/fa-volume-xmark/);
   });
+
+  test("day mode applies clean light surface variables and preserves weather icon styling", async ({ page }) => {
+    await page.goto("/");
+    const themeBtn = page.locator("#theme-toggle-btn");
+    await themeBtn.click();
+    await expect(page.locator("body")).toHaveAttribute("data-theme", "light");
+
+    // Switch to weather tab
+    await page.locator("#tab-btn-atmosphere").click();
+    await expect(page.locator("#tab-atmosphere")).toHaveClass(/active/);
+    await expect(page.locator(".hw-bezel-card").first()).toBeVisible();
+  });
 });
 

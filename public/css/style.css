@@ -1,3 +1,4 @@
+/* Hallmark · theme: dark-tech · macrostructure: workbench · pre-emit critique: P5 H5 E5 S5 R5 V5 */
 /* ==========================================================================
    NewsAtlas Design System — Planetary Mission Control
    Tactical Dark-Tech · Hairline Aerospace Structure · Telemetry Hierarchy
@@ -293,6 +294,100 @@ header {
 }
 
 /* --------------------------------------------------------------------------
+   View Presets Segmented Control (Cockpit / Tactical / Split / Zen)
+   -------------------------------------------------------------------------- */
+.view-preset-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 32px;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+  transition: border-color var(--transition-fast);
+}
+
+@media (max-width: 820px) {
+  .view-preset-strip {
+    display: none;
+  }
+}
+
+.view-preset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius-sm) - 2px);
+  background: transparent;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.view-preset-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-surface-hover);
+}
+
+.view-preset-btn.active {
+  color: var(--accent-primary);
+  background: var(--accent-subtle);
+  border-color: var(--border-accent);
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.15);
+}
+
+html[data-theme='light'] .view-preset-btn.active {
+  color: var(--accent-primary);
+  background: rgba(217, 119, 6, 0.12);
+  border-color: rgba(217, 119, 6, 0.35);
+  box-shadow: 0 1px 4px rgba(217, 119, 6, 0.1);
+}
+
+/* Zen Mode Floating Exit Pill */
+#zen-exit-pill {
+  position: fixed;
+  bottom: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10005;
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 14px;
+  background: rgba(11, 19, 36, 0.94);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65), 0 0 16px rgba(245, 158, 11, 0.2);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: pill-float 3s ease-in-out infinite alternate;
+}
+@keyframes pill-float {
+  0% { transform: translate(-50%, 0); }
+  100% { transform: translate(-50%, -3px); }
+}
+
+#zen-exit-pill.active,
+body.layout-zen #zen-exit-pill {
+  display: inline-flex !important;
+}
+
+html[data-theme='light'] #zen-exit-pill {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* --------------------------------------------------------------------------
    Tab strip — floating segmented control above the globe
    -------------------------------------------------------------------------- */
 .nav-tab-strip {
@@ -536,10 +631,131 @@ html[data-theme='light'] .intel-sidebar.glass-panel.dashboard-panel {
 }
 
 /* Map-first: hide the panel when the user wants the full globe */
-body.view-state-map .intel-sidebar.glass-panel.dashboard-panel {
+body.view-state-map:not(.layout-split) .intel-sidebar.glass-panel.dashboard-panel {
   transform: translateX(calc(100% + 24px));
   opacity: 0;
   pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   View Presets: Cockpit, Tactical HUD, Split 50/50, Zen
+   -------------------------------------------------------------------------- */
+
+/* 1. Tactical HUD Overlay */
+body.layout-tactical .intel-sidebar.glass-panel.dashboard-panel {
+  width: min(390px, calc(100vw - 32px)) !important;
+  background: rgba(8, 15, 29, 0.78) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(56, 189, 248, 0.28) !important;
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 20px 60px rgba(0, 0, 0, 0.75) !important;
+}
+body.layout-tactical .intel-sidebar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  border-top: 2px solid var(--cyan);
+  border-left: 2px solid var(--cyan);
+  pointer-events: none;
+  z-index: 50;
+  border-top-left-radius: 4px;
+}
+body.layout-tactical .intel-sidebar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 14px;
+  height: 14px;
+  border-top: 2px solid var(--cyan);
+  border-right: 2px solid var(--cyan);
+  pointer-events: none;
+  z-index: 50;
+  border-top-right-radius: 4px;
+}
+
+/* 2. Split 50/50 Grid */
+@media (min-width: 900px) {
+  body.layout-split .dashboard-layout {
+    display: flex !important;
+    flex-direction: row !important;
+    position: absolute !important;
+    inset: 0 !important;
+  }
+  body.layout-split .map-box.dashboard-map {
+    position: relative !important;
+    inset: auto !important;
+    width: 50% !important;
+    height: 100% !important;
+    flex: 0 0 50% !important;
+    border-right: 1px solid var(--border-subtle) !important;
+  }
+  body.layout-split .intel-sidebar.glass-panel.dashboard-panel {
+    position: relative !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 50% !important;
+    height: 100% !important;
+    flex: 0 0 50% !important;
+    border-radius: 0 !important;
+    border: none !important;
+    border-left: 1px solid var(--border-subtle) !important;
+    transform: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    box-shadow: none !important;
+  }
+  body.layout-split .nav-tab-strip {
+    left: 25% !important;
+  }
+}
+
+@media (max-width: 899px) {
+  body.layout-split .dashboard-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    position: absolute !important;
+    inset: 0 !important;
+  }
+  body.layout-split .map-box.dashboard-map {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    height: 50% !important;
+    flex: 0 0 50% !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+  }
+  body.layout-split .intel-sidebar.glass-panel.dashboard-panel {
+    position: relative !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 50% !important;
+    flex: 0 0 50% !important;
+    border-radius: 0 !important;
+    border: none !important;
+    border-top: 1px solid var(--border-subtle) !important;
+    transform: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+}
+
+/* 3. Zen Mode */
+body.layout-zen .intel-sidebar.glass-panel.dashboard-panel {
+  transform: translateX(calc(100% + 40px)) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+body.layout-zen .nav-tab-strip {
+  transform: translate(-50%, -70px) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 /* Keep the centered tab pill clear of the panel on narrower desktops */
@@ -699,22 +915,76 @@ html[data-theme='light'] #coach-card { background: #ffffff; }
 }
 
 /* --------------------------------------------------------------------------
-   Cards — flat surfaces, separated by hairlines. No glass, no glow.
+   Option B: Hardware Double-Bezel Architecture & Micro-Kickers
+   Tactical Dark-Tech · Calibrated Specular Lighting · Tabular Numerics
    -------------------------------------------------------------------------- */
+.hw-bezel-card,
 .apple-glass,
 .glass-panel,
 .glass-elevated,
 .dossier-card {
+  position: relative;
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.35);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 4px 20px -4px rgba(0, 0, 0, 0.35);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
 }
+
+html[data-theme='light'] .hw-bezel-card,
+html[data-theme='light'] .apple-glass,
+html[data-theme='light'] .glass-panel,
+html[data-theme='light'] .glass-elevated,
+html[data-theme='light'] .dossier-card {
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 3px 14px -2px rgba(0, 0, 0, 0.06);
+}
+
+.hw-bezel-card:hover,
 .apple-glass:hover,
+.glass-panel:hover,
 .dossier-card:hover {
   border-color: var(--border-subtle-hover);
-  box-shadow: 0 8px 30px -6px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 8px 30px -6px rgba(0, 0, 0, 0.5);
+}
+
+/* Micro-Kickers: Machined cybernetic telemetry header */
+.hw-kicker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--border-subtle);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.hw-kicker-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+}
+.hw-kicker-tag i {
+  font-size: 9px;
+  color: var(--accent-primary);
+}
+.hw-kicker-meta {
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
 /* Section labels inside cards */
@@ -722,17 +992,46 @@ html[data-theme='light'] #coach-card { background: #ffffff; }
   letter-spacing: 0.04em;
 }
 
-/* Stat tiles */
+/* Stat tiles: machined inner cells */
 .grid > div[class*="rounded-lg"][class*="bg-[var(--bg-surface-subtle)]"],
 .grid > div[class*="p-2.5"] {
   background: var(--bg-surface-subtle);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
-  transition: border-color var(--transition-fast);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 .grid > div[class*="rounded-lg"][class*="bg-[var(--bg-surface-subtle)]"]:hover,
 .grid > div[class*="p-2.5"]:hover {
   border-color: var(--border-subtle-hover);
+  background: var(--bg-surface-hover);
+}
+
+/* Anti-Slop Strict Numeric Alignment across all telemetry & finance */
+.tabular-nums,
+.font-mono,
+#ist-time,
+#cursor-coords,
+#fact-pop,
+#fact-area,
+#fact-code,
+#fact-currency,
+#news-count,
+#atmo-temp,
+#eco-gdp,
+.market-ticker-val,
+.market-price,
+.fact-val {
+  font-variant-numeric: tabular-nums lining-nums !important;
+}
+
+/* Anti-Slop Typography Purity (Hallmark Gate 38a: No italic headers) */
+h1, h2, h3, h4, h5, h6,
+.brand-wordmark,
+.nav-tab,
+.header-widget,
+.sector-pill {
+  font-style: normal !important;
 }
 
 /* Big numeric displays */
@@ -740,6 +1039,11 @@ html[data-theme='light'] #coach-card { background: #ffffff; }
   font-family: var(--font-mono);
   font-weight: 600;
   letter-spacing: -0.04em;
+}
+
+/* Hallmark Gate 34: Root horizontal overflow discipline */
+html, body {
+  overflow-x: clip;
 }
 
 /* --------------------------------------------------------------------------

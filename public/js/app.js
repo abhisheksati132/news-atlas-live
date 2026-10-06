@@ -452,6 +452,10 @@ window.handleCountryClick = async function (event, d) {
     const compareBtn = document.getElementById("sector-compare-btn");
     
     const iso = d.properties.iso_a2 || d.properties.ISO_A2 || d.properties.iso_a3 || d.properties.ISO_A3;
+    const kickerIso = document.getElementById("kicker-iso");
+    if (kickerIso) {
+      kickerIso.innerText = `LOC-${(iso || "GLOBAL").toUpperCase()}`;
+    }
     if (iso && flagEl) {
       flagEl.src = `https://flagcdn.com/w40/${iso.toLowerCase().substring(0, 2)}.png`;
       flagEl.classList.remove("hidden");
@@ -632,6 +636,46 @@ window.toggleDayNightTerminator = function() {
   }
   if (window.showToast) window.showToast(isActive ? "Day/Night shadow enabled" : "Day/Night shadow disabled", "info");
 };
+window.switchViewPreset = (preset) => {
+  const validPresets = ["cockpit", "tactical", "split", "zen"];
+  const p = validPresets.includes(preset) ? preset : "cockpit";
+  window._currentViewPreset = p;
+
+  validPresets.forEach(name => {
+    document.body.classList.remove(`layout-${name}`);
+  });
+  document.body.classList.add(`layout-${p}`);
+
+  // Update button states
+  document.querySelectorAll(".view-preset-btn").forEach(btn => {
+    const isSelected = btn.getAttribute("data-preset") === p;
+    btn.classList.toggle("active", isSelected);
+    btn.setAttribute("aria-checked", isSelected ? "true" : "false");
+  });
+
+  // Handle zen exit pill
+  const zenPill = document.getElementById("zen-exit-pill");
+  if (zenPill) {
+    zenPill.classList.toggle("active", p === "zen");
+  }
+
+  try {
+    localStorage.setItem("newsatlas_view_preset", p);
+  } catch (err) {
+    // Ignore storage issues in sandboxed contexts
+  }
+
+  // Smooth resize for map canvas
+  if (window.mapEngine && window.mapEngine.map) {
+    window.requestAnimationFrame(() => {
+      window.mapEngine.map.resize();
+    });
+    setTimeout(() => {
+      window.mapEngine.map.resize();
+    }, 160);
+  }
+};
+
 function setupEventListeners() {
   window.addEventListener("keydown", (e) => {
     // Esc handling
@@ -640,12 +684,25 @@ function setupEventListeners() {
       const ao = safeEl("about-overlay");
       if (so && !so.classList.contains("hidden")) so.classList.add("hidden");
       if (ao && !ao.classList.contains("hidden")) ao.classList.add("hidden");
+      if (document.body.classList.contains("layout-zen")) {
+        window.switchViewPreset("cockpit");
+      }
     }
 
-    // Tab Navigation (1-5)
     // Ignore if user is typing in an input field
     if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
 
+    // View Presets cycling shortcut (V)
+    if (e.key === "v" || e.key === "V") {
+      e.preventDefault();
+      const presets = ["cockpit", "tactical", "split", "zen"];
+      const current = window._currentViewPreset || "cockpit";
+      const next = presets[(presets.indexOf(current) + 1) % presets.length];
+      window.switchViewPreset(next);
+      return;
+    }
+
+    // Tab Navigation (1-5)
     const navMap = {
       "1": "intel",
       "2": "news",
@@ -966,6 +1023,10 @@ async function startApp() {
   setupEventListeners();
   initMobileBottomNav();
   setInterval(updateSystemTime, 1000);
+
+  // Restore view preset
+  const savedPreset = (typeof localStorage !== "undefined" && localStorage.getItem("newsatlas_view_preset")) || "cockpit";
+  window.switchViewPreset(savedPreset);
 
   window.mapEngine = new MapboxEngine('map-container');
   await window.mapEngine.init();

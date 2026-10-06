@@ -77,5 +77,40 @@ test.describe("NewsAtlas smoke", () => {
     await arcsBtn.click();
     await expect(arcsBtn).toHaveClass(/active/);
   });
+
+  test("view presets switch layout modes and zen exit pill works", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/");
+    await page.waitForTimeout(2000);
+
+    const presetWrap = page.locator("#view-preset-selector");
+    await expect(presetWrap).toBeVisible();
+
+    // Switch to Tactical HUD
+    await page.locator('button[data-preset="tactical"]').click();
+    await expect(page.locator("body")).toHaveClass(/layout-tactical/);
+
+    // Switch to Split 50/50
+    await page.locator('button[data-preset="split"]').click();
+    await expect(page.locator("body")).toHaveClass(/layout-split/);
+
+    // Switch to Zen
+    await page.locator('button[data-preset="zen"]').click();
+    await expect(page.locator("body")).toHaveClass(/layout-zen/);
+    const zenPill = page.locator("#zen-exit-pill");
+    await expect(zenPill).toHaveClass(/active/);
+
+    // Exit Zen back to Cockpit
+    await zenPill.locator("button").click({ force: true });
+    await expect(page.locator("body")).toHaveClass(/layout-cockpit/);
+  });
+
+  test("hardware double-bezel cards and micro-kickers are rendered", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForTimeout(2000);
+
+    await expect(page.locator(".hw-bezel-card").first()).toBeAttached();
+    await expect(page.locator(".hw-kicker").first()).toBeAttached();
+  });
 });
 

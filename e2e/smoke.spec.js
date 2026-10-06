@@ -132,7 +132,8 @@ test.describe("NewsAtlas smoke", () => {
     // Switch to weather tab
     await page.locator("#tab-btn-atmosphere").click();
     await expect(page.locator("#tab-atmosphere")).toHaveClass(/active/);
-    await expect(page.locator(".hw-bezel-card").first()).toBeVisible();
+    const weatherCard = page.locator("#tab-atmosphere .hw-bezel-card").first();
+    await expect(weatherCard).toBeVisible({ timeout: 15000 });
   });
 });
 

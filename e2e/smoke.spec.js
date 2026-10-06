@@ -112,5 +112,15 @@ test.describe("NewsAtlas smoke", () => {
     await expect(page.locator(".hw-bezel-card").first()).toBeAttached();
     await expect(page.locator(".hw-kicker").first()).toBeAttached();
   });
+
+  test("audio haptic feedback toggle button exists and toggles state", async ({ page }) => {
+    await page.goto("/");
+    const audioBtn = page.locator("#audio-toggle-btn");
+    await expect(audioBtn).toBeVisible();
+    await audioBtn.click();
+    await expect(page.locator("#audio-toggle-icon")).toHaveClass(/fa-volume-high/);
+    await audioBtn.click();
+    await expect(page.locator("#audio-toggle-icon")).toHaveClass(/fa-volume-xmark/);
+  });
 });
 

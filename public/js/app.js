@@ -10,6 +10,7 @@ import './modules/economics.js';
 import './modules/geography.js';
 import './modules/map-toolbar.js';
 import './global-fx.js';
+import './modules/audio-feedback.js';
 import './enhancements.js';
 let selectedCountry = null;
 let currencyCode = null;
@@ -132,6 +133,19 @@ async function runBootSequence() {
       btn.classList.add('text-indigo-500');
       btn.classList.remove('text-slate-500');
       btn.title = "Performance Mode Active (Low FX)";
+    }
+  }
+
+  // Initialize audio haptic button state
+  if (window.audioHaptics) {
+    const isAudioOn = window.audioHaptics.isEnabled();
+    const audioIcon = document.getElementById('audio-toggle-icon');
+    const audioBtn = document.getElementById('audio-toggle-btn');
+    if (audioIcon) {
+      audioIcon.className = isAudioOn ? 'fas fa-volume-high text-[var(--accent-primary)]' : 'fas fa-volume-xmark';
+    }
+    if (audioBtn) {
+      audioBtn.title = isAudioOn ? 'Tactical Audio: ON (Click to mute)' : 'Tactical Audio: OFF (Click to enable)';
     }
   }
 }
@@ -426,7 +440,8 @@ async function generateAIBriefing(loc) {
 }
 window.generateAIBriefing = generateAIBriefing;
 window.handleCountryClick = async function (event, d) {
-  window.playTacticalSound("click");
+  if (window.playTacticalSound) window.playTacticalSound("click");
+  if (window.audioHaptics) window.audioHaptics.play('select');
   
   if (window.compareModeActive && window.primaryCountry && d && d.properties) {
     window.secondaryCountry = d;
@@ -579,6 +594,22 @@ window.togglePerformanceMode = function() {
   }
 };
 
+window.toggleAudioHaptics = function() {
+  if (!window.audioHaptics) return;
+  const isEnabled = window.audioHaptics.toggleAudio();
+  const icon = document.getElementById('audio-toggle-icon');
+  const btn = document.getElementById('audio-toggle-btn');
+  if (icon) {
+    icon.className = isEnabled ? 'fas fa-volume-high text-[var(--accent-primary)]' : 'fas fa-volume-xmark';
+  }
+  if (btn) {
+    btn.title = isEnabled ? 'Tactical Audio: ON (Click to mute)' : 'Tactical Audio: OFF (Click to enable)';
+  }
+  if (window.showToast) {
+    window.showToast(isEnabled ? 'Tactical Audio Feedback Enabled' : 'Tactical Audio Feedback Muted', 'info');
+  }
+};
+
 window.toggleMapProjection = function() {
   if (!window.mapEngine) return;
   const current = window.mapEngine.getProjection();
@@ -645,6 +676,10 @@ window.switchViewPreset = (preset) => {
     document.body.classList.remove(`layout-${name}`);
   });
   document.body.classList.add(`layout-${p}`);
+
+  if (window.audioHaptics) {
+    window.audioHaptics.play('preset');
+  }
 
   // Update button states
   document.querySelectorAll(".view-preset-btn").forEach(btn => {
@@ -730,6 +765,7 @@ function updateSystemTime() {
 
 window.switchTab = (id) => {
   if (typeof window.playTacticalSound === "function") window.playTacticalSound("tab");
+  if (window.audioHaptics) window.audioHaptics.play('tick');
   const normId = (id || "intel").toLowerCase().replace("tab-", "").replace("btn-", "");
   
   const tabs = document.querySelectorAll(".nav-tab");

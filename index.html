@@ -183,10 +183,10 @@
     </div>
 
     <div class="flex items-center gap-3">
-      <button type="button" onclick="toggleSearch()"
+      <button type="button" onclick="window.commandPalette ? window.commandPalette.open() : toggleSearch()"
         class="header-widget flex items-center gap-2">
-        <i class="fas fa-search text-xs text-[var(--cyan)]"></i>
-        <span class="text-[10px] text-[var(--text-secondary)] font-semibold uppercase tracking-widest font-mono">Search</span>
+        <i class="fas fa-terminal text-xs text-[var(--cyan)]"></i>
+        <span class="text-[10px] text-[var(--text-secondary)] font-semibold uppercase tracking-widest font-mono">Omnibox <span class="opacity-60 text-[9px]">/</span></span>
       </button>
       <div class="header-clock-wrap">
         <span id="ist-time" class="header-clock">--:-- IST</span>
@@ -197,6 +197,9 @@
       <button type="button" id="header-ai-btn" onclick="window.toggleCLI()" class="header-widget flex items-center gap-1.5" title="Open assistant (`)">
         <i class="fas fa-brain text-xs text-[var(--accent-primary)]"></i>
         <span>Assistant</span>
+      </button>
+      <button type="button" id="header-hotkeys-btn" onclick="window.commandPalette?.toggleHotkeysHUD()" class="header-widget p-2" title="Tactical Hotkeys HUD (?)" aria-label="Tactical Hotkeys HUD">
+        <i class="fas fa-keyboard"></i>
       </button>
       <button type="button" id="audio-toggle-btn" onclick="window.toggleAudioHaptics()" class="header-widget p-2" title="Toggle tactical audio (Mute/Unmute)" aria-label="Toggle tactical audio">
         <i class="fas fa-volume-xmark" id="audio-toggle-icon" aria-hidden="true"></i>
@@ -267,9 +270,14 @@
           <button type="button" id="mtb-terminator" class="mtb-btn" title="Day / night shadow"><i class="fas fa-adjust"></i></button>
           <button type="button" id="mtb-radar" class="mtb-btn" title="Precipitation radar"><i class="fas fa-cloud-rain"></i></button>
           <button type="button" id="mtb-arcs" class="mtb-btn" title="3D telemetry arcs"><i class="fas fa-satellite-dish"></i></button>
+          <button type="button" id="mtb-satellites" class="mtb-btn" title="Orbital ISS & Satellites [S]"><i class="fas fa-satellite"></i></button>
+          <button type="button" id="mtb-flights" class="mtb-btn" title="Global Aviation Corridors [F]"><i class="fas fa-plane"></i></button>
+          <button type="button" id="mtb-seismic" class="mtb-btn" title="USGS Seismic Pulses [E]"><i class="fas fa-wave-square"></i></button>
         </div>
         <div class="mtb-sep"></div>
         <div class="mtb-group">
+          <button type="button" id="mtb-compare" class="mtb-btn" title="Bilateral Comparison Matrix [C]"><i class="fas fa-chart-pie"></i></button>
+          <button type="button" id="mtb-command" class="mtb-btn" title="Command Palette [Cmd+K / /]"><i class="fas fa-terminal"></i></button>
           <button type="button" id="mtb-rotate" class="mtb-btn" title="Auto-rotate globe"><i class="fas fa-sync-alt"></i></button>
           <button type="button" id="mtb-locate" class="mtb-btn" title="Fly to my location"><i class="fas fa-location-crosshairs"></i></button>
           <button type="button" id="mtb-screenshot" class="mtb-btn" title="Save map as image"><i class="fas fa-camera"></i></button>

@@ -201,6 +201,36 @@ function bindActions() {
     toast(isActive ? "3D Telemetry Arcs on" : "3D Telemetry Arcs off");
   });
 
+  on("mtb-satellites", () => {
+    if (window.orbitalSpatial) {
+      window.orbitalSpatial.toggleSatellites();
+    }
+  });
+
+  on("mtb-flights", () => {
+    if (window.orbitalSpatial) {
+      window.orbitalSpatial.toggleFlights();
+    }
+  });
+
+  on("mtb-seismic", () => {
+    if (window.orbitalSpatial) {
+      window.orbitalSpatial.toggleSeismic();
+    }
+  });
+
+  on("mtb-compare", () => {
+    if (window.comparisonDossier) {
+      window.comparisonDossier.openModal();
+    }
+  });
+
+  on("mtb-command", () => {
+    if (window.commandPalette) {
+      window.commandPalette.open();
+    }
+  });
+
   on("mtb-rotate", () => {
     const e = engine();
     if (!e) return;

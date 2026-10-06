@@ -1648,3 +1648,83 @@ p {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--border-subtle-hover);
 }
+
+/* ==========================================================================
+   Orbital Spatial Telemetry & ISS Tracking
+   ========================================================================== */
+.iss-orbital-marker {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.iss-marker-pulse {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid #38bdf8;
+  background: rgba(56, 189, 248, 0.2);
+  animation: iss-pulse 2.5s infinite cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.iss-marker-icon {
+  position: relative;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #0284c7;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+}
+
+@keyframes iss-pulse {
+  0% { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+.iss-telemetry-hud {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2400;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  max-width: 340px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* ==========================================================================
+   Command Palette & Hotkeys Cheat Sheet
+   ========================================================================== */
+.palette-item {
+  user-select: none;
+}
+.palette-item:hover {
+  background: var(--bg-surface-subtle);
+}
+
+/* Print Optimization */
+@media print {
+  header, nav, #map-toolbar, #zen-exit-pill, #mobile-bottom-nav, .search-backdrop, #command-palette-modal, #compare-modal, #hotkeys-hud-modal {
+    display: none !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+}

@@ -20,12 +20,56 @@ test.describe("NewsAtlas smoke", () => {
     await expect(page.locator("#tab-markets")).toHaveClass(/active/);
   });
 
-  test("search overlay opens and lists countries", async ({ page }) => {
+  test("command palette opens and searches commands and countries", async ({ page }) => {
     await page.goto("/");
-    await page.locator('header button:has-text("Search")').click();
-    await expect(page.locator("#search-overlay")).toBeVisible();
-    await page.locator("#country-search").fill("japan");
-    await expect(page.locator("#search-results")).toContainText("Japan", { timeout: 10000 });
+    await page.waitForTimeout(2000);
+    await page.locator('header button:has-text("Omnibox")').click();
+    await expect(page.locator("#command-palette-modal")).toBeVisible();
+    await page.locator("#palette-search-input").fill("japan");
+    await expect(page.locator("#palette-results-list")).toContainText("Japan", { timeout: 10000 });
+  });
+
+  test("tactical hotkeys HUD opens and displays keyboard shortcuts", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("#header-hotkeys-btn").click();
+    await expect(page.locator("#hotkeys-hud-modal")).toBeVisible();
+    await expect(page.locator("#hotkeys-hud-modal")).toContainText("Mission Control Tactical Keyboard Shortcuts");
+    await page.locator("#hotkeys-close-btn").click();
+    await expect(page.locator("#hotkeys-hud-modal")).toHaveClass(/hidden/);
+  });
+
+  test("orbital telemetry layers toggle properly", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForTimeout(2000);
+
+    const satBtn = page.locator("#mtb-satellites");
+    await expect(satBtn).toBeVisible();
+    await satBtn.click();
+    await expect(satBtn).toHaveClass(/active/);
+
+    const flightBtn = page.locator("#mtb-flights");
+    await expect(flightBtn).toBeVisible();
+    await flightBtn.click();
+    await expect(flightBtn).toHaveClass(/active/);
+
+    const seismicBtn = page.locator("#mtb-seismic");
+    await expect(seismicBtn).toBeVisible();
+    await seismicBtn.click();
+    await expect(seismicBtn).toHaveClass(/active/);
+  });
+
+  test("bilateral comparison modal opens with radar chart and indicator deltas", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForTimeout(2000);
+
+    const compareBtn = page.locator("#mtb-compare");
+    await expect(compareBtn).toBeVisible();
+    await compareBtn.click();
+    await expect(page.locator("#compare-modal")).toBeVisible();
+    await expect(page.locator("#compare-radar-canvas")).toBeAttached();
+    await expect(page.locator("#compare-table-body")).toBeVisible();
+    await page.locator("#compare-close-btn").click();
+    await expect(page.locator("#compare-modal")).toHaveClass(/hidden/);
   });
 
   test("country selection loads profile data", async ({ page }) => {

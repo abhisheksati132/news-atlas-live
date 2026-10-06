@@ -102,14 +102,18 @@ function applyTheme(theme) {
 
   if (window.mapEngine && window.mapEngine.map && typeof mapboxgl !== 'undefined') {
     const isMapboxToken = !!mapboxgl.accessToken && !mapboxgl.accessToken.startsWith('pk.eyJ1IjoiZ3Vlc3Qi');
-    const newStyle = isMapboxToken
-      ? 'mapbox://styles/mapbox/satellite-streets-v12'
-      : (isLight
-          ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
-          : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json');
-    try {
-      window.mapEngine.setStyle(newStyle);
-    } catch (e) {}
+    if (isMapboxToken) {
+      if (window.mapEngine.updateTheme) {
+        window.mapEngine.updateTheme(isLight);
+      }
+    } else {
+      const targetStyle = isLight
+        ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
+        : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
+      try {
+        window.mapEngine.setStyle(targetStyle);
+      } catch (_e) {}
+    }
   }
 }
 window.applyTheme = applyTheme;
@@ -550,7 +554,7 @@ window.togglePerformanceMode = function() {
         window.mapEngine.map.setTerrain(null);
         window.mapEngine.map.setFog(null);
       } else {
-        window.mapEngine._addTerrain();
+        if (window.mapEngine._terrainActive) window.mapEngine._addTerrain();
         window.mapEngine._applyAtmosphere();
       }
     } catch (e) {
@@ -598,15 +602,6 @@ window.toggleMapStyle = function() {
 
 window.toggleGlobeTheme = function() {
   window.toggleTheme();
-  if (window.mapEngine) {
-    const hasToken = typeof mapboxgl !== 'undefined' && !!mapboxgl.accessToken;
-    if (hasToken) {
-      window.mapEngine.setStyle('mapbox://styles/mapbox/satellite-streets-v12');
-    } else {
-      const isLight = document.body.classList.contains('light-theme');
-      window.mapEngine.setStyle(isLight ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json' : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json');
-    }
-  }
 };
 
 window.zoomMap = function(factor) {

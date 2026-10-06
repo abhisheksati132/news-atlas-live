@@ -151,10 +151,9 @@ function bindActions() {
     if (!e) return;
     terrainOn = !terrainOn;
     try {
-      if (terrainOn) e._addTerrain();
-      else e.map.setTerrain(null);
-      setActive("mtb-terrain", terrainOn);
-      toast(terrainOn ? "3D terrain on" : "3D terrain off");
+      const active = e.toggleTerrain(terrainOn);
+      setActive("mtb-terrain", active);
+      toast(active ? "3D terrain on" : "3D terrain off");
     } catch (err) {
       terrainOn = false;
       setActive("mtb-terrain", false);

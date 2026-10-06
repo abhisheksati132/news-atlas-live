@@ -53,6 +53,23 @@ test.describe("NewsAtlas smoke", () => {
     }
   });
 
+  test("day to night and night to day theme toggle keeps globe intact", async ({ page }) => {
+    await page.goto("/");
+    const themeBtn = page.locator("#theme-toggle-btn");
+    await expect(themeBtn).toBeVisible();
+
+    // Toggle to Light mode
+    await themeBtn.click();
+    await expect(page.locator("body")).toHaveAttribute("data-theme", "light");
+
+    // Toggle back to Dark mode
+    await themeBtn.click();
+    await expect(page.locator("body")).toHaveAttribute("data-theme", "dark");
+
+    // Ensure map container canvas remains active and attached
+    await expect(page.locator("#map-container canvas")).toBeAttached();
+  });
+
   test("terminal app 3D telemetry arcs toggle is functional", async ({ page }) => {
     await page.goto("/");
     const arcsBtn = page.locator("#mtb-arcs");

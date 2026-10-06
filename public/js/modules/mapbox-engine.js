@@ -17,6 +17,8 @@ class MapboxEngine {
         this._telemetryAnimId = null;
         this._telemetryPhotons = [];
         this._telemetryRoutes = [];
+        this._currentStyle = null;
+        this._terrainActive = false;
     }
 
     async init() {
@@ -45,6 +47,7 @@ class MapboxEngine {
             : (isLight
                 ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
                 : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json');
+        this._currentStyle = defaultStyle;
 
         try {
             this.map = new mapboxgl.Map({
@@ -82,10 +85,17 @@ class MapboxEngine {
 
         this.map.on('style.load', () => {
             this.map.resize();
+            try { this.map.setProjection('globe'); } catch (_e) {}
             const isLowFx = document.body.classList.contains('low-fx');
             if (!isLowFx) {
                 this._applyAtmosphere();
-                if (hasToken) this._addTerrain();
+                if (hasToken && this._terrainActive) {
+                    this._addTerrain();
+                } else {
+                    try { this.map.setTerrain(null); } catch (_e) {}
+                }
+            } else {
+                try { this.map.setTerrain(null); } catch (_e) {}
             }
             this.initMapboxLayers();
             if (this._telemetryArcsActive) {
@@ -130,6 +140,9 @@ class MapboxEngine {
 
     setStyle(style) {
         if (!this.map) return;
+        if (this._currentStyle === style) return;
+        this._currentStyle = style;
+        try { this.map.setTerrain(null); } catch (_e) {}
         this.map.setStyle(style);
     }
 
@@ -139,13 +152,16 @@ class MapboxEngine {
     }
 
     _applyAtmosphere() {
+        if (!this.map) return;
+        const isLight = document.body.classList.contains('light-theme') ||
+                        document.documentElement.getAttribute('data-theme') === 'light';
         try {
             this.map.setFog({
-                'color': 'rgba(11, 19, 36, 0.6)',
-                'high-color': 'rgba(6, 11, 20, 0.5)',
+                'color': isLight ? 'rgba(235, 240, 248, 0.45)' : 'rgba(11, 19, 36, 0.6)',
+                'high-color': isLight ? 'rgba(215, 225, 240, 0.35)' : 'rgba(6, 11, 20, 0.5)',
                 'horizon-blend': 0.02,
-                'space-color': '#060B14',
-                'star-intensity': 0.8,
+                'space-color': isLight ? '#f4f6f8' : '#060B14',
+                'star-intensity': isLight ? 0.0 : 0.8,
                 'range': [0.4, 8]
             });
         } catch (e) {
@@ -163,9 +179,55 @@ class MapboxEngine {
                     maxzoom: 14
                 });
             }
-            this.map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
+            this.map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.2 });
+            this._terrainActive = true;
         } catch (e) {
             console.warn('Terrain DEM unavailable:', e.message);
+        }
+    }
+
+    toggleTerrain(force = null) {
+        if (!this.map) return false;
+        this._terrainActive = force !== null ? force : !this._terrainActive;
+        if (this._terrainActive) {
+            this._addTerrain();
+        } else {
+            try { this.map.setTerrain(null); } catch (_e) {}
+        }
+        return this._terrainActive;
+    }
+
+    updateTheme(isLight) {
+        if (!this.map || !this.ready) return;
+        const fillColor = isLight ? '#18181b' : '#ffffff';
+        const borderColor = isLight ? 'rgba(0, 0, 0, 0.35)' : 'rgba(255, 255, 255, 0.16)';
+        const hoverColor = isLight ? 'rgba(0, 0, 0, 0.55)' : 'rgba(255, 255, 255, 0.5)';
+        const selectedColor = isLight ? '#18181b' : '#ffffff';
+
+        try {
+            if (this.map.getLayer('country-fills')) {
+                this.map.setPaintProperty('country-fills', 'fill-color', fillColor);
+            }
+            if (this.map.getLayer('country-borders-base')) {
+                this.map.setPaintProperty('country-borders-base', 'line-color', borderColor);
+            }
+            if (this.map.getLayer('country-borders-hover')) {
+                this.map.setPaintProperty('country-borders-hover', 'line-color', [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false], hoverColor,
+                    'transparent'
+                ]);
+            }
+            if (this.map.getLayer('country-borders-selected')) {
+                this.map.setPaintProperty('country-borders-selected', 'line-color', [
+                    'case',
+                    ['boolean', ['feature-state', 'selected'], false], selectedColor,
+                    'transparent'
+                ]);
+            }
+            this._applyAtmosphere();
+        } catch (e) {
+            console.warn('Theme paint update failed:', e.message);
         }
     }
 

@@ -22,6 +22,8 @@
         "color-contrast": "error",
         "image-size-responsive": "error",
         "unsized-images": "error",
+        "unused-javascript": "warn",
+        "uses-optimized-images": "warn",
         "unused-css-rules": "warn",
         "uses-long-cache-ttl": "off",
         "font-display-insight": "off",

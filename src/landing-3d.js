@@ -237,8 +237,8 @@ export class Interactive3DEarth {
     
     // Photorealistic Earth Surface
     const earthGeo = new THREE.SphereGeometry(this.radius, 64, 64);
-    const dayTex = textureLoader.load('/textures/earth/earth_atmos_2048.jpg');
-    const specTex = textureLoader.load('/textures/earth/earth_specular_2048.jpg');
+    const dayTex = textureLoader.load('/textures/earth/earth_atmos_2048.webp');
+    const specTex = textureLoader.load('/textures/earth/earth_specular_2048.webp');
 
     const earthMat = new THREE.MeshPhongMaterial({
       map: dayTex,
@@ -254,7 +254,7 @@ export class Interactive3DEarth {
 
     // Independent Atmospheric Clouds
     const cloudGeo = new THREE.SphereGeometry(this.radius * 1.012, 64, 64);
-    const cloudTex = textureLoader.load('/textures/earth/earth_clouds_1024.png');
+    const cloudTex = textureLoader.load('/textures/earth/earth_clouds_1024.webp');
     const cloudMat = new THREE.MeshLambertMaterial({
       map: cloudTex,
       transparent: true,

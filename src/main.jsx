@@ -4,6 +4,8 @@ import './styles/globals.css';
 
 import * as Sentry from "@sentry/browser";
 import { browserTracingIntegration, replayIntegration } from "@sentry/browser";
+import { Button, LiquidButton, MetalButton } from '@/components/ui/liquid-glass-button';
+import { Send, RotateCcw, Copy, Check, Sparkles } from 'lucide-react';
 
 const DSN = import.meta.env.VITE_SENTRY_DSN;
 
@@ -175,14 +177,16 @@ const AIAssistant = () => {
             {currentCountry}
           </span>
         </div>
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={handleResetChat}
-          className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold px-2 py-1 rounded hover:bg-white/5 active:scale-95"
+          className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors h-7 px-2 text-[10px] uppercase tracking-wider font-semibold hover:bg-white/5 active:scale-95"
           title="Reset conversation"
         >
-          <i className="fas fa-redo-alt text-[9px]"></i>
+          <RotateCcw className="size-3 mr-1" />
           <span>Clear</span>
-        </button>
+        </Button>
       </div>
 
       {/* Messages Scroll Area */}
@@ -202,10 +206,14 @@ const AIAssistant = () => {
               {m.role === 'assistant' && !m.isError && (
                 <button
                   onClick={() => copyMessage(m.content, i)}
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-white/10 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] text-[10px]"
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-white/10 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
                   title="Copy analysis"
                 >
-                  <i className={`fas ${copiedIdx === i ? 'fa-check text-emerald-400' : 'fa-copy'}`}></i>
+                  {copiedIdx === i ? (
+                    <Check className="size-3 text-emerald-400" />
+                  ) : (
+                    <Copy className="size-3" />
+                  )}
                 </button>
               )}
             </div>
@@ -226,13 +234,15 @@ const AIAssistant = () => {
       {messages.length <= 2 && !loading && (
         <div className="px-4 pb-2.5 pt-2 flex flex-wrap gap-1.5 border-t border-[var(--border-subtle)] bg-[var(--bg-surface)]">
           {promptChips.map((chip, idx) => (
-            <button
+            <Button
               key={idx}
+              variant="outline"
+              size="sm"
               onClick={() => handleSendPrompt(chip.prompt)}
-              className="text-[11px] px-2.5 py-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] hover:border-[var(--border-accent)] hover:text-[var(--accent-primary)] text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] active:scale-[0.98] transition-all font-sans font-medium text-left"
+              className="text-[11px] h-auto py-1 px-2.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] hover:border-[var(--border-accent)] hover:text-[var(--accent-primary)] text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] active:scale-[0.98] transition-all font-sans font-medium text-left whitespace-normal justify-start shadow-none"
             >
               {chip.label}
-            </button>
+            </Button>
           ))}
         </div>
       )}
@@ -251,15 +261,16 @@ const AIAssistant = () => {
             }
           }}
         />
-        <button
+        <Button
           type="button"
+          size="icon"
           onClick={() => handleSendPrompt()}
           disabled={loading || !input.trim()}
           className="shrink-0 w-9 h-9 rounded-xl bg-[var(--accent-primary)] text-[var(--accent-text)] font-bold hover:bg-[var(--accent-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center shadow-sm"
           aria-label="Send query"
         >
-          <i className="fas fa-paper-plane text-xs"></i>
-        </button>
+          <Send className="size-3.5" />
+        </Button>
       </div>
     </div>
   );
@@ -270,6 +281,28 @@ if (assistantMount) {
   ReactDOM.createRoot(assistantMount).render(
     <React.StrictMode>
       <AIAssistant />
+    </React.StrictMode>
+  );
+}
+
+import { Hero } from './components/hero/Hero';
+
+const heroMount = document.getElementById('react-hero-root');
+if (heroMount) {
+  const handleEnterTerminal = () => {
+    const el = document.getElementById('terminal-dashboard');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+        if (window.map?.resize) window.map.resize();
+      }, 500);
+    }
+  };
+
+  ReactDOM.createRoot(heroMount).render(
+    <React.StrictMode>
+      <Hero onEnterTerminal={handleEnterTerminal} />
     </React.StrictMode>
   );
 }

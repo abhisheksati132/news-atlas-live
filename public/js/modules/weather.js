@@ -151,7 +151,7 @@ async function fetchWeather(lat, lon) {
       if (atmoCondition) atmoCondition.innerText = meta.text;
       const iconEl = document.getElementById("atmo-main-icon");
       if (iconEl)
-        iconEl.className = `fas ${meta.icon} text-9xl ${meta.color} opacity-80`;
+        iconEl.className = `fas ${meta.icon} text-5xl ${meta.color} opacity-80`;
       const atmoFeels = document.getElementById("atmo-feels");
       if (atmoFeels)
         atmoFeels.innerText = `${Math.round(curr.apparent_temperature)}°`;
@@ -198,13 +198,13 @@ async function fetchWeather(lat, lon) {
       if (atmoAqi) {
         if (curr.aqi !== undefined) {
           atmoAqi.innerText = curr.aqi;
-          atmoAqi.className = `text-2xl font-black leading-none ${curr.aqi <= 20 ? 'text-emerald-400' :
+          atmoAqi.className = `text-base font-bold tabular-nums ${curr.aqi <= 20 ? 'text-emerald-400' :
             curr.aqi <= 50 ? 'text-yellow-400' :
               curr.aqi <= 100 ? 'text-orange-400' : 'text-red-500'
             }`;
         } else {
           atmoAqi.innerText = "--";
-          atmoAqi.className = "text-2xl font-black text-white leading-none";
+          atmoAqi.className = "text-base font-bold tabular-nums text-white";
         }
       }
     }

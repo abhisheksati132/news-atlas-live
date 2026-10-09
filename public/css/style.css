@@ -4,34 +4,34 @@
    ========================================================================== */
 
 :root {
-  /* Surfaces — Executive Deep Obsidian */
-  --bg-primary: #060913;
-  --bg-surface: #0a101f;
-  --bg-surface-subtle: #0f182e;
-  --bg-surface-hover: #15223f;
-  --bg-surface-active: #1b2b4f;
-  --bg-elevated: #111c33;
+  /* Surfaces — Executive Deep Obsidian & Adeora Navy */
+  --bg-primary: #050b14;
+  --bg-surface: #080d19;
+  --bg-surface-subtle: #0d1527;
+  --bg-surface-hover: #121e36;
+  --bg-surface-active: #182847;
+  --bg-elevated: #0e172a;
 
-  /* Structure & Borders */
-  --border-subtle: #1a2742;
-  --border-subtle-hover: #293d66;
-  --border-subtle-active: #38507e;
-  --border-bright: #3b527e;
+  /* Structure & Hairline Borders */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-subtle-hover: rgba(255, 255, 255, 0.16);
+  --border-subtle-active: rgba(255, 255, 255, 0.24);
+  --border-bright: rgba(255, 255, 255, 0.3);
   --border-accent: rgba(245, 158, 11, 0.4);
 
   /* High-Contrast Typographic Hierarchy */
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-tertiary: #64748b;
-  --text-faint: #475569;
-  --text-inverse: #060913;
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.8);
+  --text-tertiary: rgba(255, 255, 255, 0.5);
+  --text-faint: rgba(255, 255, 255, 0.3);
+  --text-inverse: #050b14;
 
   /* Accent Amber */
   --accent-primary: #f59e0b;
   --accent-primary-hover: #fbbf24;
   --accent-subtle: rgba(245, 158, 11, 0.12);
   --accent-subtle-hover: rgba(245, 158, 11, 0.2);
-  --accent-text: #060913;
+  --accent-text: #050b14;
   --accent-focus-ring: rgba(245, 158, 11, 0.45);
 
   /* Cyan & Data Semantics */
@@ -45,7 +45,7 @@
   --warning-bg: rgba(245, 158, 11, 0.12);
 
   /* Type */
-  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-display: var(--font-sans);
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
@@ -69,20 +69,41 @@
 /* --------------------------------------------------------------------------
    Base
    -------------------------------------------------------------------------- */
-* { box-sizing: border-box; }
+html {
+  scroll-behavior: smooth;
+}
 
-html, body {
+body {
   margin: 0;
   padding: 0;
   width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
   background: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-sans);
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+#react-hero-root {
+  width: 100vw;
+  min-height: 100vh;
+  position: relative;
+  display: block;
+}
+
+.terminal-dashboard {
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-primary);
 }
 
 ::selection { background: rgba(245, 158, 11, 0.3); color: #ffffff; }
@@ -151,13 +172,15 @@ header {
   font-size: 12px;
 }
 
-.brand-wordmark {
+.brand-wordmark,
+.terminal-wordmark {
   font-size: 16px;
   font-weight: 700;
   letter-spacing: -0.03em;
   color: var(--text-primary);
 }
-.brand-wordmark span {
+.brand-wordmark span,
+.terminal-wordmark span {
   color: var(--accent-primary);
   font-weight: 600;
 }
@@ -280,7 +303,7 @@ header {
 .intel-sidebar {
   width: var(--sidebar-width, 440px);
   min-width: 320px;
-  max-width: 650px;
+  max-width: min(850px, 70vw);
   height: 100%;
   max-height: 100%;
   background: var(--bg-surface);
@@ -318,12 +341,12 @@ body.layout-tactical .intel-sidebar {
 }
 
 #sidebar-content {
-  flex: 1;
+  flex: 1 1 0%;
+  min-height: 0;
   overflow: hidden;
   position: relative;
   display: flex;
   flex-direction: column;
-  height: calc(100% - 45px);
 }
 
 .tab-content {
@@ -334,15 +357,31 @@ body.layout-tactical .intel-sidebar {
 .tab-content.active {
   display: flex;
   flex-direction: column;
+  flex: 1 1 0%;
+  min-height: 0;
   height: 100%;
 }
 
 .content-scroll-area {
-  flex: 1;
+  flex: 1 1 0%;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 14px;
   overscroll-behavior: contain;
+}
+.content-scroll-area::-webkit-scrollbar {
+  width: 5px;
+}
+.content-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+.content-scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+}
+.content-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
 }
 
 /* Responsive Mobile Layout (< 860px) */
@@ -411,14 +450,14 @@ body.layout-tactical .intel-sidebar {
   background: var(--bg-surface-hover);
 }
 .nav-tab.active {
-  color: var(--accent-primary);
-  background: var(--bg-elevated);
-  border-color: var(--border-subtle);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 /* --------------------------------------------------------------------------
-   Map Controls Toolbar (Left Rail)
+   Map Controls Toolbar (Floating Rail)
    -------------------------------------------------------------------------- */
 .map-toolbar-bar {
   position: absolute;
@@ -428,14 +467,14 @@ body.layout-tactical .intel-sidebar {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1px;
-  padding: 4px 3px;
-  background: rgba(10, 16, 31, 0.94);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  gap: 2px;
+  padding: 5px 4px;
+  background: rgba(8, 13, 24, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.6);
   max-height: calc(100vh - var(--header-h) - 28px);
   overflow-y: auto;
 }
@@ -447,37 +486,37 @@ body.layout-tactical .intel-sidebar {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1px;
+  gap: 2px;
 }
 .mtb-sep {
-  width: 12px;
+  width: 14px;
   height: 1px;
-  background: var(--border-subtle);
-  margin: 2px 0;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 3px 0;
 }
 
 .mtb-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border: 1px solid transparent;
-  border-radius: calc(var(--radius-sm) - 1px);
+  border-radius: 7px;
   background: transparent;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   font-size: 11px;
   transition: all var(--transition-fast);
 }
 .mtb-btn:hover {
-  color: var(--text-primary);
-  background: var(--bg-surface-hover);
-  border-color: var(--border-subtle);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 .mtb-btn.active {
   color: var(--accent-primary);
-  background: var(--accent-subtle);
-  border-color: var(--border-accent);
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.35);
 }
 
 /* Toolbar Popover Menus */
@@ -522,16 +561,17 @@ body.layout-tactical .intel-sidebar {
 .apple-glass,
 .glass-panel,
 .dossier-card {
-  background: var(--bg-surface-subtle);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: 16px;
+  background: #080d19;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.35);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 .bento-card:hover,
 .hw-bezel-card:hover,
 .apple-glass:hover {
-  border-color: var(--border-subtle-hover);
+  border-color: rgba(255, 255, 255, 0.14);
 }
 
 .hw-kicker {
@@ -557,6 +597,23 @@ body.layout-tactical .intel-sidebar {
 }
 .hw-kicker-meta {
   color: var(--text-tertiary);
+}
+
+/* Sentiment Badges */
+.sentiment-negative {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+}
+.sentiment-positive {
+  background: rgba(16, 185, 129, 0.12) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
+}
+.sentiment-neutral {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Stat Grid Inside Cards */

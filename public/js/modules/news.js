@@ -220,10 +220,10 @@ function displayNewsArticles(articles) {
           <span class="text-[8px] font-bold px-2 py-0.5 rounded ${sentiment.cls} uppercase ml-auto font-mono">${sentiment.label}</span>
         </div>
         ${imgHtml}
-        <h3 class="text-sm font-bold text-slate-100 leading-snug hover:text-indigo-400 transition-colors pt-0.5 cursor-pointer" onclick="window.open('${escapeHtml(art.link)}', '_blank')">${escapeHtml(art.title)}</h3>
+        <h3 class="text-sm font-bold text-slate-100 leading-snug hover:text-amber-400 transition-colors pt-0.5 cursor-pointer" onclick="window.open('${escapeHtml(art.link)}', '_blank')">${escapeHtml(art.title)}</h3>
         ${art.description ? `<p class="text-xs text-slate-400 leading-relaxed font-normal line-clamp-3">${escapeHtml(art.description)}</p>` : ''}
         <div class="flex items-center justify-between pt-2 mt-1 border-t border-white/5 text-[11px] font-mono">
-          <a href="${escapeHtml(art.link)}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1 font-semibold">
+          <a href="${escapeHtml(art.link)}" target="_blank" rel="noopener noreferrer" class="text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1 font-semibold">
             Read Source <i class="fas fa-arrow-up-right-from-square text-[9px]"></i>
           </a>
           <button type="button" onclick="window.copyArticleLink('${escapeHtml(art.link)}', this)" class="text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1">

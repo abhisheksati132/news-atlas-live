@@ -28,10 +28,10 @@
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.32.0/mapbox-gl.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" />
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
   <noscript>
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   </noscript>
   <meta name="description" content="NewsAtlas: Real-time Global News and Market Dashboard." />
   <meta property="og:title" content="NewsAtlas — The whole world, on one map" />
@@ -90,13 +90,27 @@
         if (so) so.classList.add('hidden');
       }
     });
+    function toggleSettingsMenu() {
+      var el = document.getElementById('header-settings-dropdown');
+      if (el) el.classList.toggle('hidden');
+    }
+    document.addEventListener('click', function (e) {
+      var btn = document.getElementById('header-settings-btn');
+      var dd = document.getElementById('header-settings-dropdown');
+      if (dd && !dd.classList.contains('hidden')) {
+        if (btn && !btn.contains(e.target) && !dd.contains(e.target)) {
+          dd.classList.add('hidden');
+        }
+      }
+    });
     window.toggleAboutOverlay = toggleAboutOverlay;
     window.closeAboutOverlay = closeAboutOverlay;
     window.toggleSearch = toggleSearch;
+    window.toggleSettingsMenu = toggleSettingsMenu;
   </script>
 </head>
 
-<body class="flex flex-col night-theme view-state-map" data-theme="dark">
+<body class="night-theme view-state-map" data-theme="dark">
   <!-- Interactive Hover Tooltip for Map -->
   <div id="map-tooltip" class="fixed hidden text-white rounded-xl overflow-hidden pointer-events-none z-[2500] p-0 shadow-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]" style="min-width: 170px;">
     <div class="flex items-center gap-2.5 px-3 pt-2.5 pb-2 border-b border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)]">
@@ -133,13 +147,18 @@
     </div>
   </div>
 
-  <header class="main-header">
+  <!-- Adeora Hero Fullscreen Entrance -->
+  <div id="react-hero-root"></div>
+
+  <!-- Terminal Dashboard Stage -->
+  <div id="terminal-dashboard" class="terminal-dashboard">
+    <header class="main-header">
     <div class="flex items-center gap-4 shrink-0">
       <div class="flex items-center gap-2.5 cursor-pointer" onclick="resetToGlobalCenter(true)">
         <div class="brand-badge shrink-0" aria-hidden="true">
           <i class="fas fa-globe-americas"></i>
         </div>
-        <h1 class="brand-wordmark leading-none">News<span>Atlas</span></h1>
+        <h1 class="terminal-wordmark leading-none">News<span>Atlas</span></h1>
       </div>
 
       <!-- Active Country Pill -->
@@ -185,24 +204,37 @@
         <i class="fas fa-brain text-xs text-amber-400"></i>
         <span class="hidden sm:inline">Assistant</span>
       </button>
-      <button type="button" id="header-hotkeys-btn" onclick="window.commandPalette?.toggleHotkeysHUD()" class="header-widget p-2" title="Tactical Hotkeys (?)" aria-label="Tactical Hotkeys">
-        <i class="fas fa-keyboard"></i>
-      </button>
       <button type="button" id="audio-toggle-btn" onclick="window.toggleAudioHaptics()" class="header-widget p-2" title="Audio feedback" aria-label="Audio feedback">
         <i class="fas fa-volume-xmark" id="audio-toggle-icon" aria-hidden="true"></i>
       </button>
-      <button type="button" id="perf-toggle" onclick="togglePerformanceMode()" class="header-widget p-2" title="Toggle performance mode (Low FX)">
-        <i class="fas fa-bolt"></i>
+      <button type="button" id="header-hotkeys-btn" onclick="window.commandPalette?.toggleHotkeysHUD()" class="header-widget p-2" title="Tactical Hotkeys (?)" aria-label="Tactical Hotkeys">
+        <i class="fas fa-keyboard"></i>
       </button>
-      <button type="button" onclick="downloadDossier()" class="header-widget p-2" title="Export Intelligence Dossier (PDF)">
-        <i class="fas fa-file-download"></i>
-      </button>
-      <button type="button" onclick="window.toggleAboutOverlay()" class="header-widget p-2" title="About">
-        <i class="fas fa-info-circle"></i>
-      </button>
-      <button type="button" onclick="goToIndiaHome()" class="header-widget p-2" title="Home">
-        <i class="fas fa-home"></i>
-      </button>
+
+      <!-- Consolidated Settings & System Menu -->
+      <div class="relative">
+        <button type="button" id="header-settings-btn" onclick="window.toggleSettingsMenu()" class="header-widget p-2" title="Settings & Tools" aria-label="Settings and Tools">
+          <i class="fas fa-cog"></i>
+        </button>
+        <div id="header-settings-dropdown" class="hidden absolute right-0 mt-2 w-56 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-1.5 shadow-2xl z-[100] backdrop-blur-xl text-xs font-sans">
+          <button type="button" id="perf-toggle" onclick="togglePerformanceMode(); window.toggleSettingsMenu();" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] transition-colors text-left" title="Toggle performance mode (Low FX)">
+            <i class="fas fa-bolt w-4 text-center"></i>
+            <span>Performance (Low FX)</span>
+          </button>
+          <button type="button" onclick="downloadDossier(); window.toggleSettingsMenu();" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] transition-colors text-left" title="Export Intelligence Dossier (PDF)">
+            <i class="fas fa-file-download w-4 text-center"></i>
+            <span>Export Dossier (PDF)</span>
+          </button>
+          <button type="button" onclick="window.toggleAboutOverlay(); window.toggleSettingsMenu();" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] transition-colors text-left" title="About">
+            <i class="fas fa-info-circle w-4 text-center"></i>
+            <span>About NewsAtlas</span>
+          </button>
+          <button type="button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); window.toggleSettingsMenu();" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] transition-colors text-left" title="View Hero">
+            <i class="fas fa-arrow-up w-4 text-center"></i>
+            <span>Top / Hero View</span>
+          </button>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -311,30 +343,30 @@
               </div>
 
               <!-- Key Fact Indicators Grid -->
-              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-mono">
-                <div class="p-2.5 rounded-lg bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]">
-                  <span class="text-[9px] uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5 font-semibold">Population</span>
-                  <span id="fact-pop" class="font-bold text-[var(--text-primary)] block text-sm tabular-nums">--</span>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-3 border-t border-[var(--border-subtle)]">
+                <div>
+                  <span class="text-[10px] text-[var(--text-tertiary)] block font-medium">Population</span>
+                  <span id="fact-pop" class="font-bold text-[var(--text-primary)] block text-sm font-mono tabular-nums">--</span>
                 </div>
-                <div class="p-2.5 rounded-lg bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]">
-                  <span class="text-[9px] uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5 font-semibold">Region</span>
-                  <span id="fact-region" class="font-bold text-[var(--text-primary)] truncate block text-sm">Global</span>
+                <div>
+                  <span class="text-[10px] text-[var(--text-tertiary)] block font-medium">Region</span>
+                  <span id="fact-region" class="font-bold text-[var(--text-primary)] truncate block text-sm font-sans">Global</span>
                 </div>
-                <div class="p-2.5 rounded-lg bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]">
-                  <span class="text-[9px] uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5 font-semibold">Currency</span>
-                  <span id="fact-currency" class="font-bold text-[var(--accent-primary)] block text-sm tabular-nums">--</span>
+                <div>
+                  <span class="text-[10px] text-[var(--text-tertiary)] block font-medium">Currency</span>
+                  <span id="fact-currency" class="font-bold text-[var(--accent-primary)] block text-sm font-mono tabular-nums">--</span>
                 </div>
-                <div class="p-2.5 rounded-lg bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]">
-                  <span class="text-[9px] uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5 font-semibold">Land Area</span>
-                  <span id="fact-area" class="font-bold text-[var(--text-primary)] block text-sm tabular-nums">--</span>
+                <div>
+                  <span class="text-[10px] text-[var(--text-tertiary)] block font-medium">Land Area</span>
+                  <span id="fact-area" class="font-bold text-[var(--text-primary)] block text-sm font-mono tabular-nums">--</span>
                 </div>
-                <div class="p-2.5 rounded-lg bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]">
-                  <span class="text-[9px] uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5 font-semibold">Calling Code</span>
-                  <span id="fact-code" class="font-bold text-[var(--text-primary)] block text-sm tabular-nums">--</span>
+                <div>
+                  <span class="text-[10px] text-[var(--text-tertiary)] block font-medium">Calling Code</span>
+                  <span id="fact-code" class="font-bold text-[var(--text-primary)] block text-sm font-mono tabular-nums">--</span>
                 </div>
-                <div class="p-2.5 rounded-lg bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]">
-                  <span class="text-[9px] uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5 font-semibold">Drive Side</span>
-                  <span id="fact-drive" class="font-bold text-[var(--text-primary)] block text-sm">--</span>
+                <div>
+                  <span class="text-[10px] text-[var(--text-tertiary)] block font-medium">Drive Side</span>
+                  <span id="fact-drive" class="font-bold text-[var(--text-primary)] block text-sm font-sans">--</span>
                 </div>
               </div>
             </div>
@@ -804,6 +836,7 @@
     </aside>
     </div>
   </main>
+  </div>
 
   
 

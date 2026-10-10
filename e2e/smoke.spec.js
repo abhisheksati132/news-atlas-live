@@ -162,6 +162,31 @@ test.describe("NewsAtlas smoke", () => {
   });
 
   test("in-terminal news reader drawer opens on article click and closes on escape", async ({ page }) => {
+    // Intercept /api/news to guarantee deterministic, immediate test execution
+    await page.route("**/api/news*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          status: "success",
+          totalResults: 2,
+          results: [
+            {
+              title: "Global Supply Chain Infrastructure Bolstered by Maritime Treaty",
+              link: "https://example.com/news/1",
+              pubDate: new Date().toISOString(),
+              source: "Global Dispatch",
+              source_id: "globaldispatch",
+              source_url: "https://example.com",
+              category: "top",
+              description: "International logistics consortiums ratify expanded deep-water shipping protocols.",
+              image_url: null
+            }
+          ]
+        })
+      });
+    });
+
     await page.goto("/");
     await page.waitForTimeout(1000);
 
@@ -169,9 +194,9 @@ test.describe("NewsAtlas smoke", () => {
     await page.locator("#tab-btn-news").click();
     await expect(page.locator("#tab-news")).toHaveClass(/active/);
 
-    // Wait for real news article card (not skeleton loader) to appear
+    // Wait for real news article card to appear
     const realCard = page.locator("#articles-container [data-news-index]").first();
-    await expect(realCard).toBeVisible({ timeout: 20000 });
+    await expect(realCard).toBeVisible({ timeout: 10000 });
 
     // Click real news card to open in-terminal reader drawer
     await realCard.click();

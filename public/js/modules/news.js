@@ -139,11 +139,9 @@ async function liveSearchFallback(query) {
   if (container) {
     container.innerHTML = `
       <div class="col-span-full p-8 text-center">
-        <div class="inline-flex items-center gap-3 px-5 py-3 rounded-xl" style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2)">
-          <div class="w-2 h-2 rounded-full bg-blue-400 animate-ping"></div>
-          <span class="text-[11px] font-black text-blue-400 uppercase tracking-widest" style="font-family:'JetBrains Mono',monospace">
-            Searching live feeds for "<span class="text-white">${query}</span>"...
-          </span>
+        <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-lg bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)] text-xs text-[var(--text-secondary)] font-mono">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+          <span>Searching for "<span class="text-[var(--text-primary)] font-semibold">${escapeHtml(query)}</span>"...</span>
         </div>
       </div>`;
   }
@@ -214,7 +212,7 @@ function displayNewsArticles(articles) {
       <div class="flex flex-col gap-2">
         <div class="flex items-center gap-2">
           ${faviconHtml}
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">${art.source_id || "UPLINK"}</span>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">${art.source_id || "NEWS WIRE"}</span>
           <span class="text-[9px] font-mono text-slate-600">·</span>
           <span class="text-[9px] font-mono text-slate-500 uppercase">${timeAgo}</span>
           <span class="text-[8px] font-bold px-2 py-0.5 rounded ${sentiment.cls} uppercase ml-auto font-mono">${sentiment.label}</span>

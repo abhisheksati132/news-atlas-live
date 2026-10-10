@@ -136,8 +136,8 @@ export class OrbitalSpatialEngine {
     }
     badge.innerHTML = `
       <div class="flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-1.5 mb-1.5 font-mono">
-        <span class="text-amber-400 font-bold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>ISS // ORBITAL TELEMETRY</span>
-        <span class="text-[9px] text-[var(--text-tertiary)]">ZARYA-51.6°</span>
+        <span class="text-[var(--text-primary)] font-semibold flex items-center gap-1.5 text-xs"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>International Space Station</span>
+        <span class="text-[9px] text-[var(--text-tertiary)]">ZARYA (51.6°)</span>
       </div>
       <div class="grid grid-cols-3 gap-2 font-mono text-[11px]">
         <div><span class="text-[9px] text-[var(--text-tertiary)] block">LAT / LNG</span><span class="font-bold text-[var(--text-primary)]">${lat.toFixed(2)}°, ${lng.toFixed(2)}°</span></div>

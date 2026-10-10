@@ -13,7 +13,13 @@ const preview = spawn("npx", ["vite", "preview", "--port", "5198", "--strictPort
   stdio: "ignore",
   shell: true
 });
-await new Promise((r) => setTimeout(r, 4000));
+for (let i = 0; i < 20; i++) {
+  try {
+    const res = await fetch("http://localhost:5198/");
+    if (res.ok || res.status) break;
+  } catch {}
+  await new Promise((r) => setTimeout(r, 500));
+}
 
 const browser = await chromium.launch();
 const results = {};

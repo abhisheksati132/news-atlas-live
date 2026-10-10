@@ -169,10 +169,10 @@ export class ComparisonDossierEngine {
       <div class="apple-glass glass-elevated w-full max-w-4xl max-h-[90vh] flex flex-col rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
         <!-- Modal Header -->
         <div class="px-6 py-4 border-b border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></div>
+          <div class="flex items-center gap-2.5">
+            <div class="w-2 h-2 rounded-full bg-amber-400"></div>
             <h2 class="text-sm font-bold text-[var(--text-primary)] font-mono uppercase tracking-wider">
-              Bilateral Intelligence & Macroeconomic Comparison Matrix
+              Bilateral Country &amp; Macroeconomic Comparison
             </h2>
           </div>
           <div class="flex items-center gap-2">

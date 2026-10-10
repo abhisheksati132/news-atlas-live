@@ -321,8 +321,8 @@
             <!-- Hero Country Profile Card -->
             <div class="hw-bezel-card apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex items-center justify-between mb-3 pb-2 border-b border-[var(--border-subtle)]">
-                <span class="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider font-mono flex items-center gap-2">
-                  <i class="fas fa-globe text-[var(--accent-primary)] text-xs"></i>Country Profile
+                <span class="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider font-mono">
+                  Country Profile
                 </span>
                 <span class="text-[10px] font-mono text-[var(--text-tertiary)]" id="kicker-iso">GLOBAL</span>
               </div>
@@ -337,8 +337,8 @@
                     <p id="selected-country-capital" class="text-xs text-[var(--text-secondary)] font-medium">Search or click a country</p>
                   </div>
                 </div>
-                <div id="country-status-badge" class="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold uppercase tracking-wider shrink-0 flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Active
+                <div id="country-status-badge" class="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold uppercase tracking-wider shrink-0 flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Active
                 </div>
               </div>
 
@@ -374,8 +374,8 @@
             <!-- Pinned countries -->
             <div id="pinned-sectors-card" class="hw-bezel-card apple-glass p-3.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2.5 pb-1.5 border-b border-[var(--border-subtle)]">
-                <span class="text-[11px] text-[var(--text-secondary)] uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
-                  <i class="fas fa-star text-xs text-[var(--accent-primary)]"></i>Pinned Countries
+                <span class="text-[11px] text-[var(--text-secondary)] uppercase font-bold tracking-wider font-mono">
+                  Pinned Countries
                 </span>
                 <span class="text-[9px] text-[var(--text-tertiary)] font-mono">Quick Access</span>
               </div>
@@ -401,13 +401,13 @@
               </div>
             </div>
 
-            <!-- AI Intelligence Briefing Card -->
+            <!-- Executive Briefing Card -->
             <div id="ai-briefing-box" class="hw-bezel-card apple-glass rounded-xl p-4 border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2.5 border-b border-[var(--border-subtle)] pb-2">
-                <span class="text-[11px] text-[var(--text-primary)] uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
-                  <i class="fas fa-brain text-xs text-[var(--accent-primary)]"></i>Country Briefing
+                <span class="text-[11px] text-[var(--text-primary)] uppercase font-bold tracking-wider font-mono">
+                  Executive Briefing
                 </span>
-                <span class="text-[9px] font-mono text-[var(--text-tertiary)]">AI Generated</span>
+                <span class="text-[9px] font-mono text-[var(--text-tertiary)]">Intelligence Synthesis</span>
               </div>
               <div id="ai-briefing-text" class="text-[var(--text-secondary)] font-sans text-xs leading-relaxed">
                 Click any country on the map to generate a summary.
@@ -428,19 +428,19 @@
             <!-- Sentiment & Instability Trends Chart -->
             <div id="geopolitical-trends-card" class="hw-bezel-card apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2.5 pb-2 border-b border-[var(--border-subtle)]">
-                <span class="text-[11px] text-[var(--text-primary)] uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
-                  <i class="fas fa-chart-area text-xs text-[var(--accent-primary)]"></i>Sentiment & Instability Trend
+                <span class="text-[11px] text-[var(--text-primary)] uppercase font-bold tracking-wider font-mono">
+                  Sentiment &amp; Stability Trend
                 </span>
                 <span class="text-[9px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest font-mono">10-Day Window</span>
               </div>
               <canvas id="trends-line-chart" class="w-full h-24 rounded-lg bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]"></canvas>
             </div>
 
-            <!-- Strategic Research Notes Card (Offline-First Local Storage) -->
+            <!-- Notes Card -->
             <div id="classified-notes-card" class="hw-bezel-card apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2 pb-1.5 border-b border-[var(--border-subtle)]">
-                <span class="text-[11px] text-[var(--text-secondary)] uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
-                  <i class="fas fa-pen-nib text-xs text-[var(--accent-primary)]"></i>Field Notes
+                <span class="text-[11px] text-[var(--text-secondary)] uppercase font-bold tracking-wider font-mono">
+                  Notes
                 </span>
                 <span id="notes-save-status" class="text-[9px] font-bold text-emerald-400 uppercase tracking-widest font-mono">Saved</span>
               </div>
@@ -494,13 +494,13 @@
             <!-- GDELT Global Events Card -->
             <div id="gdelt-events-card" class="hw-bezel-card apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2 pb-2 border-b border-[var(--border-subtle)]">
-                <span class="text-[11px] text-[var(--text-primary)] font-bold uppercase tracking-wider font-mono flex items-center gap-1.5">
-                  <i class="fas fa-satellite text-xs text-[var(--accent-primary)]"></i>Global Events
+                <span class="text-[11px] text-[var(--text-primary)] font-bold uppercase tracking-wider font-mono">
+                  Global Events
                 </span>
                 <span id="gdelt-timestamp" class="text-[9px] font-mono text-[var(--text-tertiary)]">Last 72 Hours</span>
               </div>
               <div id="gdelt-events-content" class="divide-y divide-[var(--border-subtle)] space-y-1">
-                <div class="text-[var(--text-tertiary)] text-xs py-2 font-mono animate-pulse">Loading events...</div>
+                <div class="text-[var(--text-tertiary)] text-xs py-2 font-mono">Loading events...</div>
               </div>
             </div>
 
@@ -544,8 +544,8 @@
             <!-- PRECIOUS METALS -->
             <div class="hw-bezel-card apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2 border-b border-[var(--border-subtle)] pb-2 cursor-pointer" onclick="toggleMarketCategory('metals')">
-                <span class="text-[11px] text-[var(--text-primary)] uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
-                  <i class="fas fa-coins text-xs text-[var(--accent-primary)]"></i>Precious Metals
+                <span class="text-[11px] text-[var(--text-primary)] uppercase font-bold tracking-wider font-mono">
+                  Precious Metals
                 </span>
                 <i class="fas fa-chevron-up text-[var(--text-tertiary)] text-xs" id="metals-chevron"></i>
               </div>
@@ -555,8 +555,8 @@
             <!-- STOCK INDICES -->
             <div class="hw-bezel-card apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2 border-b border-[var(--border-subtle)] pb-2 cursor-pointer" onclick="toggleMarketCategory('indices')">
-                <span class="text-[11px] text-[var(--text-primary)] uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
-                  <i class="fas fa-chart-line text-xs text-[var(--accent-primary)]"></i><span id="indices-country">GLOBAL</span> Stock Indices
+                <span class="text-[11px] text-[var(--text-primary)] uppercase font-bold tracking-wider font-mono">
+                  <span id="indices-country">GLOBAL</span> Stock Indices
                 </span>
                 <i class="fas fa-chevron-up text-[var(--text-tertiary)] text-xs" id="indices-chevron"></i>
               </div>
@@ -566,8 +566,8 @@
             <!-- FOREX MATRIX -->
             <div class="hw-bezel-card apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2 border-b border-[var(--border-subtle)] pb-2 cursor-pointer" onclick="toggleMarketCategory('forex')">
-                <span class="text-[11px] text-[var(--text-primary)] uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
-                  <i class="fas fa-exchange-alt text-xs text-[var(--accent-primary)]"></i>Foreign Exchange (FX)
+                <span class="text-[11px] text-[var(--text-primary)] uppercase font-bold tracking-wider font-mono">
+                  Foreign Exchange (FX)
                 </span>
                 <i class="fas fa-chevron-up text-[var(--text-tertiary)] text-xs" id="forex-chevron"></i>
               </div>
@@ -577,8 +577,8 @@
             <!-- COMMODITIES PIPELINE -->
             <div class="hw-bezel-card apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2 border-b border-[var(--border-subtle)] pb-2 cursor-pointer" onclick="toggleMarketCategory('commodities')">
-                <span class="text-[11px] text-[var(--text-primary)] uppercase font-bold tracking-wider font-mono flex items-center gap-1.5">
-                  <i class="fas fa-oil-can text-xs text-[var(--accent-primary)]"></i>Energy & Commodities
+                <span class="text-[11px] text-[var(--text-primary)] uppercase font-bold tracking-wider font-mono">
+                  Energy &amp; Commodities
                 </span>
                 <i class="fas fa-chevron-up text-[var(--text-tertiary)] text-xs" id="commodities-chevron"></i>
               </div>
@@ -596,7 +596,7 @@
             <div class="hw-bezel-card apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2 pb-2 border-b border-[var(--border-subtle)]">
                 <span class="text-[11px] text-[var(--text-primary)] uppercase font-bold tracking-wider font-mono">
-                  <i class="fas fa-cloud-sun mr-1.5 text-[var(--accent-primary)]"></i>Weather Forecast
+                  Weather Forecast
                 </span>
                 <span id="atmo-location-label" class="text-[10px] font-mono text-[var(--text-secondary)] hidden"></span>
               </div>
@@ -741,9 +741,9 @@
             <div class="hw-bezel-card apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2.5 pb-2 border-b border-[var(--border-subtle)]">
                 <span class="text-[11px] text-[var(--text-primary)] uppercase font-bold tracking-wider font-mono">
-                  <i class="fas fa-landmark mr-1.5 text-[var(--accent-primary)]"></i>World Bank Indicators
+                  Economic Indicators
                 </span>
-                <span class="text-[9px] font-mono text-[var(--text-tertiary)]">Verified Series</span>
+                <span class="text-[9px] font-mono text-[var(--text-tertiary)]">World Bank Series</span>
               </div>
               <div class="flex items-center gap-2">
                 <input type="text" id="economic-city-search" placeholder="Search any country..."
@@ -807,9 +807,9 @@
             <div class="hw-bezel-card apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="flex justify-between items-center mb-2.5 pb-2 border-b border-[var(--border-subtle)]">
                 <span class="text-[11px] text-[var(--text-primary)] uppercase font-bold tracking-wider font-mono">
-                  <i class="fas fa-chart-line mr-1.5 text-[var(--accent-primary)]"></i>GDP &amp; Inflation History
+                  GDP &amp; Inflation History
                 </span>
-                <span class="text-[9px] font-mono text-[var(--text-tertiary)]">World Bank Open Data</span>
+                <span class="text-[9px] font-mono text-[var(--text-tertiary)]">Historical Trend</span>
               </div>
               <canvas id="gdp-trend-chart" height="150" class="w-full rounded-lg bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]"></canvas>
             </div>
@@ -817,7 +817,7 @@
             <!-- Major Exports & Drivers -->
             <div class="hw-bezel-card apple-glass p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
               <div class="text-[11px] text-[var(--text-secondary)] uppercase font-bold tracking-wider font-mono mb-2 pb-1.5 border-b border-[var(--border-subtle)]">
-                <i class="fas fa-box-open mr-1.5 text-[var(--accent-primary)]"></i>Main Exports &amp; Trade
+                Major Exports &amp; Trade
               </div>
               <div id="eco-exports" class="flex flex-wrap gap-1.5 pt-1">
                 <div class="text-[var(--text-tertiary)] text-xs font-mono">Select a country to load export data.</div>

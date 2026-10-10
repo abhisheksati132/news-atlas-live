@@ -13,10 +13,10 @@
   --bg-elevated: #0e172a;
 
   /* Structure & Hairline Borders */
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-subtle-hover: rgba(255, 255, 255, 0.16);
-  --border-subtle-active: rgba(255, 255, 255, 0.24);
-  --border-bright: rgba(255, 255, 255, 0.3);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-subtle-hover: rgba(255, 255, 255, 0.12);
+  --border-subtle-active: rgba(255, 255, 255, 0.18);
+  --border-bright: rgba(255, 255, 255, 0.25);
   --border-accent: rgba(245, 158, 11, 0.4);
 
   /* High-Contrast Typographic Hierarchy */
@@ -418,43 +418,45 @@ body.layout-tactical .intel-sidebar {
 .nav-tab-strip {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   width: 100%;
-  background: var(--bg-surface-subtle);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius);
-  padding: 3px;
+  background: rgba(13, 21, 39, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 2px;
 }
 
 .nav-tab {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 5px;
   flex: 1;
   height: 28px;
   padding: 0 6px;
   border: 1px solid transparent;
-  border-radius: calc(var(--radius) - 2px);
+  border-radius: 8px;
   background: transparent;
   color: var(--text-tertiary);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   transition: all var(--transition-fast);
   cursor: pointer;
   white-space: nowrap;
 }
-.nav-tab i { font-size: 11px; opacity: 0.8; }
+.nav-tab i { font-size: 10px; opacity: 0.75; }
 .nav-tab:hover {
-  color: var(--text-primary);
-  background: var(--bg-surface-hover);
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
 }
 .nav-tab.active {
-  color: var(--text-primary);
-  background: var(--bg-surface);
-  border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  font-weight: 600;
 }
+.nav-tab.active i { opacity: 1; color: var(--cyan); }
 
 /* --------------------------------------------------------------------------
    Map Controls Toolbar (Floating Rail)
@@ -468,15 +470,20 @@ body.layout-tactical .intel-sidebar {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 5px 4px;
-  background: rgba(8, 13, 24, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 4px 3px;
+  background: rgba(5, 11, 20, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 12px;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   max-height: calc(100vh - var(--header-h) - 28px);
   overflow-y: auto;
+  opacity: 0.82;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.map-toolbar-bar:hover {
+  opacity: 1;
 }
 .map-toolbar-bar::-webkit-scrollbar {
   display: none;
@@ -489,22 +496,22 @@ body.layout-tactical .intel-sidebar {
   gap: 2px;
 }
 .mtb-sep {
-  width: 14px;
+  width: 12px;
   height: 1px;
-  background: rgba(255, 255, 255, 0.08);
-  margin: 3px 0;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 2px 0;
 }
 
 .mtb-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border: 1px solid transparent;
   border-radius: 7px;
   background: transparent;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.6);
   font-size: 11px;
   transition: all var(--transition-fast);
 }
@@ -514,9 +521,10 @@ body.layout-tactical .intel-sidebar {
   border-color: rgba(255, 255, 255, 0.12);
 }
 .mtb-btn.active {
-  color: var(--accent-primary);
-  background: rgba(245, 158, 11, 0.15);
-  border-color: rgba(245, 158, 11, 0.35);
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.3);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.12);
 }
 
 /* Toolbar Popover Menus */
@@ -562,16 +570,16 @@ body.layout-tactical .intel-sidebar {
 .glass-panel,
 .dossier-card {
   background: #080d19;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.055);
   border-radius: 12px;
   padding: 14px;
-  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 .bento-card:hover,
 .hw-bezel-card:hover,
 .apple-glass:hover {
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .hw-kicker {
@@ -579,14 +587,14 @@ body.layout-tactical .intel-sidebar {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 10px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   font-family: var(--font-mono);
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   color: var(--text-tertiary);
 }
 .hw-kicker-tag {

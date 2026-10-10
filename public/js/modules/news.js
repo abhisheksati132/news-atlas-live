@@ -354,11 +354,11 @@ window.openArticleReader = (index) => {
   const backdrop = document.getElementById("news-reader-backdrop");
   if (drawer) {
     drawer.classList.remove("hidden");
-    requestAnimationFrame(() => drawer.classList.add("open"));
+    drawer.classList.add("open");
   }
   if (backdrop) {
     backdrop.classList.remove("hidden");
-    requestAnimationFrame(() => backdrop.classList.add("open"));
+    backdrop.classList.add("open");
   }
   if (window.audioHaptics) window.audioHaptics.play("open");
 };

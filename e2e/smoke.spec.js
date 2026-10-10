@@ -169,12 +169,12 @@ test.describe("NewsAtlas smoke", () => {
     await page.locator("#tab-btn-news").click();
     await expect(page.locator("#tab-news")).toHaveClass(/active/);
 
-    // Wait for at least one news card to appear
-    const firstCard = page.locator("#articles-container > div").first();
-    await expect(firstCard).toBeVisible({ timeout: 15000 });
+    // Wait for real news article card (not skeleton loader) to appear
+    const realCard = page.locator("#articles-container [data-news-index]").first();
+    await expect(realCard).toBeVisible({ timeout: 20000 });
 
-    // Click first card to open in-terminal reader drawer
-    await firstCard.click();
+    // Click real news card to open in-terminal reader drawer
+    await realCard.click();
     const readerDrawer = page.locator("#news-reader-drawer");
     await expect(readerDrawer).toHaveClass(/open/);
     await expect(page.locator("#reader-title")).not.toBeEmpty();

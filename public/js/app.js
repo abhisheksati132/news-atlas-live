@@ -713,6 +713,7 @@ function setupEventListeners() {
       const ao = safeEl("about-overlay");
       if (so && !so.classList.contains("hidden")) so.classList.add("hidden");
       if (ao && !ao.classList.contains("hidden")) ao.classList.add("hidden");
+      if (window.closeArticleReader) window.closeArticleReader();
       if (document.body.classList.contains("layout-zen")) {
         window.switchViewPreset("cockpit");
       }

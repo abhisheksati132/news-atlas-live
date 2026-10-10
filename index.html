@@ -840,6 +840,87 @@
 
   
 
+  <!-- In-Terminal News Reader Drawer -->
+  <div id="news-reader-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-[2250] hidden opacity-0 transition-opacity duration-300" onclick="window.closeArticleReader()"></div>
+  <aside id="news-reader-drawer" class="fixed top-0 right-0 bottom-0 w-full sm:w-[460px] max-w-full z-[2300] bg-[var(--bg-surface)] border-l border-[var(--border-subtle)] shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300 ease-out hidden" aria-label="News Story Reader">
+    <!-- Drawer Header -->
+    <div class="px-5 py-4 border-b border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <span id="reader-source-icon" class="w-6 h-6 rounded-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center shrink-0 overflow-hidden">
+          <i class="fas fa-newspaper text-[10px] text-[var(--text-tertiary)]"></i>
+        </span>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <span id="reader-source-name" class="text-[11px] font-bold text-[var(--text-primary)] font-mono uppercase tracking-wider truncate">NEWS WIRE</span>
+            <span id="reader-sentiment-badge" class="text-[9px] font-bold px-2 py-0.5 rounded font-mono uppercase bg-[var(--bg-surface)] text-[var(--accent-primary)] border border-[var(--border-subtle)]">NEUTRAL</span>
+          </div>
+          <span id="reader-pub-time" class="text-[10px] text-[var(--text-tertiary)] font-mono">Just now</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="text-[10px] text-[var(--text-tertiary)] font-mono hidden sm:inline-block">ESC</span>
+        <button type="button" onclick="window.closeArticleReader()" class="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5 rounded-lg transition-colors" aria-label="Close story reader">
+          <i class="fas fa-times text-sm"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Drawer Scrollable Content -->
+    <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-5">
+      <!-- Article Image -->
+      <div id="reader-image-wrap" class="w-full rounded-xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] hidden">
+        <img id="reader-image" src="" alt="" class="w-full h-52 object-cover" />
+      </div>
+
+      <!-- Headline -->
+      <h2 id="reader-title" class="text-lg md:text-xl font-bold text-[var(--text-primary)] font-sans leading-snug tracking-tight"></h2>
+
+      <!-- Metadata Strip -->
+      <div class="flex flex-wrap items-center gap-2 pt-1 pb-2 border-b border-[var(--border-subtle)] text-[11px] font-mono text-[var(--text-tertiary)]">
+        <span class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]">
+          <i class="fas fa-globe text-[10px] text-cyan-400"></i>
+          <span id="reader-domain">news.source</span>
+        </span>
+        <span class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]">
+          <i class="fas fa-tag text-[10px] text-amber-400"></i>
+          <span id="reader-category">World</span>
+        </span>
+        <span class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-surface-subtle)] border border-[var(--border-subtle)]">
+          <i class="fas fa-clock text-[10px] text-emerald-400"></i>
+          <span id="reader-timestamp">Live Wire</span>
+        </span>
+      </div>
+
+      <!-- Summary / Content -->
+      <div class="space-y-2">
+        <h3 class="text-[11px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] font-mono">Story Brief</h3>
+        <p id="reader-description" class="text-sm text-[var(--text-secondary)] leading-relaxed font-sans"></p>
+      </div>
+
+      <!-- Quick Navigation (Prev / Next) -->
+      <div class="pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs font-mono">
+        <button type="button" onclick="window.navigateNews(-1)" class="px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] hover:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5">
+          <i class="fas fa-arrow-left text-[10px]"></i> <span>Previous (K)</span>
+        </button>
+        <button type="button" onclick="window.navigateNews(1)" class="px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] hover:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5">
+          <span>Next (J)</span> <i class="fas fa-arrow-right text-[10px]"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Drawer Footer Actions -->
+    <div class="px-6 py-4 border-t border-[var(--border-subtle)] bg-[var(--bg-surface-subtle)] flex items-center gap-3 shrink-0">
+      <a id="reader-source-link" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 px-4 rounded-xl bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/90 text-slate-950 font-bold text-xs font-mono text-center flex items-center justify-center gap-2 transition-all shadow-sm">
+        <span>Read Original Source</span>
+        <i class="fas fa-arrow-up-right-from-square text-[10px]"></i>
+      </a>
+      <button type="button" id="reader-copy-btn" onclick="window.copyCurrentReaderLink(this)" class="py-2.5 px-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:bg-white/5 text-[var(--text-primary)] font-medium text-xs font-mono flex items-center gap-2 transition-all">
+        <i class="far fa-copy text-xs"></i>
+        <span>Copy</span>
+      </button>
+    </div>
+  </aside>
+
   <!-- Centered AI Assistant Modal -->
   <div id="ai-chat-modal" class="fixed inset-0 z-[3000] hidden items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onclick="if(event.target === this) window.closeCLI();" style="display: none;">
     <div class="w-full max-w-xl rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-2xl overflow-hidden flex flex-col" onclick="event.stopPropagation()">

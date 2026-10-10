@@ -845,3 +845,22 @@ body.layout-zen #zen-exit-pill,
     color: #000000 !important;
   }
 }
+
+/* ── IN-TERMINAL NEWS READER DRAWER ── */
+#news-reader-drawer.open {
+  transform: translateX(0) !important;
+}
+#news-reader-backdrop.open {
+  display: block !important;
+  opacity: 1 !important;
+}
+.news-card-active {
+  border-color: var(--accent-primary) !important;
+  background-color: var(--bg-surface-elevated) !important;
+  box-shadow: 0 0 0 1px var(--accent-subtle), 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Smooth Map Tooltip Transitions */
+#map-tooltip {
+  transition: opacity 0.12s cubic-bezier(0.16, 1, 0.3, 1), transform 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+}

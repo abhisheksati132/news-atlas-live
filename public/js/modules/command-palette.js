@@ -70,6 +70,46 @@ export class CommandPaletteEngine {
             e.preventDefault();
             if (window.downloadDossier) window.downloadDossier();
             break;
+          case 'j': {
+            const drawer = document.getElementById('news-reader-drawer');
+            const isDrawerOpen = drawer && drawer.classList.contains('open');
+            const isNewsTab = (window._currentTab === 'tab-news') || (document.getElementById('tab-btn-news')?.classList.contains('active'));
+            if (isDrawerOpen || isNewsTab) {
+              e.preventDefault();
+              if (window.navigateNews) window.navigateNews(1);
+            }
+            break;
+          }
+          case 'k': {
+            const drawer = document.getElementById('news-reader-drawer');
+            const isDrawerOpen = drawer && drawer.classList.contains('open');
+            const isNewsTab = (window._currentTab === 'tab-news') || (document.getElementById('tab-btn-news')?.classList.contains('active'));
+            if (isDrawerOpen || isNewsTab) {
+              e.preventDefault();
+              if (window.navigateNews) window.navigateNews(-1);
+            }
+            break;
+          }
+          case 'enter': {
+            const isNewsTab = (window._currentTab === 'tab-news') || (document.getElementById('tab-btn-news')?.classList.contains('active'));
+            if (isNewsTab && window.openSelectedArticle) {
+              const drawer = document.getElementById('news-reader-drawer');
+              const isDrawerOpen = drawer && drawer.classList.contains('open');
+              if (!isDrawerOpen) {
+                e.preventDefault();
+                window.openSelectedArticle();
+              }
+            }
+            break;
+          }
+          case 'escape': {
+            const drawer = document.getElementById('news-reader-drawer');
+            if (drawer && drawer.classList.contains('open')) {
+              e.preventDefault();
+              if (window.closeArticleReader) window.closeArticleReader();
+            }
+            break;
+          }
           case '1':
             e.preventDefault();
             if (window.switchTab) window.switchTab('intel');
@@ -344,6 +384,8 @@ export class CommandPaletteEngine {
               <div class="flex justify-between items-center"><span class="text-[var(--text-secondary)]">Command Palette</span><kbd class="px-2 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)]">Cmd/Ctrl+K or /</kbd></div>
               <div class="flex justify-between items-center"><span class="text-[var(--text-secondary)]">Cycle View Presets</span><kbd class="px-2 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)]">V</kbd></div>
               <div class="flex justify-between items-center"><span class="text-[var(--text-secondary)]">Telemetry Tabs</span><kbd class="px-2 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)]">1 – 5</kbd></div>
+              <div class="flex justify-between items-center"><span class="text-[var(--text-secondary)]">Navigate Stories</span><kbd class="px-2 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)]">J / K</kbd></div>
+              <div class="flex justify-between items-center"><span class="text-[var(--text-secondary)]">Open Story Reader</span><kbd class="px-2 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)]">Enter</kbd></div>
               <div class="flex justify-between items-center"><span class="text-[var(--text-secondary)]">Escape / Exit Zen</span><kbd class="px-2 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)]">ESC</kbd></div>
             </div>
 

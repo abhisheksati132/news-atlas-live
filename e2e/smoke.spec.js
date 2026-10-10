@@ -85,7 +85,7 @@ test.describe("NewsAtlas smoke", () => {
 
   test("country SEO page renders", async ({ page }) => {
     await page.goto("/country/india/index.html");
-    await expect(page.locator("h1")).toContainText("India");
+    await expect(page.locator("main h1")).toContainText("India");
     await expect(page.locator(".facts")).toBeVisible();
   });
 
@@ -159,5 +159,28 @@ test.describe("NewsAtlas smoke", () => {
     await expect(page.locator("#tab-atmosphere")).toHaveClass(/active/);
     const weatherCard = page.locator("#tab-atmosphere .hw-bezel-card").first();
     await expect(weatherCard).toBeVisible({ timeout: 15000 });
+  });
+
+  test("in-terminal news reader drawer opens on article click and closes on escape", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForTimeout(1000);
+
+    // Switch to news tab
+    await page.locator("#tab-btn-news").click();
+    await expect(page.locator("#tab-news")).toHaveClass(/active/);
+
+    // Wait for at least one news card to appear
+    const firstCard = page.locator("#articles-container > div").first();
+    await expect(firstCard).toBeVisible({ timeout: 15000 });
+
+    // Click first card to open in-terminal reader drawer
+    await firstCard.click();
+    const readerDrawer = page.locator("#news-reader-drawer");
+    await expect(readerDrawer).toHaveClass(/open/);
+    await expect(page.locator("#reader-title")).not.toBeEmpty();
+
+    // Escape closes drawer
+    await page.keyboard.press("Escape");
+    await expect(readerDrawer).not.toHaveClass(/open/);
   });
 });

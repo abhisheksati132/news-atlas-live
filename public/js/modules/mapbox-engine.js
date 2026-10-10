@@ -637,48 +637,39 @@ class MapboxEngine {
         }
     }
 
-    flyToCountry(lngLat, zoom = 4.5) {
+    flyToCountry(lngLat, zoom = 4.2) {
         if (!this.map) return;
-        const currentZoom = this.map.getZoom();
-        const isGlobeView = currentZoom < 3;
-
-        if (isGlobeView) {
-            this.map.easeTo({ zoom: 1.8, pitch: 0, bearing: 0, duration: 600 });
-            setTimeout(() => {
-                this.map.flyTo({
-                    center: lngLat,
-                    zoom,
-                    pitch: 55,
-                    bearing: (Math.random() * 20) - 10,
-                    essential: true,
-                    duration: 3500,
-                    curve: 1.1,
-                    speed: 0.8
-                });
-            }, 700);
-        } else {
-            this.map.flyTo({
-                center: lngLat,
-                zoom,
-                pitch: 42,
-                bearing: -10,
-                essential: true,
-                duration: 2200,
-                curve: 1.42
-            });
+        const isLowFx = document.body.classList.contains('low-fx');
+        if (isLowFx) {
+            this.map.jumpTo({ center: lngLat, zoom });
+            return;
         }
+
+        // Direct, fluid camera glide with cubic easing and executive 35° perspective
+        this.map.flyTo({
+            center: lngLat,
+            zoom: Math.max(zoom, 3.6),
+            pitch: 35,
+            bearing: 0,
+            essential: true,
+            duration: 2200,
+            curve: 1.35,
+            speed: 0.9,
+            easing: (t) => 1 - Math.pow(1 - t, 3)
+        });
     }
 
     resetToGlobe() {
         if (!this.map) return;
         this.map.flyTo({
             center: [10, 15],
-            zoom: 1.5,
+            zoom: 1.6,
             pitch: 0,
             bearing: 0,
             essential: true,
             duration: 1800,
-            curve: 1.2
+            curve: 1.25,
+            easing: (t) => 1 - Math.pow(1 - t, 3)
         });
     }
 

@@ -1,4 +1,6 @@
 let allNews = [];
+let currentDisplayedArticles = [];
+let selectedNewsIndex = 0;
 let displayedNewsCount = 21;
 let currentNewsFilters = { search: "", time: "All Time", sort: "Most Recent" };
 let newsSearchQuery = "";
@@ -174,7 +176,8 @@ function displayFilteredNews() {
   let countToDisplay = Math.min(displayedNewsCount, filtered.length);
   const remainder = countToDisplay % 3;
   if (remainder !== 0 && countToDisplay > remainder) countToDisplay -= remainder;
-  displayNewsArticles(filtered.slice(0, countToDisplay));
+  currentDisplayedArticles = filtered.slice(0, countToDisplay);
+  displayNewsArticles(currentDisplayedArticles);
 }
 function displayNewsArticles(articles) {
   const container = document.getElementById("articles-container");
@@ -199,15 +202,21 @@ function displayNewsArticles(articles) {
       : `<i class="fas fa-newspaper text-[8px] text-slate-500"></i>`;
     
     const imgHtml = art.image_url
-      ? `<div class="w-full mt-3 rounded-xl border border-white/[0.05] overflow-hidden bg-slate-900/50" 
-              style="height: 180px;">
+      ? `<div class="w-full mt-3 rounded-xl border border-white/[0.05] overflow-hidden bg-slate-900/50 cursor-pointer" 
+              style="height: 180px;" onclick="window.openArticleReader(${i})">
               <img src="${art.image_url}" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'">
          </div>`
       : "";
 
     const row = document.createElement("div");
-    row.className = `apple-glass p-3.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--border-subtle-hover)] transition-all news-card-animate whitespace-normal`;
+    const isSelected = i === selectedNewsIndex;
+    row.dataset.newsIndex = i;
+    row.className = `apple-glass p-3.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--border-subtle-hover)] transition-all news-card-animate whitespace-normal cursor-pointer ${isSelected ? "news-card-active" : ""}`;
     row.style.animationDelay = `${i * 20}ms`;
+    row.onclick = (e) => {
+      if (e.target.closest("a") || e.target.closest("button")) return;
+      window.openArticleReader(i);
+    };
     row.innerHTML = `
       <div class="flex flex-col gap-2">
         <div class="flex items-center gap-2">
@@ -218,13 +227,13 @@ function displayNewsArticles(articles) {
           <span class="text-[8px] font-bold px-2 py-0.5 rounded ${sentiment.cls} uppercase ml-auto font-mono">${sentiment.label}</span>
         </div>
         ${imgHtml}
-        <h3 class="text-sm font-bold text-slate-100 leading-snug hover:text-amber-400 transition-colors pt-0.5 cursor-pointer" onclick="window.open('${escapeHtml(art.link)}', '_blank')">${escapeHtml(art.title)}</h3>
+        <h3 class="text-sm font-bold text-slate-100 leading-snug hover:text-cyan-400 transition-colors pt-0.5 cursor-pointer" onclick="window.openArticleReader(${i})">${escapeHtml(art.title)}</h3>
         ${art.description ? `<p class="text-xs text-slate-400 leading-relaxed font-normal line-clamp-3">${escapeHtml(art.description)}</p>` : ''}
         <div class="flex items-center justify-between pt-2 mt-1 border-t border-white/5 text-[11px] font-mono">
-          <a href="${escapeHtml(art.link)}" target="_blank" rel="noopener noreferrer" class="text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1 font-semibold">
+          <a href="${escapeHtml(art.link)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1 font-semibold">
             Read Source <i class="fas fa-arrow-up-right-from-square text-[9px]"></i>
           </a>
-          <button type="button" onclick="window.copyArticleLink('${escapeHtml(art.link)}', this)" class="text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1">
+          <button type="button" onclick="event.stopPropagation(); window.copyArticleLink('${escapeHtml(art.link)}', this)" class="text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1">
             <i class="far fa-copy text-[10px]"></i> <span>Copy</span>
           </button>
         </div>
@@ -263,6 +272,142 @@ window.checkNewsScroll = () => {
 };
 window.fetchNews = fetchNews;
 window.displayFilteredNews = displayFilteredNews;
+
+window.openArticleReader = (index) => {
+  if (!currentDisplayedArticles || currentDisplayedArticles.length === 0) return;
+  const idx = Math.max(0, Math.min(index, currentDisplayedArticles.length - 1));
+  selectedNewsIndex = idx;
+
+  document.querySelectorAll("#articles-container > div").forEach((c, i) => {
+    c.classList.toggle("news-card-active", i === idx);
+  });
+
+  const art = currentDisplayedArticles[idx];
+  if (!art) return;
+
+  const sentiment = getNewsSentiment(art.title, art.description);
+  const timeAgo = relativeTime(art.pubDate);
+  const favicon = getFavicon(art.source_url || art.link);
+
+  const titleEl = document.getElementById("reader-title");
+  if (titleEl) titleEl.innerText = art.title || "Untitled Dispatch";
+
+  const descEl = document.getElementById("reader-description");
+  if (descEl) descEl.innerText = art.description || "No full summary wire provided. You can inspect the full article at the verified original source link below.";
+
+  const sourceNameEl = document.getElementById("reader-source-name");
+  if (sourceNameEl) sourceNameEl.innerText = (art.source_id || "NEWS WIRE").toUpperCase();
+
+  const pubTimeEl = document.getElementById("reader-pub-time");
+  if (pubTimeEl) pubTimeEl.innerText = timeAgo ? `${timeAgo}` : "Recent";
+
+  const badgeEl = document.getElementById("reader-sentiment-badge");
+  if (badgeEl) {
+    badgeEl.className = `text-[9px] font-bold px-2 py-0.5 rounded font-mono uppercase ${sentiment.cls}`;
+    badgeEl.innerText = sentiment.label;
+  }
+
+  const linkEl = document.getElementById("reader-source-link");
+  if (linkEl) linkEl.href = art.link || "#";
+
+  let domain = "news.wire";
+  try {
+    domain = new URL(art.link).hostname.replace(/^www\./, "");
+  } catch (_) {}
+  const domainEl = document.getElementById("reader-domain");
+  if (domainEl) domainEl.innerText = domain;
+
+  const catEl = document.getElementById("reader-category");
+  if (catEl) catEl.innerText = (window.currentCategory || "Global").toUpperCase();
+
+  const tsEl = document.getElementById("reader-timestamp");
+  if (tsEl) {
+    let cleanTs = "Live Wire";
+    if (art.pubDate) {
+      try { cleanTs = new Date(art.pubDate).toLocaleString(); } catch (_) {}
+    }
+    tsEl.innerText = cleanTs;
+  }
+
+  const iconWrap = document.getElementById("reader-source-icon");
+  if (iconWrap) {
+    if (favicon) {
+      iconWrap.innerHTML = `<img src="${favicon}" alt="" class="w-full h-full object-cover grayscale opacity-90">`;
+    } else {
+      iconWrap.innerHTML = `<i class="fas fa-newspaper text-[10px] text-[var(--text-tertiary)]"></i>`;
+    }
+  }
+
+  const imgWrap = document.getElementById("reader-image-wrap");
+  const imgEl = document.getElementById("reader-image");
+  if (imgWrap && imgEl) {
+    if (art.image_url) {
+      imgEl.src = art.image_url;
+      imgWrap.classList.remove("hidden");
+    } else {
+      imgWrap.classList.add("hidden");
+      imgEl.src = "";
+    }
+  }
+
+  const drawer = document.getElementById("news-reader-drawer");
+  const backdrop = document.getElementById("news-reader-backdrop");
+  if (drawer) {
+    drawer.classList.remove("hidden");
+    requestAnimationFrame(() => drawer.classList.add("open"));
+  }
+  if (backdrop) {
+    backdrop.classList.remove("hidden");
+    requestAnimationFrame(() => backdrop.classList.add("open"));
+  }
+  if (window.audioHaptics) window.audioHaptics.play("open");
+};
+
+window.closeArticleReader = () => {
+  const drawer = document.getElementById("news-reader-drawer");
+  const backdrop = document.getElementById("news-reader-backdrop");
+  if (drawer) drawer.classList.remove("open");
+  if (backdrop) backdrop.classList.remove("open");
+  setTimeout(() => {
+    if (drawer && !drawer.classList.contains("open")) drawer.classList.add("hidden");
+    if (backdrop && !backdrop.classList.contains("open")) backdrop.classList.add("hidden");
+  }, 300);
+  if (window.audioHaptics) window.audioHaptics.play("close");
+};
+
+window.navigateNews = (delta) => {
+  if (!currentDisplayedArticles || currentDisplayedArticles.length === 0) return;
+  const nextIdx = Math.max(0, Math.min(selectedNewsIndex + delta, currentDisplayedArticles.length - 1));
+  selectedNewsIndex = nextIdx;
+
+  document.querySelectorAll("#articles-container > div").forEach((c, idx) => {
+    c.classList.toggle("news-card-active", idx === selectedNewsIndex);
+  });
+
+  const activeCard = document.querySelector(`[data-news-index="${selectedNewsIndex}"]`);
+  if (activeCard) {
+    activeCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  const drawer = document.getElementById("news-reader-drawer");
+  if (drawer && drawer.classList.contains("open")) {
+    window.openArticleReader(selectedNewsIndex);
+  }
+  if (window.audioHaptics) window.audioHaptics.play("tick");
+};
+
+window.openSelectedArticle = () => {
+  if (currentDisplayedArticles && currentDisplayedArticles.length > 0) {
+    window.openArticleReader(selectedNewsIndex);
+  }
+};
+
+window.copyCurrentReaderLink = (btn) => {
+  const art = currentDisplayedArticles[selectedNewsIndex];
+  if (art && art.link) {
+    window.copyArticleLink(art.link, btn);
+  }
+};
 async function fetchGDELTEvents(country) {
   const container = document.getElementById("gdelt-events-content");
   if (!container) return;

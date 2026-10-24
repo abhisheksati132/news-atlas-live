@@ -36,3 +36,9 @@ body[data-theme="dark"] {
   background: rgba(255, 255, 255, 0.12);
   border-radius: 4px;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

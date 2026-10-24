@@ -60,11 +60,25 @@ function showNewsSkeletons(container) {
     </div>`).join("");
   container.innerHTML = skels;
 }
+function setNewsStatus(message, tone = "info", action = false) {
+  const el = document.getElementById("news-data-status");
+  if (!el) return;
+  el.className = `data-status ${tone}`;
+  el.innerHTML = `
+    <div>
+      <strong>${tone === "error" ? "News feed unavailable" : tone === "loading" ? "Loading news" : "News feed ready"}</strong>
+      <span>${message}</span>
+    </div>
+    ${action ? '<button type="button" data-news-retry>Retry</button>' : ""}
+  `;
+  el.querySelector("[data-news-retry]")?.addEventListener("click", () => fetchNews());
+}
 async function fetchNews(overrideQ) {
   const loading = document.getElementById("news-loading");
   const container = document.getElementById("articles-container");
   if (loading) loading.classList.remove("hidden");
   if (container) showNewsSkeletons(container);
+  setNewsStatus("Checking the selected country and current sources.", "loading");
   displayedNewsCount = 21;
   isLiveSearching = false;
   const previousNews = allNews.length > 0 ? [...allNews] : null;
@@ -105,6 +119,13 @@ async function fetchNews(overrideQ) {
 
     if (window.updateHeadlineTicker) window.updateHeadlineTicker(allNews);
     displayFilteredNews();
+    setNewsStatus(
+      allNews.length
+        ? `${allNews.length} stories loaded from current sources.`
+        : "No current stories matched this country or filter.",
+      allNews.length ? "success" : "error",
+      !allNews.length,
+    );
   } catch (e) {
     if (container) {
       container.innerHTML = `
@@ -116,6 +137,7 @@ async function fetchNews(overrideQ) {
         </div>`;
     }
     if (previousNews && previousNews.length > 0) allNews = previousNews;
+    setNewsStatus("Check your connection and try again.", "error", true);
     if (window.showToast) window.showToast("News feed unavailable. Check your connection.", "error");
   } finally {
     if (loading) loading.classList.add("hidden");
@@ -322,7 +344,7 @@ window.openArticleReader = (index) => {
 
   const tsEl = document.getElementById("reader-timestamp");
   if (tsEl) {
-    let cleanTs = "Live Wire";
+    let cleanTs = "Current source";
     if (art.pubDate) {
       try { cleanTs = new Date(art.pubDate).toLocaleString(); } catch (_) {}
     }

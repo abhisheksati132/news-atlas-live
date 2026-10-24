@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NewsAtlas — Real-time World News, Financial Markets & Atmospheric Intelligence</title>
-  <meta name="description" content="NewsAtlas is a sovereign global intelligence platform displaying live news dispatches, financial markets, World Bank macroeconomics, and Doppler weather on an interactive 3D globe." />
-  <meta property="og:title" content="NewsAtlas — Planetary Intelligence Dashboard" />
-  <meta property="og:description" content="Planetary situational awareness: live news, market telemetry, macroeconomics and weather across 240+ sovereign nations." />
+  <title>NewsAtlas | See what changed, anywhere on Earth</title>
+  <meta name="description" content="News, markets, weather, and context for any country in one focused view." />
+  <meta property="og:title" content="NewsAtlas | See what changed, anywhere on Earth" />
+  <meta property="og:description" content="News, markets, weather, and context for any country in one focused view." />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="canonical" href="https://news-atlas-live.vercel.app/" />
@@ -28,11 +28,11 @@
       {
         "@type": "WebApplication",
         "@id": "https://news-atlas-live.vercel.app/#application",
-        "name": "NewsAtlas Live",
+        "name": "NewsAtlas",
         "url": "https://news-atlas-live.vercel.app/",
         "applicationCategory": "NewsApplication, BusinessApplication",
         "operatingSystem": "All modern browsers",
-        "description": "Planetary situational awareness platform with live news, financial markets, macroeconomics, and 3D globe visualization.",
+        "description": "A focused view of world news, markets, economics, and weather by country.",
         "offers": {
           "@type": "Offer",
           "price": "0",
@@ -536,25 +536,21 @@
 
   <main>
     <section class="hero wrap">
-      <div class="hero-kicker">
-        <span class="pulse-dot"></span>
-        <span>LIVE TELEMETRY UPLINK · UPDATED CONTINUOUSLY</span>
-      </div>
       <h1>
-        Planetary intelligence.<br />
-        <span class="accent-text">Sovereign precision.</span> <span class="dim-text">One map.</span>
+        See what changed, <br />
+        <span class="accent-text">anywhere on Earth.</span>
       </h1>
       <p class="hero-lead">
-        NewsAtlas bridges real-time geopolitical news, central bank economic indicators, FX matrices, commodity quotes, and atmospheric forecasts into a synchronized 3D planetary terminal.
+        News, markets, weather, and context for the country you are watching.
       </p>
       <div class="hero-actions">
         <a href="/app" class="btn-primary">
-          <span>Launch Mission Control</span>
+          <span>Open the live view</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
         </a>
         <a href="#features" class="btn-secondary">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-          <span>Inspect Architecture</span>
+          <span>See how it works</span>
         </a>
       </div>
 
@@ -562,8 +558,8 @@
       <div class="hero-preview">
         <div class="preview-header">
           <div class="preview-dots"><span></span><span></span><span></span></div>
-          <span>NEWSATLAS // LIVE 3D ORBITAL TELEMETRY [WEBGL MISSION CONTROL]</span>
-          <span style="color:var(--success);display:inline-flex;align-items:center;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;" aria-hidden="true"></span>3D ONLINE</span>
+          <span>NEWSATLAS / WORLD VIEW</span>
+          <span style="color:var(--success);display:inline-flex;align-items:center;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;" aria-hidden="true"></span>Live data</span>
         </div>
         <div class="preview-grid">
           <div class="preview-globe-stage" id="preview-globe-stage">
@@ -576,10 +572,10 @@
                 <div style="pointer-events:auto;">
                   <div class="preview-chip" id="preview-sector-chip">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    <span>SECTOR PROFILE: NEW DELHI [IN]</span>
+                    <span>COUNTRY PROFILE: INDIA</span>
                   </div>
                   <div class="preview-country-title" id="preview-country-name">Republic of India</div>
-                  <div class="preview-country-sub" id="preview-country-meta">Capital: New Delhi · South Asia · GDP Rank #5</div>
+                  <div class="preview-country-sub" id="preview-country-meta">Capital: New Delhi · South Asia</div>
                 </div>
 
                 <!-- Tactical 3D Toggles Dock -->
@@ -626,7 +622,7 @@
                   </div>
                   <div>
                     <div class="preview-metric-val" id="preview-metric-temp">28°C</div>
-                    <div class="preview-metric-lbl">Atmosphere</div>
+                    <div class="preview-metric-lbl">Temperature</div>
                   </div>
                 </div>
               </div>
@@ -635,15 +631,15 @@
 
           <div class="preview-sidebar">
             <div class="preview-card">
-              <div class="preview-card-title" style="display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>Live Dispatch Wire</div>
+              <div class="preview-card-title" style="display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>Latest headline</div>
               <div class="preview-card-text" id="preview-dispatch-text">Reserve Bank leaves policy repo rate steady; capital infrastructure expenditure expands 11.1%.</div>
             </div>
             <div class="preview-card">
-              <div class="preview-card-title" style="display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04Z"/></svg>AI Strategic Synthesis</div>
+              <div class="preview-card-title" style="display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04Z"/></svg>Briefing</div>
               <div class="preview-card-text" id="preview-synthesis-text">Stable external balances and robust domestic private consumption support elevated macro growth corridor.</div>
             </div>
             <a href="/app" class="btn-primary" style="justify-content:center;height:42px;font-size:13px;margin-top:auto;text-decoration:none;">
-              <span>Enter 3D Terminal</span>
+              <span>Open live view</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
             </a>
           </div>
@@ -656,19 +652,19 @@
       <div class="stats-strip reveal">
         <div class="stat-item">
           <div class="stat-val">240+</div>
-          <div class="stat-lbl">Sovereign Nations &amp; Territories</div>
+          <div class="stat-lbl">Countries and territories</div>
         </div>
         <div class="stat-item">
           <div class="stat-val">6 Streams</div>
-          <div class="stat-lbl">Synchronized Telemetry Layers</div>
+          <div class="stat-lbl">Ways to read the world</div>
         </div>
         <div class="stat-item">
-          <div class="stat-val">&lt; 1.8s</div>
-          <div class="stat-lbl">Real-Time Synthesis Latency</div>
+          <div class="stat-val">4 views</div>
+          <div class="stat-lbl">News, markets, weather, economics</div>
         </div>
         <div class="stat-item">
-          <div class="stat-val">100%</div>
-          <div class="stat-lbl">Open Access · Zero Signups</div>
+          <div class="stat-val">Free</div>
+          <div class="stat-lbl">No account required</div>
         </div>
       </div>
     </div>
@@ -708,7 +704,7 @@
         <div class="bento-card">
           <div>
             <div class="bento-icon-pill" style="color:var(--cyan);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10a7.31 7.31 0 0 0 10 10Z"></path><path d="m9 15 3-3"></path><path d="M17 13a6 6 0 0 0-6-6"></path><path d="M21 13A10 10 0 0 0 11 3"></path></svg></div>
-            <h3>Live Wire &amp; GDELT Dispatches</h3>
+            <h3>Current news and GDELT coverage</h3>
             <p>
               Continuous event intelligence filtered by country, categorized across politics, markets, technology, and health with instant keyword filtering.
             </p>
@@ -881,6 +877,6 @@
       }, { passive: true });
     })();
   </script>
-  <script type="module" src="/src/landing-3d.js"></script>
+  <script type="module" src="/src/landing-3d-loader.js"></script>
 </body>
 </html>

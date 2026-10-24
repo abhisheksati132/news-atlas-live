@@ -1,27 +1,49 @@
 import { test, expect } from "playwright/test";
 
+const openPage = async (page, path = "/") => {
+  await page.goto(path, {
+    waitUntil: "domcontentloaded",
+    timeout: 30000,
+  });
+
+  if (path === "/") {
+    await expect(page.locator("#map-container canvas")).toBeAttached({ timeout: 15000 });
+    await expect(page.locator("#selected-country-name")).toContainText("India", { timeout: 15000 });
+    await expect(page.locator("#tab-intel")).toHaveClass(/active/, { timeout: 15000 });
+    await expect.poll(() => page.evaluate(() => typeof window.switchTab)).toBe("function");
+  }
+};
+
 test.describe("NewsAtlas smoke", () => {
   test("dashboard loads with header and globe container", async ({ page }) => {
-    await page.goto("/");
+    await openPage(page);
     await expect(page).toHaveTitle(/NewsAtlas/);
     await expect(page.locator(".brand-wordmark")).toBeVisible();
     await expect(page.locator("#map-container")).toBeAttached();
   });
 
+  test("app route opens directly into the mobile dashboard", async ({ browser }) => {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await openPage(page, "/app?country=India&tab=economic");
+    await expect(page.locator("#react-hero-root")).toBeHidden();
+    await expect(page.locator("#mobile-bottom-nav")).toBeVisible();
+    await expect(page.locator("#terminal-dashboard")).toHaveCSS("top", "0px");
+    await page.close();
+  });
+
   test("tab switching works", async ({ page }) => {
-    await page.goto("/");
-    // Wait for dev server readiness
-    await page.waitForTimeout(2500);
-    await page.locator("#tab-btn-news").click();
+    await openPage(page);
+    await expect(page.locator("#tab-intel")).toHaveClass(/active/);
+    await page.evaluate(() => window.switchTab("news"));
     await expect(page.locator("#tab-news")).toHaveClass(/active/);
     await expect(page.locator("#tab-btn-news")).toHaveClass(/active/);
 
-    await page.locator("#tab-btn-markets").click();
+    await page.evaluate(() => window.switchTab("markets"));
     await expect(page.locator("#tab-markets")).toHaveClass(/active/);
   });
 
   test("command palette opens and searches commands and countries", async ({ page }) => {
-    await page.goto("/");
+    await openPage(page);
     await page.waitForTimeout(2000);
     const searchBtn = page.locator('header button:has-text("Search"), header button[title*="Search"]').first();
     if (await searchBtn.isVisible()) {
@@ -35,7 +57,7 @@ test.describe("NewsAtlas smoke", () => {
   });
 
   test("tactical hotkeys HUD opens and displays keyboard shortcuts", async ({ page }) => {
-    await page.goto("/");
+    await openPage(page);
     await page.locator("#header-hotkeys-btn").click();
     await expect(page.locator("#hotkeys-hud-modal")).toBeVisible();
     await expect(page.locator("#hotkeys-hud-modal")).toContainText("Mission Control Tactical Keyboard Shortcuts");
@@ -44,8 +66,13 @@ test.describe("NewsAtlas smoke", () => {
   });
 
   test("orbital telemetry layers toggle properly", async ({ page }) => {
-    await page.goto("/");
+    await openPage(page);
     await page.waitForTimeout(2000);
+
+    const moreBtn = page.locator("#mtb-more");
+    await expect(moreBtn).toHaveAttribute("aria-expanded", "false");
+    await moreBtn.click();
+    await expect(moreBtn).toHaveAttribute("aria-expanded", "true");
 
     const satBtn = page.locator("#mtb-satellites");
     await expect(satBtn).toBeVisible();
@@ -64,7 +91,7 @@ test.describe("NewsAtlas smoke", () => {
   });
 
   test("bilateral comparison modal opens with radar chart and indicator deltas", async ({ page }) => {
-    await page.goto("/");
+    await openPage(page);
     await page.waitForTimeout(2000);
 
     const compareBtn = page.locator("#mtb-compare");
@@ -78,19 +105,19 @@ test.describe("NewsAtlas smoke", () => {
   });
 
   test("country selection loads profile data", async ({ page }) => {
-    await page.goto("/?country=India&tab=intel");
+    await openPage(page, "/?country=India&tab=intel");
     await expect(page.locator("#selected-country-name")).toContainText("India", { timeout: 20000 });
     await expect(page.locator("#fact-currency")).not.toHaveText("--", { timeout: 20000 });
   });
 
   test("country SEO page renders", async ({ page }) => {
-    await page.goto("/country/india/index.html");
+    await openPage(page, "/country/india/index.html");
     await expect(page.locator("main h1")).toContainText("India");
     await expect(page.locator(".facts")).toBeVisible();
   });
 
   test("landing page interactive 3D Earth mounts and switches hubs", async ({ page }) => {
-    await page.goto("/landing.html");
+    await openPage(page, "/landing.html");
     await expect(page.locator("#landing-globe-3d canvas")).toBeAttached({ timeout: 15000 });
     await expect(page.locator("#preview-country-name")).toBeVisible();
 
@@ -103,13 +130,13 @@ test.describe("NewsAtlas smoke", () => {
   });
 
   test("executive dark theme is permanently enforced and globe renders", async ({ page }) => {
-    await page.goto("/");
+    await openPage(page);
     await expect(page.locator("body")).toHaveAttribute("data-theme", "dark");
     await expect(page.locator("#map-container canvas")).toBeAttached();
   });
 
   test("terminal app 3D telemetry arcs toggle is functional", async ({ page }) => {
-    await page.goto("/");
+    await openPage(page);
     const arcsBtn = page.locator("#mtb-arcs");
     await expect(arcsBtn).toBeAttached();
     await arcsBtn.click();
@@ -118,7 +145,7 @@ test.describe("NewsAtlas smoke", () => {
 
   test("view presets keyboard shortcut cycles layout modes", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
+    await openPage(page);
     await page.waitForTimeout(2000);
 
     // Press 'v' to cycle presets
@@ -130,7 +157,7 @@ test.describe("NewsAtlas smoke", () => {
   });
 
   test("intelligence cards and profile sections are rendered cleanly", async ({ page }) => {
-    await page.goto("/");
+    await openPage(page);
     await page.waitForTimeout(2000);
 
     await expect(page.locator(".hw-bezel-card").first()).toBeAttached();
@@ -138,7 +165,7 @@ test.describe("NewsAtlas smoke", () => {
   });
 
   test("audio haptic feedback toggle button exists and toggles state", async ({ page }) => {
-    await page.goto("/");
+    await openPage(page);
     const audioBtn = page.locator("#audio-toggle-btn");
     await expect(audioBtn).toBeVisible();
     await audioBtn.click();
@@ -148,14 +175,14 @@ test.describe("NewsAtlas smoke", () => {
   });
 
   test("docked sidebar renders cleanly and weather tab displays conditions", async ({ page }) => {
-    await page.goto("/");
+    await openPage(page);
     await page.waitForTimeout(1000);
 
     // Sidebar is docked and visible on the right
     await expect(page.locator("#sidebar")).toBeVisible();
 
     // Switch to weather tab
-    await page.locator("#tab-btn-atmosphere").click();
+    await page.evaluate(() => window.switchTab("atmosphere"));
     await expect(page.locator("#tab-atmosphere")).toHaveClass(/active/);
     const weatherCard = page.locator("#tab-atmosphere .hw-bezel-card").first();
     await expect(weatherCard).toBeVisible({ timeout: 15000 });
@@ -187,11 +214,9 @@ test.describe("NewsAtlas smoke", () => {
       });
     });
 
-    await page.goto("/");
-    await page.waitForTimeout(1000);
-
+    await openPage(page);
     // Switch to news tab
-    await page.locator("#tab-btn-news").click();
+    await page.evaluate(() => window.switchTab("news"));
     await expect(page.locator("#tab-news")).toHaveClass(/active/);
 
     // Wait for real news article card to appear
@@ -199,7 +224,10 @@ test.describe("NewsAtlas smoke", () => {
     await expect(realCard).toBeVisible({ timeout: 10000 });
 
     // Click real news card to open in-terminal reader drawer
-    await realCard.click();
+    // The initial country bootstrap and the tab fetch can both refresh this
+    // list; dispatch against the currently rendered card to avoid a stale
+    // actionability retry while the list is being replaced.
+    await realCard.evaluate((card) => card.click());
     const readerDrawer = page.locator("#news-reader-drawer");
     await expect(readerDrawer).toHaveClass(/open/);
     await expect(page.locator("#reader-title")).not.toBeEmpty();

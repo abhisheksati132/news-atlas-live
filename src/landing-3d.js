@@ -1,17 +1,11 @@
 import * as THREE from 'three';
 
 /**
- * NewsAtlas Next-Gen Photorealistic Interactive 3D Earth Engine
- * Built with Three.js r186:
- * - Dynamic Day/Night Lighting & Specular Ocean Glint
- * - Custom Rayleigh Atmospheric Scattering Shader
- * - Geodesic Telemetry Arcs with Traveling Photon Packets
- * - Orbital Satellites with Solar Panels & Telemetry Beams
- * - Cosmic Particle Dust & Starfield Network
- * - Interactive Raycaster for Hub Hotspots with Smooth Inertia Interpolation
+ * Interactive globe preview for the landing page.
+ * The controls demonstrate the same map choices available in the live view.
  */
 
-// Global Capital Telemetry Profiles
+// Preview locations used by the landing-page globe.
 export const GLOBAL_HUBS = [
   {
     id: 'in',
@@ -192,11 +186,19 @@ export class Interactive3DEarth {
     this.camera.position.set(0, 0, 5.8);
 
     // 3. Renderer with high dynamic range tonemapping
-    this.renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-      powerPreference: 'high-performance'
-    });
+    try {
+      this.renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        powerPreference: 'high-performance'
+      });
+    } catch (error) {
+      // Keep the landing interaction usable in browsers without WebGL.
+      this.renderer = null;
+      this.container.innerHTML = '<canvas class="landing-globe-fallback" aria-label="Interactive globe preview unavailable"></canvas>';
+      this.bindDOMControls();
+      return;
+    }
     this.renderer.setSize(width, height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -650,14 +652,14 @@ export class Interactive3DEarth {
     const elChip = document.getElementById('preview-sector-chip');
 
     if (elTitle) elTitle.textContent = hub.name;
-    if (elSub) elSub.textContent = `Capital: ${hub.capital} · ${hub.region} · GDP Rank ${hub.rank}`;
+    if (elSub) elSub.textContent = `Capital: ${hub.capital} · ${hub.region}`;
     if (elGdp) elGdp.textContent = hub.gdp;
     if (elGrowth) elGrowth.textContent = hub.growth;
     if (elRate) elRate.textContent = hub.rate;
     if (elTemp) elTemp.textContent = hub.temp;
     if (elDispatch) elDispatch.textContent = hub.dispatch;
     if (elSynthesis) elSynthesis.textContent = hub.synthesis;
-    if (elChip) elChip.textContent = `SECTOR PROFILE: ${hub.capital.toUpperCase()} [${hub.id.toUpperCase()}]`;
+    if (elChip) elChip.textContent = `COUNTRY PROFILE: ${hub.capital.toUpperCase()} [${hub.id.toUpperCase()}]`;
 
     // Highlight active button pill
     document.querySelectorAll('[data-3d-hub]').forEach(btn => {
@@ -708,7 +710,7 @@ export class Interactive3DEarth {
       }
     }
 
-    this.renderer.render(this.scene, this.camera);
+    if (this.renderer) this.renderer.render(this.scene, this.camera);
   }
 }
 

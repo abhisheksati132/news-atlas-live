@@ -151,8 +151,8 @@ export default async function handler(req, res) {
         base: currency,
         rates,
         timestamp: rows[0]?.date || new Date().toISOString(),
-        source: "Frankfurter / Central-Bank Telemetry",
-        freshness: "live"
+        source: "Frankfurter reference rates",
+        freshness: "cached reference rate"
       };
       setCache(cacheKey, payload, 3600);
       return res.status(200).json(payload);
@@ -191,7 +191,7 @@ export default async function handler(req, res) {
       );
 
       if (Object.keys(results).length === 0) {
-        throw new Error("No live metal quotes retrieved");
+        throw new Error("No current metal quotes retrieved");
       }
 
       const payload = {

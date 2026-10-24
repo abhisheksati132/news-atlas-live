@@ -16,7 +16,11 @@ export default async function handler(req, res) {
   const cached = getCache(cacheKey);
   if (cached) {
     res.setHeader("X-Cache", "HIT");
-    return res.status(200).json(cached);
+    return res.status(200).json({
+      ...cached,
+      source: "Open-Meteo",
+      freshness: "15m-cache",
+    });
   }
 
   const params = new URLSearchParams({
@@ -57,9 +61,16 @@ export default async function handler(req, res) {
       } catch { /* AQ is supplementary, ignore parse errors */ }
     }
 
-    setCache(cacheKey, data, 900); // 15 min cache
+    const payload = {
+      ...data,
+      source: "Open-Meteo",
+      fetchedAt: new Date().toISOString(),
+      freshness: "15m-cache",
+    };
+    setCache(cacheKey, payload, 900);
     res.setHeader("X-Cache", "MISS");
-    res.status(200).json(data);
+    res.setHeader("X-Data-Source", "Open-Meteo");
+    res.status(200).json(payload);
   } catch (error) {
     captureError(error, { handler: "weather" });
     res.status(500).json({ error: 'Failed to fetch weather data' });

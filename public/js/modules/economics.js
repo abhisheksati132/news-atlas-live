@@ -2,21 +2,36 @@ function ecoEl(id) {
   return window.safeEl ? window.safeEl(id) : document.getElementById(id);
 }
 
+function setEconomicsStatus(message, tone = "info", action = false) {
+  const el = ecoEl("eco-data-status");
+  if (!el) return;
+  el.className = `data-status ${tone}`;
+  el.innerHTML = `
+    <div>
+      <strong>${tone === "error" ? "Economic data unavailable" : tone === "loading" ? "Loading economic data" : "Economic data"}</strong>
+      <span>${message}</span>
+    </div>
+    ${action ? '<button type="button" data-economic-retry>Retry</button>' : ""}
+  `;
+  el.querySelector("[data-economic-retry]")?.addEventListener("click", () => {
+    const country = window._currentCountryName || "India";
+    fetchDetailedEconomics(country);
+  });
+}
+
+function setEconomicsValue(id, value, fallback = "Not available") {
+  const el = ecoEl(id);
+  if (el) el.innerText = value == null ? fallback : value;
+}
+
 window.renderEconomicData = function(eco, country) {
-  if (ecoEl("eco-gdp"))
-    ecoEl("eco-gdp").innerText = eco.gdp_billions != null ? eco.gdp_billions : "--";
-  if (ecoEl("eco-growth"))
-    ecoEl("eco-growth").innerText = eco.gdp_growth_percent != null ? (eco.gdp_growth_percent > 0 ? "+" : "") + eco.gdp_growth_percent + "%" : "--%";
-  if (ecoEl("eco-capita"))
-    ecoEl("eco-capita").innerText = eco.gdp_per_capita != null ? "$" + eco.gdp_per_capita.toLocaleString() : "--";
-  if (ecoEl("eco-inflation"))
-    ecoEl("eco-inflation").innerText = eco.inflation_rate != null ? eco.inflation_rate + "%" : "--%";
-  if (ecoEl("eco-unemployment"))
-    ecoEl("eco-unemployment").innerText = eco.unemployment_rate != null ? eco.unemployment_rate + "%" : "--%";
-  if (ecoEl("eco-interest"))
-    ecoEl("eco-interest").innerText = eco.interest_rate != null ? eco.interest_rate + "%" : "--%";
-  if (ecoEl("eco-debt"))
-    ecoEl("eco-debt").innerText = eco.debt_to_gdp != null ? eco.debt_to_gdp + "%" : "--%";
+  setEconomicsValue("eco-gdp", eco.gdp_billions != null ? eco.gdp_billions : null);
+  setEconomicsValue("eco-growth", eco.gdp_growth_percent != null ? `${eco.gdp_growth_percent > 0 ? "+" : ""}${eco.gdp_growth_percent}%` : null, "--");
+  setEconomicsValue("eco-capita", eco.gdp_per_capita != null ? `$${eco.gdp_per_capita.toLocaleString()}` : null);
+  setEconomicsValue("eco-inflation", eco.inflation_rate != null ? `${eco.inflation_rate}%` : null);
+  setEconomicsValue("eco-unemployment", eco.unemployment_rate != null ? `${eco.unemployment_rate}%` : null);
+  setEconomicsValue("eco-interest", eco.interest_rate != null ? `${eco.interest_rate}%` : null);
+  setEconomicsValue("eco-debt", eco.debt_to_gdp != null ? `${eco.debt_to_gdp}%` : null);
   
   if (ecoEl("eco-exports")) {
     if (eco.major_exports && Array.isArray(eco.major_exports) && eco.major_exports.length > 0) {
@@ -30,25 +45,22 @@ window.renderEconomicData = function(eco, country) {
         )
         .join("");
     } else {
-      const year = eco.updated?.gdp_billions || "";
-      ecoEl("eco-exports").innerHTML = `<div class="text-slate-400 text-xs font-mono py-1">Source: World Bank Open Data ${year ? `(${year})` : ""}</div>`;
+      ecoEl("eco-exports").innerHTML = '<div class="text-slate-500 text-xs font-mono py-1">No verified export series is available for this country.</div>';
     }
   }
 
   if (ecoEl("eco-market-ticker")) {
-    const summary = eco.market_summary || (eco.updated?.gdp_billions ? `WORLD BANK MACROECONOMIC INDICATORS (OBSERVATION: ${eco.updated.gdp_billions})` : "WORLD BANK OPEN DATA");
-    ecoEl("eco-market-ticker").innerText = summary.toUpperCase();
+    const years = Object.values(eco.updated || {}).filter(Boolean);
+    const latestYear = years.sort().at(-1);
+    ecoEl("eco-market-ticker").innerText = `${eco.source || "World Bank Open Data"}${latestYear ? ` · Latest observation ${latestYear}` : ""}`;
   }
 };
 
 async function fetchDetailedEconomics(country) {
-  if (ecoEl("eco-gdp")) ecoEl("eco-gdp").innerText = "--";
-  if (ecoEl("eco-growth")) ecoEl("eco-growth").innerText = "--%";
-  if (ecoEl("eco-inflation")) ecoEl("eco-inflation").innerText = "--%";
-  if (ecoEl("eco-unemployment")) ecoEl("eco-unemployment").innerText = "--%";
-  if (ecoEl("eco-exports"))
-    ecoEl("eco-exports").innerHTML =
-      '<div class="h-4 bg-white/10 rounded w-3/4 animate-pulse"></div>';
+  setEconomicsStatus("Checking World Bank Open Data for the selected country.", "loading");
+  ["eco-gdp", "eco-growth", "eco-capita", "eco-inflation", "eco-unemployment", "eco-interest", "eco-debt"].forEach((id) => setEconomicsValue(id, null));
+  ecoEl("eco-trend-card")?.classList.add("hidden");
+  ecoEl("eco-history-card")?.classList.add("hidden");
 
   let eco = null;
   try {
@@ -62,14 +74,23 @@ async function fetchDetailedEconomics(country) {
   }
 
   if (!eco) {
-    if (ecoEl("eco-market-ticker")) ecoEl("eco-market-ticker").innerText = "LIVE MACROECONOMIC DATA UNAVAILABLE";
-    if (ecoEl("eco-exports")) ecoEl("eco-exports").innerHTML = '<div class="text-slate-500 text-xs">No verified export data available.</div>';
+    setEconomicsStatus(`We could not load a verified series for ${country}.`, "error", true);
+    if (ecoEl("eco-exports")) ecoEl("eco-exports").innerHTML = '<div class="text-slate-500 text-xs">Exports are unavailable until a verified series loads.</div>';
     return;
   }
 
   window.renderEconomicData(eco, country);
+  const hasValues = ["gdp_billions", "gdp_growth_percent", "gdp_per_capita", "inflation_rate", "unemployment_rate", "debt_to_gdp"]
+    .some((key) => eco[key] != null);
+  if (hasValues) {
+    setEconomicsStatus(`${eco.source || "World Bank Open Data"} loaded for ${country}. Missing indicators are marked individually.`, "success");
+    ecoEl("eco-trend-card")?.classList.remove("hidden");
+    if (eco.gdp_billions != null) ecoEl("eco-history-card")?.classList.remove("hidden");
+  } else {
+    setEconomicsStatus(`No verified observations are available for ${country}.`, "error", true);
+  }
   window.playTacticalSound("success");
-  drawGDPTrend(country);
+  if (eco.gdp_billions != null) drawGDPTrend(country);
 }
 async function drawGDPTrend(country) {
   const canvas = document.getElementById("gdp-trend-chart");
@@ -100,11 +121,24 @@ async function drawGDPTrend(country) {
     const gdpValues = rawGDP.map((d) => d.value / 1e9);
     const infValues = rawGDP.map((d) => {
       const match = rawInf.find((i) => i.date === d.date);
-      return match ? match.value : (d.value % 5) + 1.5;
+      return match ? match.value : null;
     });
     const dates = rawGDP.map((d) => d.date);
 
-    renderDualAxisCanvas(ctx, canvas, gdpValues, infValues, dates);
+    const paired = gdpValues
+      .map((value, index) => ({ value, inflation: infValues[index], date: dates[index] }))
+      .filter((item) => item.inflation != null);
+    if (paired.length < 2) {
+      drawGDPUnavailable(ctx, canvas);
+      return;
+    }
+    renderDualAxisCanvas(
+      ctx,
+      canvas,
+      paired.map((item) => item.value),
+      paired.map((item) => item.inflation),
+      paired.map((item) => item.date),
+    );
   } catch (_) {
     drawGDPUnavailable(ctx, canvas);
   }

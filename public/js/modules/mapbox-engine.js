@@ -1,3 +1,23 @@
+const getFallbackMapStyle = () => ({
+    version: 8,
+    sources: {
+        carto: {
+            type: 'raster',
+            tiles: [
+                'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+            ],
+            tileSize: 256,
+            attribution: '&copy; OpenStreetMap contributors'
+        }
+    },
+    layers: [{
+        id: 'carto-raster',
+        type: 'raster',
+        source: 'carto',
+        paint: { 'raster-fade-duration': 0 }
+    }]
+});
+
 class MapboxEngine {
     constructor(containerId) {
         this.containerId = containerId;
@@ -22,6 +42,10 @@ class MapboxEngine {
     }
 
     async init() {
+        const mapStatus = document.getElementById('map-status');
+        const showMapStatus = () => mapStatus?.classList.add('visible');
+        const hideMapStatus = () => mapStatus?.classList.remove('visible');
+        const mapTimeout = window.setTimeout(showMapStatus, 8000);
         let hasToken = false;
         try {
             const res = await fetch('/api/config');
@@ -38,15 +62,16 @@ class MapboxEngine {
         this.hasToken = hasToken;
 
         const container = document.getElementById(this.containerId);
-        if (!container) return false;
+        if (!container) {
+            window.clearTimeout(mapTimeout);
+            return false;
+        }
         container.innerHTML = '';
 
         const isLight = document.body.classList.contains('light-theme');
         const defaultStyle = hasToken
             ? 'mapbox://styles/mapbox/satellite-streets-v12'
-            : (isLight
-                ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
-                : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json');
+            : getFallbackMapStyle();
         this._currentStyle = defaultStyle;
 
         try {
@@ -57,7 +82,7 @@ class MapboxEngine {
                 zoom: 1.6,
                 pitch: 0,
                 bearing: 0,
-                projection: 'globe',
+                projection: hasToken ? 'globe' : 'mercator',
                 attributionControl: false,
                 antialias: true
             });
@@ -65,27 +90,30 @@ class MapboxEngine {
             console.warn('Mapbox satellite init fallback:', e.message);
             this.map = new mapboxgl.Map({
                 container: this.containerId,
-                style: isLight 
-                    ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
-                    : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+                style: getFallbackMapStyle(),
                 center: [10, 10],
                 zoom: 1.6,
-                projection: 'globe',
+                projection: 'mercator',
                 attributionControl: false
             });
         }
 
         this.map.on('error', (e) => {
+            if (!this.ready) showMapStatus();
             if (e && e.error && (e.error.status === 401 || e.error.status === 403) && hasToken) {
-                console.warn('Mapbox token unauthorized or expired, auto-recovering with open vector basemap...');
+                console.warn('Mapbox token unauthorized or expired, auto-recovering with the open raster basemap...');
                 hasToken = false;
-                this.map.setStyle(isLight ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json' : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json');
+                this.map.setStyle(getFallbackMapStyle());
             }
         });
 
         this.map.on('style.load', () => {
+            window.clearTimeout(mapTimeout);
+            hideMapStatus();
             this.map.resize();
-            try { this.map.setProjection('globe'); } catch (_e) {}
+            if (hasToken) {
+                try { this.map.setProjection('globe'); } catch (_e) {}
+            }
             const isLowFx = document.body.classList.contains('low-fx');
             if (!isLowFx) {
                 this._applyAtmosphere();

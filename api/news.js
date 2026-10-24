@@ -43,7 +43,7 @@ async function fetchGoogleNews({ category, q, iso2, size = 12 }) {
         const sourceMatch = itemContent.match(/<source[^>]*>([\s\S]*?)<\/source>/i);
         const descMatch = itemContent.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/i) || itemContent.match(/<description>([\s\S]*?)<\/description>/i);
 
-        let cleanTitle = titleMatch ? titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "").trim() : "Intelligence Dispatch";
+        let cleanTitle = titleMatch ? titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "").trim() : "Untitled story";
         const cleanLink = linkMatch ? linkMatch[1].trim() : "#";
         const cleanPubDate = pubDateMatch ? pubDateMatch[1].trim() : new Date().toISOString();
         const sourceName = sourceMatch ? sourceMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "").trim() : "Google News";
@@ -66,7 +66,7 @@ async function fetchGoogleNews({ category, q, iso2, size = 12 }) {
             source_id: sourceName.toLowerCase().replace(/[^a-z0-9]/g, ""),
             source_url: cleanLink,
             category: category || "general",
-            description: cleanDesc || "Live verified intelligence dispatch.",
+            description: cleanDesc || "No summary provided by the source.",
             image: null,
             image_url: null,
             author: null
@@ -76,7 +76,10 @@ async function fetchGoogleNews({ category, q, iso2, size = 12 }) {
     return {
         status: "success",
         totalResults: results.length,
-        results
+        results,
+        source: "Google News RSS",
+        fetchedAt: new Date().toISOString(),
+        freshness: "current"
     };
 }
 
@@ -152,6 +155,9 @@ export default async function handler(req, res) {
                     status: "success",
                     totalResults: data.totalResults || results.length,
                     results: results.slice(0, sizeNum),
+                    source: "NewsAPI",
+                    fetchedAt: new Date().toISOString(),
+                    freshness: "current",
                 };
 
                 setCache(cacheKey, payload, CACHE_TTL);
@@ -171,51 +177,12 @@ export default async function handler(req, res) {
         return res.status(200).json(payload);
     } catch (err) {
         captureError(err, { handler: "news" });
-        const fallbackDispatches = [
-            {
-                title: "Global Central Banks Coordinate Monetary Liquidity Amid Sovereign Bond Volatility",
-                link: "https://www.reuters.com",
-                pubDate: new Date().toISOString(),
-                source: "Reuters",
-                source_id: "reuters",
-                source_url: "https://www.reuters.com",
-                category: category || "business",
-                description: "International monetary authorities reiterate stability commitments as sovereign debt markets experience elevated volume.",
-                image: null,
-                image_url: null,
-                author: "Financial Wire"
-            },
-            {
-                title: "United Nations Framework Convening on Global Renewable Energy Grid Interconnection",
-                link: "https://www.bloomberg.com",
-                pubDate: new Date().toISOString(),
-                source: "Bloomberg",
-                source_id: "bloomberg",
-                source_url: "https://www.bloomberg.com",
-                category: category || "technology",
-                description: "Delegates negotiate cross-border power transmission protocols to bolster transcontinental renewable power reliability.",
-                image: null,
-                image_url: null,
-                author: "Energy Bureau"
-            },
-            {
-                title: "Maritime Trade Corridors Report Steady Vessel Flow Through Key Global Straits",
-                link: "https://apnews.com",
-                pubDate: new Date().toISOString(),
-                source: "Associated Press",
-                source_id: "apnews",
-                source_url: "https://apnews.com",
-                category: category || "general",
-                description: "Automated tracking indicators show normal commercial shipping throughput across major international maritime transit zones.",
-                image: null,
-                image_url: null,
-                author: "Trade Desk"
-            }
-        ];
-        return res.status(200).json({
-            status: "success",
-            totalResults: fallbackDispatches.length,
-            results: fallbackDispatches
+        return res.status(502).json({
+            status: "error",
+            totalResults: 0,
+            results: [],
+            error: "News sources are currently unavailable.",
+            code: "NEWS_UPSTREAM_ERROR"
         });
     }
 }

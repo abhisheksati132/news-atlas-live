@@ -33,7 +33,7 @@ async function fetchGoogleGeopoliticalFallback(query) {
       const dateMatch = block.match(/<pubDate>([\s\S]*?)<\/pubDate>/i);
       const sourceMatch = block.match(/<source[^>]*>([\s\S]*?)<\/source>/i);
 
-      const title = titleMatch ? titleMatch[1].replace(/ - [^-]+$/, '').trim() : "Intelligence dispatch";
+      const title = titleMatch ? titleMatch[1].replace(/ - [^-]+$/, '').trim() : "Untitled story";
       const url = linkMatch ? linkMatch[1].trim() : "#";
       const domain = sourceMatch ? sourceMatch[1].trim() : "International Wire";
       const pubDate = dateMatch ? dateMatch[1].trim() : new Date().toISOString();
@@ -110,7 +110,7 @@ export default async function handler(req, res) {
     // Fallthrough to resilient fallback
   }
 
-  // Resilient fallback to real-time geopolitical intelligence RSS
+  // Use current geopolitical RSS coverage when GDELT has no response.
   const fallbackArticles = await fetchGoogleGeopoliticalFallback(query);
   if (fallbackArticles.length > 0) {
     const payload = { articles: fallbackArticles };

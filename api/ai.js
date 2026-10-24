@@ -204,6 +204,12 @@ export default async function handler(req, res) {
 
   const isStream = req.query?.stream === "true";
   const userPrompt = String(body.prompt || body.message || "Strategic situation briefing").trim();
+  if (userPrompt.length > 2000) {
+    return res.status(413).json({
+      error: "Prompt is too long. Keep requests under 2,000 characters.",
+      code: "PROMPT_TOO_LONG",
+    });
+  }
   const locName = body.location || userPrompt.match(/Location: ([^.]+)/)?.[1]?.trim() || userPrompt.match(/for ([a-zA-Z\s]+)/)?.[1]?.trim() || "Global Overview";
 
   const cacheKey = `ai_intel_${locName.replace(/\s+/g, '_')}_${userPrompt.slice(0, 30).replace(/[^a-zA-Z0-9]/g, '')}`;

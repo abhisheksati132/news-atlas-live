@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 
 interface HeroContentProps {
@@ -7,6 +7,15 @@ interface HeroContentProps {
 }
 
 export const HeroContent: React.FC<HeroContentProps> = ({ onExplore }) => {
+  const prefersReducedMotion = useReducedMotion();
+  const entrance = (distance: number, delay = 0) => ({
+    initial: prefersReducedMotion ? false : { y: distance, opacity: 0 },
+    animate: { y: 0, opacity: 1 },
+    transition: prefersReducedMotion
+      ? { duration: 0 }
+      : { duration: 0.8, ease: 'easeOut', delay },
+  });
+
   const handleScrollToTerminal = () => {
     if (onExplore) {
       onExplore();
@@ -19,57 +28,48 @@ export const HeroContent: React.FC<HeroContentProps> = ({ onExplore }) => {
   };
 
   return (
-    <div className="flex-grow flex flex-col items-center justify-center text-center px-6 mt-12 lg:mt-20 max-w-4xl mx-auto z-10">
-      {/* Subtitle */}
+    <div className="flex-grow flex items-center px-6 md:px-12 lg:px-24 py-16 md:py-20 z-10">
+      <div className="max-w-2xl text-left">
       <motion.p
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="font-inter font-medium uppercase text-white/70 text-[0.75rem] md:text-[0.875rem] tracking-widest mb-4 md:mb-6"
+        {...entrance(20)}
+        className="font-mono font-medium text-amber-300/90 text-[0.7rem] md:text-xs tracking-[0.16em] mb-5"
       >
-        WE TRACK THE WORLD IN REAL-TIME
+        NEWSATLAS / WORLD VIEW
       </motion.p>
 
-      {/* Main Headline (H1) */}
       <motion.h1
-        initial={{ y: 30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: 'easeOut', delay: 0.1 }}
-        className="font-inter font-bold text-white text-[3rem] md:text-[4.5rem] lg:text-[5.5rem] leading-[1.1] tracking-tight mb-6"
+        id="hero-heading"
+        {...entrance(30, 0.1)}
+        className="font-display font-semibold text-white text-[3.25rem] md:text-[4.5rem] lg:text-[5.25rem] leading-[0.98] tracking-[-0.055em] mb-6 max-w-3xl"
       >
-        The Living Earth, <br className="hidden md:block" />
-        In Real-Time Data.
+        See what changed,{' '}
+        <br className="hidden md:block" />
+        <span className="text-amber-300">anywhere on Earth.</span>
       </motion.h1>
 
-      {/* Description */}
       <motion.p
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
-        className="font-inter font-normal text-white/80 text-[1rem] md:text-[1.125rem] leading-[1.625] max-w-2xl mb-8 md:mb-10"
+        {...entrance(20, 0.2)}
+        className="font-inter font-normal text-white/72 text-base md:text-lg leading-[1.55] max-w-xl mb-8"
       >
-        Planetary situational awareness unifying sovereign market telemetry, geopolitical breaking news, World Bank economics, and Doppler atmospheric intelligence.
+        News, markets, weather, and context for the country you are watching.
       </motion.p>
 
-      {/* Pill CTA Button */}
       <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
+        {...entrance(20, 0.3)}
       >
         <button
           type="button"
           onClick={handleScrollToTerminal}
-          className="group relative inline-flex items-center rounded-full border border-white/20 bg-transparent backdrop-blur-sm pl-6 pr-2 py-2 transition-all duration-300 hover:bg-white/5 hover:border-white/40 focus:outline-none"
+          className="group inline-flex min-h-12 items-center rounded-lg bg-amber-300 px-5 py-3 text-[#111827] transition-colors duration-200 hover:bg-amber-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-200 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050B14]"
+          aria-label="Open the NewsAtlas live terminal"
         >
-          <span className="font-inter text-sm md:text-base font-medium text-white mr-4 transition-colors">
-            Explore Live Terminal
+          <span className="font-inter text-sm md:text-base font-semibold mr-3">
+            Open the live view
           </span>
-          <div className="w-8 h-8 rounded-full border border-white/30 flex items-center justify-center transition-all duration-300 group-hover:bg-white group-hover:border-white">
-            <ArrowRight className="w-4 h-4 text-white transition-colors duration-300 group-hover:text-[#050B14]" />
-          </div>
+          <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
         </button>
       </motion.div>
+      </div>
     </div>
   );
 };

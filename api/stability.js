@@ -20,7 +20,7 @@ export default async function handler(req, res) {
     const stressWords = ["war", "conflict", "clash", "protest", "strike", "crisis", "threat", "sanction", "crash", "dead", "attack"];
     
     regionMapping.forEach(r => {
-        regions[r.name] = { coords: r.coords, score: 0 };
+        regions[r.name] = { coords: r.coords, score: null, stories: 0 };
         const data = getCache(r.cacheKey);
         if (!data || !data.results) return;
 
@@ -32,6 +32,7 @@ export default async function handler(req, res) {
 
         // Normalize score between 0 and 1
         regions[r.name].score = Math.min(1, stressCount / (data.results.length || 1));
+        regions[r.name].stories = data.results.length;
     });
 
     res.status(200).json({
@@ -40,7 +41,8 @@ export default async function handler(req, res) {
         data: Object.entries(regions).map(([name, val]) => ({
             name,
             coordinates: val.coords,
-            score: val.score
+            score: val.score,
+            storyCount: val.stories
         }))
     });
 }

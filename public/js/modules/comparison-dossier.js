@@ -527,13 +527,13 @@ export class ComparisonDossierEngine {
           <div class="card">
             <div class="card-title">1. Geopolitical & Macro Overview</div>
             <p style="margin: 0; font-size: 9.5pt;">
-              Continuous real-time sensor streams and World Bank economic synthesizers report strategic stability for <strong>${target}</strong>. Current macroeconomic indicators reflect calibrated fiscal dynamics, sustained sovereign liquidity, and active international trade integration.
+              Current source data and World Bank indicators provide a limited view of conditions in <strong>${target}</strong>. The available macroeconomic series reflect reported fiscal, monetary, and trade measures.
             </p>
           </div>
           <div class="card">
-            <div class="card-title">2. Atmospheric & Sector Readiness</div>
+            <div class="card-title">2. Weather and map context</div>
             <p style="margin: 0; font-size: 9.5pt;">
-              Live Doppler radar and meteorological arrays confirm normal orbital and maritime transit corridors. High-frequency telemetry confirms standard aviation corridor density without strategic anomalies.
+              Weather, map, aviation, and seismic layers are shown only when their source requests succeed. This report does not infer operational readiness from missing or partial feeds.
             </p>
           </div>
         </div>
@@ -545,41 +545,41 @@ export class ComparisonDossierEngine {
               <tr>
                 <th>Indicator Classification</th>
                 <th>Measured Value</th>
-                <th>Sovereign Benchmark</th>
+                <th>Source</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td><strong>Gross Domestic Product</strong></td>
-                <td>Verified Multi-Billion Aggregate</td>
+                <td>Reported economic series</td>
                 <td>World Bank Sovereign Series</td>
-                <td>ACTIVE</td>
+                <td>Source dependent</td>
               </tr>
               <tr>
                 <td><strong>Macro Inflation Velocity</strong></td>
-                <td>Target Band Calibrated</td>
-                <td>Central Monetary Registry</td>
-                <td>MONITORED</td>
+                <td>Reported inflation series</td>
+                <td>World Bank Open Data</td>
+                <td>Source dependent</td>
               </tr>
               <tr>
                 <td><strong>Orbital & Air Telemetry</strong></td>
-                <td>Real-time Great Circle Arcs</td>
-                <td>ADS-B / OpenSky / NOAA</td>
-                <td>OPTIMAL</td>
+                <td>Great-circle route overlays</td>
+                <td>Open map and route layers</td>
+                <td>Availability varies</td>
               </tr>
               <tr>
                 <td><strong>Seismic Pulse Vector</strong></td>
-                <td>USGS Live Network Sync</td>
-                <td>Global Seismograph Array</td>
-                <td>STABLE</td>
+                <td>USGS network data</td>
+                <td>USGS source data</td>
+                <td>Availability varies</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <div class="footer">
-          <div>NEWSATLAS AUTONOMOUS TELEMETRY ENGINE &bull; CONFIDENTIAL RECORD</div>
+          <div>NEWSATLAS SOURCE REPORT &bull; GENERATED LOCALLY</div>
           <div>Page 1 of 1 &bull; End of Declassified Dossier</div>
         </div>
       </body>

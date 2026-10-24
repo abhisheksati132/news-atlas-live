@@ -173,7 +173,7 @@ export class CommandPaletteEngine {
       // Spatial & Orbital Telemetry Layers
       { id: 'layer-satellites', group: 'Spatial Layers', title: 'Toggle ISS & Orbital Satellite Tracking', icon: 'fa-satellite', action: () => window.orbitalSpatial?.toggleSatellites() },
       { id: 'layer-flights', group: 'Spatial Layers', title: 'Toggle Global Aviation Flight Corridors', icon: 'fa-plane', action: () => window.orbitalSpatial?.toggleFlights() },
-      { id: 'layer-seismic', group: 'Spatial Layers', title: 'Toggle Real-Time USGS Seismic Shockwaves', icon: 'fa-wave-square', action: () => window.orbitalSpatial?.toggleSeismic() },
+      { id: 'layer-seismic', group: 'Spatial Layers', title: 'Toggle USGS seismic activity', icon: 'fa-wave-square', action: () => window.orbitalSpatial?.toggleSeismic() },
       { id: 'layer-radar', group: 'Spatial Layers', title: 'Toggle Doppler Precipitation Radar', icon: 'fa-cloud-rain', action: () => document.getElementById('mtb-radar')?.click() },
       { id: 'layer-arcs', group: 'Spatial Layers', title: 'Toggle 3D Telemetry Arcs', icon: 'fa-satellite-dish', action: () => document.getElementById('mtb-arcs')?.click() },
       { id: 'layer-terminator', group: 'Spatial Layers', title: 'Toggle Day / Night Shadow Line', icon: 'fa-adjust', action: () => document.getElementById('mtb-terminator')?.click() },
@@ -186,7 +186,7 @@ export class CommandPaletteEngine {
 
       // Navigation Tabs
       { id: 'tab-intel', group: 'Telemetry Tabs', title: 'Switch to Intelligence Summary Tab (Key 1)', icon: 'fa-chart-pie', action: () => window.switchTab?.('intel') },
-      { id: 'tab-news', group: 'Telemetry Tabs', title: 'Switch to Live News Intelligence Tab (Key 2)', icon: 'fa-newspaper', action: () => window.switchTab?.('news') },
+      { id: 'tab-news', group: 'News', title: 'Switch to the News tab (Key 2)', icon: 'fa-newspaper', action: () => window.switchTab?.('news') },
       { id: 'tab-markets', group: 'Telemetry Tabs', title: 'Switch to Financial Markets & Forex Tab (Key 3)', icon: 'fa-chart-line', action: () => window.switchTab?.('markets') },
       { id: 'tab-atmo', group: 'Telemetry Tabs', title: 'Switch to Atmosphere & Climate Tab (Key 4)', icon: 'fa-cloud-sun', action: () => window.switchTab?.('atmosphere') },
       { id: 'tab-econ', group: 'Telemetry Tabs', title: 'Switch to World Bank Macroeconomics Tab (Key 5)', icon: 'fa-coins', action: () => window.switchTab?.('economic') },

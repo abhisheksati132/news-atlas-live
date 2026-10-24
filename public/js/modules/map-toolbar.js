@@ -6,6 +6,7 @@
 let terrainOn = false;
 let tilted = false;
 let radarOn = false;
+let telemetryArcsOn = false;
 let currentStyleName = null;
 
 function engine() {
@@ -34,11 +35,7 @@ function styleList() {
       { name: "Outdoors", url: "mapbox://styles/mapbox/outdoors-v12" }
     ];
   }
-  return [
-    { name: "Dark", url: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json" },
-    { name: "Light", url: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json" },
-    { name: "Voyager", url: "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json" }
-  ];
+  return [{ name: "Standard", url: null }];
 }
 
 function buildStyleMenu() {
@@ -53,6 +50,11 @@ function buildStyleMenu() {
     item.addEventListener("click", () => {
       const e = engine();
       if (!e) return;
+      if (!s.url) {
+        toast("Standard is the only available open basemap", "info");
+        closeMenus();
+        return;
+      }
       try {
         e.setStyle(s.url);
         currentStyleName = s.name;
@@ -120,6 +122,16 @@ function bindActions() {
     const el = document.getElementById(id);
     if (el) el.addEventListener("click", fn);
   };
+
+  on("mtb-more", () => {
+    const button = document.getElementById("mtb-more");
+    const advanced = document.getElementById("mtb-advanced");
+    if (!button || !advanced) return;
+    const isOpen = !advanced.classList.contains("hidden");
+    advanced.classList.toggle("hidden", isOpen);
+    button.setAttribute("aria-expanded", String(!isOpen));
+    button.classList.toggle("active", !isOpen);
+  });
 
   on("mtb-zoom-in", () => engine()?.map.zoomIn({ duration: 300 }));
   on("mtb-zoom-out", () => engine()?.map.zoomOut({ duration: 300 }));
@@ -194,11 +206,11 @@ function bindActions() {
   });
 
   on("mtb-arcs", () => {
+    telemetryArcsOn = !telemetryArcsOn;
     const e = engine();
-    if (!e) return;
-    const isActive = e.toggleTelemetryArcs();
-    setActive("mtb-arcs", isActive);
-    toast(isActive ? "3D Telemetry Arcs on" : "3D Telemetry Arcs off");
+    if (e) telemetryArcsOn = e.toggleTelemetryArcs();
+    setActive("mtb-arcs", telemetryArcsOn);
+    toast(telemetryArcsOn ? "3D Telemetry Arcs on" : "3D Telemetry Arcs off");
   });
 
   on("mtb-satellites", () => {

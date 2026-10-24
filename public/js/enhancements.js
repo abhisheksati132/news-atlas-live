@@ -1,3 +1,5 @@
+const initialUrlParams = new URLSearchParams(window.location.search);
+
 window.pushStateCountry = function (country, tab) {
     const params = new URLSearchParams(window.location.search);
     if (country) params.set("country", country);
@@ -10,10 +12,12 @@ window.pushStateCountry = function (country, tab) {
 
 window.restoreFromURL = function () {
     const params = new URLSearchParams(window.location.search);
-    const country = params.get("country");
-    const tab = params.get("tab");
-    if (tab && window.switchTab) window.switchTab(tab);
-    if (!country) return;
+    const country = initialUrlParams.get("country") || params.get("country");
+    const tab = initialUrlParams.get("tab") || params.get("tab");
+    if (!country) {
+        if (tab && window.switchTab) window.switchTab(tab);
+        return;
+    }
     const tryRestore = (attempts) => {
         if (attempts <= 0) return;
         if (window.globalSearchData && window.globalSearchData.length > 0) {
@@ -21,7 +25,16 @@ window.restoreFromURL = function () {
                 (c) => c.name.common.toLowerCase() === country.toLowerCase()
             );
             if (match && window.handleCountryClick) {
+                window._pendingRestoreTab = tab;
                 window.handleCountryClick(null, { properties: { name: match.name.common, iso_a2: match.cca2 } });
+                if (tab && window.switchTab) {
+                    setTimeout(() => {
+                        window.switchTab(tab);
+                    }, 250);
+                    setTimeout(() => {
+                        window._pendingRestoreTab = null;
+                    }, 1200);
+                }
             }
         } else {
             setTimeout(() => tryRestore(attempts - 1), 500);
@@ -129,7 +142,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const obs = new MutationObserver(() => {
             const country = nameEl.textContent?.trim();
             if (country && country !== "Worldwide") {
-                window.pushStateCountry(country, null);
+                const tab = window._pendingRestoreTab ||
+                    (window._currentTab ? window._currentTab.replace(/^tab-/, "") : null);
+                window.pushStateCountry(country, tab);
             }
         });
         obs.observe(nameEl, { childList: true, subtree: true, characterData: true });

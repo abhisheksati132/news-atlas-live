@@ -30,8 +30,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 const server = http.createServer(app);
+const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173,https://news-atlas-live.vercel.app")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 const io = new Server(server, {
-  cors: { origin: "*" }
+  cors: { origin: allowedOrigins }
 });
 const port = process.env.PORT || 3000;
 
@@ -41,12 +45,24 @@ app.use(helmet({
 }));
 app.use(compression());
 app.use(express.json());
-const corsOrigin = process.env.CORS_ORIGIN || "*";
 app.use(cors({
-  origin: corsOrigin,
+  origin: allowedOrigins,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Legacy handlers still set wildcard CORS headers; normalize them at the edge.
+app.use((req, res, next) => {
+  const originalSetHeader = res.setHeader.bind(res);
+  res.setHeader = (name, value) => {
+    if (name.toLowerCase() === "access-control-allow-origin" && value === "*") {
+      const requestOrigin = req.headers.origin;
+      value = allowedOrigins.includes(requestOrigin) ? requestOrigin : allowedOrigins[0];
+    }
+    return originalSetHeader(name, value);
+  };
+  next();
+});
 
 // Request time logger
 app.use((req, res, next) => {
@@ -100,28 +116,29 @@ app.use((req, res, next) => {
 
 // API Routes
 const apiRouter = express.Router();
-apiRouter.get("/news", (req, res) => newsHandler(req, res).catch(e => res.status(500).json({error: e.message})));
-apiRouter.get("/weather", (req, res) => weatherHandler(req, res).catch(e => res.status(500).json({error: e.message})));
-apiRouter.get("/markets", (req, res) => marketsHandler(req, res).catch(e => res.status(500).json({error: e.message})));
-apiRouter.get("/config", (req, res) => configHandler(req, res).catch(e => res.status(500).json({error: e.message})));
-apiRouter.get("/search", (req, res) => searchHandler(req, res).catch(e => res.status(500).json({error: e.message})));
-apiRouter.post("/ai", (req, res) => aiHandler(req, res).catch(e => res.status(500).json({error: e.message})));
-apiRouter.get("/ai", (req, res) => aiHandler(req, res).catch(e => res.status(500).json({error: e.message})));
-apiRouter.get("/countries", (req, res) => countriesHandler(req, res).catch(e => res.status(500).json({error: e.message})));
-apiRouter.get("/geo", (req, res) => geoHandler(req, res).catch(e => res.status(500).json({error: e.message})));
-apiRouter.get("/gdelt", (req, res) => gdeltHandler(req, res).catch(e => res.status(500).json({error: e.message})));
+const routeError = (_error, res) => res.status(500).json({ error: "Upstream service unavailable", code: "UPSTREAM_FAILURE" });
+apiRouter.get("/news", (req, res) => newsHandler(req, res).catch((e) => routeError(e, res)));
+apiRouter.get("/weather", (req, res) => weatherHandler(req, res).catch((e) => routeError(e, res)));
+apiRouter.get("/markets", (req, res) => marketsHandler(req, res).catch((e) => routeError(e, res)));
+apiRouter.get("/config", (req, res) => configHandler(req, res).catch((e) => routeError(e, res)));
+apiRouter.get("/search", (req, res) => searchHandler(req, res).catch((e) => routeError(e, res)));
+apiRouter.post("/ai", (req, res) => aiHandler(req, res).catch((e) => routeError(e, res)));
+apiRouter.get("/ai", (req, res) => aiHandler(req, res).catch((e) => routeError(e, res)));
+apiRouter.get("/countries", (req, res) => countriesHandler(req, res).catch((e) => routeError(e, res)));
+apiRouter.get("/geo", (req, res) => geoHandler(req, res).catch((e) => routeError(e, res)));
+apiRouter.get("/gdelt", (req, res) => gdeltHandler(req, res).catch((e) => routeError(e, res)));
 apiRouter.get("/gdelt-geo", (req, res) => {
   req.query = req.query || {};
   req.query.mode = "geo";
-  return gdeltHandler(req, res).catch(e => res.status(500).json({error: e.message}));
+  return gdeltHandler(req, res).catch((e) => routeError(e, res));
 });
 apiRouter.get("/news-alerts", (req, res) => {
   req.query = req.query || {};
   req.query.type = "alerts";
-  return newsHandler(req, res).catch(e => res.status(500).json({error: e.message}));
+  return newsHandler(req, res).catch((e) => routeError(e, res));
 });
-apiRouter.get("/stability", (req, res) => stabilityHandler(req, res).catch(e => res.status(500).json({error: e.message})));
-apiRouter.get("/economics", (req, res) => economicsHandler(req, res).catch(e => res.status(500).json({error: e.message})));
+apiRouter.get("/stability", (req, res) => stabilityHandler(req, res).catch((e) => routeError(e, res)));
+apiRouter.get("/economics", (req, res) => economicsHandler(req, res).catch((e) => routeError(e, res)));
 
 // Mount API router
 app.use("/api", apiRouter);

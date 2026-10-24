@@ -856,7 +856,7 @@ window.addEventListener("resize", () => positionTabIndicator());
 
 function initCoachCard() {
   if (localStorage.getItem("newsatlas_coach_done")) return;
-  const host = document.querySelector(".main-content");
+  const host = document.querySelector("#sidebar-content");
   if (!host || document.getElementById("coach-card")) return;
   const card = document.createElement("div");
   card.id = "coach-card";
@@ -872,7 +872,7 @@ function initCoachCard() {
       <button type="button" class="coach-done" data-coach="done">Got it</button>
     </div>
   `;
-  host.appendChild(card);
+  host.prepend(card);
   const dismiss = () => {
     localStorage.setItem("newsatlas_coach_done", "true");
     card.style.transition = "opacity 200ms ease, transform 200ms ease";

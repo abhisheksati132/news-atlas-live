@@ -93,44 +93,35 @@ function getMoonPhase() {
   ];
   return phases[b];
 }
+function setWeatherStatus(message, tone = "info", action = false) {
+  const el = document.getElementById("weather-data-status");
+  if (!el) return;
+  el.className = `data-status ${tone}`;
+  el.innerHTML = `
+    <div>
+      <strong>${tone === "error" ? "Weather unavailable" : tone === "loading" ? "Loading weather" : "Weather ready"}</strong>
+      <span>${message}</span>
+    </div>
+    ${action ? '<button type="button" data-weather-retry>Retry</button>' : ""}
+  `;
+  el.querySelector("[data-weather-retry]")?.addEventListener("click", () => {
+    if (window._currentWeatherCoordinates) {
+      fetchWeather(...window._currentWeatherCoordinates);
+    }
+  });
+}
 async function fetchWeather(lat, lon) {
   if (isNaN(lat) || isNaN(lon)) {
     console.error("Invalid coordinates passed to weather module.");
+    setWeatherStatus("A valid location is required before weather can load.", "error");
     return;
   }
+  window._currentWeatherCoordinates = [lat, lon];
+  setWeatherStatus("Checking the weather service for the selected location.", "loading");
   try {
-    const params = new URLSearchParams({
-      latitude: lat,
-      longitude: lon,
-      current: 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m,dew_point_2m',
-      hourly: 'temperature_2m,weather_code,visibility,uv_index,precipitation_probability',
-      daily: 'weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_sum',
-      timezone: 'auto',
-    });
-    
-    const weatherUrl = `https://api.open-meteo.com/v1/forecast?${params}`;
-    const aqUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=european_aqi&timezone=auto`;
-
-    let data;
-    try {
-      const weatherRes = await fetch(weatherUrl);
-      if (!weatherRes.ok) throw new Error(`Weather error status ${weatherRes.status}`);
-      data = await weatherRes.json();
-    } catch (e) {
-      throw new Error(`Weather API connection failed: ${e.message}`);
-    }
-
-    try {
-      const aqRes = await fetch(aqUrl);
-      if (aqRes.ok) {
-        const aqData = await aqRes.json();
-        if (aqData?.current?.european_aqi !== undefined && data.current) {
-          data.current.aqi = Math.round(aqData.current.european_aqi);
-        }
-      }
-    } catch (e) {
-      console.warn("Client air quality fetch failed:", e.message);
-    }
+    const weatherRes = await fetch(`/api/weather?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`);
+    if (!weatherRes.ok) throw new Error(`Weather service returned ${weatherRes.status}`);
+    const data = await weatherRes.json();
     const locationLabel = document.getElementById("atmo-location-label");
     if (locationLabel && window._currentWeatherLocation) {
       locationLabel.innerHTML = `<i class="fas fa-map-marker-alt mr-1 text-blue-400"></i>${window._currentWeatherLocation}`;
@@ -175,24 +166,14 @@ async function fetchWeather(lat, lon) {
 
       const atmoCloudCover = document.getElementById("atmo-cloud-cover");
       if (atmoCloudCover)
-        atmoCloudCover.innerText = curr.cloud_cover !== undefined ? curr.cloud_cover : "--";
+        atmoCloudCover.innerText = curr.cloud_cover !== undefined ? curr.cloud_cover : "Not available";
 
       const atmoDew = document.getElementById("atmo-dew");
       if (atmoDew)
         atmoDew.innerText = curr.dew_point_2m !== undefined ? `${Math.round(curr.dew_point_2m)}°` : "--°";
 
-      let estimatedCeiling = 8.0;
-      const code = curr.weather_code;
-      if (code === 0 || code === 1) estimatedCeiling = 12.0;
-      else if (code === 2) estimatedCeiling = 4.5;
-      else if (code === 3) estimatedCeiling = 1.8;
-      else if (code >= 45 && code <= 48) estimatedCeiling = 0.2;
-      else if (code >= 51 && code <= 67) estimatedCeiling = 1.2;
-      else if (code >= 71) estimatedCeiling = 0.9;
-      else if (code >= 95) estimatedCeiling = 1.0;
-      estimatedCeiling += Math.random() * 0.4 - 0.2;
       const atmoCloudBase = document.getElementById("atmo-cloud-base");
-      if (atmoCloudBase) atmoCloudBase.innerText = estimatedCeiling.toFixed(1);
+      if (atmoCloudBase) atmoCloudBase.innerText = "Not available";
 
       const atmoAqi = document.getElementById("atmo-aqi");
       if (atmoAqi) {
@@ -285,23 +266,22 @@ async function fetchWeather(lat, lon) {
           }
         } catch (err) { }
       }
-      const visKm = data.hourly.visibility
-        ? data.hourly.visibility[new Date().getHours()] / 1000
-        : 10;
+      const currentHourIndex = data.hourly?.time
+        ? data.hourly.time.findIndex((time) => new Date(time).getHours() === new Date().getHours())
+        : -1;
+      const visibilityMeters = currentHourIndex >= 0 ? data.hourly.visibility?.[currentHourIndex] : null;
+      const visKm = Number.isFinite(visibilityMeters) ? visibilityMeters / 1000 : null;
       const atmoVisibility = document.getElementById("atmo-visibility");
-      if (atmoVisibility) atmoVisibility.innerText = visKm.toFixed(1);
+      if (atmoVisibility) atmoVisibility.innerText = visKm == null ? "Not available" : visKm.toFixed(1);
     }
     const moon = getMoonPhase();
     const atmoMoonText = document.getElementById("atmo-moon-text");
     const atmoMoonIcon = document.getElementById("atmo-moon-icon");
     if (atmoMoonText) atmoMoonText.innerText = moon.t;
     if (atmoMoonIcon) atmoMoonIcon.className = `fas ${moon.i} text-2xl text-indigo-300`;
-    const precipTotal =
-      data.daily && data.daily.precipitation_sum
-        ? data.daily.precipitation_sum[0]
-        : 0;
+    const precipTotal = data.daily?.precipitation_sum?.[0];
     const atmoPrecipTotal = document.getElementById("atmo-precip-total");
-    if (atmoPrecipTotal) atmoPrecipTotal.innerText = precipTotal.toFixed(1);
+    if (atmoPrecipTotal) atmoPrecipTotal.innerText = precipTotal != null ? precipTotal.toFixed(1) : "Not available";
     const dailyContainer = document.getElementById("atmo-daily-container");
     if (dailyContainer && data.daily) {
       dailyContainer.innerHTML = "";
@@ -353,6 +333,10 @@ async function fetchWeather(lat, lon) {
         dailyContainer.appendChild(toggleRow);
       }
     }
+    setWeatherStatus(
+      `${data.source || "Open-Meteo"} forecast loaded${data.fetchedAt ? ` at ${new Date(data.fetchedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}.` : "."} Air quality is shown when available.`,
+      "success",
+    );
     window.playTacticalSound("success");
     try {
       const weatherSummary = {
@@ -393,11 +377,12 @@ async function fetchWeather(lat, lon) {
   } catch (e) {
     console.error("Atmosphere Error:", e);
     const atmoCondition = document.getElementById("atmo-condition");
-    if (atmoCondition) atmoCondition.innerText = "TELEMETRY OFFLINE";
+    if (atmoCondition) atmoCondition.innerText = "Weather unavailable";
     const atmoTemp = document.getElementById("atmo-temp");
     if (atmoTemp) atmoTemp.innerText = "--°";
     const analysisEl = document.getElementById("weather-ai-analysis");
     if (analysisEl) analysisEl.innerHTML = '<div class="apple-glass p-5 text-amber-400 font-mono text-xs"><i class="fas fa-exclamation-triangle mr-1.5"></i>Meteorological data feed temporarily unreachable.</div>';
+    setWeatherStatus("Check your connection and try again.", "error", true);
   }
 }
 async function generateWeatherAnalysis(weatherData, cityName) {
